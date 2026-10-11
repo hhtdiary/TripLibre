@@ -58,7 +58,9 @@ struct ExploreMapView: View {
     @State private var period: Period = .month
     @State private var phases: [LifePhase] = []
     @State private var trips: [Trip] = []
-    /// Display-only cleaned geometry per trip id (see `RouteDisplay`); stored routes are never modified.
+    /// Display-only geometry; stored routes are never modified. Arcs: one per OD pair (see `ODFlows`).
+    /// Traces: cleaned GPS geometry per trip id (see `RouteDisplay`).
+    @State private var flows: [ODFlows.Flow] = []
     @State private var cleanedRoutes: [String: [[Coordinate]]] = [:]
     @State private var routeLines: [RouteLine] = []
     @State private var metersPerPoint: Double = 16
@@ -70,7 +72,7 @@ struct ExploreMapView: View {
     @State private var showPlaces = true
     @State private var showHull = true
     @State private var showFlights = true
-    @State private var cleanRoutes = true
+    @State private var routeStyle: RouteStyle = .arcs
     @State private var position: MapCameraPosition = .automatic
     @Environment(\.tabBarSpace) private var tabBarSpace
 
@@ -83,8 +85,10 @@ struct ExploreMapView: View {
                 }
                 if showRoutes {
                     ForEach(routeLines) { r in
-                        MapPolyline(coordinates: r.coords).stroke(Toon.ink.opacity(0.7), lineWidth: 6)
-                        MapPolyline(coordinates: r.coords).stroke(r.color, lineWidth: 3.5)
+                        MapPolyline(coordinates: r.coords)
+                            .stroke(Toon.ink.opacity(0.7), style: StrokeStyle(lineWidth: r.width + 2.5, lineCap: .round))
+                        MapPolyline(coordinates: r.coords)
+                            .stroke(r.color, style: StrokeStyle(lineWidth: r.width, lineCap: .round))
                     }
                 }
                 if showFlights {
@@ -110,7 +114,10 @@ struct ExploreMapView: View {
                 let metres = ctx.rect.width * MKMetersPerMapPointAtLatitude(ctx.region.center.latitude)
                 // power-of-two buckets so small pans/zooms don't re-simplify every route
                 let bucket = pow(2, log2(max(0.5, metres / Double(mapWidth))).rounded())
-                if bucket != metersPerPoint { metersPerPoint = bucket; rebuildRouteLines() }
+                if bucket != metersPerPoint {
+                    metersPerPoint = bucket
+                    if routeStyle == .traces { rebuildRouteLines() }
+                }
             }
             // keep the Apple Maps logo / Legal link clear of the stats card and tab bar
             .safeAreaPadding(.bottom, tabBarSpace + (metrics == nil ? 0 : 92))
@@ -138,14 +145,15 @@ struct ExploreMapView: View {
                     Toggle("Places", isOn: $showPlaces)
                     Toggle("Activity space (convex hull)", isOn: $showHull)
                     Toggle("Flights", isOn: $showFlights)
-                    Section("Display only — recorded data is unchanged") {
-                        Toggle("Clean up GPS drift", isOn: $cleanRoutes)
+                    Picker("Route style", selection: $routeStyle) {
+                        ForEach(RouteStyle.allCases) { Text($0.label).tag($0) }
                     }
+                    .pickerStyle(.inline)
                 } label: { Image(systemName: "square.3.layers.3d") }
             }
         }
         .task(id: "\(period.id)-\(model.revision)") { load() }
-        .onChange(of: cleanRoutes) { _, _ in rebuildRouteLines() }
+        .onChange(of: routeStyle) { _, _ in rebuildRouteLines() }
     }
 
     private func load() {
@@ -153,36 +161,73 @@ struct ExploreMapView: View {
         let r = period.range(first: model.store.firstPointDate() ?? (try? model.store.allTrips().first?.departure) ?? nil)
         trips = ((try? model.store.trips(overlapping: r.start, r.end, withSegments: false)) ?? []).filter { r.contains($0.departure) }
         cleanedRoutes = Dictionary(trips.map { ($0.id, RouteDisplay.clean($0.route, hasGap: $0.hasGap)) }) { a, _ in a }
-        rebuildRouteLines()
         metrics = try? Analytics.compute(store: model.store, range: r)
         let places = Dictionary(uniqueKeysWithValues: ((try? model.store.places()) ?? []).map { ($0.id, $0) })
-        placeUse = (metrics?.topPlaces ?? []).isEmpty ? [] : placeCounts(r, places)
+        let visits = (try? model.store.visits(overlapping: r.start, r.end)) ?? []
+        flows = odFlows(visits, places)
+        rebuildRouteLines()
+        placeUse = (metrics?.topPlaces ?? []).isEmpty ? [] : placeCounts(visits, places)
         flights = ((try? model.store.flights()) ?? []).filter { f in Fmt.parseYMD(f.date).map(r.contains) ?? true }
         position = .automatic
     }
 
     private func rebuildRouteLines() {
-        routeLines = trips.filter { $0.mode != .airplane }.flatMap { t -> [RouteLine] in
-            let pieces = cleanRoutes
-                ? (cleanedRoutes[t.id] ?? []).map { RouteDisplay.simplify($0, metersPerPoint: metersPerPoint) }
-                : [t.route]
-            return pieces.enumerated().compactMap { i, p in
-                p.count >= 2 ? RouteLine(id: "\(t.id)-\(i)", color: t.mode.color, coords: p.map(\.cl)) : nil
+        switch routeStyle {
+        case .arcs:
+            routeLines = flows.map { f in
+                RouteLine(id: f.id, color: f.mode.color, coords: ODFlows.arc(from: f.origin.coordinate, to: f.destination.coordinate).map(\.cl),
+                          width: 3 + min(6, log2(Double(f.trips)) * 1.5))
+            }
+        case .traces:
+            routeLines = trips.filter { $0.mode != .airplane }.flatMap { t -> [RouteLine] in
+                let pieces = (cleanedRoutes[t.id] ?? []).map { RouteDisplay.simplify($0, metersPerPoint: metersPerPoint) }
+                return pieces.enumerated().compactMap { i, p in
+                    p.count >= 2 ? RouteLine(id: "\(t.id)-\(i)", color: t.mode.color, coords: p.map(\.cl), width: 3.5) : nil
+                }
             }
         }
     }
 
-    private func placeCounts(_ r: DateRange, _ places: [String: Place]) -> [(Place, Int)] {
-        let visits = (try? model.store.visits(overlapping: r.start, r.end)) ?? []
+    /// Trip endpoints snap to their places so repeated trips between the same places merge into one arc.
+    private func odFlows(_ visits: [Visit], _ places: [String: Place]) -> [ODFlows.Flow] {
+        let visitByID = Dictionary(visits.map { ($0.id, $0) }) { a, _ in a }
+        func endpoint(placeID: String?, visitID: String?, fallback: Coordinate?) -> ODFlows.Endpoint? {
+            let v = visitID.flatMap { visitByID[$0] }
+            if let pid = placeID ?? v?.placeID, let p = places[pid] { return .init(key: pid, coordinate: p.coordinate) }
+            return (v?.coordinate ?? fallback).map { ODFlows.Endpoint(coordinate: $0) }
+        }
+        let ods = trips.filter { $0.mode != .airplane }.compactMap { t -> (origin: ODFlows.Endpoint, destination: ODFlows.Endpoint, mode: TravelMode)? in
+            let route = t.route
+            guard let o = endpoint(placeID: t.originPlaceID, visitID: t.originVisitID, fallback: route.first),
+                  let d = endpoint(placeID: t.destinationPlaceID, visitID: t.destinationVisitID, fallback: route.last)
+            else { return nil }
+            return (o, d, t.mode)
+        }
+        return ODFlows.aggregate(ods)
+    }
+
+    private func placeCounts(_ visits: [Visit], _ places: [String: Place]) -> [(Place, Int)] {
         var counts: [String: Int] = [:]
         for v in visits { if let p = v.placeID { counts[p, default: 0] += 1 } }
         return counts.compactMap { k, n in places[k].map { ($0, n) } }
     }
 }
 
-/// One drawable piece of a trip route on the overview map.
+/// One drawable line on the overview map: an OD arc or a piece of a trip trace.
 private struct RouteLine: Identifiable {
     let id: String
     let color: Color
     let coords: [CLLocationCoordinate2D]
+    let width: CGFloat
+}
+
+private enum RouteStyle: String, CaseIterable, Identifiable {
+    case arcs, traces
+    var id: String { rawValue }
+    var label: String {
+        switch self {
+        case .arcs: return "Origin → destination arcs"
+        case .traces: return "GPS traces"
+        }
+    }
 }
