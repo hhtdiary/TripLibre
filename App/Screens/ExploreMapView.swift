@@ -58,6 +58,11 @@ struct ExploreMapView: View {
     @State private var period: Period = .month
     @State private var phases: [LifePhase] = []
     @State private var trips: [Trip] = []
+    /// Display-only cleaned geometry per trip id (see `RouteDisplay`); stored routes are never modified.
+    @State private var cleanedRoutes: [String: [[Coordinate]]] = [:]
+    @State private var routeLines: [RouteLine] = []
+    @State private var metersPerPoint: Double = 16
+    @State private var mapWidth: CGFloat = 390
     @State private var placeUse: [(Place, Int)] = []
     @State private var flights: [Flight] = []
     @State private var metrics: MobilityMetrics?
@@ -65,6 +70,7 @@ struct ExploreMapView: View {
     @State private var showPlaces = true
     @State private var showHull = true
     @State private var showFlights = true
+    @State private var cleanRoutes = true
     @State private var position: MapCameraPosition = .automatic
     @Environment(\.tabBarSpace) private var tabBarSpace
 
@@ -76,11 +82,9 @@ struct ExploreMapView: View {
                         .stroke(Toon.ink, style: StrokeStyle(lineWidth: 2.5, lineJoin: .round, dash: [8, 6]))
                 }
                 if showRoutes {
-                    ForEach(trips) { t in
-                        if t.mode != .airplane, t.route.count >= 2 {
-                            MapPolyline(coordinates: t.route.map(\.cl)).stroke(Toon.ink.opacity(0.7), lineWidth: 6)
-                            MapPolyline(coordinates: t.route.map(\.cl)).stroke(t.mode.color, lineWidth: 3.5)
-                        }
+                    ForEach(routeLines) { r in
+                        MapPolyline(coordinates: r.coords).stroke(Toon.ink.opacity(0.7), lineWidth: 6)
+                        MapPolyline(coordinates: r.coords).stroke(r.color, lineWidth: 3.5)
                     }
                 }
                 if showFlights {
@@ -101,6 +105,13 @@ struct ExploreMapView: View {
                 }
             }
             .mapStyle(.standard(emphasis: .muted, pointsOfInterest: .excludingAll))
+            .onGeometryChange(for: CGFloat.self) { $0.size.width } action: { mapWidth = max(1, $0) }
+            .onMapCameraChange(frequency: .onEnd) { ctx in
+                let metres = ctx.rect.width * MKMetersPerMapPointAtLatitude(ctx.region.center.latitude)
+                // power-of-two buckets so small pans/zooms don't re-simplify every route
+                let bucket = pow(2, log2(max(0.5, metres / Double(mapWidth))).rounded())
+                if bucket != metersPerPoint { metersPerPoint = bucket; rebuildRouteLines() }
+            }
             // keep the Apple Maps logo / Legal link clear of the stats card and tab bar
             .safeAreaPadding(.bottom, tabBarSpace + (metrics == nil ? 0 : 92))
 
@@ -127,21 +138,38 @@ struct ExploreMapView: View {
                     Toggle("Places", isOn: $showPlaces)
                     Toggle("Activity space (convex hull)", isOn: $showHull)
                     Toggle("Flights", isOn: $showFlights)
+                    Section("Display only — recorded data is unchanged") {
+                        Toggle("Clean up GPS drift", isOn: $cleanRoutes)
+                    }
                 } label: { Image(systemName: "square.3.layers.3d") }
             }
         }
         .task(id: "\(period.id)-\(model.revision)") { load() }
+        .onChange(of: cleanRoutes) { _, _ in rebuildRouteLines() }
     }
 
     private func load() {
         phases = (try? model.store.lifePhases()) ?? []
         let r = period.range(first: model.store.firstPointDate() ?? (try? model.store.allTrips().first?.departure) ?? nil)
         trips = ((try? model.store.trips(overlapping: r.start, r.end, withSegments: false)) ?? []).filter { r.contains($0.departure) }
+        cleanedRoutes = Dictionary(trips.map { ($0.id, RouteDisplay.clean($0.route, hasGap: $0.hasGap)) }) { a, _ in a }
+        rebuildRouteLines()
         metrics = try? Analytics.compute(store: model.store, range: r)
         let places = Dictionary(uniqueKeysWithValues: ((try? model.store.places()) ?? []).map { ($0.id, $0) })
         placeUse = (metrics?.topPlaces ?? []).isEmpty ? [] : placeCounts(r, places)
         flights = ((try? model.store.flights()) ?? []).filter { f in Fmt.parseYMD(f.date).map(r.contains) ?? true }
         position = .automatic
+    }
+
+    private func rebuildRouteLines() {
+        routeLines = trips.filter { $0.mode != .airplane }.flatMap { t -> [RouteLine] in
+            let pieces = cleanRoutes
+                ? (cleanedRoutes[t.id] ?? []).map { RouteDisplay.simplify($0, metersPerPoint: metersPerPoint) }
+                : [t.route]
+            return pieces.enumerated().compactMap { i, p in
+                p.count >= 2 ? RouteLine(id: "\(t.id)-\(i)", color: t.mode.color, coords: p.map(\.cl)) : nil
+            }
+        }
     }
 
     private func placeCounts(_ r: DateRange, _ places: [String: Place]) -> [(Place, Int)] {
@@ -150,4 +178,11 @@ struct ExploreMapView: View {
         for v in visits { if let p = v.placeID { counts[p, default: 0] += 1 } }
         return counts.compactMap { k, n in places[k].map { ($0, n) } }
     }
+}
+
+/// One drawable piece of a trip route on the overview map.
+private struct RouteLine: Identifiable {
+    let id: String
+    let color: Color
+    let coords: [CLLocationCoordinate2D]
 }
