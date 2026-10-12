@@ -1,0 +1,29 @@
+cff-version: 1.2.0
+message: "If you use HHT in your research, please cite it as below."
+type: software
+title: "HHT: a personal, local-first travel diary for iOS"
+abstract: >-
+  HHT is a private, local-first iOS app that works like a continuous household
+  travel survey for one person. It records location in the background, rebuilds
+  each day into visits, trips, modes and trip chains, lets the user correct
+  mistakes in one or two taps, and exports a research-grade dataset
+  (CSV, JSON, GeoJSON, SQLite) with a Python loader for analysis.
+authors:
+  - family-names: Yang
+    given-names: Zhanchao
+    affiliation: "University of Pennsylvania, Weitzman School of Design"
+    # orcid: "https://orcid.org/0000-0000-0000-0000"
+version: 1.2.0
+date-released: 2026-10-11
+license: Apache-2.0
+repository-code: "https://github.com/zyang91/HHT-app"
+url: "https://zhanchaoyang.com/HHT-app/docs/"
+keywords:
+  - household travel survey
+  - travel diary
+  - GPS tracking
+  - trip reconstruction
+  - mode detection
+  - transportation planning
+  - iOS
+  - SwiftUI
