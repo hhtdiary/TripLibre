@@ -25,6 +25,7 @@ authors:
     orcid: "https://orcid.org/0000-0001-6356-8865"
 version: 1.2.0
 date-released: 2026-10-11
+doi: 10.5281/zenodo.23307589
 license: Apache-2.0
 repository-code: "https://github.com/zyang91/HHT-app"
 url: "https://zhanchaoyang.com/HHT-app/docs/"
