@@ -83,6 +83,7 @@ CoreMotion activity episodes: `ts` (start), `activity` (`stationary|walking|runn
 ### trip_segments
 Mode segments inside a trip: `id, trip_id, seq, start_ts, end_ts, mode_auto, mode_confidence, mode_user, distance_m, route_polyline`.
 The trip's `mode_auto` is the main mode of its segments by the HHTS hierarchy (air > rail > transit > car > bike > walk).
+A segment with `mode_user` set was chosen or confirmed by the user (added by hand, mode changed, or its boundary moved); hand-made segments have no `mode_auto`. Editing any segment marks the trip `edited`, so its segments are kept as-is when inference reruns. Segments of a trip are contiguous: they start at the trip's departure, end at its arrival, and never overlap.
 
 ### flights
 `id, trip_id (→ trips, if detected/linked), journey_id, date (local YYYY-MM-DD), origin_code, destination_code, origin_lat/lon, destination_lat/lon, departure_ts, arrival_ts, airline, flight_number, aircraft_type, seat, cabin, distance_m, booking_reference, notes, source, created_at, updated_at`.

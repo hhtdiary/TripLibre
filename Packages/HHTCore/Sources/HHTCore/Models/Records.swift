@@ -138,9 +138,11 @@ public struct TripSegment: Identifiable, Equatable, Sendable {
     }
 
     public var mode: TravelMode { modeUser ?? modeAuto ?? .unknown }
+    /// True when the user chose or confirmed this segment's mode (it was added by hand, or its mode or bounds edited).
+    public var isUserSet: Bool { modeUser != nil }
 }
 
-public struct Trip: Identifiable, Equatable, Sendable {
+public struct Trip:Identifiable, Equatable, Sendable {
     public var id: String
     public var originVisitID: String?
     public var destinationVisitID: String?
@@ -190,6 +192,15 @@ public struct Trip: Identifiable, Equatable, Sendable {
         userStatus == .auto && (modeAuto == nil || modeAuto == .unknown || (modeConfidence ?? 0) < 0.5)
     }
     public var route: [Coordinate] { routePolyline.map(Polyline.decode) ?? [] }
+    /// Modes to show for the trip, e.g. [subway, walk] for "Subway / metro + Walk": the segment sequence
+    /// (consecutive repeats collapsed) when it is multimodal, else the single trip mode. A whole-trip override
+    /// that none of the segments carries (older edits) wins over the segments.
+    public var displayModes: [TravelMode] {
+        var uniq: [TravelMode] = []
+        for m in segments.map(\.mode) where uniq.last != m { uniq.append(m) }
+        if uniq.count > 1, modeUser.map(uniq.contains) ?? true { return uniq }
+        return [mode]
+    }
 }
 
 public struct Flight: Identifiable, Equatable, Sendable {

@@ -60,8 +60,18 @@ public final class EditService {
             var t = try tripOrThrow(tripID)
             let old = t.mode
             t.modeUser = mode
-            // a single-segment trip's segment follows the trip mode
-            if t.segments.count == 1 { t.segments[0].modeUser = mode }
+            if t.segments.count == 1 {
+                // a single-segment trip's segment follows the trip mode
+                t.segments[0].modeUser = mode
+            } else if let mode, mode != old {
+                // a different mode for the whole trip replaces the segment modes ("it was all bus")
+                for i in t.segments.indices { t.segments[i].modeUser = mode }
+            } else if mode == nil {
+                // back to automatic; segments added by hand have no automatic mode and keep theirs
+                for i in t.segments.indices where t.segments[i].modeAuto != nil { t.segments[i].modeUser = nil }
+                syncMainMode(&t)
+            }
+            // confirming the current main mode keeps a multimodal trip's segments as they are
             touch(&t)
             try store.upsertTrip(t)
             try store.audit("trip", tripID, "set_mode", field: "mode_user", old: old.rawValue, new: mode?.rawValue)
@@ -76,13 +86,141 @@ public final class EditService {
             guard let i = t.segments.firstIndex(where: { $0.id == segmentID }) else { throw EditError.notFound("segment") }
             let old = t.segments[i].mode
             t.segments[i].modeUser = mode
-            // trip main mode follows the segment hierarchy unless the user set it explicitly
-            let main = ModeClassifier.mainMode(t.segments.map { ($0.mode, $0.end.timeIntervalSince($0.start), $0.distance) })
-            if t.modeUser == nil || t.segments.count > 1 { t.modeUser = main }
+            syncMainMode(&t)
             touch(&t)
             try store.upsertTrip(t)
             try store.audit("trip_segment", segmentID, "set_mode", field: "mode_user", old: old.rawValue, new: mode?.rawValue)
         }
+    }
+
+    // MARK: - Segments
+
+    /// "I changed mode here": split the segment running at `time`; the part after it gets `mode`.
+    /// A trip without segments (manual, imported) first gets one covering the whole trip.
+    @discardableResult
+    public func addModeChange(tripID: String, at time: Date, mode: TravelMode) throws -> TripSegment {
+        try db.transaction {
+            var t = try tripOrThrow(tripID)
+            ensureSegments(&t)
+            guard let i = t.segments.firstIndex(where: { $0.start < time && time < $0.end }) else {
+                throw EditError.invalid("The change must lie inside the trip, not on an existing segment boundary.")
+            }
+            let s = t.segments[i]
+            var before = s, after = s
+            before.end = time
+            after.id = newID(); after.start = time
+            after.modeAuto = nil; after.modeConfidence = nil; after.modeUser = mode
+            t.segments.replaceSubrange(i...i, with: try reshape([before, after], replacing: [s], in: t))
+            renumber(&t)
+            syncMainMode(&t)
+            touch(&t)
+            try store.upsertTrip(t)
+            try store.audit("trip_segment", after.id, "create", field: "mode_user", new: mode.rawValue)
+            try store.audit("trip", tripID, "split_segment", field: "segment_start", old: s.id, new: iso(time))
+            return t.segments[i + 1]
+        }
+    }
+
+    /// Move the boundary between a segment and the next one. Both keep their modes and are marked as set by the user.
+    public func setSegmentEnd(_ segmentID: String, to time: Date) throws {
+        try db.transaction {
+            var t = try tripOrThrow(try tripID(ofSegment: segmentID))
+            guard let i = t.segments.firstIndex(where: { $0.id == segmentID }) else { throw EditError.notFound("segment") }
+            guard i + 1 < t.segments.count else { throw EditError.invalid("The last segment ends when the trip arrives.") }
+            let a = t.segments[i], b = t.segments[i + 1]
+            guard a.start < time, time < b.end else { throw EditError.invalid("The change must lie between the segments around it.") }
+            var na = a, nb = b
+            na.end = time; nb.start = time
+            na.modeUser = a.mode; nb.modeUser = b.mode
+            t.segments.replaceSubrange(i...(i + 1), with: try reshape([na, nb], replacing: [a, b], in: t))
+            syncMainMode(&t)
+            touch(&t)
+            try store.upsertTrip(t)
+            try store.audit("trip_segment", segmentID, "set_end", field: "end_ts", old: iso(a.end), new: iso(time))
+        }
+    }
+
+    /// Remove a segment; its time goes to the segment before it (or after it, for the first one).
+    public func removeSegment(_ segmentID: String) throws {
+        try db.transaction {
+            var t = try tripOrThrow(try tripID(ofSegment: segmentID))
+            guard let i = t.segments.firstIndex(where: { $0.id == segmentID }) else { throw EditError.notFound("segment") }
+            guard t.segments.count > 1 else { throw EditError.invalid("A trip keeps at least one segment.") }
+            let j = i > 0 ? i - 1 : i + 1
+            let gone = t.segments[i], keep = t.segments[j]
+            var merged = keep
+            merged.start = min(keep.start, gone.start); merged.end = max(keep.end, gone.end)
+            merged.modeUser = keep.mode
+            let lo = min(i, j)
+            let old = i < j ? [gone, keep] : [keep, gone]
+            t.segments.replaceSubrange(lo...(lo + 1), with: try reshape([merged], replacing: old, in: t))
+            renumber(&t)
+            syncMainMode(&t)
+            touch(&t)
+            try store.upsertTrip(t)
+            try store.audit("trip_segment", segmentID, "delete", field: "merged_into", new: keep.id)
+        }
+    }
+
+    private func tripID(ofSegment segmentID: String) throws -> String {
+        guard let r = try db.query("SELECT trip_id FROM trip_segments WHERE id = ?", segmentID).first,
+              let id = r.string("trip_id") else { throw EditError.notFound("segment \(segmentID)") }
+        return id
+    }
+
+    /// A trip without segments gets one covering it, carrying the trip's own mode and route.
+    private func ensureSegments(_ t: inout Trip) {
+        guard t.segments.isEmpty else { return }
+        t.segments = [TripSegment(tripID: t.id, sequence: 0, start: t.departure, end: t.arrival, modeAuto: t.modeAuto,
+                                  modeConfidence: t.modeConfidence, modeUser: t.modeUser, distance: t.distance,
+                                  routePolyline: t.routePolyline)]
+    }
+
+    private func renumber(_ t: inout Trip) {
+        for i in t.segments.indices { t.segments[i].sequence = i; t.segments[i].tripID = t.id }
+    }
+
+    /// Once the user has set any segment, the trip's mode is the main mode of its segments (HHTS hierarchy).
+    private func syncMainMode(_ t: inout Trip) {
+        guard t.segments.contains(where: \.isUserSet) else { t.modeUser = nil; return }
+        t.modeUser = ModeClassifier.mainMode(t.segments.map { ($0.mode, $0.end.timeIntervalSince($0.start), $0.distance) })
+    }
+
+    /// Distances and routes for `segments`, which cover the same time as `old`: from the raw fixes inside each one,
+    /// or, where there are too few (GPS gap, manual trip), the old segments' distance and route shared out by time.
+    private func reshape(_ segments: [TripSegment], replacing old: [TripSegment], in t: Trip) throws -> [TripSegment] {
+        guard let from = old.map(\.start).min(), let to = old.map(\.end).max() else { return segments }
+        let span = max(1, to.timeIntervalSince(from))
+        let pooled = old.compactMap(\.routePolyline).flatMap(Polyline.decode)
+        let route = pooled.count >= 2 ? pooled : t.route
+        let distance = old.map(\.distance).reduce(0, +)
+        let raw = try store.points(from: from, to: to)
+        var last = route.first
+        return segments.map { s in
+            var s = s
+            let fixes = raw.filter { $0.timestamp >= s.start && $0.timestamp <= s.end }.map(\.coordinate)
+            let f0 = s.start.timeIntervalSince(from) / span, f1 = s.end.timeIntervalSince(from) / span
+            let path: [Coordinate]
+            if fixes.count >= 2 {
+                path = [last].compactMap { $0 } + fixes
+                s.distance = Geo.pathLength(path)
+            } else {
+                path = slice(route, f0, f1)
+                s.distance = distance * (f1 - f0)
+            }
+            s.routePolyline = path.count >= 2 ? Polyline.encode(Geo.simplify(path, tolerance: 8)) : nil
+            last = path.last ?? last
+            return s
+        }
+    }
+
+    /// The part of a route between two fractions of its length in points.
+    private func slice(_ route: [Coordinate], _ f0: Double, _ f1: Double) -> [Coordinate] {
+        guard route.count >= 2 else { return route }
+        let n = Double(route.count - 1)
+        let i0 = min(route.count - 2, max(0, Int((n * f0).rounded())))
+        let i1 = min(route.count - 1, max(i0 + 1, Int((n * f1).rounded())))
+        return Array(route[i0...i1])
     }
 
     public func setTripPurpose(_ tripID: String, _ purpose: TripPurpose?) throws {
@@ -263,8 +401,10 @@ public final class EditService {
             var v = try visitOrThrow(visitID)
             let inc = try incomingTrip(visitID)
             let out = try outgoingTrip(visitID)
-            if var a = inc, let b = out {
+            if var a = inc, var b = out {
                 try store.audit("trip", a.id, "merge", field: "absorbed_trip", new: b.id)
+                // keep the joined trip's segments covering it end to end
+                if !a.segments.isEmpty || !b.segments.isEmpty { ensureSegments(&a); ensureSegments(&b) }
                 a.arrival = b.arrival
                 a.destinationVisitID = b.destinationVisitID
                 a.destinationPlaceID = b.destinationPlaceID

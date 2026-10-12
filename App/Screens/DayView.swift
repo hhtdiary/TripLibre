@@ -345,19 +345,9 @@ struct TripRow: View {
         .padding(.trailing, 2)
     }
 
-    private var uniqueModes: [TravelMode] {
-        var uniq: [TravelMode] = []
-        for m in trip.segments.map(\.mode) where uniq.last != m { uniq.append(m) }
-        return uniq.isEmpty || trip.modeUser != nil ? [trip.mode] : uniq
-    }
+    private var uniqueModes: [TravelMode] { trip.displayModes }
 
-    private var modeText: String {
-        let segs = trip.segments.map(\.mode)
-        var uniq: [TravelMode] = []
-        for m in segs where uniq.last != m { uniq.append(m) }
-        if uniq.count > 1 && trip.modeUser == nil { return uniq.map(\.label).joined(separator: " + ") }
-        return trip.mode.label
-    }
+    private var modeText: String { trip.displayModes.map(\.label).joined(separator: " + ") }
 }
 
 /// Vertical line used for the dashed path between diary stickers.
