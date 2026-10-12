@@ -47,7 +47,7 @@ Packages/HHTCore/       platform-independent core (Swift package, no dependencie
   Editing/              every correction (mode, place, times, split/merge/delete) + audit log
   Analytics/            HHTS metrics, radius of gyration, entropy, tours…
   Export/               CSV/JSON/GeoJSON/SQLite export; CSV/GPX/airport import
-  Tests/                29 tests incl. the brief's 14 synthetic scenarios
+  Tests/                58 tests incl. the brief's 14 synthetic scenarios
 analysis/               Python loader + example analysis (pandas)
 docs/                   project page (index.html), documentation site (docs/), markdown specs
 project.yml             XcodeGen spec (HHT.xcodeproj is generated from it)
@@ -101,7 +101,7 @@ Or query `travel.sqlite` directly (`v_trips`, `v_visits` views) from R/DBI, Duck
 ## Development
 ```bash
 make help          # list everything
-make test          # core test suite (29 tests incl. the brief's 14 scenarios)
+make test          # core test suite (58 tests incl. the brief's 14 scenarios)
 make sim           # build + run in the simulator with demo data
 make phone         # build, sign and install on the cable-connected iPhone (renews the 7-day signature)
 make ci            # what GitHub Actions runs: tests + app build + export→Python contract check

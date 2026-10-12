@@ -8,7 +8,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "0.1.0"
+    MARKETING_VERSION: "1.2.0"
     CURRENT_PROJECT_VERSION: "1"
     # Set your Apple ID team here (Xcode › Settings › Accounts), or pick it in Signing & Capabilities.
     DEVELOPMENT_TEAM: 8HRS3Q2SF3
@@ -36,6 +36,8 @@ targets:
       path: App/Support/Info.plist
       properties:
         CFBundleDisplayName: HHT
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         NSLocationWhenInUseUsageDescription: "HHT records where you go to build your private travel diary. Data never leaves your iPhone."
