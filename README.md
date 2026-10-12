@@ -14,6 +14,7 @@
   <img src="https://img.shields.io/badge/Swift-SwiftUI-F05138?logo=swift&logoColor=white" alt="Swift / SwiftUI">
   <img src="https://img.shields.io/badge/data-local--first-5ac8a0" alt="Local-first data">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="Apache 2.0 license"></a>
+  <a href="https://doi.org/10.5281/zenodo.23307589"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23307589.svg" alt="DOI 10.5281/zenodo.23307589"></a>
   <a href="https://zhanchaoyang.com/HHT-app/docs/"><img src="https://img.shields.io/badge/docs-website-f4a93b" alt="Documentation"></a>
 </p>
 
@@ -119,6 +120,11 @@ synthetic Philadelphia days. Neither exists in device builds.
 Design priorities follow the brief: data integrity → collection reliability → correct reconstruction → fast correction →
 exportability → analytics → polish. Raw observations are never modified; inference can be re-run at any time without
 touching anything you corrected.
+
+## Citation
+If you use HHT in research, please cite the archived software ([`CITATION.cff`](CITATION.cff); GitHub's *Cite this repository* button gives APA and BibTeX):
+
+> Yang, Z. *HHT: An Open-Source, Privacy-First Travel Diary for Mobility Research.* Zenodo. https://doi.org/10.5281/zenodo.23307589
 
 ---
 
