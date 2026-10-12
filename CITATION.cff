@@ -6,7 +6,7 @@ abstract: >-
   HHT is an open-source, local-first iOS application designed for personal
   mobility tracking and travel behavior research. It records
   location data in the background, reconstructs daily travel activities
-  into visits, trips, transportation modes, and trip chains.It allows
+  into visits, trips, transportation modes, and trip chains. It allows
   users to review and correct inferred travel records. The application
   supports exporting structured mobility datasets in CSV, JSON, GeoJSON,
   and SQLite formats, with a Python loader for further analysis.
