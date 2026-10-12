@@ -456,5 +456,93 @@ struct GeoAnalyticsTests {
         #expect(Geo.distance(visits[2].coordinate, Philly.restaurant) < 100)
         #expect(try store.visit(grocery.id)?.deleted == true)
     }
+
+    /// Issue #35: a segment the user sets by hand ("Subway / metro + Walk") is kept as a segment-level record.
+    @Test func manualSegmentsPersistAndStayContiguous() throws {
+        let path = FileManager.default.temporaryDirectory.appendingPathComponent("hht-\(UUID().uuidString).sqlite").path
+        defer { try? FileManager.default.removeItem(atPath: path) }
+        let tr = chainDay()
+        var tripID = ""
+        do {
+            let (store, engine) = try processed(tr, path: path)
+            let edit = EditService(store: store)
+            let trip = try store.allTrips(withSegments: true)[0]
+            tripID = trip.id
+            #expect(trip.segments.count == 1)
+            try edit.setSegmentMode(trip.segments[0].id, .subway)
+            let change = trip.departure.addingTimeInterval(trip.duration * 0.7)
+            let walk = try edit.addModeChange(tripID: tripID, at: change, mode: .walk)
+            var t = try #require(try store.trip(tripID))
+            #expect(t.displayModes == [.subway, .walk])
+            #expect(t.mode == .subway && t.userStatus == .edited)
+            #expect(t.segments.map(\.id).last == walk.id && t.segments.allSatisfy(\.isUserSet))
+            #expect(t.segments.first?.start == t.departure && t.segments.last?.end == t.arrival)
+            #expect(t.segments[0].end == change && t.segments[1].start == change)
+            #expect(abs(t.segments.map(\.distance).reduce(0, +) - t.distance) < 0.2 * t.distance)
+
+            // confirming the main mode (the ✓ chip) keeps both segments
+            try edit.setTripMode(tripID, t.mode)
+            #expect(try store.trip(tripID)?.displayModes == [.subway, .walk])
+
+            // re-running inference neither erases nor duplicates them
+            try engine.process(from: .distantPast, to: tr.t, now: tr.t.addingTimeInterval(60))
+            t = try #require(try store.trip(tripID))
+            #expect(t.displayModes == [.subway, .walk] && t.segments.count == 2 && t.segments[1].id == walk.id)
+            #expect(try store.allTrips().filter { $0.departure < t.arrival && $0.arrival > t.departure }.count == 1)
+
+            // move the boundary; a boundary on the trip's end or on an existing boundary is refused
+            let later = change.addingTimeInterval(30)
+            try edit.setSegmentEnd(t.segments[0].id, to: later)
+            #expect(throws: EditError.self) { try edit.setSegmentEnd(t.segments[0].id, to: t.arrival) }
+            #expect(throws: EditError.self) { try edit.addModeChange(tripID: tripID, at: later, mode: .bus) }
+        }
+        // the edits survive an app relaunch
+        let reopened = try TravelStore(path: path)
+        let edit = EditService(store: reopened)
+        var t = try #require(try reopened.trip(tripID))
+        #expect(t.displayModes == [.subway, .walk])
+        #expect(t.segments.map(\.sequence) == [0, 1] && t.segments[0].end == t.segments[1].start)
+
+        // remove the walk segment: the subway segment takes its time back
+        try edit.removeSegment(t.segments[1].id)
+        t = try #require(try reopened.trip(tripID))
+        #expect(t.segments.count == 1 && t.segments[0].mode == .subway && t.segments[0].end == t.arrival)
+        #expect(throws: EditError.self) { try edit.removeSegment(t.segments[0].id) }
+        #expect(try reopened.auditLog(entityID: tripID).contains { $0.action == "split_segment" })
+    }
+
+    @Test func wholeTripModeAndResetOnMultimodalTrip() throws {
+        let (store, _) = try processed(chainDay())
+        let edit = EditService(store: store)
+        let trip = try store.allTrips()[0]
+        try edit.addModeChange(tripID: trip.id, at: trip.departure.addingTimeInterval(trip.duration / 2), mode: .bus)
+        #expect(try store.trip(trip.id)?.displayModes == [.walk, .bus])
+        // "it was all bicycle" replaces the segment modes but keeps the boundaries
+        try edit.setTripMode(trip.id, .bicycle)
+        var t = try #require(try store.trip(trip.id))
+        #expect(t.displayModes == [.bicycle] && t.segments.count == 2)
+        // back to automatic: the inferred segment returns to its own mode, the hand-made one keeps the last one set
+        try edit.setTripMode(trip.id, nil)
+        t = try #require(try store.trip(trip.id))
+        #expect(t.segments.map(\.mode) == [.walk, .bicycle] && t.modeUser != nil)
+        // an older whole-trip override that no segment carries still wins on display
+        t.modeUser = .ferry
+        #expect(t.displayModes == [.ferry])
+    }
+
+    @Test func modeChangeOnTripWithoutSegments() throws {
+        let store = try TravelStore(path: ":memory:")
+        let edit = EditService(store: store)
+        let a = Place(name: "A", coordinate: Philly.home), b = Place(name: "B", coordinate: Philly.penn)
+        try store.upsertPlace(a); try store.upsertPlace(b)
+        let dep = Trajectory.date("2026-09-15 18:08")
+        let trip = try edit.addManualTrip(originPlaceID: a.id, destinationPlaceID: b.id, departure: dep,
+                                          arrival: dep.addingTimeInterval(300), mode: .subway, distance: 2250)
+        try edit.addModeChange(tripID: trip.id, at: dep.addingTimeInterval(240), mode: .walk)
+        let t = try #require(try store.trip(trip.id))
+        #expect(t.displayModes == [.subway, .walk] && t.userStatus == .manual)
+        #expect(abs(t.segments[0].distance - 1800) < 1 && abs(t.segments[1].distance - 450) < 1)
+        #expect(t.segments.allSatisfy { $0.routePolyline != nil })
+    }
 }
 

@@ -16,6 +16,8 @@ struct TripDetailView: View {
     @State private var confirmDelete = false
     @State private var showSplit = false
     @State private var showAllModes = false
+    @State private var showModeChange = false
+    @State private var editingSegment: IDBox?
 
     var body: some View {
         NavigationStack {
@@ -53,27 +55,40 @@ struct TripDetailView: View {
                 }
             }
 
-            if t.segments.count > 1 {
-                Section("Segments") {
+            Section {
+                if t.segments.count > 1 {
                     ForEach(t.segments) { s in
-                        HStack {
-                            ModeIcon(mode: s.mode, size: 24)
-                            VStack(alignment: .leading) {
-                                Text(s.mode.label)
-                                Text("\(Fmt.time(s.start))–\(Fmt.time(s.end)) · \(Fmt.distance(s.distance))")
-                                    .font(.caption).foregroundStyle(.secondary)
-                            }
-                            Spacer()
-                            Menu {
-                                ForEach(TravelMode.allCases) { m in
-                                    Button { model.perform { try model.edit.setSegmentMode(s.id, m) } } label: {
-                                        Label(m.label, systemImage: m.symbol)
+                        Button { editingSegment = IDBox(id: s.id) } label: {
+                            HStack {
+                                ModeIcon(mode: s.mode, size: 24)
+                                VStack(alignment: .leading) {
+                                    HStack(spacing: 6) {
+                                        Text(s.mode.label)
+                                        Text(s.isUserSet ? "You" : "Auto")
+                                            .font(.caption2.weight(.semibold))
+                                            .padding(.horizontal, 6).padding(.vertical, 1)
+                                            .background(s.isUserSet ? Color.accentColor.opacity(0.18) : Color.secondary.opacity(0.12),
+                                                        in: Capsule())
+                                            .accessibilityLabel(s.isUserSet ? "Set by you" : "Detected automatically")
                                     }
+                                    Text("\(Fmt.time(s.start))–\(Fmt.time(s.end)) · \(Fmt.duration(s.end.timeIntervalSince(s.start))) · \(Fmt.distance(s.distance))")
+                                        .font(.caption).foregroundStyle(.secondary)
                                 }
-                            } label: { Text("Change").font(.caption) }
+                                Spacer()
+                                Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
+                            }
+                            .contentShape(Rectangle())
                         }
+                        .buttonStyle(.plain)
                     }
                 }
+                Button { showModeChange = true } label: {
+                    Label("I changed mode on the way", systemImage: "arrow.triangle.branch")
+                }
+            } header: { Text("Segments") } footer: {
+                Text(t.segments.count > 1
+                     ? "Tap a segment to change its mode or times, or remove it. Segments you set are kept when the day is reprocessed."
+                     : "Add a segment for each part of the trip, e.g. subway, then walk.")
             }
 
             Section("Purpose (activity at destination)") {
@@ -131,6 +146,12 @@ struct TripDetailView: View {
             Text("Use this for GPS jumps. The stay before and after become one visit. Raw data is kept.")
         }
         .sheet(isPresented: $showSplit) { SplitTripSheet(trip: t).environmentObject(model) }
+        .sheet(isPresented: $showModeChange) { ModeChangeSheet(trip: t).environmentObject(model) }
+        .sheet(item: $editingSegment) { b in
+            if let i = t.segments.firstIndex(where: { $0.id == b.id }) {
+                SegmentEditSheet(trip: t, index: i).environmentObject(model)
+            }
+        }
     }
 
     private var destinationDefaultPurpose: TripPurpose? {
@@ -280,6 +301,135 @@ struct SplitTripSheet: View {
                 guard let c = proxy.convert(point, from: .local) else { return }
                 pin = Coordinate(c.latitude, c.longitude)
                 placeID = nil
+            }
+        }
+    }
+}
+
+/// "I changed mode on the way": split the trip's segments at a time, e.g. subway until 18:12, then walk.
+struct ModeChangeSheet: View {
+    @EnvironmentObject var model: AppModel
+    @Environment(\.dismiss) private var dismiss
+    let trip: Trip
+    // Seeded in init, not onAppear: the picker range below is built on first render (see SplitTripSheet).
+    @State private var time: Date
+    @State private var before: TravelMode
+    @State private var after: TravelMode
+
+    init(trip: Trip) {
+        self.trip = trip
+        let t = SplitTimes.trip(departure: trip.departure, arrival: trip.arrival).stopStart
+        _time = State(initialValue: t)
+        let running = trip.segments.first { $0.start < t && t < $0.end }?.mode ?? trip.mode
+        _before = State(initialValue: running)
+        _after = State(initialValue: running == .walk ? trip.mode : .walk)
+    }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    Picker("Before", selection: $before) { modeOptions }
+                    DatePicker("Changed at", selection: $time, in: .ordered(trip.departure, trip.arrival),
+                               displayedComponents: [.hourAndMinute])
+                    Picker("After", selection: $after) { modeOptions }
+                } footer: {
+                    Text("\(Fmt.time(trip.departure))–\(Fmt.time(trip.arrival)). The trip stays one trip with two segments; both are kept when the day is reprocessed.")
+                }
+            }
+            .navigationTitle("Change of mode")
+            .inlineTitle()
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        let at = time, mode = before
+                        model.perform {
+                            try model.edit.addModeChange(tripID: trip.id, at: at, mode: after)
+                            if let s = try model.store.trip(trip.id)?.segments.first(where: { abs($0.end.timeIntervalSince(at)) < 1 }), s.mode != mode || !s.isUserSet {
+                                try model.edit.setSegmentMode(s.id, mode)
+                            }
+                        }
+                        dismiss()
+                    }
+                }
+            }
+        }
+    }
+
+    @ViewBuilder private var modeOptions: some View {
+        ForEach(TravelMode.allCases) { m in Label(m.label, systemImage: m.symbol).tag(m) }
+    }
+}
+
+/// Change one segment's mode or end time, or remove it.
+struct SegmentEditSheet: View {
+    @EnvironmentObject var model: AppModel
+    @Environment(\.dismiss) private var dismiss
+    let trip: Trip
+    let index: Int
+    @State private var mode: TravelMode
+    @State private var end: Date
+    @State private var confirmRemove = false
+
+    init(trip: Trip, index: Int) {
+        self.trip = trip
+        self.index = index
+        _mode = State(initialValue: trip.segments[index].mode)
+        _end = State(initialValue: trip.segments[index].end)
+    }
+
+    private var segment: TripSegment { trip.segments[index] }
+    private var next: TripSegment? { trip.segments.indices.contains(index + 1) ? trip.segments[index + 1] : nil }
+
+    var body: some View {
+        NavigationStack {
+            Form {
+                Section {
+                    Picker("Mode", selection: $mode) {
+                        ForEach(TravelMode.allCases) { m in Label(m.label, systemImage: m.symbol).tag(m) }
+                    }
+                    LabeledContent("Started", value: Fmt.time(segment.start))
+                    if let n = next {
+                        DatePicker("Ended", selection: $end, in: .ordered(segment.start, n.end), displayedComponents: [.hourAndMinute])
+                    } else {
+                        LabeledContent("Ended", value: Fmt.time(segment.end))
+                    }
+                    LabeledContent("Distance", value: Fmt.distance(segment.distance))
+                } footer: {
+                    Text(segment.isUserSet
+                         ? "Set by you; kept when the day is reprocessed."
+                         : "Detected automatically (\(Fmt.percent(segment.modeConfidence))). Saving marks it as set by you.")
+                }
+                Section {
+                    Button(role: .destructive) { confirmRemove = true } label: { Label("Remove this segment", systemImage: "trash") }
+                } footer: {
+                    Text(index > 0 ? "Its time joins the segment before it." : "Its time joins the segment after it.")
+                }
+            }
+            .navigationTitle("Segment \(index + 1) of \(trip.segments.count)")
+            .inlineTitle()
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("Save") {
+                        let id = segment.id, newMode = mode, newEnd = end
+                        let modeChanged = newMode != segment.mode || !segment.isUserSet
+                        let endChanged = next != nil && abs(newEnd.timeIntervalSince(segment.end)) >= 1
+                        model.perform {
+                            if modeChanged { try model.edit.setSegmentMode(id, newMode) }
+                            if endChanged { try model.edit.setSegmentEnd(id, to: newEnd) }
+                        }
+                        dismiss()
+                    }
+                }
+            }
+            .confirmationDialog("Remove this segment?", isPresented: $confirmRemove, titleVisibility: .visible) {
+                Button("Remove", role: .destructive) {
+                    let id = segment.id
+                    model.perform { try model.edit.removeSegment(id) }
+                    dismiss()
+                }
             }
         }
     }
