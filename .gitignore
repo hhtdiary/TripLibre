@@ -10,3 +10,6 @@ __pycache__/
 *.sqlite
 .build-xcode/
 .claude/launch.json
+.vercel/
+.vercel
+.env*
