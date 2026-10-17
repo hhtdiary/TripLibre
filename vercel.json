@@ -1,0 +1,21 @@
+{
+	"$schema": "https://openapi.vercel.sh/vercel.json",
+	"framework": null,
+	"buildCommand": null,
+	"outputDirectory": "docs",
+	"trailingSlash": false,
+	"github": {
+		"enabled": false
+	},
+	"headers": [
+		{
+			"source": "/(.*)",
+			"headers": [
+				{
+					"key": "X-Robots-Tag",
+					"value": "noindex"
+				}
+			]
+		}
+	]
+}
