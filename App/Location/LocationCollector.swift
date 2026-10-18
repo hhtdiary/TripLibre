@@ -43,6 +43,7 @@ final class LocationCollector: NSObject, ObservableObject {
     /// background wake while driving, giving ~10 s GPS bursts every ~5 min (significant-change wakes).
     private var backgroundSession: CLBackgroundActivitySession?
     private let motionManager = CMMotionActivityManager()
+    private var motionUpdatesRunning = false
     #endif
     private let regionID = "hht.stationary.region"
 
@@ -78,27 +79,30 @@ final class LocationCollector: NSObject, ObservableObject {
         // Created on every start, including background relaunches: that continues the session begun in the foreground.
         if backgroundSession == nil { backgroundSession = CLBackgroundActivitySession() }
         manager.startMonitoringVisits()
-        startMotionUpdates()
         #endif
         manager.startMonitoringSignificantLocationChanges()
         enterMoving(reason: "start")
+        startMotionUpdatesIfAuthorized()
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.checkStationary() }
         }
     }
 
-    #if os(iOS)
-    /// Live activity feeds the stationary decision. Only when already authorized (MotionSync asks for permission).
-    private func startMotionUpdates() {
-        guard CMMotionActivityManager.isActivityAvailable(), CMMotionActivityManager.authorizationStatus() == .authorized
+    /// Live activity feeds the stationary decision. Only when already authorized (MotionSync asks for permission),
+    /// so this is also called once that prompt resolves and whenever the app becomes active. Idempotent.
+    func startMotionUpdatesIfAuthorized() {
+        #if os(iOS)
+        guard mode != .off, !motionUpdatesRunning, CMMotionActivityManager.isActivityAvailable(),
+              CMMotionActivityManager.authorizationStatus() == .authorized
         else { return }
+        motionUpdatesRunning = true
         motionManager.startActivityUpdates(to: .main) { [weak self] a in
             guard let a else { return }
             MainActor.assumeIsolated { self?.detector.observe(motion: MotionSync.sample(from: a)) }
         }
+        #endif
     }
-    #endif
 
     func stop() {
         UserDefaults.standard.set(false, forKey: "trackingEnabled")
@@ -107,6 +111,7 @@ final class LocationCollector: NSObject, ObservableObject {
         #if os(iOS)
         manager.stopMonitoringVisits()
         motionManager.stopActivityUpdates()
+        motionUpdatesRunning = false
         backgroundSession?.invalidate()
         backgroundSession = nil
         #endif

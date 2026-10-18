@@ -24,7 +24,10 @@ struct HHTApp: App {
                 .onAppear { model.launch() }
         }
         .onChange(of: scenePhase) { _, phase in
-            if phase == .active { Task { await model.runInference() } }
+            if phase == .active {
+                model.collector.startMotionUpdatesIfAuthorized()   // e.g. Motion & Fitness enabled in Settings
+                Task { await model.runInference() }
+            }
         }
     }
 }

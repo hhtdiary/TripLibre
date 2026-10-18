@@ -24,10 +24,13 @@ final class MotionSync {
     }
 
     /// Triggers the Motion & Fitness permission prompt (via a tiny query) if not yet decided.
-    func requestPermission() {
+    /// `completion` runs on the main queue once the user has answered (or right away if already decided).
+    func requestPermission(completion: @escaping @MainActor () -> Void = {}) {
         #if os(iOS)
         guard Self.isAvailable else { return }
-        manager.queryActivityStarting(from: Date().addingTimeInterval(-60), to: Date(), to: .main) { _, _ in }
+        manager.queryActivityStarting(from: Date().addingTimeInterval(-60), to: Date(), to: .main) { _, _ in
+            MainActor.assumeIsolated { completion() }
+        }
         #endif
     }
 
