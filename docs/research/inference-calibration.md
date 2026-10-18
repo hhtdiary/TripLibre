@@ -217,6 +217,25 @@ deletions) and all 118 human-touched trips came through unchanged: times, deleti
 endpoints. It created no new visits (+0 / ~0 / −0). It does **not** prove that a deleted stop never hides a real later one.
 The synthetic tests cover that case (`deleteVisitMergesTripsAndStaysDeleted`).
 
+### Post-review correction (PR #52)
+
+Code review found that the departure-bout rule (change 3) only checked that a bout *started* early enough to cover the
+distance, not that the bout itself *lasted* long enough. A two-minute indoor walk early in a long silence could therefore
+date the departure to a distant fix whose journey the motion log never showed. The bout must now last at least
+max(`minSegmentDuration`, distance ÷ plausible speed). This is a bug fix, not a tuning step, and there's a regression test
+(`shortEarlyBoutIsNotTheDepartureToAFarFix`). Re-scored on the same day sets (round-1 numbers include the round-2 mode rules):
+
+| | before fix | after fix |
+|---|---|---|
+| Round-1 calibration (12 days): time agreement / visit F1 / trip F1 | 0.953 / 0.817 / 0.829 | 0.952 / 0.823 / 0.835 |
+| Round-1 validation (5 days, re-check of a bug fix, not a new tuning run) | 0.939 / 0.864 / 0.864 | unchanged |
+| Round-2 calibration (17 days): time agreement / visit F1 / trip F1 | 0.949 / 0.834 / 0.842 | 0.948 / 0.838 / 0.845 |
+| Mode accuracy, human-labelled (both splits) | | unchanged |
+
+One fewer extra visit and one fewer extra trip on one calibration day. The tables above show the values before the fix.
+`reinfer-check` now rebuilds through the later of `last_inference_at` and the newest raw fix (it still passes). The
+reference fingerprint now covers a non-empty WAL.
+
 ## 6. Remaining failure modes (validation and calibration combined)
 
 1. **Unobservable stops.** 8 manually added stops had no GPS fix at all during the stay, so the engine cannot see them.

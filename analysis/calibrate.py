@@ -77,6 +77,15 @@ def sha256(path: Path) -> str:
     return h.hexdigest()
 
 
+def snapshot_sha256(db: Path) -> str:
+    """Fingerprint of everything the export reads: the database plus a non-empty WAL, where uncheckpointed rows live.
+    A fully checkpointed snapshot keeps the plain file hash."""
+    wal = Path(str(db) + "-wal")
+    if not wal.exists() or wal.stat().st_size == 0:
+        return sha256(db)
+    return hashlib.sha256(f"{sha256(db)}+wal:{sha256(wal)}".encode()).hexdigest()
+
+
 def local(t: float, tz: str | None) -> datetime:
     return datetime.fromtimestamp(t, ZoneInfo(tz or "UTC"))
 
@@ -199,7 +208,7 @@ def cmd_export(a):
 
         meta = {
             "reference_version": REFERENCE_VERSION,
-            "snapshot_sha256": sha256(db),
+            "snapshot_sha256": snapshot_sha256(db),
             "schema_version": con.execute("PRAGMA user_version").fetchone()[0],
             "extracted_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
             "app_last_inference_at": last_inference[0] if last_inference else None,

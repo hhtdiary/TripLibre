@@ -161,7 +161,8 @@ extension Replay {
         let lockedV = try store.db.query("SELECT * FROM visits WHERE user_status != 'auto'").map(TravelStore.visit)
         let lockedT = try store.trips(overlapping: .distantPast, .distantFuture, includeDeleted: true).filter { $0.userStatus.isLocked }
         let engine = InferenceEngine(store: store)
-        let end = engine.lastRunAt ?? store.lastPoint()?.timestamp ?? Date()
+        // through the newest raw fix too: points collected after the app's last run belong in a full rebuild
+        guard let end = [engine.lastRunAt, store.lastPoint()?.timestamp].compactMap({ $0 }).max() else { return ReinferenceCheck() }
         guard let first = store.firstPointDate() else { return ReinferenceCheck() }
         let start = min(first, lockedV.map(\.arrival).min() ?? first)
         let r = try engine.process(from: start, to: end, now: end)

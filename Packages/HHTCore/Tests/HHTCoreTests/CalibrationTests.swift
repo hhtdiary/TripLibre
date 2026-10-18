@@ -67,6 +67,21 @@ struct CalibrationTests {
         #expect(minutes(try #require(visits[0].departure), start.addingTimeInterval(60 * 60)) < 1)
     }
 
+    /// A short indoor walk early in a long silence is not the departure to a distant fix whose journey the motion log
+    /// never showed (e.g. a subway ride read as stationary): fall back to back-dating from the fix.
+    @Test func shortEarlyBoutIsNotTheDepartureToAFarFix() throws {
+        let start = Trajectory.date("2026-09-15 09:00")
+        var tr = Trajectory(start: start, at: Philly.home)
+        tr.stay(minutes: 240)
+        walkingBouts(&tr, at: [20], from: start)                             // 2 min of pottering at 09:20
+        tr.here = Philly.phl                                                 // next fix ~10 km away at 13:00
+        tr.stay(minutes: 60)
+        let visits = try run(tr)
+        let departure = try #require(visits.first?.departure)
+        let backdated = start.addingTimeInterval(240 * 60 - Geo.distance(Philly.home, Philly.phl) / 10)
+        #expect(minutes(departure, backdated) < 2)
+    }
+
     /// The last fix of the walk in lands just outside the core radius, then the collector goes quiet: we had arrived.
     @Test func arrivalBeforeSilenceIsNotTrimmed() throws {
         let start = Trajectory.date("2026-09-15 12:00")

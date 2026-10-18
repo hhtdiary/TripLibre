@@ -271,13 +271,15 @@ public struct StayDetector: Sendable {
     }
 
     /// Start of the movement that most plausibly carried us from a stay to a fix `distance` away, seen only in the
-    /// motion log because location was silent: the latest bout of at least `minSegmentDuration` that began early enough
-    /// to cover the distance at a plausible speed. nil when the gap has no motion coverage or no such bout.
+    /// motion log because location was silent: the latest bout lasting at least `minSegmentDuration` and long enough to
+    /// cover the distance at a plausible speed. nil when the gap has no motion coverage or no such bout.
     func departureBout(from: Date, to: Date, distance: Double, motion: MotionTimeline) -> Date? {
         guard motion.hasCoverage(from: from, to: to) else { return nil }
         let needed = distance / Self.plausibleTravelSpeed(distance: distance)
+        // the bout itself must be long enough to make the journey: a short indoor walk early in a long silence
+        // is not the departure to a distant fix
         return motion.movementBouts(from: from, to: to)
-            .filter { $0.end.timeIntervalSince($0.start) >= config.minSegmentDuration && to.timeIntervalSince($0.start) >= needed }
+            .filter { $0.end.timeIntervalSince($0.start) >= max(config.minSegmentDuration, needed) }
             .last?.start
     }
 
