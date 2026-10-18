@@ -187,6 +187,25 @@ struct StampTests {
         #expect(try store.stamp(stamp.id)?.visitID == visits[1].id)
     }
 
+    @Test func shortStopKeepsItsMinimumNextToAStay() {
+        let cfg = InferenceConfig.default
+        let anchoring = StampAnchoring(config: cfg)
+        let t0 = Trajectory.date("2026-09-16 08:00")
+        let prev = DetectedStay(start: t0, end: t0.addingTimeInterval(1_800), centroid: Philly.home, pointCount: 10, confidence: 0.9)
+        // tapped 10 s after the previous stay ended, nothing after it: the clipped padding moves to the far side
+        let tap = prev.end!.addingTimeInterval(10)
+        let stamp = Stamp(timestamp: tap, coordinate: coffee, uncertainty: 80)
+        let s = anchoring.shortStay(for: stamp, among: [prev], points: [], now: tap.addingTimeInterval(3_600))!
+        #expect(s.start > prev.end!)
+        #expect(abs(s.end!.timeIntervalSince(s.start) - cfg.stampMinStayDuration) < 0.001)
+
+        // squeezed between two stays 40 s apart: it fills the gap and overlaps neither
+        let next = DetectedStay(start: prev.end!.addingTimeInterval(40), end: nil, centroid: Philly.penn, pointCount: 5, confidence: 0.9)
+        let squeezed = anchoring.shortStay(for: stamp, among: [prev, next], points: [], now: tap.addingTimeInterval(3_600))!
+        #expect(squeezed.start > prev.end! && squeezed.end! < next.start)
+        #expect(squeezed.end!.timeIntervalSince(squeezed.start) >= 37)
+    }
+
     @Test func addStampThroughEditServiceIsAudited() throws {
         let store = try TravelStore.inMemory()
         let t = Trajectory.date("2026-09-16 08:00")

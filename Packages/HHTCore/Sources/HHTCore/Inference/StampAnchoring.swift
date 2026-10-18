@@ -84,11 +84,15 @@ public struct StampAnchoring: Sendable {
             return nil
         }
 
-        // at least `stampMinStayDuration`, without running into the neighbouring stays
+        // at least `stampMinStayDuration`, without running into the neighbouring stays: padding one side can't take
+        // goes to the other (only a gap shorter than the minimum leaves the stop shorter)
         let short = config.stampMinStayDuration - end.timeIntervalSince(start)
         if short > 0 {
-            start = max(start.addingTimeInterval(-short / 2), lo.addingTimeInterval(1))
-            end = min(end.addingTimeInterval(short / 2), hi.addingTimeInterval(-1))
+            let first = lo.addingTimeInterval(1), last = hi.addingTimeInterval(-1)
+            var s = start.addingTimeInterval(-short / 2), e = end.addingTimeInterval(short / 2)
+            if s < first { e = min(last, e.addingTimeInterval(first.timeIntervalSince(s))); s = first }
+            if e > last { s = max(first, s.addingTimeInterval(-e.timeIntervalSince(last))); e = last }
+            start = s; end = e
         }
         guard end >= start else { return nil }
         // still there: the cluster runs to the newest fix and that fix is recent

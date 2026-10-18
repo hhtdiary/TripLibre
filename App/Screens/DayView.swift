@@ -508,7 +508,7 @@ struct DayMap: View {
     /// Fit everything, but never closer than ~1 km across (a lone visit would otherwise zoom to street level).
     static func camera(for data: DayData) -> MapCameraPosition {
         let coords = data.visits.map { v in (v.placeID.flatMap { data.places[$0] }?.coordinate ?? v.coordinate) }
-            + data.trips.flatMap(\.route)
+            + data.trips.flatMap(\.route) + data.unmatchedStamps.compactMap(\.coordinate)
         guard let first = coords.first else { return .automatic }
         var minLat = first.latitude, maxLat = first.latitude, minLon = first.longitude, maxLon = first.longitude
         for c in coords {
