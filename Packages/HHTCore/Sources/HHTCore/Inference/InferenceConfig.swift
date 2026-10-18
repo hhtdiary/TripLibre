@@ -21,7 +21,8 @@ public struct InferenceConfig: Sendable, Codable, Equatable {
     /// Within a movement, no fix for this long (while covering > 300 m) marks signal loss (tunnel, flight).
     public var movingGapThreshold: TimeInterval = 120
     /// During a gap, this much (s) of non-stationary motion activity means the person was moving.
-    public var gapMovingSeconds: TimeInterval = 5 * 60
+    /// Calibrated on real days (issue #46): indoor walking adds up to 5–20 min over a long silence at one place.
+    public var gapMovingSeconds: TimeInterval = 20 * 60
     /// Two stays closer than this (m) with only a short excursion between them are merged.
     public var mergeDistance: Double = 150
     /// …if the excursion lasted less than this…
@@ -46,6 +47,24 @@ public struct InferenceConfig: Sendable, Codable, Equatable {
     public var airMinDistance: Double = 50_000
     public var intercityRailMinSpeed: Double = 38 // ~137 km/h sustained (p90)
     public var intercityMinDistance: Double = 60_000
+    /// Road-vehicle evidence (issue #46, round 2). A "good" fix has accuracy ≤ this (m) and a reported speed ≥ the next.
+    /// Above ground in a car or taxi the GPS keeps such fixes coming; underground on rail it almost never does.
+    public var roadFixMaxAccuracy: Double = 20
+    public var roadFixMinSpeed: Double = 3
+    /// A vehicle run is a road vehicle (car), whatever its signal holes, if CoreMotion says automotive for at least
+    /// this share of the covered time and at least this share (and count) of its fixes are good.
+    /// The collector's periodic 5-min holes in cars otherwise look like tunnels.
+    public var roadMinAutomotiveShare: Double = 0.6
+    public var roadMinGoodFixShare: Double = 0.5
+    public var roadMinGoodFixes: Int = 5
+    /// A vehicle run with motion coverage, less automotive than this and fewer good fixes than this share is
+    /// underground rail: on the subway CoreMotion mostly reports unknown or walking and fixes are coarse Wi-Fi/cell ones.
+    public var undergroundMaxAutomotiveShare: Double = 0.5
+    public var undergroundMaxGoodFixShare: Double = 0.2
+    /// A "walk" run whose straight-line displacement is at least `walkCheckMinDisplacement` (m) at more than this
+    /// speed (m/s) is not a walk: a person cannot cover 1 km at 9 km/h as the crow flies on foot.
+    public var walkMaxDisplacementSpeed: Double = 2.5
+    public var walkCheckMinDisplacement: Double = 1_000
 
     public init() {}
     public static let `default` = InferenceConfig()

@@ -1,0 +1,402 @@
+# Inference calibration against a human-corrected diary
+
+Issue [#46](https://github.com/zyang91/HHT-app/issues/46). This note covers the audit (Phase 0), the reference dataset
+and review protocol (1), the offline replay harness (2), matching rules and metrics (3), the first calibration round (4)
+and its held-out validation (5), and calibration round 2 on travel modes (8). Everything published here is aggregate: no coordinates, places, timelines or
+per-day diaries. The private inputs and full reports live in a gitignored `calibration-data/` folder on the
+developer's machine.
+
+## 0. Audit: where the data and the decisions live
+
+### Data flow
+
+```
+CoreLocation / CLVisit / region exits / significant change ─┐
+CoreMotion activity (synced before each run) ───────────────┤
+                                                            ▼
+   raw_location_points, motion_activities   (layer 1, append-only; never rewritten by inference)
+                                                            │  InferenceEngine.processNew() / process(from:to:)
+                                                            ▼
+   StayDetector.clean → detect → mergeStays   →   visits    (layer 2, user_status = auto)
+   ModeClassifier.segment between visits      →   trips + trip_segments
+                                                            │  EditService (every user action)
+                                                            ▼
+   visits / trips with user_status ∈ {confirmed, edited, manual}, deleted = 1 for user deletions
+   audit_log: one row per edit (entity, action, field, old → new, timestamp)
+```
+
+* **Entry points.** `AppModel.runInference()` calls `processNew()` (on launch, foreground, collector stop, background
+  refresh) or `process(from:to:)` for "Rebuild from raw data". Both are in
+  `Packages/HHTCore/Sources/HHTCore/Inference/InferenceEngine.swift`.
+* **Thresholds.** All of them are fields of `InferenceConfig` (`InferenceConfig.swift`, documented in
+  [`docs/inference.md`](../inference.md)). The struct is `Codable`; `hht-calibrate config` prints it as JSON.
+* **State machine.** Stay detection is a single sequential pass with the gap, drift, core-trim and merge rules in
+  `StayDetector.swift`. The reprocessing contract (locked records, absorption, stable auto IDs) is in
+  `InferenceEngine.process`.
+* **Engine version.** There is no version field yet. A replay is pinned by git commit + config JSON (in every output).
+
+### Provenance: what the database can and cannot tell us
+
+| Question | Answer from the schema |
+|---|---|
+| Raw observations kept? | Yes. `raw_location_points` and `motion_activities` are append-only. |
+| Edits recorded as events? | Partly. `audit_log` has a timestamped row per edit, but no full before/after record snapshot. |
+| Original machine output kept? | **No.** Edited records are updated in place (`user_status` changes, values overwritten). Once a visit is edited, nothing stores what the engine first said. |
+| Manual vs inferred? | Yes. `source = manual` / `user_status = manual` for records the user added; `edited` / `confirmed` for inferred records a person changed or accepted. |
+| Deletions? | Soft delete (`deleted = 1`), kept and honoured by reprocessing. |
+| Untouched records? | `user_status = auto`: produced by some earlier engine version and never edited. |
+
+**Consequence (documented, not worked around):** the historical app output cannot be reproduced. The baseline
+prediction is a *replay* of the raw points through the engine at a pinned commit, not "what the app showed at the
+time". The snapshot used here had 104 human-touched visits (15 of them deletions), 118 human-touched trips, and 25 visits
+/ 9 trips still `auto`.
+
+## 1. Reference dataset and review protocol
+
+`python3 analysis/calibrate.py export --db <snapshot> --out calibration-data/reference` writes:
+
+* `reference.json`: every visit and trip with its label source (`user_status`, `source`), deletion flag, edit-event
+  count from `audit_log`, segment modes (`mode_user` vs `mode_auto`), plus metadata: snapshot SHA-256, schema version,
+  extraction time, the app's `last_inference_at`, point and motion time ranges, default time zone, privacy notice and
+  the provenance limits above.
+* `quality` block: invalid coordinates, duplicate timestamps, out-of-order inserts, negative durations, overlapping
+  visits, orphaned trip/segment references, open visits, sampling gaps (total and in `moving` collector mode).
+* `review.csv`, one row per day: `reviewed`, `quality`, `note`. **Only days marked reviewed are scored.** New days default
+  to unreviewed (`--reviewed-default 0`). Re-exporting keeps earlier review decisions.
+* `exclusions.csv`: local-time intervals to leave out of scoring (`kind,start_local,end_local,reason`), e.g. a stretch
+  you no longer remember or a GPS-dead day.
+
+Label handling:
+
+* *human* = `edited`, `confirmed` or `manual`; *accepted* = `auto` on a reviewed day. Recall is reported separately for
+  each. Accepted labels came from an earlier engine, so they are biased toward the engine and are never pooled silently.
+* Mode accuracy uses only trips whose mode a person set (`mode_user` on the trip or a segment, or a manual trip).
+  Accepted modes are reported separately. Reference trips with mode `unknown` are excluded and counted.
+* Manual visits store the place's coordinate, not an observed centroid, so they are left out of the location-error metric.
+
+For this first round the developer stated that every day on the phone had been reviewed, so all 17 days with diary
+entries were marked `reviewed=1` with that note. Per-day confirmation and exclusions are still open for later rounds.
+
+### Snapshot quality (aggregate)
+
+20 days of collection, 4,127 fixes, 34,578 motion samples. No invalid coordinates, negative durations, overlapping
+visits or orphan references. Two collector issues worth their own investigation, and **not** compensated for by
+thresholds:
+
+* 247 timestamps carry duplicate fixes and 698 fixes were inserted out of time order (deferred delivery). The cleaner sorts
+  by time, so inference is unaffected, but duplicates inflate point counts.
+* 103 of the 216 silences longer than 15 min began in `moving` collector mode. These are walks and rides with no GPS, and they
+  drive most of the trip-boundary errors below.
+
+## 2. Offline replay harness
+
+```bash
+make calibrate-tool                                   # builds Packages/HHTCore/.build/release/hht-calibrate
+hht-calibrate replay --db <snapshot>/travel.sqlite --out pred.json                 # batch ("Rebuild from raw data")
+hht-calibrate replay --db … --out pred.json --mode streaming --step 900            # processNew every 15 min of data
+hht-calibrate replay --db … --out pred.json --config candidate.json                # partial InferenceConfig override
+hht-calibrate reinfer-check --db <snapshot>/travel.sqlite                          # edits survive a full rebuild?
+```
+
+* **Same engine.** `Replay` (in `HHTCore/Calibration/Replay.swift`) inserts the snapshot's raw points and motion into a fresh
+  in-memory `TravelStore` and calls the production `InferenceEngine`. It never sees places, edits, deletions or the
+  audit log, so human corrections cannot leak in as inputs. Python never re-implements inference.
+* **No side effects.** The snapshot (and its WAL) is copied to a private temp file. Only the copy is opened, because
+  opening runs migrations. The calibration copy of the snapshot is also `chmod a-w`. Its SHA-256 was unchanged after every run.
+* **Determinism.** The output has no record IDs or wall-clock fields, keys are sorted, and "now" defaults to the snapshot's
+  own `last_inference_at`. Two runs on the same input are byte-identical (checked in CI by `make calibrate-smoke` and in
+  `CalibrationTests`).
+* **Streaming vs batch.** Streaming feeds the data in steps and runs `processNew` after each one, approximating the live
+  app (which runs on events, not a fixed clock). Both modes are scored. They agreed closely here (§5).
+* **Config.** `--config` takes a partial JSON object merged onto `InferenceConfig.default`. Unknown keys are rejected.
+* **Synthetic CI path.** `make calibrate-smoke` writes a synthetic two-day diary with a known reference
+  (`CalibrationTests.writeCalibrationFixture`), replays it twice, checks the outputs are identical, exports, evaluates
+  and checks floors (`analysis/check_calibration.py`). No private data is involved.
+
+## 3. Matching rules and metrics
+
+`python3 analysis/calibrate.py evaluate --reference … --pred … --days calibration|validation|all --db <snapshot>`
+
+**Evaluation window.** From the first raw fix to the replay's "now". Open reference visits end at that horizon.
+
+**Day attribution.** An event belongs to the local day it starts on. Matching runs on the whole timeline first and is
+then attributed, so midnight cannot split a match. A matched pair counts toward the reference event's day.
+
+**Visit matching (one-to-one, deterministic).** A (reference, prediction) pair is a candidate if the centroids are within
+300 m **and** either the temporal overlap is ≥ 50 % of the shorter interval, or both endpoints are within 15 min (with any
+overlap). Candidates are assigned greedily by descending temporal IoU (ties: earlier reference, then earlier prediction).
+Unmatched references are FN, unmatched predictions are FP. Row order and IDs are never used. **Trips** use the same rule
+without the distance test.
+
+**Splits and merges.** A reference trip covered (> 50 % of the shorter one) by ≥ 2 predicted trips is a split. A predicted
+trip covering ≥ 2 reference trips is a merge.
+
+**Timing.** Signed error (prediction − reference) in minutes on matched pairs: bias, median and mean absolute, p90.
+Departures are only scored when neither side is open.
+
+**Whole-day time agreement.** For each reference minute (sampled every 60 s) the reference state is *at a stay* or
+*travelling*. A minute agrees when the prediction says *travelling* too, or a stay whose centroid is within 300 m.
+Disagreements are tallied by type (`ref_stay_pred_travel` = phantom trip, `ref_travel_pred_stay` = missed trip, …).
+This is the metric most sensitive to split stays and long timing errors, which F1 hides.
+
+**Breakdowns.** Visit P/R/F1 by stay duration (< 15 min, 15–60 min, 1–4 h, > 4 h) and by label source. Trip recall by
+reference mode group. A per-day table. A failure table with day-local IDs (`10-02/V3`), local HH:MM intervals, fix
+counts and a rule-based *plausible* cause (recording gap, indoor drift, short stop, absorbed into trip, split stay, …),
+which is a pointer for diagnosis, not a verdict.
+
+**Uncertainty.** Day-level cluster bootstrap (500 resamples, seed 0) for visit F1, trip F1 and time agreement. Days are
+resampled, never points. With 12 + 5 days the intervals are wide and are labelled as small-sample.
+
+`compare --baseline A --candidate B` refuses to compare evaluations over different day sets and prints paired deltas
+plus per-day changes.
+
+## 4. Calibration round 1
+
+**Split, frozen before any tuning.** Whole days, salted SHA-256 ranking. Only complete days (collection running all day)
+can be validation days: 12 calibration days and 5 validation days (`split.json`, salt `hht-46-v1`).
+
+**Baseline first.** The engine at `cb0abde` with default config was replayed and archived (batch and streaming) before any
+change.
+
+**Diagnosis.** On calibration days the baseline disagreed with the diary for 3,439 of 16,126 minutes in one direction:
+*diary says at a place, engine says travelling*. Stepping through the worst cases in the raw points turned up four
+structural causes, none of them a recording failure:
+
+| # | Failure class | Mechanism | Change |
+|---|---|---|---|
+| 1 | Evening at home split by a phantom "home → home" trip | ≥ 5 min of *cumulative* CoreMotion walking over a 1.5–3 h location silence counted as "left and came back". Indoor pottering easily reaches 5–20 min. | `gapMovingSeconds` 5 → 20 min (see the grid below) |
+| 2 | Stay ended by one stray fix | 1–2 fixes 110–250 m out, then the collector went quiet (stationary), then the next fix was back inside. The drift rule only looked 2 min ahead. | New rule: drift before a stationary silence |
+| 3 | Departure to a building next door dated hours late (or early) | The walk happened during a silence. The departure was back-dated from the next fix, which can be hours later. The motion log shows the walk. | Departure = start of the latest motion bout that could cover the distance |
+| 4 | Arrival 30–60 min late | The last walk-in fix sat just outside the core radius, then the collector went quiet. Core trimming dropped it. | Keep that fix as the arrival when a stationary silence follows |
+
+Change 1 alone broke the "data ends inside a stay" check (walking out right now was read as stationary). That check now
+looks at the *current* movement bout instead of the cumulative total, which also fixed an existing fixture.
+
+**Grid (calibration days only, batch).** Motion during same-place silences overlapped heavily between real out-and-back
+trips and indoor movement, so no motion rule separates them cleanly. The tradeoff was measured directly:
+
+| `gapMovingSeconds` | 5 min | 10 | 15 | **20** | 25 | 30 | 40 |
+|---|---|---|---|---|---|---|---|
+| time agreement, without / with change 2 | 0.778 / 0.785 | 0.878 / 0.886 | 0.918 / 0.925 | 0.934 / 0.941 | — / 0.941 | 0.934 / 0.941 | — / 0.947 |
+
+20 min is the smallest value on the plateau, so it gives up the fewest real short loops. 40 min scored marginally higher and was rejected
+as the edge of overfitting. Changes 3 and 4 then took 20 min from 0.941 to 0.953. That candidate was frozen before
+validation.
+
+## 5. Results
+
+Batch replay. Streaming (15 min steps) gave the same conclusions, within ±1.1 pp time agreement and identical event counts
+on validation. Bootstrap 95 % intervals in brackets. Small sample: 12 and 5 days.
+
+| | Calibration (12 days) baseline | → candidate | **Validation (5 days, run once)** baseline | → candidate |
+|---|---|---|---|---|
+| Whole-day time agreement | 0.778 [0.70, 0.85] | 0.953 [0.92, 0.98] | 0.827 [0.68, 0.93] | **0.939** [0.91, 0.97] |
+| Minutes "at a place" scored as travel | 3,439 | 473 | 1,139 | 307 |
+| Minutes "travelling" scored as a stay | 124 | 273 | 108 | 134 |
+| Visits P / R / F1 | 0.79 / 0.84 / 0.81 | 0.81 / 0.83 / 0.82 | 0.92 / 0.80 / 0.85 | 0.95 / 0.80 / 0.86 |
+| Trips P / R / F1 | 0.76 / 0.81 / 0.78 | 0.82 / 0.84 / 0.83 | 0.95 / 0.80 / 0.86 | 0.95 / 0.80 / 0.86 |
+| Visit arrival bias / mean abs (min) | +51.7 / 52.4 | +2.4 / 5.5 | +4.2 / 6.0 | +2.6 / 5.5 |
+| Visit departure bias / mean abs / p90 (min) | −33.7 / 39.3 / 98 | +2.2 / 8.9 / 17 | −28.8 / 32.0 / 68 | **+0.3 / 5.6 / 19** |
+| Trip merges | 7 | 3 | 4 | 4 |
+| Mode, human-labelled: exact / group (n) | 0.34 / 0.47 (38) | 0.42 / 0.49 (41) | 0.36 / 0.56 (25) | 0.35 / 0.54 (26) |
+
+Median absolute timing errors are 0–2 min in every column. The improvement is in the tail, where split stays had put
+arrivals and departures off by hours.
+
+**Adverse tradeoffs (reported, not hidden):**
+
+* *Missed trips up.* Minutes of real travel predicted as a stay rose (124 → 273 calibration, 108 → 134 validation).
+  Short walks between buildings < 100 m apart, with no fix in between, now merge into one stay (the "multiple nearby
+  locations" scenario). Visit recall fell by one event on calibration days.
+* One validation day lost a 5-minute stop, swallowed by the now-later departure from the previous stay.
+* Accepted (never-edited) modes: one fewer trip correct in each split.
+
+**Release check on real data: edits survive re-inference.** `hht-calibrate reinfer-check` ran a full
+`process(from:to:)` over a private copy of the snapshot, edits included. All 104 human-touched visits (15 of them
+deletions) and all 118 human-touched trips came through unchanged: times, deletion flags, places, user modes, segments,
+endpoints. It created no new visits (+0 / ~0 / −0). It does **not** prove that a deleted stop never hides a real later one.
+The synthetic tests cover that case (`deleteVisitMergesTripsAndStaysDeleted`).
+
+### Post-review correction (PR #52)
+
+Code review found that the departure-bout rule (change 3) only checked that a bout *started* early enough to cover the
+distance, not that the bout itself *lasted* long enough. A two-minute indoor walk early in a long silence could therefore
+date the departure to a distant fix whose journey the motion log never showed. The bout must now last at least
+max(`minSegmentDuration`, distance ÷ plausible speed). This is a bug fix, not a tuning step, and there's a regression test
+(`shortEarlyBoutIsNotTheDepartureToAFarFix`). Re-scored on the same day sets (round-1 numbers include the round-2 mode rules):
+
+| | before fix | after fix |
+|---|---|---|
+| Round-1 calibration (12 days): time agreement / visit F1 / trip F1 | 0.953 / 0.817 / 0.829 | 0.952 / 0.823 / 0.835 |
+| Round-1 validation (5 days, re-check of a bug fix, not a new tuning run) | 0.939 / 0.864 / 0.864 | unchanged |
+| Round-2 calibration (17 days): time agreement / visit F1 / trip F1 | 0.949 / 0.834 / 0.842 | 0.948 / 0.838 / 0.845 |
+| Mode accuracy, human-labelled (both splits) | | unchanged |
+
+One fewer extra visit and one fewer extra trip on one calibration day. The tables above show the values before the fix.
+`reinfer-check` now rebuilds through the later of `last_inference_at` and the newest raw fix (it still passes). The
+reference fingerprint now covers a non-empty WAL.
+
+## 6. Remaining failure modes (validation and calibration combined)
+
+1. **Unobservable stops.** 8 manually added stops had no GPS fix at all during the stay, so the engine cannot see them.
+   This is a collector issue, not an inference one.
+2. **Walks during location silence.** "Absorbed into a predicted trip" (5 on validation days) and "stationary period
+   inside a reference walk trip" (5 on calibration days) both trace back to the 103 moving-mode silences.
+3. **Nearby buildings merged** (3 on calibration days). See the tradeoff above.
+4. **Mode classification is the weakest component.** On human-labelled trips, subway is often scored as car or walk, and
+   taxi/ride-hail as subway (8 calibration trips). Only 35–55 % are right even at group level. Calibration round 1 did not
+   touch modes. *Addressed in round 2 (§8).*
+5. **Arrival after a silent walk** is still dated by the next fix. Only the departure side reads the motion log.
+6. **Indoor drift of hundreds of metres** at large venues still creates duplicate stays 200–500 m apart.
+
+## 7. Release readiness
+
+| Criterion | Status |
+|---|---|
+| Synthetic evaluation from a fresh checkout | ✅ `make calibrate-smoke` (in CI) |
+| Private evaluation on a phone snapshot | ✅ commands above |
+| Deterministic replay and metrics | ✅ byte-identical outputs; tested |
+| Raw / machine / human kept apart, replay never mutates data | ✅ for raw and human. ⚠️ Historical machine output is unrecoverable once edited (schema gap, §0) |
+| Human edits survive re-inference | ✅ synthetic tests and the real-snapshot `reinfer-check` |
+| Tuning checked on untouched days, tradeoffs reported | ✅ §4–5 |
+| No personal location history published | ✅ aggregates only. `calibration-data/` is gitignored |
+| Regression fixtures for the failure classes found | ✅ `CalibrationTests` (each fails on the old engine), rounds 1 and 2 |
+| Round 2 (modes) checked on untouched days | ⏳ pending: no post-cutoff days yet (§8) |
+
+**Recommendation:** ship the round-1 changes. They fix a large, systematic diary error (phantom trips splitting long
+stays) and showed no data loss. Not release-blocking but open: mode classification (§6.4), moving-mode GPS silences in the
+collector (§6.2), and keeping the original machine output when a record is first edited, so future rounds can measure
+the app's real behaviour and not only a replay.
+
+## 8. Calibration round 2: travel modes (2026-10-17)
+
+Round 2 changes only `ModeClassifier` and new `InferenceConfig` fields. Visit and trip boundaries are untouched: every
+stay, trip and timing metric is identical between baseline and candidate.
+
+### Protocol v2 (forward split)
+
+The round-1 validation days had been scored once, so they cannot be a holdout again. A fresh phone snapshot
+(`20261017-221454`) was pulled first. It held **no new data**: the same 4,127 fixes and the same 17 diary days as round 1,
+because it was taken the same evening. A new salted shuffle of those days would only reuse days already seen. So
+protocol v2 is a *forward* split, frozen before any tuning (`calibrate.py split --salt hht-46-v2 --validation-after 2026-10-17`):
+
+* **Calibration:** all 17 existing reviewed days, including round 1's validation days. Using a spent holdout for
+  tuning is allowed; reusing it as a holdout is not.
+* **Validation:** only complete, reviewed days recorded **after 2026-10-17**. A later export fills `split.json` with
+  those days. The command refuses to change calibration days or an already-filled holdout.
+* **Baseline** = the round-1 engine. **Candidate** = this round's engine. Both release binaries are archived in
+  `calibration-data/tools/`, and each reproduces its archived replay byte-for-byte, so validation will score exactly
+  the frozen engines.
+
+**Status: validation is pending.** No post-cutoff days exist yet. The single validation run is due once at least 5 new
+complete days have been reviewed (commands under *Reproducing*). Until then, every number below is calibration-only
+and in-sample.
+
+### Diagnosis (calibration days)
+
+There are 67 matched trips with a human-set mode: 39 transit, 14 car/taxi, 12 active, 2 long-distance. For each
+misclassified trip the raw fixes and CoreMotion samples were stepped through (`calibration-data/results/r2-baseline/diag.jsonl`).
+The vehicle part of each trip was summarised by three numbers: the share of CoreMotion-covered time that is
+*automotive*, the share of fixes that are **good** (accuracy ≤ 20 m with a valid reported speed ≥ 3 m/s), and the
+signal-loss fraction.
+
+| Confusion (baseline) | n | What the data shows |
+|---|---|---|
+| taxi → subway | 10 | 1 Hz bursts of good fixes at 7–24 m/s (median), automotive ≥ 0.67 in 9 of 10, then the collector goes quiet for **4–6 min** at a time. Those holes push signal loss above the 40 % "tunnel" threshold. 90 of the snapshot's 146 holes > 2 min under automotive motion last 4–6 min: a collector cadence, not tunnels. |
+| car → subway | 3 | Same pattern on highway drives (automotive ≥ 0.79, ≥ 88 % good fixes). |
+| subway → car | 7 | 5 of 7 have no good fixes at all: coarse Wi-Fi/cell fixes (40–230 m, no speed), CoreMotion mostly *unknown*, *walking* or *stationary*. The trip falls through to the "car" default because the holes are shorter than 2 min, or the window is long. |
+| subway → walk | 5 | Fixes cluster at the two stations. The ride is one short jump that the 2 min minimum segment absorbs. CoreMotion reads the carriage as walking. Straight-line displacement is 1.1–2.6 km at **2.7–4.9 m/s**. The fastest real walk over 400 m was 1.55 m/s. |
+| bus → car / subway | 3 / 3 | Bus and road traffic look the same without GTFS. Bus → subway already counts at group level (transit). |
+| walk → car | 4 | GPS jumps during walks create short "vehicle" runs. Real bus and car sub-segments also show near-zero displacement, so no clean rule was found. **Not changed.** |
+
+On automotive share and good fixes, taxi/car and subway barely overlap. The exceptions are 3 subway trips on fast
+above-ground track (≈ 25 m/s, automotive 0.57–0.90, clean GPS). Those trips look like a car to any rule without map data.
+
+### Changes
+
+| # | Rule (`ModeClassifier.refine` / `segment`) | Config (default) | Fixes |
+|---|---|---|---|
+| A | **Road evidence → car**, checked *before* the signal-loss subway rule: automotive ≥ 60 % of covered time and ≥ 50 % (≥ 5) good fixes. Confidence 0.6, or 0.45 when one hole exceeds `gapThreshold` (a 25 min blackout is still ambiguous and still needs review). | `roadMinAutomotiveShare` 0.6, `roadMinGoodFixShare` 0.5, `roadMinGoodFixes` 5, `roadFixMaxAccuracy` 20 m, `roadFixMinSpeed` 3 m/s | taxi/car → subway |
+| B | **No road evidence → subway** (instead of the car default): motion covered, automotive < 50 %, good fixes < 20 %, avg < 25 m/s, < 40 km. | `undergroundMaxAutomotiveShare` 0.5, `undergroundMaxGoodFixShare` 0.2 | subway → car |
+| C | **Too fast to be a walk**: a walk run with straight-line displacement ≥ 1 km at > 2.5 m/s (9 km/h) becomes a vehicle run, and B then refines it. | `walkCheckMinDisplacement` 1 km, `walkMaxDisplacementSpeed` 2.5 m/s | subway → walk |
+
+The thresholds were read off the diagnosis table. They were not picked by search. A one-at-a-time sweep afterwards
+(each threshold one step either side: 0.5/0.7, 0.4/0.6, 3/10 fixes, 0.4/0.6, 0.1/0.3, 2.0/3.0 m/s, 0.5/1.5 km,
+15/30 m) moved group accuracy by at most 2 trips (0.791–0.821). The defaults sit on a plateau, not a peak. Ablation
+(group accuracy without the rule): A 0.672, B 0.672, C 0.746, all three 0.821.
+
+**Regression fixtures** (`CalibrationTests`, synthetic). The first three fail on the round-1 engine:
+`taxiWithCollectorHolesIsACar`, `coarseFixesWithoutAutomotiveMotionAreSubway`, `fastStraightLineWalkIsARide`.
+`ordinaryWalksAndDrivesAreUnchanged` guards a normal walk and a GPS-dense drive. The existing `missingInterval` test
+(25 silent minutes must still need review) drove the 0.45 confidence in rule A.
+
+### Results (calibration days only, 17 days, in-sample)
+
+| | Baseline (round-1 engine) | Candidate |
+|---|---|---|
+| Mode, human-labelled: exact / group (n = 67), batch | 0.388 / 0.507 | **0.537 / 0.821** |
+| … day-level bootstrap 95 % for group accuracy | [0.38, 0.65] | [0.71, 0.93] |
+| … paired Δ group, bootstrap 95 % | | +0.31 [+0.20, +0.44] |
+| … streaming replay (15 min steps): exact / group | 0.403 / 0.522 | 0.522 / 0.806 |
+| Group recall: transit / car / active / long-distance | 23/39 · 1/14 · 8/12 · 2/2 | 33/39 · 12/14 · 8/12 · 2/2 |
+| Mode, accepted (never edited): exact (n = 26) | 0.885 | 0.885 |
+| Visits F1, trips F1, time agreement, timing | 0.834, 0.842, 0.949 | identical |
+
+22 trips went from wrong to right at group level and 1 went from right to wrong. Remaining human-labelled confusions:
+subway → car 5, walk → subway 4, taxi → subway 2, light rail → walk 1, walk → bicycle 1. Exact accuracy is capped:
+taxi, bus, light rail and commuter rail are never predicted (taxi → car counts at group level only).
+
+**Adverse tradeoffs (reported, not hidden):**
+
+* *Above-ground rail now reads as car.* One subway trip on fast surface track with automotive motion and clean GPS
+  flipped subway → car. The other two such trips stayed subway only because their automotive or good-fix share fell just below the thresholds.
+* *Walks with GPS jumps now say subway, not car.* Rule B also catches the short vehicle runs created by jumps. Those 4
+  human-labelled walks (and 2 accepted ones) were wrong before and are still wrong. Subway outranks car in the main-mode
+  hierarchy, so the error is now more visible in the diary.
+* *Buses go to subway more often* (6 of 6, up from 3 of 6). That is correct at group level and wrong exactly. Only
+  GTFS can separate them.
+* *Car confidence rose to 0.6* when road evidence is present, so those trips leave the review queue. Trips with a
+  > 15 min blackout stay at 0.45 and still need review.
+
+### Collector findings (not compensated in inference)
+
+* **Periodic holes while driving.** Most > 2 min silences under automotive motion last 4–6 min, between 1 Hz bursts.
+  Distance and route geometry on those trips are straight lines across the holes.
+* **Stationary markers written mid-ride.** 65 `stationary_marker` fixes were logged while CoreMotion said automotive,
+  within 5 min of a ≥ 5 m/s fix. The collector switches to stationary mode on a moving vehicle, and the following
+  `significant_change` fix lands kilometres away. This is probably the same mechanism as the moving-mode silences in
+  §6.2 and is worth fixing at the source.
+
+## Reproducing
+
+```bash
+# 1. pull the diary off the phone into the gitignored workspace (read-only afterwards)
+xcrun devicectl device copy from --device <UDID> --domain-type appDataContainer \
+  --domain-identifier com.zyang91.hht --source "Library/Application Support" --destination calibration-data/snapshots/<stamp>
+chmod a-w calibration-data/snapshots/<stamp>/HHT/travel.sqlite*
+S=calibration-data/snapshots/<stamp>/HHT/travel.sqlite
+# 2. reference + review sheet, then mark days in review.csv, then freeze the split once
+python3 analysis/calibrate.py export --db $S --out calibration-data/reference
+python3 analysis/calibrate.py split --reference calibration-data/reference
+# 3. replay + evaluate (calibration days while tuning; validation once per protocol version)
+make calibrate-tool
+Packages/HHTCore/.build/release/hht-calibrate replay --db $S --out calibration-data/results/<name>/batch.json
+python3 analysis/calibrate.py evaluate --reference calibration-data/reference --db $S \
+  --pred calibration-data/results/<name>/batch.json --out calibration-data/results/<name> --days calibration
+python3 analysis/calibrate.py compare --baseline …/metrics-calibration.json --candidate …/metrics-calibration.json
+```
+
+**Round 2 validation (run once, when ≥ 5 complete days after 2026-10-17 have been reviewed):**
+
+```bash
+# new snapshot as in step 1, then re-export into the v2 reference (keeps review decisions) and mark the new days reviewed
+python3 analysis/calibrate.py export --db $S --out calibration-data/reference-v2
+python3 analysis/calibrate.py split --reference calibration-data/reference-v2 --salt hht-46-v2 --validation-after 2026-10-17
+for v in baseline candidate; do
+  calibration-data/tools/hht-calibrate-r2-$v replay --db $S --out calibration-data/results/r2-val-$v/batch.json
+  python3 analysis/calibrate.py evaluate --reference calibration-data/reference-v2 --db $S --days validation \
+    --pred calibration-data/results/r2-val-$v/batch.json --out calibration-data/results/r2-val-$v
+done
+python3 analysis/calibrate.py compare --baseline calibration-data/results/r2-val-baseline/metrics-validation.json \
+  --candidate calibration-data/results/r2-val-candidate/metrics-validation.json
+```

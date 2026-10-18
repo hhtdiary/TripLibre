@@ -17,6 +17,8 @@ public struct ModeClassifier: Sendable {
         var speed: Double
         var coarse: Coarse
         var isGap: Bool
+        var goodFix: Bool    // the interval ends on an accurate fix with a valid moving speed (see InferenceConfig)
+        var isFix: Bool      // the interval ends on an observed fix, not a synthetic visit anchor
         var duration: TimeInterval { end.timeIntervalSince(start) }
     }
 
@@ -41,10 +43,11 @@ public struct ModeClassifier: Sendable {
             let mid = a.timestamp.addingTimeInterval(dt / 2)
             // the collector samples every few seconds while moving, so a multi-minute hole is signal loss
             let isGap = dt > config.movingGapThreshold && d > 300
+            let good = (b.horizontalAccuracy ?? .infinity) <= config.roadFixMaxAccuracy && (b.speed ?? -1) >= config.roadFixMinSpeed
             intervals.append(Interval(start: a.timestamp, end: b.timestamp, from: a.coordinate, to: b.coordinate,
                                       distance: d, speed: v,
                                       coarse: coarse(speed: v, reported: b.speed, activity: motion.activity(at: mid), isGap: isGap),
-                                      isGap: isGap))
+                                      isGap: isGap, goodFix: b.source != "anchor" && good, isFix: b.source != "anchor"))
         }
         // "still" intervals (waiting at a stop, red light) join the neighbouring class
         resolveStill(&intervals)
@@ -81,6 +84,24 @@ public struct ModeClassifier: Sendable {
             }
             runs = merged
             changed = true
+        }
+
+        // a "walk" that covers ground faster than anyone walks is a ride whose fixes were too sparse to show it
+        // (underground, with CoreMotion reading the train's vibration as walking)
+        var relabelled = false
+        for k in runs.indices where runs[k][0].coarse == .walk {
+            let disp = Geo.distance(runs[k][0].from, runs[k].last!.to)
+            if disp >= config.walkCheckMinDisplacement && disp / max(1, runDuration(runs[k])) > config.walkMaxDisplacementSpeed {
+                for i in runs[k].indices { runs[k][i].coarse = .vehicle }
+                relabelled = true
+            }
+        }
+        if relabelled {
+            var merged: [[Interval]] = []
+            for r in runs {
+                if let last = merged.last, last[0].coarse == r[0].coarse { merged[merged.count - 1].append(contentsOf: r) } else { merged.append(r) }
+            }
+            runs = merged
         }
 
         return runs.map { run in
@@ -142,7 +163,13 @@ public struct ModeClassifier: Sendable {
         let speeds = run.filter { !$0.isGap }.map { $0.speed }
         let p90 = percentile(speeds, 0.9)
         let gapTime = run.filter { $0.isGap }.reduce(0) { $0 + $1.duration }
-        let hasMotion = motion.hasCoverage(from: run.first!.start, to: run.last!.end)
+        let activity = motion.seconds(from: run.first!.start, to: run.last!.end)
+        let covered = activity.values.reduce(0, +)
+        let hasMotion = covered > 0
+        let automotiveShare = hasMotion ? (activity[.automotive] ?? 0) / covered : 0
+        let fixes = run.filter(\.isFix).count
+        let goodFixes = run.filter(\.goodFix).count
+        let goodShare = fixes > 0 ? Double(goodFixes) / Double(fixes) : 0
 
         switch run[0].coarse {
         case .walk: return (.walk, hasMotion ? 0.85 : 0.65)
@@ -155,8 +182,20 @@ public struct ModeClassifier: Sendable {
             if dist >= config.intercityMinDistance && p90 >= config.intercityRailMinSpeed && p90 < config.airMinSpeed {
                 return (.intercityRail, 0.35)
             }
+            // sustained automotive motion with GPS that keeps seeing the vehicle move: a road vehicle, even if the
+            // collector left holes in the track. A blackout longer than a data gap could still hide a rail leg: flag it.
+            if automotiveShare >= config.roadMinAutomotiveShare && goodFixes >= config.roadMinGoodFixes
+                && goodShare >= config.roadMinGoodFixShare {
+                let longestHole = run.filter { $0.isGap }.map(\.duration).max() ?? 0
+                return (.car, longestHole > config.gapThreshold ? 0.45 : 0.6)
+            }
             // long stretches without GPS at urban speeds suggest underground rail
             if gapTime / dur > 0.4 && avg > 4 && avg < 25 && dist < 40_000 { return (.subway, 0.4) }
+            // moving at vehicle speed, yet neither CoreMotion nor the GPS sees a road vehicle: underground rail
+            if hasMotion && automotiveShare < config.undergroundMaxAutomotiveShare && goodShare < config.undergroundMaxGoodFixShare
+                && avg < 25 && dist < 40_000 {
+                return (.subway, 0.35)
+            }
             return (.car, hasMotion ? 0.5 : 0.4)
         }
     }

@@ -18,16 +18,25 @@ When a fix falls outside the radius:
 - **Departure**: otherwise the cluster ends.
 
 **Data gaps** (> `gapThreshold` [15 min] between fixes) are normal: the collector deliberately stops GPS when stationary.
-A gap is treated as *stationary* if CoreMotion shows < `gapMovingSeconds` [5 min] of walking/running/cycling/automotive
-during it, or — with no motion data — if the last fix was recorded in `stationary` collector mode.
+A gap is treated as *stationary* if CoreMotion shows < `gapMovingSeconds` [20 min] of walking/running/cycling/automotive
+during it, or — with no motion data — if the last fix was recorded in `stationary` collector mode. (20 min, not 5, was
+calibrated on real days: indoor pottering adds up to 5–20 min of "walking" over a long silence at one place; see
+[research/inference-calibration.md](research/inference-calibration.md).)
 - Stationary gap, next fix inside the radius → the stay continues through the gap.
-- Stationary gap, next fix outside → departure is back-dated from the next fix by distance ÷ a plausible speed
-  (1.4 m/s < 2 km, 10 m/s < 50 km, 25 m/s < 500 km, else 220 m/s air).
+- Next fix outside → if the motion log shows a movement bout (≥ `minSegmentDuration`, blips ≤ 3 min joined) that began
+  early enough to cover the distance at a plausible speed, the departure is the start of the latest such bout
+  (e.g. a walk to a building next door while location was silent). Otherwise, for a stationary gap, the departure is
+  back-dated from the next fix by distance ÷ a plausible speed (1.4 m/s < 2 km, 10 m/s < 50 km, 25 m/s < 500 km, else 220 m/s air).
 - Moving gap, next fix inside → the stay ends (the person left and came back; the loop becomes a trip).
+- **Drift before a silence**: a few non-moving fixes outside the radius (but within `mergeMaxExcursionDistance`), then a
+  stationary gap, then a fix back inside → drift; the stay continues.
+- **Data ends inside a stay**: it is ongoing unless the motion log says we are moving *now* and have been for
+  ≥ `minSegmentDuration` (then it ended when that movement began).
 
 A cluster becomes a visit if it lasts ≥ `minStayDuration` [5 min]. Its arrival/departure are trimmed to the first/last
 fix within the **core radius** (max(`stayCoreRadius` [35 m], 1.5 × median member distance)) after re-centring on the
-inner half, removing the walk-in / walk-out bias of radius clustering. If the data ends inside a stay that is plausibly
+inner half, removing the walk-in / walk-out bias of radius clustering. Exception: when the collector went quiet right
+after the last non-core fix (stationary gap before the first core fix), that fix is the arrival — we had already arrived. If the data ends inside a stay that is plausibly
 still ongoing, the visit gets no departure.
 
 **Merging**: consecutive stays ≤ `mergeDistance` [150 m] apart, separated by an excursion shorter than
@@ -50,12 +59,25 @@ Distance = path length (straight line across gaps). `has_gap` = any > 15 min hol
 
 **Segmentation**: run-length encode the classes; repeatedly absorb the shortest run under `minSegmentDuration` [120 s]
 into its longer neighbour. Short access walks under 2 min are therefore folded into the vehicle segment.
+A walk run whose straight-line displacement is ≥ `walkCheckMinDisplacement` [1 km] at > `walkMaxDisplacementSpeed`
+[2.5 m/s] becomes a vehicle run: sparse station fixes plus walking-like CoreMotion on a train otherwise read as a walk.
 
 **Segment refinement**: an air run shorter than `airMinDistance` [50 km] is a GPS jump and is refined as vehicle.
-Vehicle runs: airplane if avg ≥ 0.6·air speed over > 150 km; intercity rail if ≥ 60 km with
-p90 speed 38–70 m/s (conf 0.35); subway if > 40 % of time is signal loss (no fix for > `movingGapThreshold` [120 s]
-while covering > 300 m) at 4–25 m/s over < 40 km (conf 0.4); else car (conf 0.4–0.5). Bus vs car is not separable
-without GTFS; correct it once and personalisation handles repeats.
+Vehicle runs, in order (issue #46 round 2 added the road-evidence and no-evidence rules):
+1. airplane if avg ≥ 0.6·air speed over > 150 km; intercity rail if ≥ 60 km with p90 speed 38–70 m/s (conf 0.35);
+2. **road evidence → car**: CoreMotion automotive ≥ `roadMinAutomotiveShare` [60 %] of covered time and ≥
+   `roadMinGoodFixShare` [50 %] (and ≥ `roadMinGoodFixes` [5]) of fixes are "good" (accuracy ≤ `roadFixMaxAccuracy`
+   [20 m] with reported speed ≥ `roadFixMinSpeed` [3 m/s]). Conf 0.6, or 0.45 if one hole exceeds `gapThreshold`.
+   The collector leaves ~5 min holes during car rides; without this rule they looked like tunnels;
+3. subway if > 40 % of time is signal loss (no fix for > `movingGapThreshold` [120 s] while covering > 300 m) at
+   4–25 m/s over < 40 km (conf 0.4);
+4. **no road evidence → subway**: motion covered, automotive < `undergroundMaxAutomotiveShare` [50 %], good fixes
+   < `undergroundMaxGoodFixShare` [20 %], avg < 25 m/s, < 40 km (conf 0.35). Underground, CoreMotion mostly says
+   unknown or walking and fixes are coarse Wi-Fi/cell ones without speed;
+5. else car (conf 0.4–0.5).
+
+Bus vs car vs taxi is not separable without GTFS; buses mostly land in subway (same transit group). Above-ground rail at
+road speeds with automotive motion and clean GPS reads as car. Correct it once and personalisation handles repeats.
 
 **Main mode** = highest in: airplane > intercity rail > coach > ferry > commuter rail > subway > light rail > bus >
 shuttle > taxi > car (driver/passenger/unspecified) > e-bike > bicycle > scooter > run > walk, among segments ≥ 2 min or ≥ 300 m.
@@ -89,8 +111,15 @@ Rules that keep user corrections safe:
 
 Tests assert: incremental == one-shot, repeated runs change nothing, edits survive full rebuilds, deleted stops stay deleted.
 
+## 7. Calibration against a real diary
+`hht-calibrate` replays raw points through this engine offline (batch or streaming), and `analysis/calibrate.py`
+scores the result against a human-corrected diary. Protocol, matching rules, results and limitations:
+[research/inference-calibration.md](research/inference-calibration.md).
+
 ## Known limitations / next steps
 - Bus vs car vs ride-hail needs GTFS/route matching.
 - Short (< 2 min) access/egress walks are merged into the main segment.
 - The collector's region-exit wake-up can lag departure by a few minutes; CLVisit departure events and back-dating correct most of it.
 - Place centroids of inferred places are not re-estimated from later visits yet.
+- Arrival after a walk hidden in a location silence is dated by the next fix (only the departure side uses the motion log).
+- Consecutive stays at buildings < 100 m apart with no fix between them merge into one visit.
