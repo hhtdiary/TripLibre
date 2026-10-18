@@ -23,7 +23,8 @@ unless you export it yourself.</p>
 
 <h2>What is stored</h2>
 <p>One SQLite file inside the app's sandbox (<code>Library/Application Support/HHT/travel.sqlite</code>) holds raw GPS fixes,
-CoreMotion activity, inferred and corrected visits and trips, your places, flights, life phases, and the audit log.</p>
+CoreMotion activity, inferred and corrected visits and trips, your places, flights, life phases, stamps you tapped, and the audit log.
+A stamp keeps only a coarse location (rounded to about 110 m) and doesn't need a precise fix to be saved.</p>
 <ul>
   <li>Daily snapshots go to <code>Documents/Backups</code> (the last 7 are kept).</li>
   <li>Exports go to <code>Documents/Exports</code>.</li>

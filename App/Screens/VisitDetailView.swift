@@ -14,6 +14,7 @@ struct VisitDetailView: View {
     @State private var ongoing = false
     @State private var notes = ""
     @State private var history: [AuditEntry] = []
+    @State private var stamps: [Stamp] = []
     @State private var showPlacePicker = false
     @State private var showSplit = false
     @State private var confirmDelete = false
@@ -80,6 +81,27 @@ struct VisitDetailView: View {
                     }
                 }
                 Text(Fmt.duration((ongoing ? Date() : departure).timeIntervalSince(arrival))).foregroundStyle(.secondary)
+            }
+
+            if !stamps.isEmpty {
+                Section {
+                    ForEach(stamps) { s in
+                        HStack {
+                            Label("You stamped at \(Fmt.time(s.timestamp, tz: s.timeZone))", systemImage: StampStyle.symbol)
+                            Spacer()
+                            if s.coordinate != nil, let u = s.uncertainty {
+                                Text("±\(Fmt.distance(u))").font(.caption).foregroundStyle(.secondary)
+                            }
+                        }
+                        .swipeActions { Button("Remove", role: .destructive) { model.undoStamp(s) } }
+                    }
+                } header: {
+                    Text("Self-reported")
+                } footer: {
+                    Text(v.pointCount == 0
+                         ? "This stop comes from your stamp alone; there was no GPS around it."
+                         : "Your stamp confirms this stop. Its place and times still come from GPS, not from where you tapped.")
+                }
             }
 
             Section("Notes") {
@@ -149,6 +171,7 @@ struct VisitDetailView: View {
         ongoing = v.departure == nil
         notes = v.notes ?? ""
         history = (try? model.store.auditLog(entityID: v.id)) ?? []
+        stamps = (try? model.store.stamps(visitID: v.id)) ?? []
     }
 }
 

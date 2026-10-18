@@ -163,6 +163,37 @@ final class AppModel: ObservableObject {
         revision += 1
     }
 
+    // MARK: - Stamps
+
+    /// The stamp just made, for the "Stamped · Undo" confirmation.
+    @Published private(set) var lastStamp: Stamp?
+
+    /// One tap: record that something worth noting happened around here, around now (issue #32).
+    /// Saves immediately with whatever fix is at hand (only a coarse location is kept), then lets inference place it.
+    func stampNow() {
+        let now = Date()
+        var fix = collector.latestLocation.flatMap { $0.horizontalAccuracy >= 0 ? $0 : nil }
+            .map { (Coordinate($0.coordinate.latitude, $0.coordinate.longitude), $0.horizontalAccuracy, $0.timestamp) }
+        if fix == nil, let p = store.lastPoint() { fix = (p.coordinate, p.horizontalAccuracy ?? 100, p.timestamp) }
+        do {
+            lastStamp = try edit.addStamp(at: now, fix: fix?.0, fixAccuracy: fix?.1, fixTime: fix?.2)
+        } catch {
+            errorMessage = "Couldn't save the stamp: \(error)"
+            return
+        }
+        revision += 1
+        collector.noteStamp()
+        Task { await reprocess(from: now.addingTimeInterval(-engine.config.stampSearchWindow), to: now) }
+    }
+
+    func undoStamp(_ s: Stamp) {
+        if lastStamp?.id == s.id { lastStamp = nil }
+        perform { try edit.deleteStamp(s.id) }
+        Task { await reprocess(from: s.timestamp.addingTimeInterval(-engine.config.stampSearchWindow), to: Date()) }
+    }
+
+    func dismissStampConfirmation() { lastStamp = nil }
+
     /// Run an edit; report errors; refresh views.
     func perform(_ body: () throws -> Void) {
         do {

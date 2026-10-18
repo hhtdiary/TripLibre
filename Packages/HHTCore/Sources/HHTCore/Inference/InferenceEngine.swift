@@ -118,7 +118,12 @@ public final class InferenceEngine {
             let motion = MotionTimeline(try store.motion(from: from.addingTimeInterval(-3600), to: to))
             let detector = StayDetector(config: config)
             let clean = detector.clean(points)
-            let stays = detector.mergeStays(detector.detect(points, motion: motion, now: now), points: clean)
+            // stamps the user tapped add short stops the sensors alone would miss (§8)
+            let anchoring = StampAnchoring(config: config)
+            let stamps = try store.stamps(from: from.addingTimeInterval(-config.stampTimeTolerance), to: to)
+            let stays = anchoring.anchor(stamps.filter { $0.timestamp >= from },
+                                         stays: detector.mergeStays(detector.detect(points, motion: motion, now: now), points: clean),
+                                         points: clean, now: now)
                 .filter { ($0.end ?? now) > from }
 
             // existing records in the window
@@ -264,6 +269,14 @@ public final class InferenceEngine {
                     if trip.mode == .airplane { try linkFlight(for: trip, from: a, to: b) }
                 }
             }
+            // 6. attach each stamp to the visit that accounts for it (or none); stamps are otherwise never touched
+            let finalVisits = try store.visits(overlapping: from.addingTimeInterval(-config.stampTimeTolerance),
+                                               to.addingTimeInterval(config.stampTimeTolerance))
+            for s in stamps { try store.setStampVisit(s.id, anchoring.visit(for: s, in: finalVisits, now: now)?.id) }
+            try store.db.run("""
+                UPDATE stamps SET visit_id = NULL
+                WHERE visit_id IS NOT NULL AND visit_id NOT IN (SELECT id FROM visits WHERE deleted = 0)
+                """)
             progress(.finalizing, stays.count, of: stays.count)
             try store.pruneOrphanPlaces()
             try store.pruneOrphanFlights()

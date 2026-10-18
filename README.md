@@ -44,11 +44,11 @@ App/                    SwiftUI iOS app (Today · Timeline · Map · Stats · Pl
   Screens/              UI
 Packages/HHTCore/       platform-independent core (Swift package, no dependencies)
   Database/             SQLite wrapper, schema + migrations, repository
-  Inference/            stay detection, trip building, mode classification, reprocessing
+  Inference/            stay detection, self-reported stamps, trip building, mode classification, reprocessing
   Editing/              every correction (mode, place, times, split/merge/delete) + audit log
   Analytics/            HHTS metrics, radius of gyration, entropy, tours…
   Export/               CSV/JSON/GeoJSON/SQLite export; CSV/GPX/airport import
-  Tests/                58 tests incl. the brief's 14 synthetic scenarios
+  Tests/                94 tests incl. the brief's 14 synthetic scenarios
 analysis/               Python loader + example analysis (pandas)
 docs/                   project page (index.html), documentation site (docs/), markdown specs
 project.yml             XcodeGen spec (HHT.xcodeproj is generated from it)
@@ -73,6 +73,9 @@ After changing `project.yml`, regenerate with `xcodegen generate` (`brew install
 ## Daily use
 - **Today**: the reconstructed day on a map plus the chronological diary. Uncertain trips show quick mode buttons;
   tap any trip or visit to change mode/segments, place, purpose, times, split, merge/delete or add notes.
+  **Stamp this moment** records, in one tap, that you stopped somewhere around here, around now (coffee, a quick pickup,
+  a transfer): stops too short for the ~5-minute rule still make it into the diary, marked as self-reported.
+  Only a coarse location is kept ([how stamps are used](docs/inference.md#8-self-reported-stamps)).
 - **Places**: name recurring places once (Home, Penn, 30th St…) and they're recognised from then on. Merge duplicates.
 - **Timeline**: days by month, trip search/filters, flights, life phases.
 - **Map / Stats**: activity space, radius of gyration, mode share, departure times, tours, weekday/weekend, and
@@ -102,7 +105,7 @@ Or query `travel.sqlite` directly (`v_trips`, `v_visits` views) from R/DBI, Duck
 ## Development
 ```bash
 make help          # list everything
-make test          # core test suite (58 tests incl. the brief's 14 scenarios)
+make test          # core test suite (94 tests incl. the brief's 14 scenarios)
 make sim           # build + run in the simulator with demo data
 make phone         # build, sign and install on the cable-connected iPhone (renews the 7-day signature)
 make ci            # what GitHub Actions runs: tests + app build + export→Python contract check

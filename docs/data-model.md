@@ -20,6 +20,9 @@ and are append-only.
 | 2. Inferred events | `visits`, `trips`, `trip_segments` with `user_status = 'auto'` | inference engine (may be rebuilt) |
 | 3. Canonical, user-corrected | same rows with `user_status ∈ {confirmed, edited, manual}` | edits; locked against rebuilds |
 
+Self-reports (`stamps`) sit beside layer 1: user observations that inference reads but never rewrites (it only sets
+`visit_id`, the visit it attached the stamp to).
+
 ## Tables
 
 ### raw_location_points
@@ -92,6 +95,14 @@ Airplane trips create a flight row automatically (codes blank until the airport 
 ### journeys, journey_members
 Reserved for multi-leg intercity journeys (access trip → flight → egress). Schema present; UI not built yet.
 
+### stamps  (schema v3; self-reported stops, issue #32)
+One row per tap of *Stamp this moment*: "something worth recording happened around here, around now".
+`id, ts, lat, lon` (coarse: rounded to 3 decimals ≈ 110 m; NULL when there was no fix ≤ 10 min old),
+`uncertainty_m` (radius the stop is believed to lie within), `fix_accuracy_m, fix_age_s` (the fix the location came from),
+`visit_id` (set by inference: the visit that accounts for the stamp; NULL = unmatched; no foreign key because auto visits
+are replaced by deletion), `note, tz, deleted, created_at, updated_at`.
+The coordinate is never treated as the stop's true position; see [inference.md §8](inference.md#8-self-reported-stamps).
+
 ### life_phases
 `id, name, kind (semester|job|residence|vacation|research_trip|other), start_date, end_date (inclusive, NULL = ongoing), notes`.
 
@@ -99,7 +110,7 @@ Reserved for multi-leg intercity journeys (access trip → flight → egress). S
 Reference data from OurAirports (public domain), downloaded on request: `iata, icao, name, municipality, country, lat, lon, type`.
 
 ### audit_log
-`id, ts, entity_type (visit|trip|trip_segment|place|flight), entity_id, action, field, old_value, new_value`.
+`id, ts, entity_type (visit|trip|trip_segment|place|flight|stamp), entity_id, action, field, old_value, new_value`.
 Actions include `set_mode, set_purpose, set_place, set_times, merge, split, delete, confirm, create, relink, infer_departure`.
 This is also a labelled training set: every `set_mode` row is a ground-truth mode for a trip.
 
@@ -115,4 +126,6 @@ Key/value: `last_inference_at`.
 `trips.csv` is the canonical HHTS-style table: `person_day_id` (local date of departure), `trip_seq` (order within
 the person-day), OD place ids/names/categories/coordinates, UTC and local times, `travel_time_min`, `distance_m`,
 `mode`, `mode_group`, `mode_auto`, `mode_confidence`, `mode_user`, `n_segments`, `segment_modes` (`walk|subway|walk`),
-`purpose`, `has_gap`, provenance. Every other CSV joins on the same IDs. `*_ts` columns are accompanied by `*_utc` ISO strings.
+`purpose`, `has_gap`, provenance. Every other CSV joins on the same IDs. `stamps.csv` lists the non-deleted stamps
+(`stamp_id, ts, time_utc, tz, lat, lon, uncertainty_m, fix_accuracy_m, fix_age_s, visit_id, note`; `visit_id` is empty
+unless it points at an exported visit); `analysis/hht.py` loads it as `d.stamps`. `*_ts` columns are accompanied by `*_utc` ISO strings.

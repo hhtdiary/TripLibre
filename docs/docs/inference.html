@@ -106,10 +106,29 @@ so the anchor stay is detected exactly as in a full run. <code>process(from:to:)
   <li>A detected stay overlapping a locked visit is absorbed by it.</li>
   <li>Matching auto visits are updated in place, so IDs stay stable.</li>
   <li>No trip is created where a locked trip already covers the interval.</li>
+  <li>Self-reported stamps add stays before rules 2–5 apply, so a deletion or a locked trip still wins over a stamp.</li>
 </ol>
 <div class="callout note"><div class="ic">i</div>
 <p>The test suite asserts that incremental runs equal one-shot runs, repeated runs change nothing, edits survive full rebuilds,
 and deleted stops stay deleted.</p></div>
+
+<h2>6. Self-reported stamps</h2>
+<p>A stamp (<b>Stamp this moment</b>) means <i>something worth recording happened around here, around now</i>, never
+<i>this coordinate is the stop</i>. It stores the tap time and a coarse location: the latest fix rounded to 3 decimals,
+with an uncertainty radius of fix accuracy + half a rounding cell + 1.4 m/s × fix age (no location if the fix is over 10 min old).
+After stays are detected, each stamp is handled in <code>StampAnchoring</code>:</p>
+<ol>
+  <li><b>Match</b>: a stay within ± <code>stampTimeTolerance</code> [10 min] of the tap and within the stamp's radius
+    + <code>stayRadius</code> + <code>placeMatchSlack</code> already accounts for it.</li>
+  <li><b>Conflict</b>: a tap inside a stay that is too far away contradicts the sensors and stays unmatched.</li>
+  <li><b>Short stop</b>: otherwise, fixes within ± <code>stampSearchWindow</code> [10 min] are searched; a cluster grows from the fix
+    nearest the tap with no minimum dwell, and its fixes give the place, arrival and departure. With no fix nearby the coarse
+    coordinate is used. Such stops last at least <code>stampMinStayDuration</code> [60 s] and get confidence 0.8.</li>
+  <li><b>Link</b>: after each run, <code>stamps.visit_id</code> names the visit that accounts for the stamp (or NULL).
+    That is the only thing inference writes to a stamp.</li>
+</ol>
+<p>Visits built from stamps are ordinary inferred visits; the stamp rows record which visits the user vouched for.
+The calibration replay ignores stamps, as it ignores every human input.</p>
 
 <h2>Known limitations</h2>
 <ul>

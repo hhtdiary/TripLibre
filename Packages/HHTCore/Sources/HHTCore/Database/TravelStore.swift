@@ -434,6 +434,47 @@ public final class TravelStore: @unchecked Sendable {
                       createdAt: r.date("created_at") ?? Date(), updatedAt: r.date("updated_at") ?? Date())
     }
 
+    // MARK: - Stamps
+
+    public func insertStamp(_ s: Stamp) throws {
+        try db.run("""
+            INSERT INTO stamps(id, ts, lat, lon, uncertainty_m, fix_accuracy_m, fix_age_s, visit_id, note, tz, deleted,
+                created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)
+            """, s.id, s.timestamp, s.coordinate?.latitude, s.coordinate?.longitude, s.uncertainty, s.fixAccuracy,
+            s.fixAge, s.visitID, s.note, s.timeZone, s.deleted, s.createdAt, s.updatedAt)
+    }
+
+    public func stamp(_ id: String) throws -> Stamp? {
+        try db.query("SELECT * FROM stamps WHERE id = ?", id).first.map(Self.stamp)
+    }
+
+    /// Stamps tapped within [from, to], oldest first.
+    public func stamps(from: Date, to: Date, includeDeleted: Bool = false) throws -> [Stamp] {
+        try db.query("""
+            SELECT * FROM stamps WHERE ts >= ? AND ts <= ? \(includeDeleted ? "" : "AND deleted = 0") ORDER BY ts
+            """, from, to).map(Self.stamp)
+    }
+
+    /// Stamps inference attached to a visit, oldest first.
+    public func stamps(visitID: String) throws -> [Stamp] {
+        try db.query("SELECT * FROM stamps WHERE visit_id = ? AND deleted = 0 ORDER BY ts", visitID).map(Self.stamp)
+    }
+
+    /// Inference's only write to a stamp: which visit it belongs to (nil = unmatched).
+    func setStampVisit(_ stampID: String, _ visitID: String?) throws {
+        try db.run("UPDATE stamps SET visit_id = ? WHERE id = ? AND visit_id IS NOT ?", visitID, stampID, visitID)
+    }
+
+    static func stamp(_ r: Row) -> Stamp {
+        var c: Coordinate?
+        if let la = r.double("lat"), let lo = r.double("lon") { c = Coordinate(la, lo) }
+        return Stamp(id: r.string("id") ?? "", timestamp: r.date("ts") ?? Date(), coordinate: c,
+                     uncertainty: r.double("uncertainty_m"), fixAccuracy: r.double("fix_accuracy_m"),
+                     fixAge: r.double("fix_age_s"), visitID: r.string("visit_id"), note: r.string("note"),
+                     timeZone: r.string("tz"), deleted: r.bool("deleted"),
+                     createdAt: r.date("created_at") ?? Date(), updatedAt: r.date("updated_at") ?? Date())
+    }
+
     // MARK: - Life phases
 
     public func upsertLifePhase(_ p: LifePhase) throws {
@@ -463,7 +504,7 @@ public final class TravelStore: @unchecked Sendable {
 
     public func counts() -> [String: Int] {
         var out: [String: Int] = [:]
-        for t in ["raw_location_points", "motion_activities", "places", "visits", "trips", "trip_segments", "flights", "audit_log"] {
+        for t in ["raw_location_points", "motion_activities", "places", "visits", "trips", "trip_segments", "flights", "stamps", "audit_log"] {
             out[t] = (try? db.scalar("SELECT COUNT(*) FROM \(t)").description).flatMap { Int($0) } ?? 0
         }
         return out
@@ -473,7 +514,7 @@ public final class TravelStore: @unchecked Sendable {
     public func eraseAll() throws {
         try db.transaction {
             for t in ["journey_members", "trip_segments", "flights", "trips", "visits", "journeys", "places",
-                      "raw_location_points", "motion_activities", "life_phases", "audit_log", "app_meta"] {
+                      "raw_location_points", "motion_activities", "stamps", "life_phases", "audit_log", "app_meta"] {
                 try db.run("DELETE FROM \(t)")
             }
         }

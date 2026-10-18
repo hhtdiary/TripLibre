@@ -147,6 +147,15 @@ final class LocationCollector: NSObject, ObservableObject {
         }
     }
 
+    /// The newest fix the OS has, for a stamp's coarse location (may be old, inaccurate or absent).
+    var latestLocation: CLLocation? { manager.location }
+
+    /// The user just stamped a stop: if we were asleep in stationary mode, wake up so the stop and the walk away
+    /// from it get fixes. The detector puts us back to sleep after a few still minutes.
+    func noteStamp() {
+        if mode == .stationary { enterMoving(reason: "stamp") }
+    }
+
     // MARK: - Modes
 
     private func applyMoving() {

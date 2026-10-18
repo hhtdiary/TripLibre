@@ -17,6 +17,8 @@ Implemented in `App/Location/LocationCollector.swift`.
   delivering moving-mode updates in the background.
 - While collecting, live CoreMotion activity (if already authorized) feeds the stationary decision. The ~7-day history is
   also queried whenever inference runs.
+- Tapping *Stamp this moment* (docs/inference.md §8) wakes the collector from stationary into moving mode, so the short
+  stop and the walk away from it get fixes; the usual 3-minute rule puts it back to sleep if nothing moves.
 - A background refresh task (`com.zyang91.hht.refresh`, ~every 2 h when iOS allows) runs inference and the daily backup.
 
 Permissions: Location **Always** (required for background), Motion & Fitness (optional but improves modes).

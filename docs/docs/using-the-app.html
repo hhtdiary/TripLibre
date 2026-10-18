@@ -25,7 +25,8 @@ and builds your diary whenever it gets a chance. Opening it once a day to confir
 <div class="table-wrap"><table>
   <tr><th>Tab</th><th>What it shows</th></tr>
   <tr><td><b>Today</b></td><td>The reconstructed day on a map plus a chronological diary of visits and trips. Swipe between days.
-    Trips that need review show quick mode buttons. The gear icon opens <b>Settings</b>.</td></tr>
+    Trips that need review show quick mode buttons. <b>Stamp this moment</b> marks a short stop in one tap.
+    The gear icon opens <b>Settings</b>.</td></tr>
   <tr><td><b>Timeline</b></td><td>Days grouped by month, trip search and filters (mode, place, weekends only), flights, and life phases.</td></tr>
   <tr><td><b>Map</b></td><td>Your activity space over a chosen range: places, routes, flights and the convex hull of visited places.</td></tr>
   <tr><td><b>Stats</b></td><td>Mode share (by trips, distance or time), departure times, radius of gyration, tours, weekday vs weekend,
@@ -38,11 +39,26 @@ and builds your diary whenever it gets a chance. Opening it once a day to confir
   <li><b>Live your day</b>HHT records GPS while you move and goes quiet when you stop.</li>
   <li><b>Open Today</b>The diary updates on launch. You'll see something like
     <i>Home → walk → Coffee → subway → Penn</i>.</li>
+  <li><b>Stamp short stops</b>Grabbing a coffee or picking something up takes less than the ~5 minutes HHT needs to notice a stop.
+    Tap <b>Stamp this moment</b> on Today while you're there: no form, nothing to fill in.</li>
   <li><b>Review uncertain trips</b>"Did I get that right?" cards appear for trips with an unknown or low-confidence mode.
     Tap the right mode, or <b>Looks right</b>.</li>
   <li><b>Name new places once</b>The first time you stop somewhere, it's an unnamed place. Name it (e.g. "Home", "Lab") and pick a category;
     every future visit is recognised automatically.</li>
 </ol>
+
+<h2>Stamping a short stop</h2>
+<p><b>Stamp this moment</b> (Today, top) saves that <i>something worth recording happened around here, around now</i>.
+It records the time immediately and only a coarse location (rounded to about 110 m), and it works with poor GPS or none at all.
+A line confirms it with an <b>Undo</b> for a few seconds.</p>
+<ul>
+  <li>If HHT already sees a visit there, the stamp is attached to it and the visit shows a yellow stamp badge.</li>
+  <li>If not, HHT looks at the GPS fixes around the tap and adds the short stop it missed, splitting the trip in two.
+    The stop's place and times come from those fixes, not from where you tapped.</li>
+  <li>A stamp with nothing to place it yet (or one that contradicts the GPS) is listed in the diary as
+    <i>You stamped a stop</i>, clearly separate from inferred visits. Swipe it to remove it.</li>
+  <li>The visit's detail screen lists its stamps under <b>Self-reported</b>. <i>This wasn't a stop</i> still wins over a stamp.</li>
+</ul>
 
 <h2>Correcting the diary</h2>
 <p>Tap any trip or visit to open its detail screen. Every correction is written to an audit log and <b>locks</b> the record
