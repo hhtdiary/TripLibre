@@ -45,6 +45,7 @@ with stable IDs that join across every table.</p>
   <tr><td><code>trips</code></td><td>Movement between visits</td><td><code>id, origin_visit_id, destination_visit_id, departure_ts, arrival_ts, distance_m, mode_auto, mode_user, purpose, route_polyline</code></td></tr>
   <tr><td><code>trip_segments</code></td><td>Mode segment inside a trip</td><td><code>trip_id, seq, start_ts, end_ts, mode_auto, mode_user, distance_m</code></td></tr>
   <tr><td><code>flights</code></td><td>Flight</td><td><code>trip_id, date, origin_code, destination_code, airline, flight_number, distance_m</code></td></tr>
+  <tr><td><code>stamps</code></td><td>One-tap self-report (schema v3)</td><td><code>id, ts, lat, lon</code> (coarse, ≈ 110 m), <code>uncertainty_m, fix_accuracy_m, fix_age_s, visit_id</code> (set by inference; NULL = unmatched), <code>note, deleted</code></td></tr>
   <tr><td><code>life_phases</code></td><td>Named date range</td><td><code>name, kind, start_date, end_date</code></td></tr>
   <tr><td><code>audit_log</code></td><td>Correction</td><td><code>ts, entity_type, entity_id, action, field, old_value, new_value</code></td></tr>
 </table></div>
@@ -73,6 +74,7 @@ transit_station hotel friend_family medical other</code></p>
   <tr><td><code>trip_segments.csv</code></td><td>Mode segments with their own times, distances and polylines</td></tr>
   <tr><td><code>visits.csv</code>, <code>places.csv</code></td><td>Stays and places (with visit counts and first/last visit)</td></tr>
   <tr><td><code>flights.csv</code>, <code>life_phases.csv</code>, <code>audit_log.csv</code></td><td>As in the database</td></tr>
+  <tr><td><code>stamps.csv</code></td><td>Self-reported stops (coarse location only); <code>visit_id</code> is the visit inference attached each one to, empty if unmatched. Loaded as <code>d.stamps</code> in Python</td></tr>
   <tr><td><code>raw_location_points.csv</code>, <code>motion_activities.csv</code></td><td>Only if <i>Include raw GPS points</i> is on</td></tr>
   <tr><td><code>data.json</code></td><td>Everything above in one JSON document</td></tr>
   <tr><td><code>places.geojson</code>, <code>trips.geojson</code>, <code>trip_ends.geojson</code></td><td>For QGIS, kepler.gl, Mapbox…</td></tr>

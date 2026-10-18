@@ -195,6 +195,7 @@ public final class Exporter {
         }
         let (vw, va) = whereRange("arrival_ts", range)
         let (tw, ta) = whereRange("departure_ts", range)
+        let (sw, sa) = whereRange("ts", range)
         let obj: [String: Any] = [
             "format": "hht-personal-travel-diary",
             "schema_version": store.schemaVersion,
@@ -208,6 +209,7 @@ public final class Exporter {
             "journeys": try rows("SELECT * FROM journeys"),
             "journey_members": try rows("SELECT * FROM journey_members"),
             "life_phases": try rows("SELECT * FROM life_phases"),
+            "stamps": try rows("SELECT * FROM stamps \(sw)", sa),
             "audit_log": try rows("SELECT * FROM audit_log"),
         ]
         return try JSONSerialization.data(withJSONObject: obj, options: [.sortedKeys])
@@ -257,6 +259,13 @@ public final class Exporter {
                 """))
             try write("flights.csv", try queryCSV("SELECT id AS flight_id, * FROM flights ORDER BY date"))
             try write("life_phases.csv", try queryCSV("SELECT * FROM life_phases ORDER BY start_date"))
+            try write("stamps.csv", try queryCSV("""
+                SELECT s.id AS stamp_id, s.ts, s.tz, s.lat, s.lon, s.uncertainty_m, s.fix_accuracy_m, s.fix_age_s,
+                       CASE WHEN v.id IS NULL THEN NULL ELSE s.visit_id END AS visit_id, s.note
+                FROM stamps s LEFT JOIN visits v ON v.id = s.visit_id AND v.deleted = 0
+                \(pw.isEmpty ? "WHERE" : pw.replacingOccurrences(of: "ts", with: "s.ts") + " AND") s.deleted = 0
+                ORDER BY s.ts
+                """, pa))
             try write("audit_log.csv", try queryCSV("SELECT * FROM audit_log ORDER BY id"))
             if options.includeRawPoints {
                 try write("raw_location_points.csv", try queryCSV("SELECT * FROM raw_location_points \(pw) ORDER BY ts", pa))
@@ -284,6 +293,8 @@ public final class Exporter {
         places.csv           personal place database (join *_place_id)
         flights.csv          flights (optionally linked to trip_id)
         life_phases.csv      user-defined periods for comparisons
+        stamps.csv           one-tap self-reports ("a stop happened around here, around now"); coarse location only;
+                             visit_id = the visit inference attached it to, empty if unmatched
         audit_log.csv        every user correction (old → new)
         raw_location_points.csv, motion_activities.csv   raw sensor observations (if included)
         data.json            everything above with relationships, full fidelity

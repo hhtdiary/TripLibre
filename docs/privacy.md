@@ -2,8 +2,9 @@
 
 ## What is stored
 Everything lives in one SQLite file inside the app's sandbox (`Library/Application Support/HHT/travel.sqlite`):
-raw GPS fixes, CoreMotion activity episodes, inferred and corrected visits/trips, your places, flights, life phases and
-an audit log of every edit. Daily snapshots go to `Documents/Backups` (last 7) and exports to `Documents/Exports`;
+raw GPS fixes, CoreMotion activity episodes, inferred and corrected visits/trips, your places, flights, life phases,
+stamps you tapped and an audit log of every edit. A stamp keeps only a coarse location (rounded to ≈ 110 m) and works
+without a precise fix, or any fix, at all. Daily snapshots go to `Documents/Backups` (last 7) and exports to `Documents/Exports`;
 both are visible in the Files app under *On My iPhone › HHT*.
 
 ## What leaves the device

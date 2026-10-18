@@ -65,6 +65,16 @@ public struct InferenceConfig: Sendable, Codable, Equatable {
     /// speed (m/s) is not a walk: a person cannot cover 1 km at 9 km/h as the crow flies on foot.
     public var walkMaxDisplacementSpeed: Double = 2.5
     public var walkCheckMinDisplacement: Double = 1_000
+    /// Self-reported stamps (issue #32, docs/inference.md §8). A stamp belongs to a stay that runs to within this
+    /// long of the tap…
+    public var stampTimeTolerance: TimeInterval = 10 * 60
+    /// …and lies within the stamp's uncertainty plus `stayRadius` + `placeMatchSlack` of it.
+    /// Without such a stay, fixes up to this long either side of the tap are searched for the short stop it marks.
+    public var stampSearchWindow: TimeInterval = 10 * 60
+    /// A stop built from a stamp is at least this long (it may be a single fix, or none).
+    public var stampMinStayDuration: TimeInterval = 60
+    /// Confidence given to a stop that exists only because the user stamped it.
+    public var stampStayConfidence: Double = 0.8
 
     public init() {}
     public static let `default` = InferenceConfig()

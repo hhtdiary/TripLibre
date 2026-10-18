@@ -237,6 +237,27 @@ enum Schema {
         """
         ALTER TABLE places ADD COLUMN deleted INTEGER NOT NULL DEFAULT 0;
         """,
+        // v3 — self-reported stamps ("something worth recording happened around here, around now"; issue #32).
+        // A user observation like the raw tables: inference only ever writes visit_id (the visit it attached the
+        // stamp to). visit_id has no foreign key because inference replaces auto visits by deleting them.
+        """
+        CREATE TABLE stamps (
+            id              TEXT PRIMARY KEY,
+            ts              REAL NOT NULL,
+            lat             REAL,
+            lon             REAL,
+            uncertainty_m   REAL,
+            fix_accuracy_m  REAL,
+            fix_age_s       REAL,
+            visit_id        TEXT,
+            note            TEXT,
+            tz              TEXT,
+            deleted         INTEGER NOT NULL DEFAULT 0,
+            created_at      REAL NOT NULL,
+            updated_at      REAL NOT NULL
+        );
+        CREATE INDEX idx_stamps_ts ON stamps(ts);
+        """,
     ]
 
     static func migrate(_ db: SQLiteConnection) throws {

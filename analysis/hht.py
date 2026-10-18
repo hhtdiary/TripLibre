@@ -6,7 +6,7 @@ Load an HHT export (or the raw SQLite database) into pandas for research.
     d.trips.head()
 
 Tables (see docs/data-model.md): trips, segments, visits, places, flights, life_phases,
-points (raw GPS, if exported), motion. Times are tz-aware; *_local columns use each record's tz.
+points (raw GPS, if exported), motion, stamps (one-tap self-reports). Times are tz-aware; *_local columns use each record's tz.
 """
 from __future__ import annotations
 
@@ -29,6 +29,7 @@ class HHT:
     life_phases: pd.DataFrame
     points: pd.DataFrame | None = None
     motion: pd.DataFrame | None = None
+    stamps: pd.DataFrame | None = None   # self-reported stops; visit_id = the visit inference attached it to
 
     # ---- convenience -------------------------------------------------------
     def phase(self, name: str) -> "HHT":
@@ -44,7 +45,7 @@ class HHT:
         t = self.trips[(day >= start.tz_localize(None)) & (day < end.tz_localize(None))]
         v = self.visits[self.visits["visit_id"].isin(set(t["origin_visit_id"]) | set(t["destination_visit_id"]))]
         s = self.segments[self.segments["trip_id"].isin(t["trip_id"])]
-        return HHT(t, s, v, self.places, self.flights, self.life_phases, self.points, self.motion)
+        return HHT(t, s, v, self.places, self.flights, self.life_phases, self.points, self.motion, self.stamps)
 
 
 def _utc(s: pd.Series) -> pd.Series:
@@ -75,8 +76,11 @@ def _load_csv(folder: Path) -> HHT:
     pts = read("raw_location_points.csv")
     if len(pts):
         pts["time_utc"] = _utc(pts["time_utc"])
+    stamps = read("stamps.csv")
+    if len(stamps):
+        stamps["time_utc"] = _utc(stamps["time_utc"])
     return HHT(trips, seg, visits, read("places.csv"), read("flights.csv"), read("life_phases.csv"),
-               pts if len(pts) else None, read("motion_activities.csv"))
+               pts if len(pts) else None, read("motion_activities.csv"), stamps)
 
 
 def _load_sqlite(db: Path) -> HHT:
@@ -116,8 +120,15 @@ def _load_sqlite(db: Path) -> HHT:
                + (" AND deleted = 0" if "deleted" in place_cols else ""))  # schema v1 has no places.deleted
     pts = q("SELECT * FROM raw_location_points ORDER BY ts")
     pts["time_utc"] = pd.to_datetime(pts["ts"], unit="s", utc=True)
+    stamps = pd.DataFrame()
+    if con.execute("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'stamps'").fetchone():  # schema v3+
+        stamps = q("""SELECT s.id AS stamp_id, s.ts, s.tz, s.lat, s.lon, s.uncertainty_m, s.fix_accuracy_m, s.fix_age_s,
+                             CASE WHEN v.id IS NULL THEN NULL ELSE s.visit_id END AS visit_id, s.note
+                      FROM stamps s LEFT JOIN visits v ON v.id = s.visit_id AND v.deleted = 0
+                      WHERE s.deleted = 0 ORDER BY s.ts""")
+        stamps["time_utc"] = pd.to_datetime(stamps["ts"], unit="s", utc=True)
     out = HHT(trips, seg, visits, places, q("SELECT * FROM flights"), q("SELECT * FROM life_phases"),
-              pts, q("SELECT * FROM motion_activities"))
+              pts, q("SELECT * FROM motion_activities"), stamps)
     con.close()
     return out
 

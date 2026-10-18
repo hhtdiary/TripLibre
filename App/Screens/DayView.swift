@@ -6,17 +6,21 @@ import HHTCore
 enum DiaryItem: Identifiable {
     case visit(Visit, Place?)
     case trip(Trip)
+    /// A self-reported stamp no visit accounts for (yet).
+    case stamp(Stamp)
 
     var id: String {
         switch self {
         case .visit(let v, _): return "v-" + v.id
         case .trip(let t): return "t-" + t.id
+        case .stamp(let s): return "s-" + s.id
         }
     }
     var start: Date {
         switch self {
         case .visit(let v, _): return v.arrival
         case .trip(let t): return t.departure
+        case .stamp(let s): return s.timestamp
         }
     }
 }
@@ -27,6 +31,9 @@ struct DayData {
     var visits: [Visit] = []
     var trips: [Trip] = []
     var places: [String: Place] = [:]
+    /// Stamps attached to each visit, and the ones no visit on screen accounts for.
+    var stampsByVisit: [String: [Stamp]] = [:]
+    var unmatchedStamps: [Stamp] = []
 
     static func load(_ store: TravelStore, day: Date) -> DayData {
         let r = DateRange.day(day)
@@ -35,7 +42,12 @@ struct DayData {
         d.trips = (try? store.trips(overlapping: r.start, r.end)) ?? []
         let ids = Set(d.visits.compactMap(\.placeID) + d.trips.flatMap { [$0.originPlaceID, $0.destinationPlaceID].compactMap { $0 } })
         for id in ids { if let p = try? store.place(id) { d.places[id] = p } }
-        d.items = (d.visits.map { DiaryItem.visit($0, $0.placeID.flatMap { d.places[$0] }) } + d.trips.map { DiaryItem.trip($0) })
+        let visitIDs = Set(d.visits.map(\.id))
+        for s in (try? store.stamps(from: r.start, to: r.end)) ?? [] {
+            if let id = s.visitID, visitIDs.contains(id) { d.stampsByVisit[id, default: []].append(s) } else { d.unmatchedStamps.append(s) }
+        }
+        d.items = (d.visits.map { DiaryItem.visit($0, $0.placeID.flatMap { d.places[$0] }) } + d.trips.map { DiaryItem.trip($0) }
+                   + d.unmatchedStamps.map { DiaryItem.stamp($0) })
             .sorted { $0.start < $1.start }
         return d
     }
@@ -70,6 +82,7 @@ struct DayView: View {
             }
             Section {
                 MascotSays(text: mascotLine).toonRow(top: 8, bottom: 8)
+                if isToday && !fixedDay { StampButton().toonRow(top: 4, bottom: 6) }
                 if !fixedDay && reviewCount > 0 {
                     reviewBanner
                         .background(NavigationLink { ReviewView() } label: { EmptyView() }.opacity(0))
@@ -89,7 +102,7 @@ struct DayView: View {
                     ForEach(data.items) { item in
                         switch item {
                         case .visit(let v, let p):
-                            VisitRow(visit: v, place: p, day: day).contentShape(Rectangle())
+                            VisitRow(visit: v, place: p, day: day, stamps: data.stampsByVisit[v.id] ?? []).contentShape(Rectangle())
                                 .onTapGesture { selectedVisit = IDBox(id: v.id) }
                                 .toonRow(top: 5, bottom: 5)
                         case .trip(let t):
@@ -99,6 +112,11 @@ struct DayView: View {
                             .contentShape(Rectangle())
                             .onTapGesture { selectedTrip = IDBox(id: t.id) }
                             .toonRow(top: 3, bottom: 3)
+                        case .stamp(let s):
+                            StampRow(stamp: s)
+                                .swipeActions { Button("Remove", role: .destructive) { model.undoStamp(s) } }
+                                .contextMenu { Button("Remove stamp", systemImage: "trash", role: .destructive) { model.undoStamp(s) } }
+                                .toonRow(top: 5, bottom: 5)
                         }
                     }
                     if let tail = pendingTail { PendingActivityRow(tail: tail).toonRow(top: 5, bottom: 5) }
@@ -208,7 +226,7 @@ struct DayView: View {
                 if model.collector.mode == .off {
                     Text("Location collection is off. Turn it on in Settings.").font(.toon(13, .bold)).foregroundStyle(Toon.muted)
                 } else if isToday {
-                    Text("Visits appear after you've stayed somewhere ~5 minutes; trips once you arrive. Pull to refresh.")
+                    Text("Visits appear after you've stayed somewhere ~5 minutes; trips once you arrive. Stopping for less? Tap Stamp. Pull to refresh.")
                         .font(.toon(13, .bold)).foregroundStyle(Toon.muted)
                 }
             }
@@ -240,6 +258,7 @@ struct VisitRow: View {
     let visit: Visit
     let place: Place?
     let day: Date
+    var stamps: [Stamp] = []
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
@@ -252,6 +271,14 @@ struct VisitRow: View {
                         .lineLimit(2)
                     if visit.userStatus.isLocked { Image(systemName: "checkmark.seal.fill").font(.caption).foregroundStyle(Toon.okGreen) }
                     if visit.departure == nil { ToonBadge(text: "here now", color: Toon.accent) }
+                    if !stamps.isEmpty {
+                        // self-reported, as opposed to purely inferred
+                        Label("stamped", systemImage: StampStyle.symbol).labelStyle(.iconOnly)
+                            .font(.caption.weight(.bold)).foregroundStyle(Toon.ink)
+                            .padding(4).background(Circle().fill(StampStyle.color))
+                            .overlay(Circle().strokeBorder(Toon.ink, lineWidth: 1.5))
+                            .accessibilityLabel("You stamped this stop")
+                    }
                 }
                 HStack(spacing: 6) {
                     Text(timeSpan).monospacedDigit()
@@ -360,6 +387,80 @@ struct Line: Shape {
     }
 }
 
+// MARK: - Stamps
+
+enum StampStyle {
+    static let symbol = "hand.tap.fill"
+    static let color = Toon.sun
+}
+
+/// "Stamp this moment": one tap, no form. Confirms with the time and an Undo for a few seconds.
+struct StampButton: View {
+    @EnvironmentObject var model: AppModel
+    @State private var stamped = 0
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            Button {
+                model.stampNow()
+                stamped += 1
+            } label: {
+                Label("Stamp this moment", systemImage: StampStyle.symbol)
+                    .frame(maxWidth: .infinity)
+            }
+            .buttonStyle(ToonButtonStyle(fill: StampStyle.color, height: 46, fontSize: 16, shadow: 3))
+            .accessibilityHint("Records that you stopped somewhere around here, around now")
+            .sensoryFeedback(.success, trigger: stamped)
+
+            if let s = model.lastStamp {
+                HStack(spacing: 8) {
+                    Text("Stamped at \(Fmt.time(s.timestamp)). I'll fit it into your day.")
+                        .font(.toon(12, .bold)).foregroundStyle(Toon.muted)
+                    Spacer(minLength: 0)
+                    Button("Undo") { model.undoStamp(s) }
+                        .buttonStyle(.borderless)   // in a List row, only this button reacts to its tap
+                        .font(.toon(12, .heavy)).foregroundStyle(Toon.accentDeep)
+                }
+                .task(id: s.id) {
+                    try? await Task.sleep(for: .seconds(6))
+                    if model.lastStamp?.id == s.id { model.dismissStampConfirmation() }
+                }
+            }
+        }
+    }
+}
+
+/// A stamp no visit accounts for: kept as the user's own record, clearly not an inferred stop.
+struct StampRow: View {
+    let stamp: Stamp
+
+    var body: some View {
+        HStack(alignment: .center, spacing: 12) {
+            ToonChip(symbol: StampStyle.symbol, color: StampStyle.color, size: 44)
+            VStack(alignment: .leading, spacing: 2) {
+                HStack(spacing: 6) {
+                    Text("You stamped a stop").font(.toon(16, .bold)).foregroundStyle(Toon.ink)
+                    ToonBadge(text: "self-reported", color: Toon.cream)
+                }
+                Text(detail).font(.toon(12, .bold)).monospacedDigit().foregroundStyle(Toon.muted)
+                Text("Not matched to a visit yet. It will be once there's location data around it.")
+                    .font(.toon(12, .semibold)).foregroundStyle(Toon.muted).fixedSize(horizontal: false, vertical: true)
+                if let n = stamp.note { Text(n).font(.toon(12, .semibold)).foregroundStyle(Toon.muted).lineLimit(2) }
+            }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 14).padding(.vertical, 10)
+            .toonCard(Toon.cream, radius: 18, shadow: 0, dashed: true)
+        }
+        .accessibilityElement(children: .combine)
+    }
+
+    private var detail: String {
+        let t = Fmt.time(stamp.timestamp, tz: stamp.timeZone)
+        guard stamp.coordinate != nil, let u = stamp.uncertainty else { return "\(t) · no location" }
+        return "\(t) · within ~\(Fmt.distance(u))"
+    }
+}
+
 // MARK: - Map
 
 struct DayMap: View {
@@ -384,6 +485,11 @@ struct DayMap: View {
                         .stroke(Toon.ink, style: StrokeStyle(lineWidth: 8, lineCap: .round, lineJoin: .round))
                     MapPolyline(coordinates: t.route.map(\.cl))
                         .stroke(t.mode.color, style: ToonMap.style(for: t.mode))
+                }
+            }
+            ForEach(data.unmatchedStamps.filter { $0.coordinate != nil }) { s in
+                Annotation("", coordinate: s.coordinate!.cl, anchor: .center) {
+                    ToonPin(symbol: StampStyle.symbol, color: StampStyle.color, size: 22)
                 }
             }
             ForEach(data.visits) { v in

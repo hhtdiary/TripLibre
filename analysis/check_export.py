@@ -34,6 +34,11 @@ def main(path: str) -> None:
     visit_ids = set(csv.visits["visit_id"])
     ends = set(csv.trips["origin_visit_id"].dropna()) | set(csv.trips["destination_visit_id"].dropna())
     assert ends <= visit_ids, "trip endpoints reference unknown visits"
+    # self-reported stamps: same rows in both, and an attached stamp points at an exported visit
+    assert len(csv.stamps) == len(db.stamps), f"CSV has {len(csv.stamps)} stamps, SQLite {len(db.stamps)}"
+    if len(csv.stamps):
+        assert set(csv.stamps["stamp_id"]) == set(db.stamps["stamp_id"]), "stamp ids differ between CSV and SQLite"
+        assert set(csv.stamps["visit_id"].dropna()) <= visit_ids, "stamps reference unknown visits"
 
     s = summary(db)
     assert s["trips"] == len(db.trips)

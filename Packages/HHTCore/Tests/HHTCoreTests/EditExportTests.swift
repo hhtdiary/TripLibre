@@ -271,12 +271,17 @@ struct EditExportTests {
     /// loader in analysis/ can be tested against the app's actual output format.
     @Test func writeExportForPythonCheck() throws {
         guard let dir = ProcessInfo.processInfo.environment["HHT_EXPORT_DIR"] else { return }
-        let (store, _) = try processed(chainDay())
+        let tr = chainDay()
+        let (store, engine) = try processed(tr)
         let edit = EditService(store: store)
         let v = try store.allVisits()
         try edit.createPlace(forVisit: v[0].id, name: "Home", category: .home)
         try edit.createPlace(forVisit: v[1].id, name: "Penn", category: .workSchool)
         try edit.setTripMode(try store.allTrips()[0].id, .bicycle)
+        // one stamp at Penn (attached by the next run) so the contract check covers stamps.csv
+        let tap = v[1].arrival.addingTimeInterval(600)
+        try edit.addStamp(at: tap, fix: v[1].coordinate, fixAccuracy: 30, fixTime: tap)
+        try engine.process(from: tr.points[0].timestamp, to: tr.t, now: tr.t.addingTimeInterval(60))
         let folder = try Exporter(store: store).exportBundle(to: URL(fileURLWithPath: dir))
         print("HHT export written to \(folder.path)")
     }

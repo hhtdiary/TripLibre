@@ -248,6 +248,73 @@ public struct Flight: Identifiable, Equatable, Sendable {
     public var routeLabel: String { "\(originCode ?? "???") → \(destinationCode ?? "???")" }
 }
 
+/// A one-tap self-report: "something worth recording happened around here, around now" (issue #32).
+///
+/// The location is deliberately coarse and never treated as the stop's true position: inference uses it only to
+/// find the visit the stamp belongs to, or the surrounding GPS fixes that place a short stop it would otherwise miss.
+public struct Stamp: Identifiable, Equatable, Sendable {
+    public var id: String
+    public var timestamp: Date
+    /// Rounded to `Stamp.coordinateDecimals` decimals; nil when there was no usable fix at tap time.
+    public var coordinate: Coordinate?
+    /// Radius (m) around `coordinate` the stop is believed to lie within (fix accuracy, rounding and fix age).
+    public var uncertainty: Double?
+    /// Accuracy and age of the fix the coordinate came from, for the record.
+    public var fixAccuracy: Double?
+    public var fixAge: TimeInterval?
+    /// The visit inference attached the stamp to; nil = not (yet) matched to any visit.
+    public var visitID: String?
+    public var note: String?
+    public var timeZone: String?
+    public var deleted: Bool
+    public var createdAt: Date
+    public var updatedAt: Date
+
+    public init(id: String = newID(), timestamp: Date, coordinate: Coordinate?, uncertainty: Double?,
+                fixAccuracy: Double? = nil, fixAge: TimeInterval? = nil, visitID: String? = nil, note: String? = nil,
+                timeZone: String? = TimeZone.current.identifier, deleted: Bool = false,
+                createdAt: Date = Date(), updatedAt: Date = Date()) {
+        self.id = id; self.timestamp = timestamp; self.coordinate = coordinate; self.uncertainty = uncertainty
+        self.fixAccuracy = fixAccuracy; self.fixAge = fixAge; self.visitID = visitID; self.note = note
+        self.timeZone = timeZone; self.deleted = deleted; self.createdAt = createdAt; self.updatedAt = updatedAt
+    }
+
+    /// 3 decimals ≈ 110 m north–south: a block, not a doorway.
+    public static let coordinateDecimals = 3
+    /// Fixes older than this are not used for a stamp's location (the stamp is still saved, without one).
+    public static let maxFixAge: TimeInterval = 10 * 60
+    /// Assumed walking speed (m/s) for how far the user may have moved since the fix.
+    static let driftSpeed = 1.4
+
+    /// A stamp at `time` with only a coarse location derived from the latest fix, if it is recent enough.
+    /// Works with poor or reduced-accuracy fixes (the uncertainty just grows) and with none at all.
+    public static func make(at time: Date = Date(), fix: Coordinate?, fixAccuracy: Double?, fixTime: Date?,
+                            timeZone: String? = TimeZone.current.identifier) -> Stamp {
+        let age = fixTime.map { max(0, time.timeIntervalSince($0)) }
+        guard let c = fix, let age, age <= maxFixAge, (fixAccuracy ?? 0) >= 0 else {
+            return Stamp(timestamp: time, coordinate: nil, uncertainty: nil, fixAccuracy: fixAccuracy, fixAge: age,
+                         timeZone: timeZone)
+        }
+        let coarse = coarsen(c)
+        // the true position is within the fix accuracy of the fix, which is within a rounding cell of `coarse`
+        let uncertainty = (fixAccuracy ?? 0) + roundingRadius(at: c.latitude) + driftSpeed * age
+        return Stamp(timestamp: time, coordinate: coarse, uncertainty: uncertainty.rounded(), fixAccuracy: fixAccuracy,
+                     fixAge: age.rounded(), timeZone: timeZone)
+    }
+
+    public static func coarsen(_ c: Coordinate) -> Coordinate {
+        let f = pow(10, Double(coordinateDecimals))
+        return Coordinate((c.latitude * f).rounded() / f, (c.longitude * f).rounded() / f)
+    }
+
+    /// Half the diagonal of a rounding cell: the farthest a true position can be from its rounded coordinate.
+    static func roundingRadius(at latitude: Double) -> Double {
+        let half = 0.5 / pow(10, Double(coordinateDecimals))
+        let dy = half * 111_320, dx = half * 111_320 * cos(latitude * .pi / 180)
+        return (dx * dx + dy * dy).squareRoot()
+    }
+}
+
 /// A named period of life (semester, job, city of residence) used to compare behavior.
 public struct LifePhase: Identifiable, Equatable, Sendable {
     public var id: String

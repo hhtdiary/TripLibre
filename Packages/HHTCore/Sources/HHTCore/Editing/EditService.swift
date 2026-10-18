@@ -626,4 +626,32 @@ public final class EditService {
         try store.audit("visit", v.id, "create")
         return v
     }
+
+    // MARK: - Stamps
+
+    /// One tap, no form: save that something worth recording happened around now. The next inference run attaches it
+    /// to a nearby visit or uses it as evidence for a short stop (docs/inference.md §8).
+    @discardableResult
+    public func addStamp(at time: Date = Date(), fix: Coordinate?, fixAccuracy: Double?, fixTime: Date?) throws -> Stamp {
+        let s = Stamp.make(at: time, fix: fix, fixAccuracy: fixAccuracy, fixTime: fixTime)
+        try store.insertStamp(s)
+        try store.audit("stamp", s.id, "create", field: "ts", new: iso(s.timestamp))
+        return s
+    }
+
+    /// Withdraw a stamp (soft delete); the stop it alone produced disappears on the next run over that time.
+    public func deleteStamp(_ stampID: String) throws {
+        guard try store.stamp(stampID) != nil else { throw EditError.notFound("stamp \(stampID)") }
+        try db.run("UPDATE stamps SET deleted = 1, updated_at = ? WHERE id = ?", Date(), stampID)
+        try store.audit("stamp", stampID, "delete")
+    }
+
+    public func setNotes(stampID: String, _ notes: String?) throws {
+        guard let s = try store.stamp(stampID) else { throw EditError.notFound("stamp \(stampID)") }
+        let n = notes?.trimmingCharacters(in: .whitespacesAndNewlines)
+        let new = (n?.isEmpty ?? true) ? nil : n
+        guard new != s.note else { return }
+        try db.run("UPDATE stamps SET note = ?, updated_at = ? WHERE id = ?", new, Date(), stampID)
+        try store.audit("stamp", stampID, "set_notes", field: "note", old: s.note, new: new)
+    }
 }

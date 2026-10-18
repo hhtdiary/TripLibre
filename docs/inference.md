@@ -108,6 +108,7 @@ Rules that keep user corrections safe:
 3. A detected stay overlapping a locked visit is absorbed by it.
 4. Auto visits matched by a detection are updated **in place** (stable IDs); unmatched ones are deleted with their auto trips.
 5. Auto trips in the window are rebuilt; no trip is created where a locked trip already covers the interval.
+6. Self-reported stamps (§8) add stays before rules 2–5 apply, so a user deletion or a locked trip still wins over a stamp.
 
 Tests assert: incremental == one-shot, repeated runs change nothing, edits survive full rebuilds, deleted stops stay deleted.
 
@@ -116,6 +117,35 @@ Tests assert: incremental == one-shot, repeated runs change nothing, edits survi
 scores the result against a human-corrected diary. Protocol, matching rules, results and limitations:
 [research/inference-calibration.md](research/inference-calibration.md).
 
+## 8. Self-reported stamps
+*Stamp this moment* on Today saves a **stamp**: "something worth recording happened around here, around now".
+It is user evidence, not ground truth for the stop's position, and it complements passive detection instead of
+overriding it. Code: `Inference/StampAnchoring.swift`; thresholds in `InferenceConfig` (`stamp*`).
+
+**What a stamp stores.** The tap time, and only a coarse location: the latest fix rounded to 3 decimals (≈ 110 m)
+with an uncertainty radius = fix accuracy + half a rounding cell (≈ 70 m) + 1.4 m/s × fix age. A fix older than
+10 min is not used; the stamp is then saved with its time only. Poor GPS just makes the radius larger.
+
+**How inference uses it** (after stays are detected and merged, before they are resolved to visits):
+1. *Match.* A stay accounts for a stamp if the tap is within the stay ± `stampTimeTolerance` [10 min] and, when the stamp
+   has a location, the stay centroid is within its uncertainty + `stayRadius` + `placeMatchSlack`. Nothing changes.
+2. *Conflict.* A tap inside a stay that is too far away contradicts the sensors; the stamp stays unmatched.
+3. *Short stop.* Otherwise the cleaned fixes within ± `stampSearchWindow` [10 min] (and between the neighbouring stays) are
+   searched. From the fix nearest the tap (inside the stamp's radius), a cluster grows both ways while fixes stay within
+   `stayRadius` of it, with no minimum dwell: the stamp is the evidence of the stop. The centroid, arrival and departure
+   come from those fixes (stretched to include the tap). With no fix nearby, the stamp's coarse coordinate is used.
+   The stop lasts at least `stampMinStayDuration` [60 s], never overlaps its neighbours, is open (`departure` NULL) if it
+   runs to the newest fix and that fix is recent, and gets confidence `stampStayConfidence` [0.8].
+4. The new stay then goes through §6 like any other: it becomes an ordinary auto visit (`source = inferred`), splits
+   the trip it interrupted, and keeps a stable ID across runs.
+5. *Link.* At the end of each run every stamp in the window gets `stamps.visit_id` = the visit that matches it (nearest in
+   time, then space), or NULL. That link is the only thing inference ever writes to a stamp.
+
+The distinction between inferred and self-reported is kept in the data: visits stay inferred, and the stamp rows say
+which of them the user vouched for. Deleting the visit ("This wasn't a stop") wins on every later run; withdrawing the
+stamp removes a stop that only it supported. Stamps are human input, so the calibration replay (§7) ignores them,
+like every other correction.
+
 ## Known limitations / next steps
 - Bus vs car vs ride-hail needs GTFS/route matching.
 - Short (< 2 min) access/egress walks are merged into the main segment.
@@ -123,3 +153,5 @@ scores the result against a human-corrected diary. Protocol, matching rules, res
 - Place centroids of inferred places are not re-estimated from later visits yet.
 - Arrival after a walk hidden in a location silence is dated by the next fix (only the departure side uses the motion log).
 - Consecutive stays at buildings < 100 m apart with no fix between them merge into one visit.
+- A stamp tapped while the phone already sat in one long stay is absorbed by it; two stops a block apart need GPS between them.
+- Stamps carry no activity type yet (a note can be stored, but there is no UI for it).
