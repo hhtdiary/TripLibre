@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Privacy · HHT Docs</title>
+<meta name="description" content="What HHT stores, what (almost nothing) leaves your phone, and how to share travel data safely.">
+<link rel="icon" href="assets/hht-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=6">
+<script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<script src="assets/docs.js" defer></script>
+</head>
+<body>
+<main class="dx-main"><article class="dx-content">
+
+<p class="eyebrow">Concepts</p>
+<h1>Privacy</h1>
+<p class="lede">HHT has no account, no server, no analytics SDK and no sync. Your travel history stays on your iPhone
+unless you export it yourself.</p>
+
+<h2>What is stored</h2>
+<p>One SQLite file inside the app's sandbox (<code>Library/Application Support/HHT/travel.sqlite</code>) holds raw GPS fixes,
+CoreMotion activity, inferred and corrected visits and trips, your places, flights, life phases, stamps you tapped, and the audit log.
+A stamp keeps only a coarse location (rounded to about 110 m) and doesn't need a precise fix to be saved.</p>
+<ul>
+  <li>Daily snapshots go to <code>Documents/Backups</code> (the last 7 are kept).</li>
+  <li>Exports go to <code>Documents/Exports</code>.</li>
+  <li>Both are visible in the Files app under <i>On My iPhone › HHT</i>.</li>
+</ul>
+
+<h2>What leaves the device</h2>
+<div class="table-wrap"><table>
+  <tr><th>What</th><th>When</th><th>To</th></tr>
+  <tr><td><b>Nothing, by default</b></td><td>—</td><td>—</td></tr>
+  <tr><td>One place coordinate at a time</td><td>Only if Settings › <i>Look up addresses</i> is on (off by default)</td><td>Apple CLGeocoder</td></tr>
+  <tr><td>Map tile requests for the visible area</td><td>Whenever a map is on screen</td><td>Apple Maps</td></tr>
+  <tr><td>Nothing about you (downloads a public CSV)</td><td>Only when you tap <i>Download airport list</i></td><td>ourairports.com</td></tr>
+  <tr><td>Whatever you choose to share</td><td>Export › Share</td><td>The destination you pick</td></tr>
+</table></div>
+
+<div class="callout warn"><div class="ic">!</div>
+<p>Your iOS device backup (iCloud or Finder) includes the app's container, like any other app's data. Turn off iCloud Backup
+for HHT if you don't want that.</p></div>
+
+<h2>You're in control</h2>
+<ul>
+  <li><b>Stop collection</b> any time: Settings › <i>Record location</i>.</li>
+  <li><b>Export everything</b> at any time as CSV, JSON, GeoJSON or SQLite.</li>
+  <li><b>Erase all data</b> permanently deletes the database contents (two confirmations). Backups and exports in Files are
+    left for you to delete yourself.</li>
+  <li>Soft-deleted records stay in the database for the audit trail until you erase.</li>
+</ul>
+
+<h2>Sharing safely</h2>
+<p>Raw traces and daily diaries reveal where you live, work and sleep. If you publish anything, share <b>aggregates only</b>:
+cities, airports, flight routes, mode shares. Never share <code>raw_location_points</code>, <code>visits</code>, or trip routes near home.</p>
+
+<h2>Verifying it yourself</h2>
+<p>Because HHT is open source, you don't have to take this page's word for it. All network access is in three places:</p>
+<ul>
+  <li><code>App/Location/PlaceGeocoder.swift</code>: optional reverse geocoding</li>
+  <li>The airport-list download in <code>App/Screens/SettingsView.swift</code></li>
+  <li>MapKit views (map tiles)</li>
+</ul>
+<p>To report a privacy or security problem, see
+<a href="https://github.com/zyang91/HHT-app/blob/main/SECURITY.md"><code>SECURITY.md</code></a>.</p>
+
+</article></main>
+</body>
+</html>

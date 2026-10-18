@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>How inference works · HHT Docs</title>
+<meta name="description" content="How HHT turns raw GPS fixes into visits, places, trips and travel modes, and how it keeps your corrections safe.">
+<link rel="icon" href="assets/hht-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=6">
+<script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<script src="assets/docs.js" defer></script>
+</head>
+<body>
+<main class="dx-main"><article class="dx-content">
+
+<p class="eyebrow">Concepts</p>
+<h1>How inference works</h1>
+<p class="lede">Inference turns a stream of GPS fixes into the diary you see. It is rule-based and deterministic, with no
+machine learning and no network calls, so every result can be explained and reproduced.</p>
+
+<ol class="conveyor" aria-label="Inference pipeline">
+  <li style="--fill:#d8d2c4"><span class="n">1</span><span class="ic">🧹</span><b>Clean</b><span class="d">Drop inaccurate fixes and GPS spikes</span></li>
+  <li style="--fill:#ffc93c"><span class="n">2</span><span class="ic">📍</span><b>Stays</b><span class="d">Cluster fixes into visits</span></li>
+  <li style="--fill:#8bdb5e"><span class="n">3</span><span class="ic">🏠</span><b>Places</b><span class="d">Match a known place or create one</span></li>
+  <li style="--fill:#5c9bff"><span class="n">4</span><span class="ic">🚇</span><b>Trips</b><span class="d">Connect visits, split by mode</span></li>
+  <li style="--fill:#ff7eb3"><span class="n">5</span><span class="ic">🛡️</span><b>Protect</b><span class="d">Never touch your edits</span><span class="lock">🔒 locked</span></li>
+</ol>
+
+<p>Every threshold is a field of <code>InferenceConfig</code>
+(<a href="https://github.com/zyang91/HHT-app/blob/main/Packages/HHTCore/Sources/HHTCore/Inference/InferenceConfig.swift">source</a>).
+Defaults are shown in brackets. The full specification is
+<a href="https://github.com/zyang91/HHT-app/blob/main/docs/inference.md"><code>docs/inference.md</code></a>.</p>
+
+<h2>1. Cleaning</h2>
+<ul>
+  <li>Ignore fixes with horizontal accuracy worse than <code>maxHorizontalAccuracy</code> [100 m] (iOS visit events: [250 m]).
+    They stay in the raw table.</li>
+  <li>Drop single-point spikes: A→B and B→C both faster than <code>maxPlausibleSpeed</code> [320 m/s] while A→C is not.</li>
+</ul>
+
+<h2>2. Stay detection</h2>
+<p>Fixes are walked in time order. Starting from a seed fix, fixes are added while they're within <code>stayRadius</code>
+[100 m] of the running, accuracy-weighted centroid. A fix outside the radius is either:</p>
+<ul>
+  <li><b>Drift</b>: the cluster is established and a later fix within <code>driftMaxDuration</code> [120 s] comes back inside, so the excursion is skipped.</li>
+  <li><b>Departure</b>: otherwise the cluster ends.</li>
+</ul>
+
+<h3>Data gaps are normal</h3>
+<p>The collector deliberately stops GPS when you're stationary, so gaps longer than <code>gapThreshold</code> [15 min] are expected.
+A gap counts as <i>stationary</i> if CoreMotion shows less than <code>gapMovingSeconds</code> [5 min] of movement during it,
+or, without motion data, if the last fix was recorded in stationary mode.</p>
+<div class="table-wrap"><table>
+  <tr><th>Gap</th><th>Next fix</th><th>Result</th></tr>
+  <tr><td>stationary</td><td>inside radius</td><td>The stay continues through the gap</td></tr>
+  <tr><td>stationary</td><td>outside radius</td><td>Departure is back-dated from the next fix by distance ÷ plausible speed</td></tr>
+  <tr><td>moving</td><td>inside radius</td><td>The stay ends: you left and came back, and the loop becomes a trip</td></tr>
+</table></div>
+<p>A cluster becomes a visit if it lasts at least <code>minStayDuration</code> [5 min]. Arrival and departure are trimmed to the
+<b>core radius</b> [35 m, or 1.5 × median spread] to remove the walk-in / walk-out bias. Consecutive stays within
+<code>mergeDistance</code> [150 m], separated by a short excursion, are merged.</p>
+
+<h2>3. Places</h2>
+<p>Each stay is matched to the nearest place whose radius + <code>placeMatchSlack</code> [40 m] contains its centroid; named
+places win over unnamed ones. Otherwise a new unnamed place is created with radius <code>newPlaceRadius</code> [80 m].
+This is why naming a place once is enough: every later visit is matched to it.</p>
+
+<h2>4. Trips and modes</h2>
+<p>A trip connects consecutive visits. Its path is every cleaned fix in between plus both visit centroids.</p>
+
+<h3>Per-interval classification</h3>
+<p>Between each pair of fixes, speed and the CoreMotion activity at the midpoint give a class:</p>
+<ul>
+  <li>≥ <code>airMinSpeed</code> [70 m/s] → <b>air</b></li>
+  <li>motion says walking / running / cycling → walk / run / bike; automotive → vehicle</li>
+  <li>no motion: &lt; 0.3 m/s still; ≤ <code>walkMaxSpeed</code> [2.2] walk; ≤ <code>bikeMaxSpeed</code> [7] bike; else vehicle</li>
+  <li>"still" intervals take the class of the next moving interval, because waiting comes before boarding</li>
+</ul>
+
+<h3>Segmentation and refinement</h3>
+<p>Classes are run-length encoded; runs shorter than <code>minSegmentDuration</code> [120 s] are absorbed into their longer
+neighbour. Vehicle segments are then refined:</p>
+<div class="table-wrap"><table>
+  <tr><th>Refined mode</th><th>Rule</th></tr>
+  <tr><td>airplane</td><td>Average ≥ 0.6 × air speed over &gt; 150 km</td></tr>
+  <tr><td>intercity rail</td><td>≥ 60 km with p90 speed 38–70 m/s</td></tr>
+  <tr><td>subway</td><td>&gt; 40 % of time is signal loss, at 4–25 m/s, over &lt; 40 km</td></tr>
+  <tr><td>car</td><td>Everything else. Bus vs car can't be separated without transit schedules.</td></tr>
+</table></div>
+<p>The trip's <b>main mode</b> is the highest segment in the HHTS hierarchy (airplane &gt; rail &gt; transit &gt; car &gt; bike &gt; walk),
+among segments of at least 2 min or 300 m.</p>
+
+<h3>Personalisation</h3>
+<p>If you've corrected earlier trips between the same origin and destination and at least 60 % of those corrections agree,
+that mode is used. A trip is flagged <b>needs review</b> when it is untouched and its mode is unknown or has confidence &lt; 0.5.</p>
+
+<h2>5. Reprocessing without losing edits</h2>
+<p><code>processNew()</code> reprocesses from the latest visit, loading <code>contextMargin</code> [30 min] of earlier fixes
+so the anchor stay is detected exactly as in a full run. <code>process(from:to:)</code> rebuilds any range. These rules keep your corrections safe:</p>
+<ol>
+  <li>Records with <code>user_status ≠ auto</code> (and auto visits they reference) are <b>locked</b> and never modified.</li>
+  <li>A detected stay overlapping a locked trip or a user-deleted visit is ignored.</li>
+  <li>A detected stay overlapping a locked visit is absorbed by it.</li>
+  <li>Matching auto visits are updated in place, so IDs stay stable.</li>
+  <li>No trip is created where a locked trip already covers the interval.</li>
+  <li>Self-reported stamps add stays before rules 2–5 apply, so a deletion or a locked trip still wins over a stamp.</li>
+</ol>
+<div class="callout note"><div class="ic">i</div>
+<p>The test suite asserts that incremental runs equal one-shot runs, repeated runs change nothing, edits survive full rebuilds,
+and deleted stops stay deleted.</p></div>
+
+<h2>6. Self-reported stamps</h2>
+<p>A stamp (<b>Stamp this moment</b>) means <i>something worth recording happened around here, around now</i>, never
+<i>this coordinate is the stop</i>. It stores the tap time and a coarse location: the latest fix rounded to 3 decimals,
+with an uncertainty radius of fix accuracy + half a rounding cell + 1.4 m/s × fix age (no location if the fix is over 10 min old).
+After stays are detected, each stamp is handled in <code>StampAnchoring</code>:</p>
+<ol>
+  <li><b>Match</b>: a stay within ± <code>stampTimeTolerance</code> [10 min] of the tap and within the stamp's radius
+    + <code>stayRadius</code> + <code>placeMatchSlack</code> already accounts for it.</li>
+  <li><b>Conflict</b>: a tap inside a stay that is too far away contradicts the sensors and stays unmatched.</li>
+  <li><b>Short stop</b>: otherwise, fixes within ± <code>stampSearchWindow</code> [10 min] are searched; a cluster grows from the fix
+    nearest the tap with no minimum dwell, and its fixes give the place, arrival and departure. With no fix nearby the coarse
+    coordinate is used. Such stops last at least <code>stampMinStayDuration</code> [60 s] and get confidence 0.8.</li>
+  <li><b>Link</b>: after each run, <code>stamps.visit_id</code> names the visit that accounts for the stamp (or NULL).
+    That is the only thing inference writes to a stamp.</li>
+</ol>
+<p>Visits built from stamps are ordinary inferred visits; the stamp rows record which visits the user vouched for.
+The calibration replay ignores stamps, as it ignores every human input.</p>
+
+<h2>Known limitations</h2>
+<ul>
+  <li>Bus vs car vs ride-hail needs GTFS / route matching.</li>
+  <li>Access and egress walks shorter than 2 min are folded into the main segment.</li>
+  <li>The region-exit wake-up can lag the real departure by a few minutes; back-dating corrects most of it.</li>
+  <li>Centroids of inferred places aren't re-estimated from later visits yet.</li>
+</ul>
+
+</article></main>
+</body>
+</html>

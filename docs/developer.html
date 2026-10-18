@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Meet the developer · HHT Docs</title>
+<meta name="description" content="Who builds HHT, why a transportation researcher made a travel survey for one, and how to get in touch.">
+<link rel="icon" href="assets/hht-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=6">
+<script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<script src="assets/docs.js" defer></script>
+</head>
+<body>
+<main class="dx-main"><article class="dx-content dev">
+
+<p class="eyebrow">About</p>
+<h1>Meet the developer</h1>
+<p class="lede">HHT is built and maintained by one person: a transportation researcher who wanted a travel survey
+of their own life, without handing that data to anyone else.</p>
+
+<div class="pass" aria-label="Boarding pass: Zhanchao Yang, Qingdao to Philadelphia, flight HHT 001, seat 14A">
+  <div class="main">
+    <div class="band"><span>Boarding pass</span><span>HHT Air ✈</span></div>
+    <div class="who">
+      <img src="assets/hht-logo.png" alt="">
+      <div><small>Passenger · developer &amp; maintainer</small><b>Zhanchao Yang</b></div>
+    </div>
+    <div class="route-row">
+      <div class="code">TAO<small>Qingdao · home</small></div>
+      <div class="plane"></div>
+      <div class="code" style="text-align:right">PHL<small>Philadelphia · research</small></div>
+    </div>
+    <div class="fields">
+      <div class="field"><small>Flight</small><b>HHT 001</b></div>
+      <div class="field"><small>Seat</small><b>14A · window</b></div>
+      <div class="field"><small>Class</small><b>Open source</b></div>
+      <div class="field"><small>Via</small><b>BGM</b></div>
+    </div>
+  </div>
+  <div class="stub">
+    <small>Gate</small><b>github.com/zyang91</b>
+    <small>Boarding</small><b>Whenever you like</b>
+    <div class="barcode"></div>
+  </div>
+</div>
+
+<h2>Hi, I'm Zhanchao</h2>
+<p>I grew up in Qingdao, a coastal city in eastern China, and came to the United States for college in 2020. A world
+geography class at Binghamton University and a planning course taught by a county planning director turned a childhood
+love of maps into a career question: <i>why are places the way they are, and who decided?</i></p>
+<p>Today I work on transportation, urban planning and spatial analytics. I study how policies and changing urban conditions
+reshape the way people travel, using travel surveys, causal inference and a lot of maps. Outside research I travel slowly:
+walking, riding transit, and spending more time in airports than a normal person should.</p>
+
+<h2>Why I built HHT</h2>
+<p>Much of my research leans on <b>household travel surveys</b>, the one- or two-day trip diaries agencies use to understand
+how a region moves. They are invaluable and also limited: short, expensive, and dependent on memory. I wanted the same diary
+for myself, kept continuously and accurately enough to analyse.</p>
+<p>The apps that already do this are run by companies, charge subscriptions, upload your location history, or all three.
+Location data is too revealing for that. So HHT is built on a few non-negotiables:</p>
+<ul>
+  <li><b>Local-first.</b> No account, no server, no sync. The data never leaves the phone unless you export it.</li>
+  <li><b>Research-grade.</b> Trips, modes and purposes follow survey conventions, so the export drops straight into pandas or R.</li>
+  <li><b>Honest about uncertainty.</b> The app tells you when it's unsure and makes fixing it one tap.</li>
+  <li><b>Open.</b> Anyone can read the code, check the privacy claims, or fork it for their own study.</li>
+</ul>
+<p>The flights feature exists for a slightly less academic reason: I really like airports.</p>
+
+<h2>Questions I keep returning to</h2>
+<div class="qs">
+  <div class="q" style="--fill:#ffc93c"><span class="num">01</span><div><b>How do transportation policies and changing urban conditions reshape travel behavior?</b><span>Telework, transit service, and the travel decisions people make each day.</span></div></div>
+  <div class="q" style="--fill:#8bdb5e"><span class="num">02</span><div><b>How do people perceive, navigate and experience urban space?</b><span>Mental maps, route choice, and why access can feel different from what a network model says.</span></div></div>
+  <div class="q" style="--fill:#5c9bff"><span class="num">03</span><div><b>How do transportation systems shape broader urban and economic outcomes?</b><span>Transit, infrastructure, congestion, land use and development.</span></div></div>
+</div>
+<p>HHT sits right at the first question: a personal, continuous record of how one person's travel responds to the
+places, schedules and systems around them.</p>
+
+<h2>Say hello</h2>
+<p>Found a bug, built something on top of the export, or using HHT in a study? I'd love to hear about it.</p>
+<div class="links">
+  <a href="https://www.zhanchaoyang.com/" style="--fill:#ffc93c">Website ↗</a>
+  <a href="https://www.zhanchaoyang.com/pages/research.html" style="--fill:#8bdb5e">Research ↗</a>
+  <a href="https://github.com/zyang91" style="--fill:#fff">GitHub ↗</a>
+  <a href="https://www.linkedin.com/in/zhanchaoyang/" style="--fill:#5c9bff">LinkedIn ↗</a>
+  <a href="mailto:zhanchao@upenn.edu" style="--fill:#ff7eb3">Email</a>
+</div>
+<p class="muted">For bugs and feature requests, please use <a href="https://github.com/zyang91/HHT-app/issues/new/choose">GitHub issues</a>
+so others can follow along. See <a href="contributing.html">Contributing</a> if you'd like to help.</p>
+
+</article></main>
+</body>
+</html>
