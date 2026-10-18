@@ -61,6 +61,23 @@ public struct MotionTimeline: Sendable {
         return start
     }
 
+    /// Bouts of walking/running/cycling/automotive within [from, to], joined across non-moving blips ≤ `tolerance`.
+    public func movementBouts(from: Date, to: Date, tolerance: TimeInterval = 180) -> [(start: Date, end: Date)] {
+        guard to > from else { return [] }
+        var bouts: [(start: Date, end: Date)] = []
+        for (i, s) in samples.enumerated() where s.confidence >= 1 {
+            let start = max(s.timestamp, from)
+            let end = min(i + 1 < samples.count ? samples[i + 1].timestamp : to, to)
+            guard end > start, [.walking, .running, .cycling, .automotive].contains(s.activity) else { continue }
+            if let last = bouts.last, start.timeIntervalSince(last.end) <= tolerance {
+                bouts[bouts.count - 1].end = max(last.end, end)
+            } else {
+                bouts.append((start, end))
+            }
+        }
+        return bouts
+    }
+
     public func hasCoverage(from: Date, to: Date) -> Bool {
         seconds(from: from, to: to).values.reduce(0, +) > 0
     }
@@ -164,9 +181,24 @@ public struct StayDetector: Sendable {
                     k = m   // skip the drift points
                     continue
                 }
+                // Drift just before the collector went quiet: a few fixes barely outside, then a stationary silence,
+                // then the next fix is back inside. Nobody left; don't end the stay on a stray fix.
+                if !returned && established && m < n && m > k,
+                   Geo.distance(pts[m].coordinate, centroid) <= config.stayRadius,
+                   pts[m].timestamp.timeIntervalSince(pts[m - 1].timestamp) > config.gapThreshold,
+                   (k..<m).allSatisfy({ Geo.distance(pts[$0].coordinate, centroid) <= config.mergeMaxExcursionDistance
+                                        && (pts[$0].speed ?? 0) <= 1.5 }),
+                   !isGap || stationaryDuringGap(from: last.timestamp, to: p.timestamp, lastPoint: last, motion: motion),
+                   stationaryDuringGap(from: pts[m - 1].timestamp, to: pts[m].timestamp, lastPoint: pts[m - 1], motion: motion) {
+                    k = m
+                    continue
+                }
 
                 // Real departure.
-                if isGap && stationaryDuringGap(from: last.timestamp, to: p.timestamp, lastPoint: last, motion: motion) {
+                if isGap, let b = departureBout(from: last.timestamp, to: p.timestamp, distance: d, motion: motion) {
+                    // the walk/ride that got us there shows up in the motion log: that is when we left
+                    estimatedEnd = b
+                } else if isGap && stationaryDuringGap(from: last.timestamp, to: p.timestamp, lastPoint: last, motion: motion) {
                     // stayed until shortly before the next fix; back off by travel time at a plausible speed
                     let v = max(p.speed ?? 0, Self.plausibleTravelSpeed(distance: d))
                     let travel = min(d / v, gap)
@@ -190,7 +222,15 @@ public struct StayDetector: Sendable {
                 median = dists.sorted()[dists.count / 2]
             }
             let core = max(config.stayCoreRadius, min(config.stayRadius, 1.5 * median))
-            let firstCore = dists.firstIndex { $0 <= core } ?? 0
+            var firstCore = dists.firstIndex { $0 <= core } ?? 0
+            // …unless the collector went quiet right after it: a stationary silence means we had already arrived
+            if firstCore > 0 {
+                let a = pts[memberIdx[firstCore - 1]], b = pts[memberIdx[firstCore]]
+                if b.timestamp.timeIntervalSince(a.timestamp) > config.gapThreshold,
+                   stationaryDuringGap(from: a.timestamp, to: b.timestamp, lastPoint: a, motion: motion) {
+                    firstCore -= 1
+                }
+            }
             let lastCore = dists.lastIndex { $0 <= core } ?? (dists.count - 1)
             let first = pts[memberIdx[firstCore]]
             let last = pts[memberIdx[estimatedEnd == nil ? lastCore : dists.count - 1]]
@@ -199,18 +239,22 @@ public struct StayDetector: Sendable {
             if !brokeOnMove && k >= n {
                 // cluster runs to the end of the data: ongoing if plausibly still there
                 let quiet = now.timeIntervalSince(last.timestamp) < config.gapThreshold
-                if quiet || stationaryDuringGap(from: last.timestamp, to: now, lastPoint: last, motion: motion) {
+                if quiet {
                     end = nil
                     effectiveEnd = max(now, last.timestamp)
                 } else if motion.hasCoverage(from: last.timestamp, to: now) {
                     // judge by what we're doing now, not by every walk-around since the last fix
-                    if let m = motion.movementStart(from: last.timestamp, to: now),
+                    let movingNow = motion.activity(at: now).map { [.walking, .running, .cycling, .automotive].contains($0) } ?? false
+                    if movingNow, let m = motion.movementStart(from: last.timestamp, to: now),
                        motion.movingSeconds(from: m, to: now) >= config.minSegmentDuration {
                         end = m; effectiveEnd = m
                     } else {
                         end = nil
                         effectiveEnd = max(now, last.timestamp)
                     }
+                } else if stationaryDuringGap(from: last.timestamp, to: now, lastPoint: last, motion: motion) {
+                    end = nil
+                    effectiveEnd = max(now, last.timestamp)
                 }
             }
             let duration = effectiveEnd.timeIntervalSince(first.timestamp)
@@ -224,6 +268,17 @@ public struct StayDetector: Sendable {
             }
         }
         return stays
+    }
+
+    /// Start of the movement that most plausibly carried us from a stay to a fix `distance` away, seen only in the
+    /// motion log because location was silent: the latest bout of at least `minSegmentDuration` that began early enough
+    /// to cover the distance at a plausible speed. nil when the gap has no motion coverage or no such bout.
+    func departureBout(from: Date, to: Date, distance: Double, motion: MotionTimeline) -> Date? {
+        guard motion.hasCoverage(from: from, to: to) else { return nil }
+        let needed = distance / Self.plausibleTravelSpeed(distance: distance)
+        return motion.movementBouts(from: from, to: to)
+            .filter { $0.end.timeIntervalSince($0.start) >= config.minSegmentDuration && to.timeIntervalSince($0.start) >= needed }
+            .last?.start
     }
 
     /// Typical door-to-door speed for a trip of this length (used only to back-date a departure hidden in a gap).

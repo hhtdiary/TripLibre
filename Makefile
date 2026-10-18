@@ -8,7 +8,10 @@ SIM_NAME    ?= iPhone 17
 EXPORT_DIR  := $(BUILD_DIR)/export-check
 PY          := analysis/.venv/bin/python
 
-.PHONY: help test project build sim phone analysis-env export-check ci clean
+CAL_DIR     := $(BUILD_DIR)/calibrate-smoke
+CALIBRATE   := Packages/HHTCore/.build/release/hht-calibrate
+
+.PHONY: help test project build sim phone analysis-env export-check calibrate-tool calibrate-smoke ci clean
 
 help:            ## list targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -41,7 +44,20 @@ export-check:    ## end-to-end: Swift writes a real export, Python loads and val
 	cd Packages/HHTCore && HHT_EXPORT_DIR=$(abspath $(EXPORT_DIR)) swift test --filter writeExportForPythonCheck
 	cd analysis && $(if $(wildcard $(PY)),.venv/bin/python,python3) check_export.py $(abspath $(EXPORT_DIR))
 
-ci: test build export-check   ## everything GitHub Actions runs
+calibrate-tool:  ## build the offline replay tool (runs the production inference engine; issue #46)
+	cd Packages/HHTCore && swift build -c release --product hht-calibrate
+
+calibrate-smoke: calibrate-tool  ## synthetic end-to-end calibration: fixture → replay ×2 (determinism) → export → evaluate
+	rm -rf $(CAL_DIR) && mkdir -p $(CAL_DIR)
+	cd Packages/HHTCore && HHT_CALIBRATION_DIR=$(abspath $(CAL_DIR)) swift test --filter writeCalibrationFixture
+	$(CALIBRATE) replay --db $(CAL_DIR)/fixture.sqlite --out $(CAL_DIR)/pred.json
+	$(CALIBRATE) replay --db $(CAL_DIR)/fixture.sqlite --out $(CAL_DIR)/pred2.json
+	cmp $(CAL_DIR)/pred.json $(CAL_DIR)/pred2.json
+	python3 analysis/calibrate.py export --db $(CAL_DIR)/fixture.sqlite --out $(CAL_DIR)/reference --reviewed-default 1 --review-note synthetic
+	python3 analysis/calibrate.py evaluate --reference $(CAL_DIR)/reference --pred $(CAL_DIR)/pred.json --out $(CAL_DIR)/results --days all --db $(CAL_DIR)/fixture.sqlite
+	python3 analysis/check_calibration.py $(CAL_DIR)/results/metrics-all.json
+
+ci: test build export-check calibrate-smoke   ## everything GitHub Actions runs
 
 clean:
 	rm -rf $(BUILD_DIR) Packages/HHTCore/.build

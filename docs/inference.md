@@ -18,16 +18,25 @@ When a fix falls outside the radius:
 - **Departure**: otherwise the cluster ends.
 
 **Data gaps** (> `gapThreshold` [15 min] between fixes) are normal: the collector deliberately stops GPS when stationary.
-A gap is treated as *stationary* if CoreMotion shows < `gapMovingSeconds` [5 min] of walking/running/cycling/automotive
-during it, or — with no motion data — if the last fix was recorded in `stationary` collector mode.
+A gap is treated as *stationary* if CoreMotion shows < `gapMovingSeconds` [20 min] of walking/running/cycling/automotive
+during it, or — with no motion data — if the last fix was recorded in `stationary` collector mode. (20 min, not 5, was
+calibrated on real days: indoor pottering adds up to 5–20 min of "walking" over a long silence at one place; see
+[research/inference-calibration.md](research/inference-calibration.md).)
 - Stationary gap, next fix inside the radius → the stay continues through the gap.
-- Stationary gap, next fix outside → departure is back-dated from the next fix by distance ÷ a plausible speed
-  (1.4 m/s < 2 km, 10 m/s < 50 km, 25 m/s < 500 km, else 220 m/s air).
+- Next fix outside → if the motion log shows a movement bout (≥ `minSegmentDuration`, blips ≤ 3 min joined) that began
+  early enough to cover the distance at a plausible speed, the departure is the start of the latest such bout
+  (e.g. a walk to a building next door while location was silent). Otherwise, for a stationary gap, the departure is
+  back-dated from the next fix by distance ÷ a plausible speed (1.4 m/s < 2 km, 10 m/s < 50 km, 25 m/s < 500 km, else 220 m/s air).
 - Moving gap, next fix inside → the stay ends (the person left and came back; the loop becomes a trip).
+- **Drift before a silence**: a few non-moving fixes outside the radius (but within `mergeMaxExcursionDistance`), then a
+  stationary gap, then a fix back inside → drift; the stay continues.
+- **Data ends inside a stay**: it is ongoing unless the motion log says we are moving *now* and have been for
+  ≥ `minSegmentDuration` (then it ended when that movement began).
 
 A cluster becomes a visit if it lasts ≥ `minStayDuration` [5 min]. Its arrival/departure are trimmed to the first/last
 fix within the **core radius** (max(`stayCoreRadius` [35 m], 1.5 × median member distance)) after re-centring on the
-inner half, removing the walk-in / walk-out bias of radius clustering. If the data ends inside a stay that is plausibly
+inner half, removing the walk-in / walk-out bias of radius clustering. Exception: when the collector went quiet right
+after the last non-core fix (stationary gap before the first core fix), that fix is the arrival — we had already arrived. If the data ends inside a stay that is plausibly
 still ongoing, the visit gets no departure.
 
 **Merging**: consecutive stays ≤ `mergeDistance` [150 m] apart, separated by an excursion shorter than
@@ -89,8 +98,15 @@ Rules that keep user corrections safe:
 
 Tests assert: incremental == one-shot, repeated runs change nothing, edits survive full rebuilds, deleted stops stay deleted.
 
+## 7. Calibration against a real diary
+`hht-calibrate` replays raw points through this engine offline (batch or streaming), and `analysis/calibrate.py`
+scores the result against a human-corrected diary. Protocol, matching rules, results and limitations:
+[research/inference-calibration.md](research/inference-calibration.md).
+
 ## Known limitations / next steps
 - Bus vs car vs ride-hail needs GTFS/route matching.
 - Short (< 2 min) access/egress walks are merged into the main segment.
 - The collector's region-exit wake-up can lag departure by a few minutes; CLVisit departure events and back-dating correct most of it.
 - Place centroids of inferred places are not re-estimated from later visits yet.
+- Arrival after a walk hidden in a location silence is dated by the next fix (only the departure side uses the motion log).
+- Consecutive stays at buildings < 100 m apart with no fix between them merge into one visit.

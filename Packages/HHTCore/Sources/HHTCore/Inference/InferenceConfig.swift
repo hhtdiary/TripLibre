@@ -21,7 +21,8 @@ public struct InferenceConfig: Sendable, Codable, Equatable {
     /// Within a movement, no fix for this long (while covering > 300 m) marks signal loss (tunnel, flight).
     public var movingGapThreshold: TimeInterval = 120
     /// During a gap, this much (s) of non-stationary motion activity means the person was moving.
-    public var gapMovingSeconds: TimeInterval = 5 * 60
+    /// Calibrated on real days (issue #46): indoor walking adds up to 5–20 min over a long silence at one place.
+    public var gapMovingSeconds: TimeInterval = 20 * 60
     /// Two stays closer than this (m) with only a short excursion between them are merged.
     public var mergeDistance: Double = 150
     /// …if the excursion lasted less than this…

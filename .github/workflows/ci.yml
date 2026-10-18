@@ -34,6 +34,8 @@ jobs:
         run: make test
       - name: Export → Python contract check
         run: make export-check
+      - name: Calibration harness smoke test (synthetic data only)
+        run: make calibrate-smoke
 
   app:
     name: Build iOS app
