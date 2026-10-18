@@ -3,318 +3,121 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>A Travel Survey of One | Zhanchao Yang</title>
-<meta name="description" content="HHT: a private iOS app that runs a continuous household travel survey on one person, and why it is built the way it is.">
+<title>HHT Documentation</title>
+<meta name="description" content="Documentation for HHT, a free, open-source, local-first iOS app that runs a continuous household travel survey for one person.">
+<link rel="icon" href="assets/hht-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400;1,8..60,600&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="site-chrome.css">
-<style>
-  :root {
-    --bg: #faf8f4; --surface: #fff; --surface-warm: #f5f2ec;
-    --ink: #0b2345; --ink-navy: #0b2345; --ink-soft: rgba(11,35,69,.72); --ink-faint: rgba(11,35,69,.5);
-    --red: #a51c30; --blue: #456a96; --sand: #e9dcc7; --sand-deep: #d9c5a5; --sage: #c8d5c5; --terracotta: #d76a54;
-    --line: rgba(11,35,69,.14); --line-soft: rgba(11,35,69,.08); --num: #efece4;
-    --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
-    --sans: 'Inter', system-ui, -apple-system, sans-serif;
-  }
-  * { box-sizing: border-box; }
-  html { -webkit-text-size-adjust: 100%; }
-  body { margin: 0; background: var(--bg); color: var(--ink); font: 16px/1.65 var(--sans); }
-  a { color: inherit; }
-  .container { max-width: 1180px; margin: 0 auto; padding: 0 28px; }
-
-  /* hero */
-  .hero { padding: 64px 0 56px; border-bottom: 1px solid var(--line); }
-  .tags { display: flex; flex-wrap: wrap; gap: 6px 14px; font: 600 11.5px var(--sans); letter-spacing: .2em; text-transform: uppercase; color: var(--ink-faint); padding-bottom: 14px; border-bottom: 1px solid var(--line-soft); margin: 0 0 44px; }
-  .tags span:first-child { color: var(--red); }
-  h1 { font: 600 clamp(52px, 9vw, 92px)/.94 var(--serif); letter-spacing: -.03em; margin: 0 0 30px; max-width: 12ch; }
-  h1 em { color: var(--red); font-weight: 400; }
-  .lede-row { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 48px; align-items: start; }
-  .lede { font: 400 19px/1.6 var(--serif); color: var(--ink); margin: 0; max-width: 34em; }
-  .aside { border-left: 2px solid var(--red); padding: 2px 0 2px 16px; font-size: 14px; color: var(--ink-soft); margin: 6px 0 0; }
-
-  /* sections */
-  section.item { padding: 64px 0; border-bottom: 1px solid var(--line-soft); }
-  .item-head { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 8px 24px; align-items: start; margin-bottom: 26px; }
-  .n { font: 600 58px/.8 var(--serif); color: var(--num); letter-spacing: -.04em; }
-  .kicker { font: 600 12.5px var(--sans); letter-spacing: .16em; text-transform: uppercase; color: var(--ink-soft); margin: 0 0 8px; }
-  h2 { font: 600 clamp(26px, 3.4vw, 35px)/1.14 var(--serif); letter-spacing: -.02em; margin: 0; max-width: 22ch; }
-  .body { margin-left: 134px; max-width: 690px; }
-  .body p { font: 400 17.5px/1.7 var(--serif); margin: 0 0 1.05em; }
-  .body p.note { font: 400 15px/1.6 var(--sans); color: var(--ink-soft); }
-  .body strong { font-weight: 600; }
-  code { font: 500 .86em ui-monospace, SFMono-Regular, Menlo, monospace; background: var(--surface-warm); padding: 1px 5px; border-radius: 4px; }
-
-  /* the diary figure */
-  figure.plate { margin: 30px 0 8px; background: var(--surface); border: 1px solid var(--line-soft); border-radius: 6px; padding: 22px 24px; box-shadow: 0 1px 2px rgba(11,35,69,.04), 0 8px 28px rgba(11,35,69,.06); }
-  .diary { font: 14px/1.5 var(--sans); display: grid; grid-template-columns: 96px 18px minmax(0, 1fr); column-gap: 10px; }
-  .diary .t { color: var(--ink-faint); font-variant-numeric: tabular-nums; padding: 7px 0; }
-  .diary .rail { position: relative; }
-  .diary .rail::before { content: ""; position: absolute; left: 8px; top: 0; bottom: 0; width: 2px; background: var(--line-soft); }
-  .diary .rail i { position: absolute; left: 3px; top: 12px; width: 12px; height: 12px; border-radius: 50%; background: var(--ink-navy); }
-  .diary .rail.move i { background: none; }
-  .diary .rail.move::before { background: var(--c, var(--blue)); width: 3px; left: 7.5px; }
-  .diary .what { padding: 7px 0; }
-  .diary .place { font-weight: 600; font-family: var(--serif); font-size: 16px; }
-  .diary .meta { color: var(--ink-soft); font-size: 13px; }
-  .chip { display: inline-block; font: 600 10.5px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--terracotta); background: #fbece7; border-radius: 3px; padding: 1px 6px; margin-left: 6px; vertical-align: 1px; }
-  figcaption { font: 400 15.5px/1.6 var(--serif); color: var(--ink-soft); margin-top: 14px; }
-
-  /* layers */
-  .layers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; margin: 26px 0 10px; }
-  .layer { background: var(--surface); border: 1px solid var(--line-soft); border-radius: 6px; padding: 16px 16px 14px; }
-  .layer b { display: block; font: 600 11.5px var(--sans); letter-spacing: .14em; text-transform: uppercase; color: var(--red); margin-bottom: 6px; }
-  .layer p { font: 400 15px/1.5 var(--serif) !important; margin: 0 !important; }
-  .layer small { display: block; margin-top: 8px; font: 13px/1.45 var(--sans); color: var(--ink-soft); }
-
-  ul.plain { list-style: none; padding: 0; margin: 0 0 1em; }
-  ul.plain li { font: 400 17px/1.6 var(--serif); padding: 10px 0; border-top: 1px solid var(--line-soft); }
-  ul.plain li:last-child { border-bottom: 1px solid var(--line-soft); }
-  ul.plain li b { font-family: var(--sans); font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--ink-navy); margin-right: 8px; }
-
-  @media (max-width: 760px) {
-    .container { padding: 0 16px; }
-    .hero { padding: 40px 0 40px; }
-    .lede-row { grid-template-columns: 1fr; gap: 20px; }
-    .item-head { grid-template-columns: 1fr; }
-    .n { font-size: 44px; }
-    .body { margin-left: 0; }
-    .layers { grid-template-columns: 1fr; }
-    .diary { grid-template-columns: 74px 18px minmax(0, 1fr); column-gap: 6px; }
-    figure.plate { padding: 16px 14px; }
-  }
-
-  .container { padding: 0 36px; }
-  body { -webkit-font-smoothing: antialiased; }
-  .hero { padding: 120px 0 58px; }
-  .tags { margin-bottom: 34px; }
-  .hero-grid { display: grid; grid-template-columns: 1fr 1.1fr; align-items: center; gap: 24px; }
-  h1 { font-size: clamp(54px, 6.2vw, 82px); line-height: 1.03; margin-bottom: 24px; }
-  .hero-dek { max-width: 30ch; font: 400 21px/1.55 var(--serif); color: var(--ink-soft); }
-  .hero-figure { margin: 0 -20px 0 0; }
-  .hero-figure img { display: block; width: 100%; height: auto; }
-  .hero-actions { display: flex; flex-wrap: wrap; gap: 22px; margin: 28px 0; align-items: center; }
-  .hero-actions a { font: 500 13px/1.5 var(--sans); text-decoration: none; }
-  .source-link { padding: 12px 19px; background: var(--ink); color: var(--bg); border-radius: 3px; }
-  .source-link:hover { background: var(--red); }
-  .read-link { color: var(--red); }
-  .lede-row { margin-top: 34px; padding-top: 30px; border-top: 1px solid var(--line); }
-  .kicker { color: var(--red); }
-  .n { color: var(--sand-deep); }
-  .footer-name, .footer-identity { margin-top: 0; }
-  .footer-identity { margin-bottom: 0; }
-  section.item { scroll-margin-top: 90px; }
-  a:focus-visible, button:focus-visible { outline: 2px solid var(--red); outline-offset: 5px; }
-  @media (max-width: 1000px) { .nav-affil { display: none; } .nav-links { gap: 20px; } }
-  @media (max-width: 760px) {
-    .container { padding: 0 24px; }
-    .hero { padding: 102px 0 40px; }
-    .hero-grid { grid-template-columns: 1fr; gap: 8px; }
-    .hero-figure { margin: 0; }
-    .hero-dek { max-width: 34ch; }
-    .tags { font-size: 10px; letter-spacing: .12em; margin-bottom: 26px; }
-    .lede-row { margin-top: 24px; }
-    .footer-links { gap: 16px 24px; }
-    .site-footer { padding: 56px 0 32px; }
-  }
-  @media (max-width: 720px) {
-    .site-nav .nav-inner { padding: 14px 24px; }
-    .nav-toggle { display: flex; }
-    .nav-links { position: absolute; top: 100%; left: 0; right: 0; background: var(--bg); border-bottom: 1px solid var(--line); flex-direction: column; align-items: stretch; gap: 0; padding: 8px 24px 18px; display: none; }
-    .nav-links.open { display: flex; }
-    .nav-links a { padding: 10px 0; font-size: 1rem; }
-  }
-  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; } }
-</style>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=6">
+<script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<script src="assets/docs.js" defer></script>
 </head>
 <body>
+<main class="dx-main"><article class="dx-content home">
 
-<header class="site-nav" id="site-nav">
-			<div class="nav-inner">
-				<div class="nav-brand">
-					<a class="nav-name" href="https://www.zhanchaoyang.com/">Zhanchao Yang</a>
-					<span class="nav-affil">Penn Weitzman</span>
-				</div>
-				<button
-					class="nav-toggle"
-					id="nav-toggle"
-					aria-label="Open menu"
-					aria-expanded="false"
-					aria-controls="nav-links"
-				>
-					<span></span><span></span><span></span>
-				</button>
-				<nav aria-label="Main navigation" class="nav-links" id="nav-links">
-					<a href="https://www.zhanchaoyang.com/pages/research.html">Research</a>
-					<a href="https://www.zhanchaoyang.com/pages/professional-work.html">Work</a>
-					<a class="active" href="https://www.zhanchaoyang.com/pages/blog.html">Thoughts</a>
-					<a href="https://www.zhanchaoyang.com/pages/cv.html">CV</a>
-					<a href="https://www.zhanchaoyang.com/pages/awards.html">Awards</a>
-					<a href="https://www.zhanchaoyang.com/pages/about-me.html">About</a>
-					<a href="https://www.zhanchaoyang.com/pages/contact.html">Contact</a>
-				</nav>
-			</div>
-		</header>
-
-<main>
-  <div class="hero">
-    <div class="container">
-      <p class="tags"><span>Experiments</span><span>iOS</span><span>Travel behavior</span><span>N-of-1</span><span>SQLite · SwiftUI</span></p>
-      <div class="hero-grid">
-        <div>
-          <h1>A travel survey <em>of one</em>.</h1>
-          <p class="hero-dek">One person. Every day. A little city of routines, detours, and discoveries.</p>
-          <div class="hero-actions"><a class="source-link" href="https://github.com/zyang91/HHT-app">Explore the code ↗</a><a class="read-link" href="#the-diary">Read the field notes ↓</a></div>
-        </div>
-        <figure class="hero-figure"><img src="assets/hht-daily-journey.png" width="1536" height="1024" fetchpriority="high" alt="A miniature Philadelphia unfolds from a phone, with a looping route connecting home, campus, coffee, cycling and the subway."></figure>
-      </div>
-      <div class="lede-row">
-        <p class="lede">Household travel surveys ask thousands of people to remember one weekday. I wanted the opposite: one person, every day, for years. HHT is a private iPhone app that quietly records where I go and rebuilds each day into visits, trips, modes and trip chains, then gets out of the way.</p>
-        <p class="aside">Built for exactly one user. Not on the App Store, no account, no server. The data never leaves the phone unless I export it.</p>
-      </div>
-    </div>
+<div class="hero">
+  <div>
+    <p class="eyebrow">Documentation</p>
+    <h1>HHT: a travel survey for one person</h1>
   </div>
+  <img class="logo" src="assets/hht-logo.png" alt="HHT logo">
+</div>
+<p class="lede">HHT is a free, open-source iOS app that records where you go, rebuilds each day into
+visits, trips and travel modes, and keeps all of it on your phone. Think of it as a household travel survey
+that fills itself in, with a sample size of one.</p>
 
-  <section class="item" id="the-diary">
-    <div class="container">
-      <div class="item-head">
-        <span class="n">01</span>
-        <div><p class="kicker">What it does</p><h2>A diary that writes itself, and a dataset underneath it.</h2></div>
-      </div>
-      <div class="body">
-        <p>Open the app in the evening and the day is already there: when I left, where I stopped, for how long, how I got between places and the route I took. Uncertain guesses are flagged, and fixing one is a single tap.</p>
-        <figure class="plate">
-          <div class="diary">
-            <div class="t">– 08:20</div><div class="rail"><i></i></div><div class="what"><span class="place">Home</span><div class="meta">overnight · 14 h 51 min</div></div>
-            <div class="t">08:20–08:30</div><div class="rail move" style="--c:#6d5bd0"></div><div class="what">Walk + Subway + Walk <span class="chip">check</span><div class="meta">10 min · 1.6 mi · three segments</div></div>
-            <div class="t">08:30–12:25</div><div class="rail"><i></i></div><div class="what"><span class="place">Penn</span><div class="meta">Work / School · 3 h 55 min</div></div>
-            <div class="t">12:25–12:33</div><div class="rail move" style="--c:#3f9b6b"></div><div class="what">Walk<div class="meta">8 min · 0.5 mi</div></div>
-            <div class="t">12:33–13:18</div><div class="rail"><i></i></div><div class="what"><span class="place">Lunch spot</span><div class="meta">Meal · 45 min</div></div>
-          </div>
-          <figcaption><strong>The Today view, in text.</strong> Stays of five minutes or more become visits; everything between two visits is a trip, split into mode segments. The subway leg is inferred from a GPS blackout at urban speed while the phone's motion sensor reported "vehicle".</figcaption>
-        </figure>
-      </div>
-    </div>
-  </section>
+<div class="actions">
+  <a class="btn primary" href="installation.html">Install on your iPhone →</a>
+  <a class="btn" href="architecture.html">How it's built</a>
+  <a class="btn" href="https://github.com/zyang91/HHT-app">View on GitHub</a>
+</div>
 
-  <section class="item">
-    <div class="container">
-      <div class="item-head">
-        <span class="n">02</span>
-        <div><p class="kicker">Purpose</p><h2>Why run a travel survey on myself?</h2></div>
-      </div>
-      <div class="body">
-        <p>Transportation planning leans on cross-sectional snapshots: a trip diary, a single day, a large sample. They tell us a lot about populations and very little about how one person's mobility <em>changes</em>: across semesters, jobs, moves between cities, seasons, the week after a new transit line opens.</p>
-        <p>A continuous N-of-1 record makes those longitudinal questions answerable. How routine is my weekday? Does my radius of gyration shrink in winter? How often do I chain errands versus go straight home? Did I become more multimodal after moving? The app keeps the classic HHTS concepts (person-day, trip, segment, origin, destination, mode, purpose, tour) so the data sits comfortably next to real survey datasets.</p>
-        <p>It is also a sandbox: a place to test mobility metrics on data I understand completely, because I lived it.</p>
-      </div>
-    </div>
-  </section>
+<div class="showcase" aria-label="Screenshots of the HHT app">
+  <figure class="phone"><img src="assets/screens/diary.jpg" alt="The day's diary: visits and trips in order, with a trip asking 'Did I get that right?'" loading="lazy"><figcaption>Diary</figcaption></figure>
+  <figure class="phone"><img src="assets/screens/today.jpg" alt="The Today screen: a mascot speech bubble, the day's routes on a map, and four colourful stat tiles" loading="lazy"><figcaption>Today</figcaption></figure>
+  <figure class="phone"><img src="assets/screens/stats.jpg" alt="The Stats screen: trips per day, distance, travel time and mode share bars" loading="lazy"><figcaption>Stats</figcaption></figure>
+</div>
 
-  <section class="item">
-    <div class="container">
-      <div class="item-head">
-        <span class="n">03</span>
-        <div><p class="kicker">Considerations</p><h2>Five decisions that shaped the build.</h2></div>
-      </div>
-      <div class="body">
-        <ul class="plain">
-          <li><b>Private by default.</b>Location history is about as sensitive as personal data gets. Everything lives in one local SQLite file. Address lookup, the only feature that sends a coordinate anywhere, is off unless I switch it on.</li>
-          <li><b>Automatic first.</b>Manual diaries die within a week. The goal was "the app reconstructed my day, I spent thirty seconds fixing two things", never "log six trips by hand".</li>
-          <li><b>Correction is cheap.</b>Unknown is an acceptable answer. Uncertain trips carry quick-pick modes; everything else can be merged, split, renamed or deleted in a tap or two. Corrections also feed back: once I say a Home→Penn trip was an e-bike ride, the next one is guessed as an e-bike ride.</li>
-          <li><b>Honest about battery.</b>GPS runs only while moving. After a few stationary minutes it switches off and a geofence, iOS visit detection and significant-change monitoring wake it up when I leave.</li>
-          <li><b>No gamification.</b>No streaks, goals or "you moved less than last week". It summarizes behaviour; it doesn't try to change it.</li>
-        </ul>
-      </div>
-    </div>
-  </section>
+<h2>Why this app exists</h2>
+<p>Location history is one of the most revealing datasets a person produces. Most apps that collect it
+are run by companies or individual developers who either charge a subscription, upload your movements to their
+servers, or both. Once the data is on someone else's server, you are trusting their business model,
+their security, and whatever they decide to do with it later.</p>
+<p>HHT takes the opposite position:</p>
 
-  <section class="item">
-    <div class="container">
-      <div class="item-head">
-        <span class="n">04</span>
-        <div><p class="kicker">Data integrity</p><h2>Never overwrite what was observed.</h2></div>
-      </div>
-      <div class="body">
-        <p>The most important design choice is invisible in the interface. The data is kept in three layers, so the inference can improve later without erasing anything I corrected.</p>
-        <div class="layers">
-          <div class="layer"><b>1 · Raw</b><p>Every GPS fix and motion-activity episode, append-only.</p><small>Never edited, never silently thinned.</small></div>
-          <div class="layer"><b>2 · Inferred</b><p>Visits, trips, segments and modes from transparent rules.</p><small>Can be rebuilt from raw at any time.</small></div>
-          <div class="layer"><b>3 · Corrected</b><p>Anything I confirmed, edited, split or deleted.</p><small>Locked against rebuilds; every change is in an audit log.</small></div>
-        </div>
-        <p>The audit log doubles as a labelled dataset: each time I correct a mode, that's a ground-truth label for training a better, personal classifier later. The thresholds are deliberately simple heuristics (a 100 m stay radius, a 5-minute minimum dwell, speed and motion rules for modes), all documented, and tested against synthetic days: commutes, drift, subway blackouts, flights, midnight and daylight-saving crossings.</p>
-      </div>
-    </div>
-  </section>
+<div class="pillars">
+  <div><b>Free and open source</b><span>Apache 2.0. No subscription, no paid tier, no ads. Read every line that touches your data.</span></div>
+  <div><b>Nothing goes to a cloud</b><span>No account, no server, no analytics SDK, no sync. The database is one SQLite file in the app's sandbox.</span></div>
+  <div><b>Built for one person</b><span>A personal tool, not a platform. You install it yourself from source and you own the output.</span></div>
+  <div><b>Research-grade output</b><span>Trips follow household-travel-survey (HHTS) conventions and export to CSV, JSON, GeoJSON and SQLite.</span></div>
+</div>
 
-  <section class="item">
-    <div class="container">
-      <div class="item-head">
-        <span class="n">05</span>
-        <div><p class="kicker">For analysis</p><h2>Built to be exported.</h2></div>
-      </div>
-      <div class="body">
-        <p>One tap produces CSVs with stable IDs that join across tables (<code>trips</code>, <code>trip_segments</code>, <code>visits</code>, <code>places</code>, <code>flights</code>), a full JSON dump, GeoJSON routes and places, and a SQLite snapshot for R, Python, DuckDB or QGIS. The trips table is HHTS-shaped: <code>person_day_id</code>, <code>trip_seq</code>, origin, destination, times, distance, mode, purpose.</p>
-        <p>Inside the app, the dashboard already computes the usual suspects: trips and distance per person-day, mode share, departure-time profile, time away from home, radius of gyration, convex-hull activity space, destination and mode entropy, repeat OD pairs and home-based tour complexity. Any two periods (two semesters, before and after a move) can be compared side by side.</p>
-        <p class="note">What it can't do yet: tell a bus from a car without transit schedules, or catch very short access walks. Those are the next rabbit holes.</p>
-      </div>
-    </div>
-  </section>
-</main>
+<p>The design comes from transportation research. A household travel survey asks people to keep a one- or two-day
+diary of every trip: where they started, where they went, when, by what mode, and why. Those diaries are expensive,
+short, and depend on memory. HHT keeps the same diary continuously, from GPS and motion sensors, and lets you correct
+it in a tap or two.</p>
 
-<footer class="site-footer">
-			<div class="container">
-				<div class="footer-grid">
-					<div>
-						<p class="footer-name">Zhanchao Yang</p>
-						<p class="footer-identity">
-							Urban Planning <span class="dot">·</span> Transportation
-							<span class="dot">·</span> Spatial Analytics
-						</p>
-					</div>
-					<nav aria-label="Footer navigation" class="footer-links">
-						<a href="mailto:zhanchao@upenn.edu">Email</a>
-						<a href="https://www.zhanchaoyang.com/pages/research.html">Research</a>
-						<a href="https://www.zhanchaoyang.com/pages/professional-work.html">Work</a>
-						<a href="https://www.zhanchaoyang.com/pages/blog.html">Thoughts</a>
-						<a href="https://www.zhanchaoyang.com/pages/cv.html">CV</a>
-						<a href="https://www.zhanchaoyang.com/pages/awards.html">Awards</a>
-						<a href="https://www.zhanchaoyang.com/pages/about-me.html">About</a>
-						<a href="https://www.zhanchaoyang.com/pages/contact.html">Contact</a>
-						<a href="https://github.com/zyang91" target="_blank" rel="noopener">GitHub</a>
-						<a href="https://www.linkedin.com/in/zhanchaoyang/" target="_blank" rel="noopener">LinkedIn</a>
-					</nav>
-				</div>
-				<div class="footer-hometown">
-					<img src="assets/qingdao-footer.png" width="2172" height="724"
-						alt="Qingdao, my hometown — a sketch of Zhanqiao Pier and the seafront."
-						loading="lazy" decoding="async" />
-				</div>
-				<div class="footer-note">
-					<span>© <span id="year">2026</span> Zhanchao Yang</span>
-					<span>Philadelphia, PA</span>
-				</div>
-			</div>
-		</footer>
+<h2>What it does</h2>
+<div class="cards toon-grid two">
+  <div class="card"><div class="k">collect</div><h3>Background recording</h3><p>GPS runs only while you are moving. When you stop, it switches to a geofence to save battery.</p></div>
+  <div class="card"><div class="k">reconstruct</div><h3>Visits, trips and modes</h3><p>A deterministic engine turns raw fixes into stays, trips, mode segments and named places.</p></div>
+  <div class="card"><div class="k">correct</div><h3>One-tap fixes</h3><p>Change a mode, rename a place, split or merge. Corrections are locked and survive rebuilds.</p></div>
+  <div class="card"><div class="k">analyse</div><h3>Stats and export</h3><p>Mode share, radius of gyration, tours, flights. Export everything for pandas, R, DuckDB or QGIS.</p></div>
+</div>
 
-<script>
-  const toggle = document.getElementById('nav-toggle');
-  const links = document.getElementById('nav-links');
-  function closeMenu() { links.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); toggle.setAttribute('aria-label', 'Open menu'); }
-  toggle.addEventListener('click', () => {
-    const open = links.classList.toggle('open');
-    toggle.setAttribute('aria-expanded', String(open));
-    toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
-  });
-  links.addEventListener('click', event => { if (event.target.closest('a')) closeMenu(); });
-  document.addEventListener('keydown', event => { if (event.key === 'Escape' && links.classList.contains('open')) { closeMenu(); toggle.focus(); } });
-  const desktop = window.matchMedia('(min-width: 721px)');
-  desktop.addEventListener('change', closeMenu);
-  function syncNav() { document.getElementById('site-nav').classList.toggle('scrolled', window.scrollY > 12); }
-  window.addEventListener('scroll', syncNav, { passive: true });
-  syncNav();
-  document.getElementById('year').textContent = new Date().getFullYear();
-</script>
+<p>All of this sits behind a playful "sticker" interface: thick ink outlines, solid shadows, bright flat colours and a
+friendly map-pin mascot that sums up your day.</p>
+<div class="toon-stage" aria-hidden="true">
+  <div class="toon-bubble"><span class="pin"></span><span class="toon say">5 trips and 4.1 mi. Your feet did most of the work!</span></div>
+  <span class="toon toon-stat" style="--fill:#ffc93c"><big>5</big><small>trips</small></span>
+  <span class="toon toon-stat" style="--fill:#8bdb5e"><big>4.1 mi</big><small>distance</small></span>
+  <span class="toon-chip" style="background:#8bdb5e">🚶</span><span class="toon-chip" style="background:#5c9bff">🚇</span><span class="toon-chip" style="background:#b596ff">🚗</span>
+  <span class="toon-badge" style="background:#ffc93c">check</span>
+</div>
+<p><a href="ui-guide.html">Tour every screen in the UI guide →</a></p>
+
+<h2>Who it's for</h2>
+<ul>
+  <li><b>Anyone who wants a private travel diary</b> without handing their location history to a company.</li>
+  <li><b>Transportation and urban researchers</b> who want clean, HHTS-style data about their own travel, or a reference
+    implementation of trip reconstruction.</li>
+  <li><b>iOS and Swift developers</b> curious about long-running background location, or wanting to fork the app and extend it.</li>
+</ul>
+
+<div class="callout note"><div class="ic">i</div>
+<p>HHT is not on the App Store. You build it from source with Xcode and install it on your own phone. With a free Apple ID
+the install lasts 7 days and you renew it with one command, and your data is kept between installs. See <a href="installation.html">Installation</a>.</p></div>
+
+<h2>Where to go next</h2>
+<p class="muted">Your route through the docs, step by step, drawn like a day in the app's diary.</p>
+<ol class="route">
+  <li class="stop" style="--fill:#ffc93c"><a href="installation.html">
+    <span class="pin">1</span>
+    <span class="body"><b>Installation <span class="toon-badge" style="background:#fff">start here</span></b><small>Build, sign and install on your iPhone.</small></span>
+    <span class="go">→</span></a></li>
+  <li class="leg"><span class="toon-chip" style="background:#8bdb5e">🚶</span>Walk · 4 min read</li>
+  <li class="stop" style="--fill:#8bdb5e"><a href="using-the-app.html">
+    <span class="pin">2</span>
+    <span class="body"><b>Using the app</b><small>The screens, daily routine, corrections and export.</small></span>
+    <span class="go">→</span></a></li>
+  <li class="leg"><span class="toon-chip" style="background:#ffc93c">🚲</span>Bike · 5 min read</li>
+  <li class="stop" style="--fill:#ff7eb3"><a href="ui-guide.html">
+    <span class="pin">3</span>
+    <span class="body"><b>UI guide</b><small>Every screen, annotated, plus the sticker design system.</small></span>
+    <span class="go">→</span></a></li>
+  <li class="leg"><span class="toon-chip" style="background:#5c9bff">🚇</span>Subway · 6 min read</li>
+  <li class="stop" style="--fill:#5c9bff"><a href="architecture.html">
+    <span class="pin">4</span>
+    <span class="body"><b>Architecture</b><small>Modules, data flow, and the three data layers.</small></span>
+    <span class="go">→</span></a></li>
+  <li class="leg"><span class="toon-chip" style="background:#b596ff">🚗</span>Car · 4 min read</li>
+  <li class="stop" style="--fill:#b596ff"><a href="api.html">
+    <span class="pin">5</span>
+    <span class="body"><b>Developer API <span class="toon-badge" style="background:#ff6b4a">destination</span></b><small>HHTCore (Swift) and the Python analysis helpers.</small></span>
+    <span class="go">→</span></a></li>
+</ol>
+
+</article></main>
 </body>
 </html>

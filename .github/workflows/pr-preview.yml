@@ -70,11 +70,11 @@ jobs:
             const url = process.env.PREVIEW_URL;
             const sha = context.payload.pull_request.head.sha.slice(0, 7);
             const pages = [
-              ['Home', '/index.html'],
-              ['Docs', '/docs/index.html'],
-              ['Installation', '/docs/installation.html'],
-              ['Using the app', '/docs/using-the-app.html'],
-              ['Privacy', '/docs/privacy.html'],
+              ['Docs home', '/index.html'],
+              ['Project story (backup)', '/backup/index.html'],
+              ['Installation', '/installation.html'],
+              ['Using the app', '/using-the-app.html'],
+              ['Privacy', '/privacy.html'],
             ];
             const list = pages
               .map(([name, path]) => `- [${name}](${url}${path})`)

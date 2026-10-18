@@ -23,7 +23,7 @@ const NAV = [
     { href: 'developer.html', title: 'Meet the developer' },
   ] },
   { group: 'Links', items: [
-    { href: '../', title: 'Project story', ext: true },
+    { href: 'backup/', title: 'Project story', ext: true },
     { href: 'https://github.com/zyang91/HHT-app', title: 'GitHub', ext: true },
   ] },
 ];
@@ -51,11 +51,11 @@ function buildHeader() {
   h.className = 'dx-header';
   h.innerHTML = `
     <button class="icon-btn menu-btn" aria-label="Open navigation">${ICONS.menu}</button>
-    <a class="dx-brand" href="index.html"><img src="../assets/hht-logo.png" alt="">HHT <span class="tag">docs</span></a>
+    <a class="dx-brand" href="index.html"><img src="assets/hht-logo.png" alt="">HHT <span class="tag">docs</span></a>
     <nav>
       <a class="hide-sm" href="installation.html">Install</a>
       <a class="hide-sm" href="api.html">API</a>
-      <a class="hide-sm" href="../">Project story</a>
+      <a class="hide-sm" href="backup/">Project story</a>
       <a class="icon-btn" href="${REPO}" aria-label="GitHub repository">${ICONS.github}</a>
       <button class="icon-btn theme-btn" aria-label="Toggle dark mode">${ICONS.moon}${ICONS.sun}</button>
     </nav>`;
@@ -131,7 +131,7 @@ function buildPager(content) {
   const foot = document.createElement('footer');
   foot.className = 'dx-foot';
   foot.innerHTML = `<span>HHT · Apache 2.0 · local-first travel diary for iOS</span>
-    <a href="${REPO}/edit/main/docs/docs/${currentFile()}">Edit this page on GitHub</a>`;
+    <a href="${REPO}/edit/main/docs/${currentFile()}">Edit this page on GitHub</a>`;
   content.append(foot);
 }
 

@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Contributing · HHT Docs</title>
+<meta name="description" content="How to set up HHT for development, run the tests, and contribute changes.">
+<link rel="icon" href="assets/hht-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=6">
+<script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<script src="assets/docs.js" defer></script>
+</head>
+<body>
+<main class="dx-main"><article class="dx-content">
+
+<p class="eyebrow">Reference</p>
+<h1>Contributing</h1>
+<p class="lede">Bug reports, fixes and new features are welcome. HHT is small enough to read in an afternoon, and most of the
+interesting logic lives in a package you can test without a phone.</p>
+
+<h2>Development setup</h2>
+<pre data-lang="bash"><code>git clone https://github.com/zyang91/HHT-app.git
+cd HHT-app
+brew install xcodegen
+make test     # core tests, no simulator needed
+make sim      # run the app with demo data</code></pre>
+
+<h2>Where to make a change</h2>
+<div class="table-wrap"><table>
+  <tr><th>You want to…</th><th>Look in</th></tr>
+  <tr><td>Improve visit / trip / mode detection</td><td><code>Inference/</code> and <code>InferenceConfig</code>; add a fixture scenario in <code>Tests/HHTCoreTests/InferenceTests.swift</code></td></tr>
+  <tr><td>Add a correction</td><td><code>Editing/EditService.swift</code>; always write <code>audit_log</code> and set <code>user_status</code></td></tr>
+  <tr><td>Change the schema</td><td><code>Database/Schema.swift</code>; add a new migration, never edit an old one</td></tr>
+  <tr><td>Add a metric</td><td><code>Analytics/MobilityMetrics.swift</code>, mirrored in <code>analysis/hht.py</code> and <code>docs/analytics.md</code></td></tr>
+  <tr><td>Add an export column</td><td><code>Export/Exporter.swift</code>; the Python contract check (<code>make export-check</code>) must still pass</td></tr>
+  <tr><td>Change background collection</td><td><code>App/Location/LocationCollector.swift</code>; test on a real device, the simulator can't reproduce it</td></tr>
+  <tr><td>Change the UI</td><td><code>App/Screens/</code>, styling in <code>App/Support/Theme.swift</code></td></tr>
+  <tr><td>Edit these docs</td><td><code>docs/*.html</code>; navigation is in <code>docs/assets/docs.js</code></td></tr>
+</table></div>
+
+<h2>Ground rules</h2>
+<ul>
+  <li><b>Never modify raw observations.</b> <code>raw_location_points</code> and <code>motion_activities</code> are append-only.</li>
+  <li><b>Never overwrite user corrections.</b> Anything with <code>user_status ≠ auto</code> is locked against inference.</li>
+  <li><b>Keep inference deterministic.</b> Same input → same output, and incremental runs must equal one-shot runs.</li>
+  <li><b>No new network calls</b> without discussion. Anything that sends data off the device must be opt-in and documented on the
+    <a href="privacy.html">Privacy</a> page.</li>
+  <li><b>No third-party dependencies</b> in <code>HHTCore</code>.</li>
+  <li>Thresholds go in <code>InferenceConfig</code>, not inline.</li>
+</ul>
+
+<h2>Before opening a pull request</h2>
+<ol class="steps">
+  <li><b>Run the checks CI runs</b>
+<pre data-lang="bash"><code>make ci</code></pre></li>
+  <li><b>Regenerate the project</b> if you touched <code>project.yml</code>: <code>make project</code>, and commit <code>HHT.xcodeproj</code>. CI fails if they differ.</li>
+  <li><b>Update docs</b>: the markdown specs in <code>docs/*.md</code> and these pages if behaviour changed.</li>
+  <li><b>Open the PR</b> against <code>main</code> with a short description of what changed and why.</li>
+</ol>
+
+<h2>Reporting issues</h2>
+<p>Use the <a href="https://github.com/zyang91/HHT-app/issues/new/choose">issue templates</a> for bugs and feature requests.
+For a wrong trip or visit, describe what happened and what HHT recorded. <b>Don't attach raw exports</b>: they contain your
+location history. Security problems go through
+<a href="https://github.com/zyang91/HHT-app/blob/main/SECURITY.md"><code>SECURITY.md</code></a>, not public issues.</p>
+<p>Everyone participating is expected to follow the
+<a href="https://github.com/zyang91/HHT-app/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a>.</p>
+
+<h2>License</h2>
+<p>HHT is released under the <a href="https://github.com/zyang91/HHT-app/blob/main/LICENSE">Apache License 2.0</a>.
+Contributions are accepted under the same license.</p>
+
+</article></main>
+</body>
+</html>
