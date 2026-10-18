@@ -40,17 +40,20 @@ final class MotionSync {
         let activities: [CMMotionActivity] = await withCheckedContinuation { cont in
             manager.queryActivityStarting(from: from, to: now, to: .main) { acts, _ in cont.resume(returning: acts ?? []) }
         }
-        let samples = activities.map { a -> MotionSample in
-            let kind: MotionSample.Activity
-            if a.automotive { kind = .automotive }
-            else if a.cycling { kind = .cycling }
-            else if a.running { kind = .running }
-            else if a.walking { kind = .walking }
-            else if a.stationary { kind = .stationary }
-            else { kind = .unknown }
-            return MotionSample(timestamp: a.startDate, activity: kind, confidence: a.confidence.rawValue)
-        }
-        try? store.insertMotion(samples)
+        try? store.insertMotion(activities.map(Self.sample(from:)))
         #endif
     }
+
+    #if os(iOS)
+    static func sample(from a: CMMotionActivity) -> MotionSample {
+        let kind: MotionSample.Activity
+        if a.automotive { kind = .automotive }
+        else if a.cycling { kind = .cycling }
+        else if a.running { kind = .running }
+        else if a.walking { kind = .walking }
+        else if a.stationary { kind = .stationary }
+        else { kind = .unknown }
+        return MotionSample(timestamp: a.startDate, activity: kind, confidence: a.confidence.rawValue)
+    }
+    #endif
 }
