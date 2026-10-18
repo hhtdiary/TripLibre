@@ -1,11 +1,15 @@
 import Foundation
 import CoreLocation
 import HHTCore
+#if os(iOS)
+import CoreMotion
+#endif
 
 /// Adaptive, low-power background location collection (docs/collection.md).
 ///
 /// * **moving**: continuous updates (≈10 m accuracy, 15 m distance filter).
-/// * **stationary**: after ~3 min within 60 m, standard updates stop. A geofence around the stop,
+/// * **stationary**: after ~3 min within 60 m, at walking speed or slower and not contradicted by CoreMotion
+///   (`StationaryDetector`), standard updates stop. A geofence around the stop,
 ///   CLVisit monitoring and significant-location-change monitoring wake the app (even after termination)
 ///   when the user leaves, and the collector switches back to moving.
 ///
@@ -31,12 +35,18 @@ final class LocationCollector: NSObject, ObservableObject {
     private let manager = CLLocationManager()
     private let store: TravelStore
     private var anchor: CLLocation?
-    private var anchorSince = Date()
+    private var detector = StationaryDetector()
     private var timer: Timer?
+    private var recheck: Timer?
+    #if os(iOS)
+    /// Declares ongoing background location use (iOS 17+). Without it the app was suspended a few seconds into each
+    /// background wake while driving, giving ~10 s GPS bursts every ~5 min (significant-change wakes).
+    private var backgroundSession: CLBackgroundActivitySession?
+    private let motionManager = CMMotionActivityManager()
+    private var motionUpdatesRunning = false
+    #endif
     private let regionID = "hht.stationary.region"
 
-    static let stationaryRadius: CLLocationDistance = 60
-    static let stationaryAfter: TimeInterval = 180
     static let departureDistance: CLLocationDistance = 150
 
     init(store: TravelStore) {
@@ -66,14 +76,32 @@ final class LocationCollector: NSObject, ObservableObject {
         #if os(iOS)
         manager.allowsBackgroundLocationUpdates = true
         manager.showsBackgroundLocationIndicator = false
+        // Created on every start, including background relaunches: that continues the session begun in the foreground.
+        if backgroundSession == nil { backgroundSession = CLBackgroundActivitySession() }
         manager.startMonitoringVisits()
         #endif
         manager.startMonitoringSignificantLocationChanges()
         enterMoving(reason: "start")
+        startMotionUpdatesIfAuthorized()
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
             Task { @MainActor in self?.checkStationary() }
         }
+    }
+
+    /// Live activity feeds the stationary decision. Only when already authorized (MotionSync asks for permission),
+    /// so this is also called once that prompt resolves and whenever the app becomes active. Idempotent.
+    func startMotionUpdatesIfAuthorized() {
+        #if os(iOS)
+        guard mode != .off, !motionUpdatesRunning, CMMotionActivityManager.isActivityAvailable(),
+              CMMotionActivityManager.authorizationStatus() == .authorized
+        else { return }
+        motionUpdatesRunning = true
+        motionManager.startActivityUpdates(to: .main) { [weak self] a in
+            guard let a else { return }
+            MainActor.assumeIsolated { self?.detector.observe(motion: MotionSync.sample(from: a)) }
+        }
+        #endif
     }
 
     func stop() {
@@ -82,9 +110,14 @@ final class LocationCollector: NSObject, ObservableObject {
         manager.stopMonitoringSignificantLocationChanges()
         #if os(iOS)
         manager.stopMonitoringVisits()
+        motionManager.stopActivityUpdates()
+        motionUpdatesRunning = false
+        backgroundSession?.invalidate()
+        backgroundSession = nil
         #endif
         for r in manager.monitoredRegions { manager.stopMonitoring(for: r) }
         timer?.invalidate()
+        recheck?.invalidate()
         mode = .off
     }
 
@@ -127,11 +160,12 @@ final class LocationCollector: NSObject, ObservableObject {
         manager.startUpdatingLocation()
         mode = .moving
         anchor = nil
-        anchorSince = Date()
+        detector.reset(at: Date())
     }
 
     private func enterStationary() {
         guard mode == .moving, let a = anchor else { return }
+        recheck?.invalidate()
         mode = .stationary
         // mark the transition with the last fix so inference knows the following silence is deliberate
         record(a, source: "stationary_marker", at: Date())
@@ -145,7 +179,16 @@ final class LocationCollector: NSObject, ObservableObject {
 
     private func checkStationary() {
         guard mode == .moving, anchor != nil else { return }
-        if Date().timeIntervalSince(anchorSince) >= Self.stationaryAfter { enterStationary() }
+        switch detector.evaluate(now: Date()) {
+        case .stay: break
+        case .enterStationary: enterStationary()
+        case .recheck(let delay):
+            // just resumed from suspension: let queued fixes arrive before judging the silence
+            recheck?.invalidate()
+            recheck = Timer.scheduledTimer(withTimeInterval: delay, repeats: false) { [weak self] _ in
+                Task { @MainActor in self?.checkStationary() }
+            }
+        }
     }
 
     // MARK: - Recording
@@ -180,13 +223,13 @@ final class LocationCollector: NSObject, ObservableObject {
                 enterMoving(reason: "moved")
             }
         case .moving:
-            guard loc.horizontalAccuracy <= 100 else { return }
-            if let a = anchor, loc.distance(from: a) <= max(Self.stationaryRadius, loc.horizontalAccuracy) {
-                if loc.timestamp.timeIntervalSince(anchorSince) >= Self.stationaryAfter { enterStationary() }
-            } else {
-                anchor = loc
-                anchorSince = loc.timestamp
-            }
+            let fix = StationaryDetector.Fix(timestamp: loc.timestamp,
+                                             coordinate: Coordinate(loc.coordinate.latitude, loc.coordinate.longitude),
+                                             horizontalAccuracy: loc.horizontalAccuracy,
+                                             speed: loc.speed >= 0 ? loc.speed : nil)
+            let still = detector.observe(fix)
+            if detector.anchor == fix { anchor = loc }
+            if still { enterStationary() }
         case .off:
             break
         }

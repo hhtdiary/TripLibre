@@ -24,10 +24,13 @@ final class MotionSync {
     }
 
     /// Triggers the Motion & Fitness permission prompt (via a tiny query) if not yet decided.
-    func requestPermission() {
+    /// `completion` runs on the main queue once the user has answered (or right away if already decided).
+    func requestPermission(completion: @escaping @MainActor () -> Void = {}) {
         #if os(iOS)
         guard Self.isAvailable else { return }
-        manager.queryActivityStarting(from: Date().addingTimeInterval(-60), to: Date(), to: .main) { _, _ in }
+        manager.queryActivityStarting(from: Date().addingTimeInterval(-60), to: Date(), to: .main) { _, _ in
+            MainActor.assumeIsolated { completion() }
+        }
         #endif
     }
 
@@ -40,17 +43,20 @@ final class MotionSync {
         let activities: [CMMotionActivity] = await withCheckedContinuation { cont in
             manager.queryActivityStarting(from: from, to: now, to: .main) { acts, _ in cont.resume(returning: acts ?? []) }
         }
-        let samples = activities.map { a -> MotionSample in
-            let kind: MotionSample.Activity
-            if a.automotive { kind = .automotive }
-            else if a.cycling { kind = .cycling }
-            else if a.running { kind = .running }
-            else if a.walking { kind = .walking }
-            else if a.stationary { kind = .stationary }
-            else { kind = .unknown }
-            return MotionSample(timestamp: a.startDate, activity: kind, confidence: a.confidence.rawValue)
-        }
-        try? store.insertMotion(samples)
+        try? store.insertMotion(activities.map(Self.sample(from:)))
         #endif
     }
+
+    #if os(iOS)
+    static func sample(from a: CMMotionActivity) -> MotionSample {
+        let kind: MotionSample.Activity
+        if a.automotive { kind = .automotive }
+        else if a.cycling { kind = .cycling }
+        else if a.running { kind = .running }
+        else if a.walking { kind = .walking }
+        else if a.stationary { kind = .stationary }
+        else { kind = .unknown }
+        return MotionSample(timestamp: a.startDate, activity: kind, confidence: a.confidence.rawValue)
+    }
+    #endif
 }

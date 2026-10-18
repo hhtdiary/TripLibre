@@ -139,7 +139,7 @@ struct OnboardingView: View {
                         .font(.toon(12, .bold)).foregroundStyle(Toon.muted).multilineTextAlignment(.center)
                     Button {
                         model.collector.start()
-                        model.motion.requestPermission()
+                        model.motion.requestPermission { model.collector.startMotionUpdatesIfAuthorized() }
                         done()
                     } label: {
                         Text("Allow location & start").frame(maxWidth: .infinity)
