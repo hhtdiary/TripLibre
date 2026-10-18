@@ -247,19 +247,37 @@ def cmd_export(a):
 def cmd_split(a):
     ref = json.loads(Path(a.reference, "reference.json").read_text())
     path = Path(a.reference, "split.json")
-    if path.exists() and not a.force:
+    if path.exists() and not a.force and not a.validation_after:
         sys.exit(f"{path} exists; the split is frozen (use --force only for a new, versioned protocol)")
     m = ref["meta"]
     days = sorted(d for d in reviewed_days(Path(a.reference))
                   if m["points_start"] <= day_bounds(d, m["default_tz"])[1] and day_bounds(d, m["default_tz"])[0] <= m["points_end"])
     # complete days only: a day where recording starts or stops mid-day is calibration-only
     full = [d for d in days if day_bounds(d, m["default_tz"])[0] >= m["points_start"] and day_bounds(d, m["default_tz"])[1] <= m["points_end"]]
-    rank = sorted(full, key=lambda d: hashlib.sha256(f"{a.salt}:{d}".encode()).hexdigest())
-    n_val = max(1, round(len(full) * a.validation_share))
-    validation = sorted(rank[:n_val])
-    calibration = sorted(d for d in days if d not in validation)
+    extra = {}
+    if a.validation_after:
+        # forward split (protocol v2+): every day up to the cutoff is calibration; validation is only complete days
+        # recorded after it, so a later snapshot adds holdout days without moving any calibration day
+        cutoff = a.validation_after
+        if path.exists():
+            old = json.loads(path.read_text())
+            if old.get("validation_after") != cutoff or old.get("salt") != a.salt:
+                sys.exit(f"{path} was frozen with another protocol; refusing to change it")
+            if old.get("validation"):
+                sys.exit(f"{path} already has validation days {old['validation']}; the holdout is frozen")
+        calibration = sorted(d for d in days if d <= cutoff)
+        validation = sorted(d for d in full if d > cutoff)
+        excluded = sorted(d for d in days if d > cutoff and d not in validation)
+        if path.exists() and json.loads(path.read_text())["calibration"] != calibration:
+            sys.exit(f"{path}: calibration days would change; the split is frozen")
+        extra = {"validation_after": cutoff, "excluded_incomplete_after_cutoff": excluded}
+    else:
+        rank = sorted(full, key=lambda d: hashlib.sha256(f"{a.salt}:{d}".encode()).hexdigest())
+        n_val = max(1, round(len(full) * a.validation_share))
+        validation = sorted(rank[:n_val])
+        calibration = sorted(d for d in days if d not in validation)
     write_json(path, {"salt": a.salt, "validation_share": a.validation_share, "created_at": datetime.now(timezone.utc).isoformat(timespec="seconds"),
-                      "snapshot_sha256": m["snapshot_sha256"], "calibration": calibration, "validation": validation})
+                      "snapshot_sha256": m["snapshot_sha256"], "calibration": calibration, "validation": validation, **extra})
     print(f"split: {len(calibration)} calibration days, {len(validation)} validation days → {path}")
 
 
@@ -627,6 +645,8 @@ def cmd_evaluate(a):
         if not split:
             sys.exit("no split.json; run `calibrate.py split` first or use --days all")
         days = set(split[a.days]) & reviewed
+        if not days:
+            sys.exit(f"no reviewed {a.days} days in split.json (a forward split fills its holdout from a later export)")
     tol = dict(DEFAULT_TOL)
     points = load_points(Path(a.db)) if a.db else []
     excl = exclusions(refdir, ref["meta"]["default_tz"])
@@ -732,6 +752,9 @@ def main(argv=None):
     s = sub.add_parser("split", help="freeze a whole-day calibration/validation split")
     s.add_argument("--reference", required=True); s.add_argument("--validation-share", type=float, default=0.3)
     s.add_argument("--salt", default="hht-46-v1"); s.add_argument("--force", action="store_true")
+    s.add_argument("--validation-after", metavar="YYYY-MM-DD",
+                   help="forward split: days up to this date are calibration, complete days after it are validation; "
+                        "re-run on a later export to fill the holdout (never changes calibration days)")
     v = sub.add_parser("evaluate", help="match predictions to the reference and score them")
     v.add_argument("--reference", required=True); v.add_argument("--pred", required=True); v.add_argument("--out", required=True)
     v.add_argument("--days", choices=["calibration", "validation", "all"], default="calibration")

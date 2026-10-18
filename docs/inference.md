@@ -59,12 +59,25 @@ Distance = path length (straight line across gaps). `has_gap` = any > 15 min hol
 
 **Segmentation**: run-length encode the classes; repeatedly absorb the shortest run under `minSegmentDuration` [120 s]
 into its longer neighbour. Short access walks under 2 min are therefore folded into the vehicle segment.
+A walk run whose straight-line displacement is ≥ `walkCheckMinDisplacement` [1 km] at > `walkMaxDisplacementSpeed`
+[2.5 m/s] becomes a vehicle run: sparse station fixes plus walking-like CoreMotion on a train otherwise read as a walk.
 
 **Segment refinement**: an air run shorter than `airMinDistance` [50 km] is a GPS jump and is refined as vehicle.
-Vehicle runs: airplane if avg ≥ 0.6·air speed over > 150 km; intercity rail if ≥ 60 km with
-p90 speed 38–70 m/s (conf 0.35); subway if > 40 % of time is signal loss (no fix for > `movingGapThreshold` [120 s]
-while covering > 300 m) at 4–25 m/s over < 40 km (conf 0.4); else car (conf 0.4–0.5). Bus vs car is not separable
-without GTFS; correct it once and personalisation handles repeats.
+Vehicle runs, in order (issue #46 round 2 added the road-evidence and no-evidence rules):
+1. airplane if avg ≥ 0.6·air speed over > 150 km; intercity rail if ≥ 60 km with p90 speed 38–70 m/s (conf 0.35);
+2. **road evidence → car**: CoreMotion automotive ≥ `roadMinAutomotiveShare` [60 %] of covered time and ≥
+   `roadMinGoodFixShare` [50 %] (and ≥ `roadMinGoodFixes` [5]) of fixes are "good" (accuracy ≤ `roadFixMaxAccuracy`
+   [20 m] with reported speed ≥ `roadFixMinSpeed` [3 m/s]). Conf 0.6, or 0.45 if one hole exceeds `gapThreshold`.
+   The collector leaves ~5 min holes during car rides; without this rule they looked like tunnels;
+3. subway if > 40 % of time is signal loss (no fix for > `movingGapThreshold` [120 s] while covering > 300 m) at
+   4–25 m/s over < 40 km (conf 0.4);
+4. **no road evidence → subway**: motion covered, automotive < `undergroundMaxAutomotiveShare` [50 %], good fixes
+   < `undergroundMaxGoodFixShare` [20 %], avg < 25 m/s, < 40 km (conf 0.35). Underground, CoreMotion mostly says
+   unknown or walking and fixes are coarse Wi-Fi/cell ones without speed;
+5. else car (conf 0.4–0.5).
+
+Bus vs car vs taxi is not separable without GTFS; buses mostly land in subway (same transit group). Above-ground rail at
+road speeds with automotive motion and clean GPS reads as car. Correct it once and personalisation handles repeats.
 
 **Main mode** = highest in: airplane > intercity rail > coach > ferry > commuter rail > subway > light rail > bus >
 shuttle > taxi > car (driver/passenger/unspecified) > e-bike > bicycle > scooter > run > walk, among segments ≥ 2 min or ≥ 300 m.

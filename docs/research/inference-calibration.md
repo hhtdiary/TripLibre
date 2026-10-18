@@ -2,7 +2,7 @@
 
 Issue [#46](https://github.com/zyang91/HHT-app/issues/46). This note covers the audit (Phase 0), the reference dataset
 and review protocol (1), the offline replay harness (2), matching rules and metrics (3), the first calibration round (4)
-and its held-out validation (5). Everything published here is aggregate: no coordinates, places, timelines or
+and its held-out validation (5), and calibration round 2 on travel modes (8). Everything published here is aggregate: no coordinates, places, timelines or
 per-day diaries. The private inputs and full reports live in a gitignored `calibration-data/` folder on the
 developer's machine.
 
@@ -226,7 +226,7 @@ The synthetic tests cover that case (`deleteVisitMergesTripsAndStaysDeleted`).
 3. **Nearby buildings merged** (3 on calibration days). See the tradeoff above.
 4. **Mode classification is the weakest component.** On human-labelled trips, subway is often scored as car or walk, and
    taxi/ride-hail as subway (8 calibration trips). Only 35–55 % are right even at group level. Calibration round 1 did not
-   touch modes.
+   touch modes. *Addressed in round 2 (§8).*
 5. **Arrival after a silent walk** is still dated by the next fix. Only the departure side reads the motion log.
 6. **Indoor drift of hundreds of metres** at large venues still creates duplicate stays 200–500 m apart.
 
@@ -241,12 +241,112 @@ The synthetic tests cover that case (`deleteVisitMergesTripsAndStaysDeleted`).
 | Human edits survive re-inference | ✅ synthetic tests and the real-snapshot `reinfer-check` |
 | Tuning checked on untouched days, tradeoffs reported | ✅ §4–5 |
 | No personal location history published | ✅ aggregates only. `calibration-data/` is gitignored |
-| Regression fixtures for the failure classes found | ✅ `CalibrationTests` (each fails on the old engine) |
+| Regression fixtures for the failure classes found | ✅ `CalibrationTests` (each fails on the old engine), rounds 1 and 2 |
+| Round 2 (modes) checked on untouched days | ⏳ pending: no post-cutoff days yet (§8) |
 
 **Recommendation:** ship the round-1 changes. They fix a large, systematic diary error (phantom trips splitting long
 stays) and showed no data loss. Not release-blocking but open: mode classification (§6.4), moving-mode GPS silences in the
 collector (§6.2), and keeping the original machine output when a record is first edited, so future rounds can measure
 the app's real behaviour and not only a replay.
+
+## 8. Calibration round 2: travel modes (2026-10-17)
+
+Round 2 changes only `ModeClassifier` and new `InferenceConfig` fields. Visit and trip boundaries are untouched: every
+stay, trip and timing metric is identical between baseline and candidate.
+
+### Protocol v2 (forward split)
+
+The round-1 validation days had been scored once, so they cannot be a holdout again. A fresh phone snapshot
+(`20261017-221454`) was pulled first. It held **no new data**: the same 4,127 fixes and the same 17 diary days as round 1,
+because it was taken the same evening. A new salted shuffle of those days would only reuse days already seen. So
+protocol v2 is a *forward* split, frozen before any tuning (`calibrate.py split --salt hht-46-v2 --validation-after 2026-10-17`):
+
+* **Calibration:** all 17 existing reviewed days, including round 1's validation days. Using a spent holdout for
+  tuning is allowed; reusing it as a holdout is not.
+* **Validation:** only complete, reviewed days recorded **after 2026-10-17**. A later export fills `split.json` with
+  those days. The command refuses to change calibration days or an already-filled holdout.
+* **Baseline** = the round-1 engine. **Candidate** = this round's engine. Both release binaries are archived in
+  `calibration-data/tools/`, and each reproduces its archived replay byte-for-byte, so validation will score exactly
+  the frozen engines.
+
+**Status: validation is pending.** No post-cutoff days exist yet. The single validation run is due once at least 5 new
+complete days have been reviewed (commands under *Reproducing*). Until then, every number below is calibration-only
+and in-sample.
+
+### Diagnosis (calibration days)
+
+There are 67 matched trips with a human-set mode: 39 transit, 14 car/taxi, 12 active, 2 long-distance. For each
+misclassified trip the raw fixes and CoreMotion samples were stepped through (`calibration-data/results/r2-baseline/diag.jsonl`).
+The vehicle part of each trip was summarised by three numbers: the share of CoreMotion-covered time that is
+*automotive*, the share of fixes that are **good** (accuracy ≤ 20 m with a valid reported speed ≥ 3 m/s), and the
+signal-loss fraction.
+
+| Confusion (baseline) | n | What the data shows |
+|---|---|---|
+| taxi → subway | 10 | 1 Hz bursts of good fixes at 7–24 m/s (median), automotive ≥ 0.67 in 9 of 10, then the collector goes quiet for **4–6 min** at a time. Those holes push signal loss above the 40 % "tunnel" threshold. 90 of the snapshot's 146 holes > 2 min under automotive motion last 4–6 min: a collector cadence, not tunnels. |
+| car → subway | 3 | Same pattern on highway drives (automotive ≥ 0.79, ≥ 88 % good fixes). |
+| subway → car | 7 | 5 of 7 have no good fixes at all: coarse Wi-Fi/cell fixes (40–230 m, no speed), CoreMotion mostly *unknown*, *walking* or *stationary*. The trip falls through to the "car" default because the holes are shorter than 2 min, or the window is long. |
+| subway → walk | 5 | Fixes cluster at the two stations. The ride is one short jump that the 2 min minimum segment absorbs. CoreMotion reads the carriage as walking. Straight-line displacement is 1.1–2.6 km at **2.7–4.9 m/s**. The fastest real walk over 400 m was 1.55 m/s. |
+| bus → car / subway | 3 / 3 | Bus and road traffic look the same without GTFS. Bus → subway already counts at group level (transit). |
+| walk → car | 4 | GPS jumps during walks create short "vehicle" runs. Real bus and car sub-segments also show near-zero displacement, so no clean rule was found. **Not changed.** |
+
+On automotive share and good fixes, taxi/car and subway barely overlap. The exceptions are 3 subway trips on fast
+above-ground track (≈ 25 m/s, automotive 0.57–0.90, clean GPS). Those trips look like a car to any rule without map data.
+
+### Changes
+
+| # | Rule (`ModeClassifier.refine` / `segment`) | Config (default) | Fixes |
+|---|---|---|---|
+| A | **Road evidence → car**, checked *before* the signal-loss subway rule: automotive ≥ 60 % of covered time and ≥ 50 % (≥ 5) good fixes. Confidence 0.6, or 0.45 when one hole exceeds `gapThreshold` (a 25 min blackout is still ambiguous and still needs review). | `roadMinAutomotiveShare` 0.6, `roadMinGoodFixShare` 0.5, `roadMinGoodFixes` 5, `roadFixMaxAccuracy` 20 m, `roadFixMinSpeed` 3 m/s | taxi/car → subway |
+| B | **No road evidence → subway** (instead of the car default): motion covered, automotive < 50 %, good fixes < 20 %, avg < 25 m/s, < 40 km. | `undergroundMaxAutomotiveShare` 0.5, `undergroundMaxGoodFixShare` 0.2 | subway → car |
+| C | **Too fast to be a walk**: a walk run with straight-line displacement ≥ 1 km at > 2.5 m/s (9 km/h) becomes a vehicle run, and B then refines it. | `walkCheckMinDisplacement` 1 km, `walkMaxDisplacementSpeed` 2.5 m/s | subway → walk |
+
+The thresholds were read off the diagnosis table. They were not picked by search. A one-at-a-time sweep afterwards
+(each threshold one step either side: 0.5/0.7, 0.4/0.6, 3/10 fixes, 0.4/0.6, 0.1/0.3, 2.0/3.0 m/s, 0.5/1.5 km,
+15/30 m) moved group accuracy by at most 2 trips (0.791–0.821). The defaults sit on a plateau, not a peak. Ablation
+(group accuracy without the rule): A 0.672, B 0.672, C 0.746, all three 0.821.
+
+**Regression fixtures** (`CalibrationTests`, synthetic). The first three fail on the round-1 engine:
+`taxiWithCollectorHolesIsACar`, `coarseFixesWithoutAutomotiveMotionAreSubway`, `fastStraightLineWalkIsARide`.
+`ordinaryWalksAndDrivesAreUnchanged` guards a normal walk and a GPS-dense drive. The existing `missingInterval` test
+(25 silent minutes must still need review) drove the 0.45 confidence in rule A.
+
+### Results (calibration days only, 17 days, in-sample)
+
+| | Baseline (round-1 engine) | Candidate |
+|---|---|---|
+| Mode, human-labelled: exact / group (n = 67), batch | 0.388 / 0.507 | **0.537 / 0.821** |
+| … day-level bootstrap 95 % for group accuracy | [0.38, 0.65] | [0.71, 0.93] |
+| … paired Δ group, bootstrap 95 % | | +0.31 [+0.20, +0.44] |
+| … streaming replay (15 min steps): exact / group | 0.403 / 0.522 | 0.522 / 0.806 |
+| Group recall: transit / car / active / long-distance | 23/39 · 1/14 · 8/12 · 2/2 | 33/39 · 12/14 · 8/12 · 2/2 |
+| Mode, accepted (never edited): exact (n = 26) | 0.885 | 0.885 |
+| Visits F1, trips F1, time agreement, timing | 0.834, 0.842, 0.949 | identical |
+
+22 trips went from wrong to right at group level and 1 went from right to wrong. Remaining human-labelled confusions:
+subway → car 5, walk → subway 4, taxi → subway 2, light rail → walk 1, walk → bicycle 1. Exact accuracy is capped:
+taxi, bus, light rail and commuter rail are never predicted (taxi → car counts at group level only).
+
+**Adverse tradeoffs (reported, not hidden):**
+
+* *Above-ground rail now reads as car.* One subway trip on fast surface track with automotive motion and clean GPS
+  flipped subway → car. The other two such trips stayed subway only because their automotive or good-fix share fell just below the thresholds.
+* *Walks with GPS jumps now say subway, not car.* Rule B also catches the short vehicle runs created by jumps. Those 4
+  human-labelled walks (and 2 accepted ones) were wrong before and are still wrong. Subway outranks car in the main-mode
+  hierarchy, so the error is now more visible in the diary.
+* *Buses go to subway more often* (6 of 6, up from 3 of 6). That is correct at group level and wrong exactly. Only
+  GTFS can separate them.
+* *Car confidence rose to 0.6* when road evidence is present, so those trips leave the review queue. Trips with a
+  > 15 min blackout stay at 0.45 and still need review.
+
+### Collector findings (not compensated in inference)
+
+* **Periodic holes while driving.** Most > 2 min silences under automotive motion last 4–6 min, between 1 Hz bursts.
+  Distance and route geometry on those trips are straight lines across the holes.
+* **Stationary markers written mid-ride.** 65 `stationary_marker` fixes were logged while CoreMotion said automotive,
+  within 5 min of a ≥ 5 m/s fix. The collector switches to stationary mode on a moving vehicle, and the following
+  `significant_change` fix lands kilometres away. This is probably the same mechanism as the moving-mode silences in
+  §6.2 and is worth fixing at the source.
 
 ## Reproducing
 
@@ -265,4 +365,19 @@ Packages/HHTCore/.build/release/hht-calibrate replay --db $S --out calibration-d
 python3 analysis/calibrate.py evaluate --reference calibration-data/reference --db $S \
   --pred calibration-data/results/<name>/batch.json --out calibration-data/results/<name> --days calibration
 python3 analysis/calibrate.py compare --baseline …/metrics-calibration.json --candidate …/metrics-calibration.json
+```
+
+**Round 2 validation (run once, when ≥ 5 complete days after 2026-10-17 have been reviewed):**
+
+```bash
+# new snapshot as in step 1, then re-export into the v2 reference (keeps review decisions) and mark the new days reviewed
+python3 analysis/calibrate.py export --db $S --out calibration-data/reference-v2
+python3 analysis/calibrate.py split --reference calibration-data/reference-v2 --salt hht-46-v2 --validation-after 2026-10-17
+for v in baseline candidate; do
+  calibration-data/tools/hht-calibrate-r2-$v replay --db $S --out calibration-data/results/r2-val-$v/batch.json
+  python3 analysis/calibrate.py evaluate --reference calibration-data/reference-v2 --db $S --days validation \
+    --pred calibration-data/results/r2-val-$v/batch.json --out calibration-data/results/r2-val-$v
+done
+python3 analysis/calibrate.py compare --baseline calibration-data/results/r2-val-baseline/metrics-validation.json \
+  --candidate calibration-data/results/r2-val-candidate/metrics-validation.json
 ```

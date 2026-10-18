@@ -200,4 +200,77 @@ struct CalibrationTests {
         }
         print("calibration fixture written to \(path)")
     }
+
+    // MARK: round 2 — travel modes (docs/research/inference-calibration.md §8)
+
+    /// A path along a straight line east of `Philly.home`: one fix per entry, (seconds, metres east, accuracy, speed).
+    private func line(_ fixes: [(Double, Double, Double, Double?)], t0: Date) -> [RawPoint] {
+        let anchor = { (t: Double, x: Double) in
+            RawPoint(timestamp: t0.addingTimeInterval(t), coordinate: Geo.unproject((x, 0), origin: Philly.home), source: "anchor")
+        }
+        var path = [anchor(fixes.first!.0 - 5, fixes.first!.1)]
+        path += fixes.map { f in
+            RawPoint(timestamp: t0.addingTimeInterval(f.0), coordinate: Geo.unproject((f.1, 0), origin: Philly.home),
+                     horizontalAccuracy: f.2, speed: f.3, collectorMode: "moving")
+        }
+        path.append(anchor(fixes.last!.0 + 5, fixes.last!.1))
+        return path
+    }
+
+    private func mainMode(_ segs: [ModeClassifier.SegmentResult]) -> TravelMode {
+        ModeClassifier.mainMode(segs.map { ($0.mode, $0.end.timeIntervalSince($0.start), $0.distance) })
+    }
+
+    /// Taxi rides: the collector delivers 1 Hz bursts of accurate fixes with a valid speed, then goes quiet for ~5 min,
+    /// and CoreMotion says automotive throughout. The holes used to read as tunnels, so taxis came out as subway.
+    @Test func taxiWithCollectorHolesIsACar() {
+        let t0 = Trajectory.date("2026-10-02 16:38")
+        var fixes: [(Double, Double, Double, Double?)] = []
+        var t = 0.0, x = 0.0
+        for _ in 0..<3 {
+            for _ in 0..<20 { fixes.append((t, x, 8, 15)); t += 1; x += 15 }
+            t += 280; x += 280 * 15          // the collector's hole, still driving at 15 m/s
+        }
+        let motion = MotionTimeline([MotionSample(timestamp: t0.addingTimeInterval(-10), activity: .automotive, confidence: 2)])
+        let segs = ModeClassifier().segment(path: line(fixes, t0: t0), motion: motion)
+        #expect(mainMode(segs) == .car)
+    }
+
+    /// Underground rail with no tunnel-length hole: coarse Wi-Fi/cell fixes (no speed) every minute at train speed, and
+    /// CoreMotion reporting unknown. Nothing says road vehicle, but the old fallback was car.
+    @Test func coarseFixesWithoutAutomotiveMotionAreSubway() {
+        let t0 = Trajectory.date("2026-10-15 16:54")
+        let fixes: [(Double, Double, Double, Double?)] = (0..<9).map { i -> (Double, Double, Double, Double?) in
+            (Double(i) * 60, Double(i) * 600, 60, nil)
+        }
+        let motion = MotionTimeline([MotionSample(timestamp: t0.addingTimeInterval(-10), activity: .unknown, confidence: 2)])
+        let segs = ModeClassifier().segment(path: line(fixes, t0: t0), motion: motion)
+        #expect(mainMode(segs) == .subway)
+    }
+
+    /// Subway read as a walk: fixes cluster at the two stations, the ride itself is one short jump (absorbed by the
+    /// minimum segment length), and CoreMotion reads the carriage's vibration as walking. 3 km in 8 min is not a walk.
+    @Test func fastStraightLineWalkIsARide() {
+        let t0 = Trajectory.date("2026-10-05 09:00")
+        var fixes: [(Double, Double, Double, Double?)] = []
+        for station in [(t: 0.0, x: 0.0), (t: 300.0, x: 3_000.0)] {
+            for i in 0..<10 { fixes.append((station.t + Double(i) * 20, station.x + Double(i % 2) * 10, 50, nil)) }
+        }
+        let motion = MotionTimeline([MotionSample(timestamp: t0.addingTimeInterval(-10), activity: .walking, confidence: 2)])
+        let segs = ModeClassifier().segment(path: line(fixes, t0: t0), motion: motion)
+        #expect(mainMode(segs) == .subway)
+        #expect(!segs.contains { $0.mode == .walk && $0.distance > 1_000 })
+    }
+
+    /// Guard for the walk check: a real 1.4 m/s walk with walking motion stays a walk, and a GPS-dense drive with
+    /// automotive motion and no holes is still a car.
+    @Test func ordinaryWalksAndDrivesAreUnchanged() {
+        let t0 = Trajectory.date("2026-10-05 12:00")
+        let walk = (0..<60).map { i -> (Double, Double, Double, Double?) in (Double(i) * 20, Double(i) * 28, 10, 1.4) }
+        let walking = MotionTimeline([MotionSample(timestamp: t0.addingTimeInterval(-10), activity: .walking, confidence: 2)])
+        #expect(mainMode(ModeClassifier().segment(path: line(walk, t0: t0), motion: walking)) == .walk)
+        let drive = (0..<60).map { i -> (Double, Double, Double, Double?) in (Double(i) * 10, Double(i) * 120, 8, 12) }
+        let auto = MotionTimeline([MotionSample(timestamp: t0.addingTimeInterval(-10), activity: .automotive, confidence: 2)])
+        #expect(mainMode(ModeClassifier().segment(path: line(drive, t0: t0), motion: auto)) == .car)
+    }
 }
