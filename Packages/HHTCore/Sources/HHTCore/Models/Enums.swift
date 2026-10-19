@@ -120,7 +120,8 @@ public enum TripPurpose: String, CaseIterable, Codable, Identifiable, Sendable {
     }
 }
 
-/// Personal place category.
+/// Personal place category. Raw values are the canonical codes written to the database and exports;
+/// never rename a shipped one (old databases and exports keep it), only append new cases.
 public enum PlaceCategory: String, CaseIterable, Codable, Identifiable, Sendable {
     case home
     case workSchool = "work_school"
@@ -132,6 +133,20 @@ public enum PlaceCategory: String, CaseIterable, Codable, Identifiable, Sendable
     case friendFamily = "friend_family"
     case medical
     case other
+    // added for issue #56
+    case stadium                                // stadium / arena / sports venue
+    case eventVenue = "event_venue"             // theater / concert hall / event venue
+    case museum                                 // museum / art gallery
+    case library
+    case convenienceStore = "convenience_store"
+    case gasStation = "gas_station"
+    case bar
+    case gym
+    case pharmacy
+    case bank
+    case civic                                  // government / civic facility
+    case religious                              // place of worship
+    case parking
 
     public var id: String { rawValue }
     public var label: String {
@@ -140,17 +155,30 @@ public enum PlaceCategory: String, CaseIterable, Codable, Identifiable, Sendable
         case .workSchool: return "Work / School"
         case .restaurant: return "Restaurant"
         case .cafe: return "Cafe"
-        case .grocery: return "Grocery"
-        case .shopping: return "Shopping"
-        case .recreation: return "Recreation"
+        case .grocery: return "Grocery / Supermarket"
+        case .shopping: return "Shopping / Mall"
+        case .recreation: return "Park / Recreation"
         case .entertainment: return "Entertainment"
         case .airport: return "Airport"
         case .railStation: return "Rail station"
-        case .transitStation: return "Transit station"
-        case .hotel: return "Hotel"
+        case .transitStation: return "Bus / transit stop"
+        case .hotel: return "Hotel / Lodging"
         case .friendFamily: return "Friend / Family"
-        case .medical: return "Medical"
+        case .medical: return "Hospital / Clinic"
         case .other: return "Other"
+        case .stadium: return "Stadium / Arena"
+        case .eventVenue: return "Theater / Event venue"
+        case .museum: return "Museum / Gallery"
+        case .library: return "Library"
+        case .convenienceStore: return "Convenience store"
+        case .gasStation: return "Gas station"
+        case .bar: return "Bar / Pub"
+        case .gym: return "Gym / Fitness"
+        case .pharmacy: return "Pharmacy"
+        case .bank: return "Bank"
+        case .civic: return "Government / Civic"
+        case .religious: return "Place of worship"
+        case .parking: return "Parking"
         }
     }
     public var symbol: String {
@@ -162,7 +190,7 @@ public enum PlaceCategory: String, CaseIterable, Codable, Identifiable, Sendable
         case .grocery: return "cart.fill"
         case .shopping: return "bag.fill"
         case .recreation: return "leaf.fill"
-        case .entertainment: return "theatermasks.fill"
+        case .entertainment: return "popcorn.fill"
         case .airport: return "airplane.departure"
         case .railStation: return "train.side.front.car"
         case .transitStation: return "tram.fill"
@@ -170,23 +198,109 @@ public enum PlaceCategory: String, CaseIterable, Codable, Identifiable, Sendable
         case .friendFamily: return "person.2.fill"
         case .medical: return "cross.case.fill"
         case .other: return "mappin"
+        case .stadium: return "sportscourt.fill"
+        case .eventVenue: return "theatermasks.fill"
+        case .museum: return "paintpalette.fill"
+        case .library: return "books.vertical.fill"
+        case .convenienceStore: return "basket.fill"
+        case .gasStation: return "fuelpump.fill"
+        case .bar: return "wineglass.fill"
+        case .gym: return "dumbbell.fill"
+        case .pharmacy: return "pills.fill"
+        case .bank: return "banknote.fill"
+        case .civic: return "building.2.fill"
+        case .religious: return "hands.and.sparkles.fill"
+        case .parking: return "parkingsign.circle.fill"
         }
     }
+    /// Section the category is listed under in the picker.
+    public var group: PlaceCategoryGroup {
+        switch self {
+        case .home, .friendFamily, .workSchool, .hotel: return .personal
+        case .restaurant, .cafe, .bar: return .foodDrink
+        case .grocery, .convenienceStore, .shopping, .gasStation: return .shopping
+        case .recreation, .gym, .stadium, .eventVenue, .museum, .library, .entertainment: return .leisure
+        case .medical, .pharmacy, .bank, .civic, .religious: return .services
+        case .airport, .railStation, .transitStation, .parking: return .transport
+        case .other: return .other
+        }
+    }
+    /// Extra words the picker's search matches besides the label.
+    public var keywords: [String] {
+        switch self {
+        case .home: return ["house", "apartment"]
+        case .workSchool: return ["office", "workplace", "university", "college", "campus", "class"]
+        case .restaurant: return ["food", "dinner", "lunch"]
+        case .cafe: return ["coffee", "café", "bakery"]
+        case .grocery: return ["market", "food"]
+        case .shopping: return ["store", "retail", "shop"]
+        case .recreation: return ["outdoors", "playground", "beach", "trail"]
+        case .entertainment: return ["cinema", "movie", "arcade", "bowling"]
+        case .airport: return ["flight", "terminal"]
+        case .railStation: return ["train", "amtrak"]
+        case .transitStation: return ["bus", "subway", "metro", "terminal"]
+        case .hotel: return ["motel", "hostel", "airbnb"]
+        case .friendFamily: return ["friend", "family", "relative"]
+        case .medical: return ["doctor", "dentist", "health"]
+        case .other: return []
+        case .stadium: return ["arena", "sports", "ballpark", "field", "game"]
+        case .eventVenue: return ["concert", "music", "hall", "show", "venue", "opera"]
+        case .museum: return ["art", "exhibit"]
+        case .library: return ["books", "study"]
+        case .convenienceStore: return ["corner", "deli", "bodega", "wawa"]
+        case .gasStation: return ["fuel", "petrol", "charging"]
+        case .bar: return ["pub", "brewery", "drinks", "nightlife"]
+        case .gym: return ["fitness", "workout", "yoga", "pool"]
+        case .pharmacy: return ["drugstore", "chemist"]
+        case .bank: return ["atm", "finance"]
+        case .civic: return ["government", "city hall", "post office", "dmv", "court"]
+        case .religious: return ["church", "mosque", "temple", "synagogue", "worship"]
+        case .parking: return ["garage", "lot", "park and ride"]
+        }
+    }
+    /// True if `query` matches the label or a keyword (case- and diacritic-insensitive).
+    public func matches(_ query: String) -> Bool {
+        let q = query.trimmingCharacters(in: .whitespaces)
+        if q.isEmpty { return true }
+        let opts: String.CompareOptions = [.caseInsensitive, .diacriticInsensitive]
+        return ([label, group.label] + keywords).contains { $0.range(of: q, options: opts) != nil }
+    }
     /// Default activity purpose implied by a place category.
+    /// Keep in sync with the CASE in the latest `v_trips` migration (checked by a test).
     public var defaultPurpose: TripPurpose? {
         switch self {
         case .home: return .home
         case .workSchool: return .work
         case .restaurant, .cafe: return .meal
-        case .grocery, .shopping: return .shopping
-        case .recreation, .entertainment: return .recreation
+        case .grocery, .shopping, .convenienceStore, .gasStation: return .shopping
+        case .recreation, .entertainment, .stadium, .eventVenue, .museum, .library, .gym: return .recreation
         case .airport, .railStation, .hotel: return .travel
-        case .transitStation: return .transfer
-        case .friendFamily: return .social
-        case .medical: return .medical
+        case .transitStation, .parking: return .transfer
+        case .friendFamily, .bar, .religious: return .social
+        case .medical, .pharmacy: return .medical
+        case .bank, .civic: return .personalBusiness
         case .other: return nil
         }
     }
+}
+
+/// Picker sections for place categories, in display order.
+public enum PlaceCategoryGroup: String, CaseIterable, Identifiable, Sendable {
+    case personal, foodDrink, shopping, leisure, services, transport, other
+
+    public var id: String { rawValue }
+    public var label: String {
+        switch self {
+        case .personal: return "Home & work"
+        case .foodDrink: return "Food & drink"
+        case .shopping: return "Shopping & errands"
+        case .leisure: return "Leisure & culture"
+        case .services: return "Health & services"
+        case .transport: return "Travel & transport"
+        case .other: return "Other"
+        }
+    }
+    public var categories: [PlaceCategory] { PlaceCategory.allCases.filter { $0.group == self } }
 }
 
 /// Provenance of a derived or entered record.

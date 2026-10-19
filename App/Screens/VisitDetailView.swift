@@ -193,10 +193,7 @@ struct PlacePickerView: View {
             List {
                 Section("New place here") {
                     TextField("Name (e.g. Home, Penn, 30th St Station)", text: $newName)
-                    Picker("Category", selection: $newCategory) {
-                        Text("None").tag(PlaceCategory?.none)
-                        ForEach(PlaceCategory.allCases) { c in Label(c.label, systemImage: c.symbol).tag(PlaceCategory?.some(c)) }
-                    }
+                    PlaceCategoryPicker(selection: $newCategory)
                     Button("Create and use") {
                         onPick(.new(newName.trimmingCharacters(in: .whitespaces), newCategory))
                         dismiss()

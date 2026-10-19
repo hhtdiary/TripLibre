@@ -231,10 +231,7 @@ struct PlaceDetailView: View {
                 }
                 Section("Place") {
                     TextField("Name", text: Binding(get: { draft?.name ?? "" }, set: { draft?.name = $0.isEmpty ? nil : $0 }))
-                    Picker("Category", selection: Binding(get: { draft?.category }, set: { draft?.category = $0 })) {
-                        Text("None").tag(PlaceCategory?.none)
-                        ForEach(PlaceCategory.allCases) { c in Label(c.label, systemImage: c.symbol).tag(PlaceCategory?.some(c)) }
-                    }
+                    PlaceCategoryPicker(selection: Binding(get: { draft?.category }, set: { draft?.category = $0 }))
                     TextField("Code (IATA, station…)", text: Binding(get: { draft?.code ?? "" }, set: { draft?.code = $0.isEmpty ? nil : $0.uppercased() }))
                         .capsKeyboard()
                     HStack {
@@ -329,3 +326,63 @@ enum PlaceDeletion {
 }
 
 private func visitWord(_ n: Int) -> String { n == 1 ? "1 visit" : "\(n) visits" }
+
+/// Form row that opens a grouped, searchable list of place categories (issue #56).
+/// Categories already used by your places are listed first.
+struct PlaceCategoryPicker: View {
+    @Binding var selection: PlaceCategory?
+
+    var body: some View {
+        NavigationLink {
+            PlaceCategoryList(selection: $selection)
+        } label: {
+            LabeledContent("Category") {
+                if let c = selection { Label(c.label, systemImage: c.symbol) } else { Text("None") }
+            }
+        }
+    }
+}
+
+private struct PlaceCategoryList: View {
+    @EnvironmentObject var model: AppModel
+    @Environment(\.dismiss) private var dismiss
+    @Binding var selection: PlaceCategory?
+    @State private var query = ""
+    @State private var used: [PlaceCategory] = []
+
+    var body: some View {
+        List {
+            if query.isEmpty {
+                Section { row(nil) }
+                if !used.isEmpty {
+                    Section("Your categories") { ForEach(used) { row($0) } }
+                }
+            }
+            ForEach(PlaceCategoryGroup.allCases) { g in
+                let cats = g.categories.filter { $0.matches(query) }
+                if !cats.isEmpty { Section(g.label) { ForEach(cats) { row($0) } } }
+            }
+        }
+        .searchable(text: $query, prompt: "Search categories")
+        .navigationTitle("Category")
+        .inlineTitle()
+        .onAppear {
+            var counts: [PlaceCategory: Int] = [:]
+            for p in (try? model.store.places()) ?? [] { if let c = p.category { counts[c, default: 0] += 1 } }
+            used = counts.sorted { $0.value != $1.value ? $0.value > $1.value : $0.key.label < $1.key.label }.prefix(5).map(\.key)
+        }
+    }
+
+    private func row(_ c: PlaceCategory?) -> some View {
+        Button {
+            selection = c
+            dismiss()
+        } label: {
+            HStack {
+                Label(c?.label ?? "None", systemImage: c?.symbol ?? "circle.dashed").foregroundStyle(.primary)
+                Spacer()
+                if selection == c { Image(systemName: "checkmark").foregroundStyle(Toon.accent) }
+            }
+        }
+    }
+}
