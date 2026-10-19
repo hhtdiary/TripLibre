@@ -59,6 +59,8 @@ public struct Place: Identifiable, Equatable, Hashable, Sendable {
     public var region: String?
     public var country: String?
     public var category: PlaceCategory?
+    /// User-defined type name; only meaningful with `category == .other` (issue #56).
+    public var customCategory: String?
     public var code: String?           // IATA / station code etc.
     public var favorite: Bool
     public var notes: String?
@@ -70,12 +72,12 @@ public struct Place: Identifiable, Equatable, Hashable, Sendable {
 
     public init(id: String = newID(), name: String? = nil, coordinate: Coordinate, radius: Double = 100,
                 address: String? = nil, city: String? = nil, region: String? = nil, country: String? = nil,
-                category: PlaceCategory? = nil, code: String? = nil, favorite: Bool = false, notes: String? = nil,
-                source: RecordSource = .inferred, mergedInto: String? = nil, deleted: Bool = false,
+                category: PlaceCategory? = nil, customCategory: String? = nil, code: String? = nil, favorite: Bool = false,
+                notes: String? = nil, source: RecordSource = .inferred, mergedInto: String? = nil, deleted: Bool = false,
                 createdAt: Date = Date(), updatedAt: Date = Date()) {
         self.id = id; self.name = name; self.coordinate = coordinate; self.radius = radius
         self.address = address; self.city = city; self.region = region; self.country = country
-        self.category = category; self.code = code; self.favorite = favorite; self.notes = notes
+        self.category = category; self.customCategory = customCategory; self.code = code; self.favorite = favorite; self.notes = notes
         self.source = source; self.mergedInto = mergedInto; self.deleted = deleted; self.createdAt = createdAt; self.updatedAt = updatedAt
     }
 
@@ -85,6 +87,18 @@ public struct Place: Identifiable, Equatable, Hashable, Sendable {
         return String(format: "Place %.4f, %.4f", coordinate.latitude, coordinate.longitude)
     }
     public var isNamed: Bool { !(name ?? "").isEmpty }
+
+    /// Category as shown to the user: the custom name for an "Other" place that has one, else the category label.
+    public var categoryLabel: String? {
+        if category == .other, let c = Self.cleanCustom(customCategory) { return c }
+        return category?.label
+    }
+
+    /// Trim a custom type name; empty means none.
+    public static func cleanCustom(_ s: String?) -> String? {
+        let t = (s ?? "").trimmingCharacters(in: .whitespacesAndNewlines)
+        return t.isEmpty ? nil : t
+    }
 }
 
 public struct Visit: Identifiable, Equatable, Sendable {

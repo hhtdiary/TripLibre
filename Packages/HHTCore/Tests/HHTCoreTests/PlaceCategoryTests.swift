@@ -101,4 +101,92 @@ struct PlaceCategoryTests {
             #expect(json.contains("\"\(c.rawValue)\""))
         }
     }
+
+    // MARK: - User-defined types ("Other" + a name)
+
+    @Test func customTypeIsStoredOnlyWithOther() throws {
+        let store = try TravelStore.inMemory()
+        let edit = EditService(store: store)
+        try store.upsertPlace(Place(id: "p", coordinate: Philly.penn, radius: 80, source: .manual))
+
+        var p = try #require(try store.place("p"))
+        p.category = .other
+        p.customCategory = "  Volunteering "
+        try edit.updatePlace(p)
+        p = try #require(try store.place("p"))
+        #expect(p.customCategory == "Volunteering")
+        #expect(p.categoryLabel == "Volunteering")
+        #expect(p.category?.defaultPurpose == nil)     // still analysed as Other
+
+        // switching to a built-in category drops the custom name
+        p.category = .museum
+        try edit.updatePlace(p)
+        p = try #require(try store.place("p"))
+        #expect(p.customCategory == nil)
+        #expect(p.categoryLabel == "Museum / Gallery")
+
+        // blank names mean plain Other
+        p.category = .other
+        p.customCategory = "   "
+        try edit.updatePlace(p)
+        #expect(try store.place("p")?.customCategory == nil)
+        #expect(try store.place("p")?.categoryLabel == "Other")
+
+        let fields = try store.auditLog(entityID: "p").compactMap(\.field)
+        #expect(fields.filter { $0 == "category_custom" }.count == 2)
+    }
+
+    @Test func createPlaceWithCustomType() throws {
+        let tr: Trajectory = {
+            var t = Trajectory(start: Trajectory.date("2026-09-15 07:00"), at: Philly.home)
+            t.stay(minutes: 60)
+            return t
+        }()
+        let store = try TravelStore.inMemory()
+        try store.insertPoints(tr.points)
+        try InferenceEngine(store: store).processNew(now: tr.t.addingTimeInterval(60))
+        let v = try #require(try store.allVisits().first)
+        let edit = EditService(store: store)
+        let p = try edit.createPlace(forVisit: v.id, name: "Food bank", category: .other, customCategory: "Volunteering")
+        #expect(try store.place(p.id)?.customCategory == "Volunteering")
+        let q = try edit.createPlace(forVisit: v.id, name: "Lab", category: .workSchool, customCategory: "ignored")
+        #expect(try store.place(q.id)?.customCategory == nil)
+    }
+
+    /// A v4 database (category taxonomy, no custom column) upgrades and keeps its data.
+    @Test func upgradesV4Database() throws {
+        let path = FileManager.default.temporaryDirectory.appendingPathComponent("hht-v4-\(UUID().uuidString).sqlite").path
+        defer { try? FileManager.default.removeItem(atPath: path) }
+        do {
+            let db = try SQLiteConnection(path: path)
+            for v in 0..<4 { try db.execute(Schema.migrations[v]); try db.setUserVersion(v + 1) }
+            try db.run("""
+                INSERT INTO places(id, name, lat, lon, radius_m, category, favorite, source, created_at, updated_at)
+                VALUES ('s', 'Wells Fargo Center', 39.90, -75.17, 200, 'stadium', 0, 'manual', 0, 0)
+                """)
+        }
+        let store = try TravelStore(path: path)
+        #expect(store.schemaVersion == Schema.migrations.count)
+        let p = try #require(try store.place("s"))
+        #expect(p.category == .stadium)
+        #expect(p.customCategory == nil)
+    }
+
+    @Test func customTypeExports() throws {
+        let store = try TravelStore.inMemory()
+        try store.upsertPlace(Place(id: "p", name: "Food bank", coordinate: Philly.penn, radius: 80,
+                                    category: .other, customCategory: "Volunteering", source: .manual))
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("hht-custom-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let folder = try Exporter(store: store).exportBundle(to: dir)
+        let csv = try String(contentsOf: folder.appendingPathComponent("places.csv"), encoding: .utf8)
+        #expect(csv.components(separatedBy: "\n").first?.contains("category_custom") == true)
+        #expect(csv.contains("Volunteering"))
+        let geo = try String(contentsOf: folder.appendingPathComponent("places.geojson"), encoding: .utf8)
+        #expect(geo.contains("\"category_custom\" : \"Volunteering\""))
+        let json = try String(contentsOf: folder.appendingPathComponent("data.json"), encoding: .utf8)
+        #expect(json.contains("\"category_custom\":\"Volunteering\""))
+        let visits = try String(contentsOf: folder.appendingPathComponent("visits.csv"), encoding: .utf8)
+        #expect(visits.components(separatedBy: "\n").first?.contains("place_category_custom") == true)
+    }
 }

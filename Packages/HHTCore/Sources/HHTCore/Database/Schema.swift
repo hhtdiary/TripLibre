@@ -287,6 +287,11 @@ enum Schema {
         LEFT JOIN places dp ON dp.id = COALESCE(dv.place_id, t.destination_place_id)
         WHERE t.deleted = 0;
         """,
+        // v5 — user-defined place types (issue #56): a custom name for places whose category is 'other'.
+        // The category stays 'other', so default purposes and v_trips are unchanged.
+        """
+        ALTER TABLE places ADD COLUMN category_custom TEXT;
+        """,
     ]
 
     static func migrate(_ db: SQLiteConnection) throws {

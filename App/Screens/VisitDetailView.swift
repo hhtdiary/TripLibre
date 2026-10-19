@@ -143,7 +143,8 @@ struct VisitDetailView: View {
             PlacePickerView(near: v.coordinate) { choice in
                 switch choice {
                 case .existing(let id): model.perform { try model.edit.setVisitPlace(v.id, placeID: id) }
-                case .new(let name, let cat): model.perform { try model.edit.createPlace(forVisit: v.id, name: name, category: cat) }
+                case .new(let name, let cat, let custom):
+                    model.perform { try model.edit.createPlace(forVisit: v.id, name: name, category: cat, customCategory: custom) }
                 }
             }
             .environmentObject(model)
@@ -175,7 +176,7 @@ struct VisitDetailView: View {
     }
 }
 
-enum PlaceChoice { case existing(String), new(String, PlaceCategory?) }
+enum PlaceChoice { case existing(String), new(String, PlaceCategory?, String?) }
 
 struct PlacePickerView: View {
     @EnvironmentObject var model: AppModel
@@ -187,15 +188,16 @@ struct PlacePickerView: View {
     @State private var places: [Place] = []
     @State private var newName = ""
     @State private var newCategory: PlaceCategory? = nil
+    @State private var newCustom: String? = nil
 
     var body: some View {
         NavigationStack {
             List {
                 Section("New place here") {
                     TextField("Name (e.g. Home, Penn, 30th St Station)", text: $newName)
-                    PlaceCategoryPicker(selection: $newCategory)
+                    PlaceCategoryPicker(selection: $newCategory, custom: $newCustom)
                     Button("Create and use") {
-                        onPick(.new(newName.trimmingCharacters(in: .whitespaces), newCategory))
+                        onPick(.new(newName.trimmingCharacters(in: .whitespaces), newCategory, newCustom))
                         dismiss()
                     }
                     .disabled(newName.trimmingCharacters(in: .whitespaces).isEmpty)

@@ -141,7 +141,8 @@ public final class Exporter {
         let feats = try store.places().map { p -> [String: Any] in
             let s = stats[p.id]
             return feature(["type": "Point", "coordinates": [p.coordinate.longitude, p.coordinate.latitude]],
-                           ["place_id": p.id, "name": p.name, "category": p.category?.rawValue, "code": p.code,
+                           ["place_id": p.id, "name": p.name, "category": p.category?.rawValue,
+                            "category_custom": p.customCategory, "code": p.code,
                             "radius_m": p.radius, "city": p.city, "country": p.country,
                             "visit_count": s?.visitCount, "total_dwell_h": s.map { $0.totalDwell / 3600 },
                             "first_visit": Self.utc(s?.firstVisit), "last_visit": Self.utc(s?.lastVisit)])
@@ -242,7 +243,7 @@ public final class Exporter {
                 """, ta))
             try write("visits.csv", try queryCSV("""
                 SELECT v.id AS visit_id, v.place_id, p.name AS place_name, p.category AS place_category,
-                       v.arrival_ts, v.departure_ts, v.tz,
+                       p.category_custom AS place_category_custom, v.arrival_ts, v.departure_ts, v.tz,
                        ROUND((COALESCE(v.departure_ts, strftime('%s','now')) - v.arrival_ts) / 60.0, 2) AS duration_min,
                        v.lat, v.lon, v.purpose, v.auto_confidence, v.source, v.user_status, v.point_count, v.notes
                 FROM visits v LEFT JOIN places p ON p.id = v.place_id
@@ -250,7 +251,7 @@ public final class Exporter {
                 ORDER BY v.arrival_ts
                 """, va))
             try write("places.csv", try queryCSV("""
-                SELECT p.id AS place_id, p.name, p.category, p.code, p.lat, p.lon, p.radius_m, p.address, p.city, p.region,
+                SELECT p.id AS place_id, p.name, p.category, p.category_custom, p.code, p.lat, p.lon, p.radius_m, p.address, p.city, p.region,
                        p.country, p.favorite, p.source, p.merged_into, p.notes, p.created_at AS created_ts,
                        (SELECT COUNT(*) FROM visits v WHERE v.place_id = p.id AND v.deleted = 0) AS visit_count,
                        (SELECT MIN(arrival_ts) FROM visits v WHERE v.place_id = p.id AND v.deleted = 0) AS first_visit_ts,
