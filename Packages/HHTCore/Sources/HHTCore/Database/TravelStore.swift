@@ -121,6 +121,23 @@ public final class TravelStore: @unchecked Sendable {
             p.deleted, p.createdAt, p.updatedAt)
     }
 
+    /// Fill only the address fields that are still empty, in one statement. For background writers such as the
+    /// reverse geocoder, which would otherwise overwrite edits saved while they waited (name, category, …).
+    /// Returns true if any field was filled.
+    @discardableResult
+    public func fillMissingAddress(placeID: String, address: String?, city: String?, region: String?,
+                                   country: String?) throws -> Bool {
+        func clean(_ s: String?) -> String? { s.flatMap { $0.isEmpty ? nil : $0 } }
+        let (a, c, r, n) = (clean(address), clean(city), clean(region), clean(country))
+        guard a != nil || c != nil || r != nil || n != nil else { return false }
+        return try db.run("""
+            UPDATE places SET address = COALESCE(address, ?), city = COALESCE(city, ?),
+                region = COALESCE(region, ?), country = COALESCE(country, ?), updated_at = ?
+            WHERE id = ? AND ((address IS NULL AND ? IS NOT NULL) OR (city IS NULL AND ? IS NOT NULL)
+                OR (region IS NULL AND ? IS NOT NULL) OR (country IS NULL AND ? IS NOT NULL))
+            """, a, c, r, n, Date(), placeID, a, c, r, n) > 0
+    }
+
     public func place(_ id: String) throws -> Place? {
         try db.query("SELECT * FROM places WHERE id = ?", id).first.map(Self.place)
     }

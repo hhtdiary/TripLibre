@@ -189,4 +189,36 @@ struct PlaceCategoryTests {
         let visits = try String(contentsOf: folder.appendingPathComponent("visits.csv"), encoding: .utf8)
         #expect(visits.components(separatedBy: "\n").first?.contains("place_category_custom") == true)
     }
+
+    /// Reverse geocoding awaits Apple between reading a place and writing back. Edits saved in that window
+    /// (here a custom type, name and a hand-typed city) must survive; only still-empty address fields fill.
+    @Test func geocoderFillDoesNotOverwriteConcurrentEdits() throws {
+        let store = try TravelStore.inMemory()
+        let edit = EditService(store: store)
+        try store.upsertPlace(Place(id: "p", coordinate: Philly.penn, radius: 80, source: .inferred))
+        _ = try #require(try store.place("p"))             // geocoder reads, then awaits Apple…
+
+        var p = try #require(try store.place("p"))         // …meanwhile the user saves edits
+        p.name = "Food bank"
+        p.category = .other
+        p.customCategory = "Volunteering"
+        p.city = "Philly"
+        try edit.updatePlace(p)
+
+        #expect(try store.fillMissingAddress(placeID: "p", address: "3401 Walnut St", city: "Philadelphia",
+                                             region: "PA", country: "US"))
+        let after = try #require(try store.place("p"))
+        #expect(after.name == "Food bank")
+        #expect(after.category == .other)
+        #expect(after.customCategory == "Volunteering")
+        #expect(after.city == "Philly")                    // user value kept
+        #expect(after.address == "3401 Walnut St")         // empty fields filled
+        #expect(after.region == "PA")
+        #expect(after.country == "US")
+
+        // nothing left to fill (or nothing found) → no write
+        #expect(try store.fillMissingAddress(placeID: "p", address: "x", city: "y", region: "z", country: "w") == false)
+        #expect(try store.fillMissingAddress(placeID: "p", address: "", city: nil, region: nil, country: nil) == false)
+        #expect(try store.place("p")?.address == "3401 Walnut St")
+    }
 }
