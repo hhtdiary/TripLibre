@@ -258,6 +258,40 @@ enum Schema {
         );
         CREATE INDEX idx_stamps_ts ON stamps(ts);
         """,
+        // v4 — more place categories (issue #56): v_trips resolves their default purposes.
+        // The CASE must match PlaceCategory.defaultPurpose (checked by a test).
+        """
+        DROP VIEW v_trips;
+        CREATE VIEW v_trips AS
+        SELECT t.*,
+               COALESCE(t.mode_user, t.mode_auto, 'unknown') AS mode_final,
+               COALESCE(t.purpose, dv.purpose, CASE dp.category
+                   WHEN 'home' THEN 'home' WHEN 'work_school' THEN 'work'
+                   WHEN 'restaurant' THEN 'meal' WHEN 'cafe' THEN 'meal'
+                   WHEN 'grocery' THEN 'shopping' WHEN 'shopping' THEN 'shopping'
+                   WHEN 'convenience_store' THEN 'shopping' WHEN 'gas_station' THEN 'shopping'
+                   WHEN 'recreation' THEN 'recreation' WHEN 'entertainment' THEN 'recreation'
+                   WHEN 'stadium' THEN 'recreation' WHEN 'event_venue' THEN 'recreation'
+                   WHEN 'museum' THEN 'recreation' WHEN 'library' THEN 'recreation' WHEN 'gym' THEN 'recreation'
+                   WHEN 'airport' THEN 'travel' WHEN 'rail_station' THEN 'travel' WHEN 'hotel' THEN 'travel'
+                   WHEN 'transit_station' THEN 'transfer' WHEN 'parking' THEN 'transfer'
+                   WHEN 'friend_family' THEN 'social' WHEN 'bar' THEN 'social' WHEN 'religious' THEN 'social'
+                   WHEN 'medical' THEN 'medical' WHEN 'pharmacy' THEN 'medical'
+                   WHEN 'bank' THEN 'personal_business' WHEN 'civic' THEN 'personal_business' END) AS purpose_final,
+               t.arrival_ts - t.departure_ts AS duration_s,
+               COALESCE(ov.place_id, t.origin_place_id) AS origin_place_final,
+               COALESCE(dv.place_id, t.destination_place_id) AS destination_place_final
+        FROM trips t
+        LEFT JOIN visits ov ON ov.id = t.origin_visit_id
+        LEFT JOIN visits dv ON dv.id = t.destination_visit_id
+        LEFT JOIN places dp ON dp.id = COALESCE(dv.place_id, t.destination_place_id)
+        WHERE t.deleted = 0;
+        """,
+        // v5 — user-defined place types (issue #56): a custom name for places whose category is 'other'.
+        // The category stays 'other', so default purposes and v_trips are unchanged.
+        """
+        ALTER TABLE places ADD COLUMN category_custom TEXT;
+        """,
     ]
 
     static func migrate(_ db: SQLiteConnection) throws {

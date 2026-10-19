@@ -1,0 +1,224 @@
+import Foundation
+import Testing
+@testable import HHTCore
+
+/// Place-category taxonomy (issue #56): backward compatibility, picker grouping/search, storage, views, exports.
+@Suite("Place categories")
+struct PlaceCategoryTests {
+
+    /// Codes that shipped before #56. They live in old databases and exports and must keep decoding.
+    static let legacyCodes = ["home", "work_school", "restaurant", "cafe", "grocery", "shopping", "recreation",
+                              "entertainment", "airport", "rail_station", "transit_station", "hotel", "friend_family",
+                              "medical", "other"]
+
+    @Test func legacyCodesStillDecode() {
+        for code in Self.legacyCodes { #expect(PlaceCategory(rawValue: code)?.rawValue == code) }
+        #expect(Set(PlaceCategory.allCases.map(\.rawValue)).count == PlaceCategory.allCases.count)
+    }
+
+    @Test func priorityCategoriesExistAndAreDistinct() {
+        let added: [PlaceCategory] = [.stadium, .eventVenue, .museum, .library, .convenienceStore, .gasStation]
+        #expect(Set(added.map(\.label)).count == added.count)
+        #expect(PlaceCategory.stadium.rawValue == "stadium")
+        #expect(PlaceCategory.eventVenue.rawValue == "event_venue")
+        #expect(PlaceCategory.convenienceStore.rawValue == "convenience_store")
+        #expect(PlaceCategory.gasStation.rawValue == "gas_station")
+    }
+
+    @Test func groupsPartitionAllCategories() {
+        let grouped = PlaceCategoryGroup.allCases.flatMap(\.categories)
+        #expect(grouped.count == PlaceCategory.allCases.count)
+        #expect(Set(grouped) == Set(PlaceCategory.allCases))
+        #expect(Set(PlaceCategory.allCases.map(\.label)).count == PlaceCategory.allCases.count)
+    }
+
+    @Test func searchMatchesLabelsAndKeywords() {
+        func hits(_ q: String) -> Set<PlaceCategory> { Set(PlaceCategory.allCases.filter { $0.matches(q) }) }
+        #expect(hits("arena").contains(.stadium))
+        #expect(hits("concert").contains(.eventVenue))
+        #expect(hits("Gallery").contains(.museum))
+        #expect(hits("petrol").contains(.gasStation))
+        #expect(hits("supermarket").contains(.grocery))
+        #expect(hits("cafe").contains(.cafe))
+        #expect(hits("café").contains(.cafe))
+        #expect(hits("").count == PlaceCategory.allCases.count)
+        #expect(hits("zzzz").isEmpty)
+    }
+
+    /// v_trips.purpose_final (SQL) must agree with PlaceCategory.defaultPurpose (Swift) for every category.
+    @Test func viewPurposeMatchesSwiftDefault() throws {
+        let store = try TravelStore.inMemory()
+        let now = Date(timeIntervalSince1970: 1_790_000_000)
+        let place = Place(id: "p", coordinate: Philly.penn, radius: 80, source: .manual)
+        try store.upsertPlace(place)
+        try store.db.run("""
+            INSERT INTO trips(id, departure_ts, arrival_ts, destination_place_id, source, user_status, deleted, created_at, updated_at)
+            VALUES ('t', ?, ?, 'p', 'manual', 'manual', 0, ?, ?)
+            """, now, now.addingTimeInterval(600), now, now)
+        for c in PlaceCategory.allCases {
+            var p = place
+            p.category = c
+            try store.upsertPlace(p)
+            let got = try store.db.query("SELECT purpose_final FROM v_trips WHERE id = 't'").first?.string("purpose_final")
+            #expect(got == c.defaultPurpose?.rawValue, "category \(c.rawValue)")
+        }
+    }
+
+    /// A database created before #56 (schema v3, old view) upgrades and keeps its labels.
+    @Test func upgradesLegacyDatabase() throws {
+        let path = FileManager.default.temporaryDirectory.appendingPathComponent("hht-legacy-\(UUID().uuidString).sqlite").path
+        defer { try? FileManager.default.removeItem(atPath: path) }
+        do {
+            let db = try SQLiteConnection(path: path)
+            for v in 0..<3 { try db.execute(Schema.migrations[v]); try db.setUserVersion(v + 1) }
+            try db.run("""
+                INSERT INTO places(id, name, lat, lon, radius_m, category, favorite, source, created_at, updated_at)
+                VALUES ('old', 'Lab', 39.95, -75.19, 80, 'work_school', 0, 'manual', 0, 0)
+                """)
+        }
+        let store = try TravelStore(path: path)
+        #expect(store.schemaVersion == Schema.migrations.count)
+        #expect(try store.place("old")?.category == .workSchool)
+    }
+
+    @Test func newCategoriesPersistAndExport() throws {
+        let store = try TravelStore.inMemory()
+        let added: [PlaceCategory] = [.stadium, .eventVenue, .museum, .library, .convenienceStore, .gasStation]
+        for (i, c) in added.enumerated() {
+            try store.upsertPlace(Place(id: "p\(i)", name: c.label, coordinate: Philly.penn, radius: 80, category: c, source: .manual))
+        }
+        for (i, c) in added.enumerated() { #expect(try store.place("p\(i)")?.category == c) }
+
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("hht-cat-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let folder = try Exporter(store: store).exportBundle(to: dir)
+        let csv = try String(contentsOf: folder.appendingPathComponent("places.csv"), encoding: .utf8)
+        let geo = try String(contentsOf: folder.appendingPathComponent("places.geojson"), encoding: .utf8)
+        let json = try String(contentsOf: folder.appendingPathComponent("data.json"), encoding: .utf8)
+        for c in added {
+            #expect(csv.contains(c.rawValue))
+            #expect(geo.contains("\"\(c.rawValue)\""))
+            #expect(json.contains("\"\(c.rawValue)\""))
+        }
+    }
+
+    // MARK: - User-defined types ("Other" + a name)
+
+    @Test func customTypeIsStoredOnlyWithOther() throws {
+        let store = try TravelStore.inMemory()
+        let edit = EditService(store: store)
+        try store.upsertPlace(Place(id: "p", coordinate: Philly.penn, radius: 80, source: .manual))
+
+        var p = try #require(try store.place("p"))
+        p.category = .other
+        p.customCategory = "  Volunteering "
+        try edit.updatePlace(p)
+        p = try #require(try store.place("p"))
+        #expect(p.customCategory == "Volunteering")
+        #expect(p.categoryLabel == "Volunteering")
+        #expect(p.category?.defaultPurpose == nil)     // still analysed as Other
+
+        // switching to a built-in category drops the custom name
+        p.category = .museum
+        try edit.updatePlace(p)
+        p = try #require(try store.place("p"))
+        #expect(p.customCategory == nil)
+        #expect(p.categoryLabel == "Museum / Gallery")
+
+        // blank names mean plain Other
+        p.category = .other
+        p.customCategory = "   "
+        try edit.updatePlace(p)
+        #expect(try store.place("p")?.customCategory == nil)
+        #expect(try store.place("p")?.categoryLabel == "Other")
+
+        let fields = try store.auditLog(entityID: "p").compactMap(\.field)
+        #expect(fields.filter { $0 == "category_custom" }.count == 2)
+    }
+
+    @Test func createPlaceWithCustomType() throws {
+        let tr: Trajectory = {
+            var t = Trajectory(start: Trajectory.date("2026-09-15 07:00"), at: Philly.home)
+            t.stay(minutes: 60)
+            return t
+        }()
+        let store = try TravelStore.inMemory()
+        try store.insertPoints(tr.points)
+        try InferenceEngine(store: store).processNew(now: tr.t.addingTimeInterval(60))
+        let v = try #require(try store.allVisits().first)
+        let edit = EditService(store: store)
+        let p = try edit.createPlace(forVisit: v.id, name: "Food bank", category: .other, customCategory: "Volunteering")
+        #expect(try store.place(p.id)?.customCategory == "Volunteering")
+        let q = try edit.createPlace(forVisit: v.id, name: "Lab", category: .workSchool, customCategory: "ignored")
+        #expect(try store.place(q.id)?.customCategory == nil)
+    }
+
+    /// A v4 database (category taxonomy, no custom column) upgrades and keeps its data.
+    @Test func upgradesV4Database() throws {
+        let path = FileManager.default.temporaryDirectory.appendingPathComponent("hht-v4-\(UUID().uuidString).sqlite").path
+        defer { try? FileManager.default.removeItem(atPath: path) }
+        do {
+            let db = try SQLiteConnection(path: path)
+            for v in 0..<4 { try db.execute(Schema.migrations[v]); try db.setUserVersion(v + 1) }
+            try db.run("""
+                INSERT INTO places(id, name, lat, lon, radius_m, category, favorite, source, created_at, updated_at)
+                VALUES ('s', 'Wells Fargo Center', 39.90, -75.17, 200, 'stadium', 0, 'manual', 0, 0)
+                """)
+        }
+        let store = try TravelStore(path: path)
+        #expect(store.schemaVersion == Schema.migrations.count)
+        let p = try #require(try store.place("s"))
+        #expect(p.category == .stadium)
+        #expect(p.customCategory == nil)
+    }
+
+    @Test func customTypeExports() throws {
+        let store = try TravelStore.inMemory()
+        try store.upsertPlace(Place(id: "p", name: "Food bank", coordinate: Philly.penn, radius: 80,
+                                    category: .other, customCategory: "Volunteering", source: .manual))
+        let dir = FileManager.default.temporaryDirectory.appendingPathComponent("hht-custom-\(UUID().uuidString)")
+        defer { try? FileManager.default.removeItem(at: dir) }
+        let folder = try Exporter(store: store).exportBundle(to: dir)
+        let csv = try String(contentsOf: folder.appendingPathComponent("places.csv"), encoding: .utf8)
+        #expect(csv.components(separatedBy: "\n").first?.contains("category_custom") == true)
+        #expect(csv.contains("Volunteering"))
+        let geo = try String(contentsOf: folder.appendingPathComponent("places.geojson"), encoding: .utf8)
+        #expect(geo.contains("\"category_custom\" : \"Volunteering\""))
+        let json = try String(contentsOf: folder.appendingPathComponent("data.json"), encoding: .utf8)
+        #expect(json.contains("\"category_custom\":\"Volunteering\""))
+        let visits = try String(contentsOf: folder.appendingPathComponent("visits.csv"), encoding: .utf8)
+        #expect(visits.components(separatedBy: "\n").first?.contains("place_category_custom") == true)
+    }
+
+    /// Reverse geocoding awaits Apple between reading a place and writing back. Edits saved in that window
+    /// (here a custom type, name and a hand-typed city) must survive; only still-empty address fields fill.
+    @Test func geocoderFillDoesNotOverwriteConcurrentEdits() throws {
+        let store = try TravelStore.inMemory()
+        let edit = EditService(store: store)
+        try store.upsertPlace(Place(id: "p", coordinate: Philly.penn, radius: 80, source: .inferred))
+        _ = try #require(try store.place("p"))             // geocoder reads, then awaits Apple…
+
+        var p = try #require(try store.place("p"))         // …meanwhile the user saves edits
+        p.name = "Food bank"
+        p.category = .other
+        p.customCategory = "Volunteering"
+        p.city = "Philly"
+        try edit.updatePlace(p)
+
+        #expect(try store.fillMissingAddress(placeID: "p", address: "3401 Walnut St", city: "Philadelphia",
+                                             region: "PA", country: "US"))
+        let after = try #require(try store.place("p"))
+        #expect(after.name == "Food bank")
+        #expect(after.category == .other)
+        #expect(after.customCategory == "Volunteering")
+        #expect(after.city == "Philly")                    // user value kept
+        #expect(after.address == "3401 Walnut St")         // empty fields filled
+        #expect(after.region == "PA")
+        #expect(after.country == "US")
+
+        // nothing left to fill (or nothing found) → no write
+        #expect(try store.fillMissingAddress(placeID: "p", address: "x", city: "y", region: "z", country: "w") == false)
+        #expect(try store.fillMissingAddress(placeID: "p", address: "", city: nil, region: nil, country: nil) == false)
+        #expect(try store.place("p")?.address == "3401 Walnut St")
+    }
+}

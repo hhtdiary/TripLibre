@@ -45,9 +45,10 @@ CoreMotion activity episodes: `ts` (start), `activity` (`stationary|walking|runn
 `confidence` (0 low, 1 medium, 2 high). An activity lasts until the next row.
 
 ### places
-`id, name, lat, lon, radius_m, address, city, region, country, category, code, favorite, notes, source, merged_into, deleted, created_at, updated_at`
+`id, name, lat, lon, radius_m, address, city, region, country, category, category_custom, code, favorite, notes, source, merged_into, deleted, created_at, updated_at`
 
-- `category`: `home, work_school, restaurant, cafe, grocery, shopping, recreation, entertainment, airport, rail_station, transit_station, hotel, friend_family, medical, other`.
+- `category`: `home, work_school, restaurant, cafe, grocery, shopping, recreation, entertainment, airport, rail_station, transit_station, hotel, friend_family, medical, other`, plus (schema v4, issue #56) `stadium, event_venue, museum, library, convenience_store, gas_station, bar, gym, pharmacy, bank, civic, religious, parking`. Codes are never renamed, so older exports stay valid; the app's picker groups them (home & work, food & drink, shopping & errands, leisure & culture, health & services, travel & transport). Place category is separate from trip purpose and mode: it only supplies a default purpose (`PlaceCategory.defaultPurpose`, mirrored in `v_trips.purpose_final`).
+- `category_custom` (schema v5): the user's own type name for a place whose `category` is `other` (e.g. "Volunteering"); NULL otherwise. It is a label only: such places still count as `other` for default purpose and analysis. Exported in `places.csv`, `places.geojson`, `data.json`, and as `place_category_custom` in `visits.csv`.
 - `code`: IATA/station code. `source`: `inferred | manual | imported_csv`.
 - `merged_into`: set when the user merges duplicates (the row stays as a tombstone; all visits point to the target).
 - `deleted`: soft delete (schema v2) when the user deletes a place that isn't real; its visits are soft-deleted too

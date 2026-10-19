@@ -34,18 +34,15 @@ final class PlaceGeocoder {
         defer { running = false }
         while !queue.isEmpty {
             let id = queue.removeFirst()
-            guard var p = try? store.place(id), p.address == nil || p.city == nil else { continue }
+            guard let p = try? store.place(id), p.address == nil || p.city == nil else { continue }
             let loc = CLLocation(latitude: p.coordinate.latitude, longitude: p.coordinate.longitude)
             guard let mark = try? await geocoder.reverseGeocodeLocation(loc).first else { continue }
-            if p.address == nil {
-                p.address = [mark.subThoroughfare, mark.thoroughfare].compactMap { $0 }.joined(separator: " ")
-                if p.address?.isEmpty == true { p.address = mark.name }
-            }
-            p.city = p.city ?? mark.locality
-            p.region = p.region ?? mark.administrativeArea
-            p.country = p.country ?? mark.isoCountryCode
-            p.updatedAt = Date()
-            try? store.upsertPlace(p)
+            // `p` may be stale after the await (the user can edit meanwhile), so write only the empty
+            // address columns instead of saving the whole record back.
+            var street = [mark.subThoroughfare, mark.thoroughfare].compactMap { $0 }.joined(separator: " ")
+            if street.isEmpty { street = mark.name ?? "" }
+            _ = try? store.fillMissingAddress(placeID: id, address: street, city: mark.locality,
+                                              region: mark.administrativeArea, country: mark.isoCountryCode)
             try? await Task.sleep(nanoseconds: 1_200_000_000)   // Apple rate-limits geocoding
         }
     }

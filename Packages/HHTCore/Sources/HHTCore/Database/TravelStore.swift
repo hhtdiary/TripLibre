@@ -109,16 +109,33 @@ public final class TravelStore: @unchecked Sendable {
 
     public func upsertPlace(_ p: Place) throws {
         try db.run("""
-            INSERT INTO places(id, name, lat, lon, radius_m, address, city, region, country, category, code, favorite,
-                notes, source, merged_into, deleted, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            INSERT INTO places(id, name, lat, lon, radius_m, address, city, region, country, category, category_custom, code,
+                favorite, notes, source, merged_into, deleted, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             ON CONFLICT(id) DO UPDATE SET name=excluded.name, lat=excluded.lat, lon=excluded.lon,
                 radius_m=excluded.radius_m, address=excluded.address, city=excluded.city, region=excluded.region,
-                country=excluded.country, category=excluded.category, code=excluded.code, favorite=excluded.favorite,
+                country=excluded.country, category=excluded.category, category_custom=excluded.category_custom, code=excluded.code, favorite=excluded.favorite,
                 notes=excluded.notes, source=excluded.source, merged_into=excluded.merged_into,
                 deleted=excluded.deleted, updated_at=excluded.updated_at
             """, p.id, p.name, p.coordinate.latitude, p.coordinate.longitude, p.radius, p.address, p.city, p.region,
-            p.country, p.category?.rawValue, p.code, p.favorite, p.notes, p.source.rawValue, p.mergedInto,
+            p.country, p.category?.rawValue, p.category == .other ? Place.cleanCustom(p.customCategory) : nil, p.code, p.favorite, p.notes, p.source.rawValue, p.mergedInto,
             p.deleted, p.createdAt, p.updatedAt)
+    }
+
+    /// Fill only the address fields that are still empty, in one statement. For background writers such as the
+    /// reverse geocoder, which would otherwise overwrite edits saved while they waited (name, category, …).
+    /// Returns true if any field was filled.
+    @discardableResult
+    public func fillMissingAddress(placeID: String, address: String?, city: String?, region: String?,
+                                   country: String?) throws -> Bool {
+        func clean(_ s: String?) -> String? { s.flatMap { $0.isEmpty ? nil : $0 } }
+        let (a, c, r, n) = (clean(address), clean(city), clean(region), clean(country))
+        guard a != nil || c != nil || r != nil || n != nil else { return false }
+        return try db.run("""
+            UPDATE places SET address = COALESCE(address, ?), city = COALESCE(city, ?),
+                region = COALESCE(region, ?), country = COALESCE(country, ?), updated_at = ?
+            WHERE id = ? AND ((address IS NULL AND ? IS NOT NULL) OR (city IS NULL AND ? IS NOT NULL)
+                OR (region IS NULL AND ? IS NOT NULL) OR (country IS NULL AND ? IS NOT NULL))
+            """, a, c, r, n, Date(), placeID, a, c, r, n) > 0
     }
 
     public func place(_ id: String) throws -> Place? {
@@ -166,7 +183,8 @@ public final class TravelStore: @unchecked Sendable {
         Place(id: r.string("id") ?? "", name: r.string("name"),
               coordinate: Coordinate(r.double("lat") ?? 0, r.double("lon") ?? 0), radius: r.double("radius_m") ?? 100,
               address: r.string("address"), city: r.string("city"), region: r.string("region"), country: r.string("country"),
-              category: r.string("category").flatMap(PlaceCategory.init(rawValue:)), code: r.string("code"),
+              category: r.string("category").flatMap(PlaceCategory.init(rawValue:)), customCategory: r.string("category_custom"),
+              code: r.string("code"),
               favorite: r.bool("favorite"), notes: r.string("notes"),
               source: RecordSource(rawValue: r.string("source") ?? "") ?? .inferred, mergedInto: r.string("merged_into"),
               deleted: r.bool("deleted"), createdAt: r.date("created_at") ?? Date(), updatedAt: r.date("updated_at") ?? Date())

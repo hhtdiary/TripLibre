@@ -299,11 +299,12 @@ public final class EditService {
 
     /// Create a named place at the visit's location (or given coordinate) and assign it.
     @discardableResult
-    public func createPlace(forVisit visitID: String, name: String, category: PlaceCategory?,
+    public func createPlace(forVisit visitID: String, name: String, category: PlaceCategory?, customCategory: String? = nil,
                             coordinate: Coordinate? = nil, radius: Double = 80) throws -> Place {
         try db.transaction {
             let v = try visitOrThrow(visitID)
-            let p = Place(name: name, coordinate: coordinate ?? v.coordinate, radius: radius, category: category, source: .manual)
+            let p = Place(name: name, coordinate: coordinate ?? v.coordinate, radius: radius, category: category,
+                          customCategory: category == .other ? Place.cleanCustom(customCategory) : nil, source: .manual)
             try store.upsertPlace(p)
             try store.audit("place", p.id, "create", field: "name", new: name)
             try setVisitPlace(visitID, placeID: p.id)
@@ -317,10 +318,14 @@ public final class EditService {
             guard let old = try store.place(updated.id) else { throw EditError.notFound("place \(updated.id)") }
             var p = updated
             p.updatedAt = Date()
-            if p.source == .inferred && (p.name != old.name || p.category != old.category) { p.source = .manual }
+            p.customCategory = p.category == .other ? Place.cleanCustom(p.customCategory) : nil
+            if p.source == .inferred && (p.name != old.name || p.category != old.category || p.customCategory != old.customCategory) {
+                p.source = .manual
+            }
             try store.upsertPlace(p)
             let pairs: [(String, String?, String?)] = [
                 ("name", old.name, p.name), ("category", old.category?.rawValue, p.category?.rawValue),
+                ("category_custom", old.customCategory, p.customCategory),
                 ("radius_m", String(old.radius), String(p.radius)), ("code", old.code, p.code),
                 ("address", old.address, p.address), ("city", old.city, p.city), ("region", old.region, p.region),
                 ("country", old.country, p.country), ("notes", old.notes, p.notes),

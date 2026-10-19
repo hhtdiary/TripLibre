@@ -214,7 +214,7 @@ struct StampTests {
         #expect(try store.auditLog(entityID: s.id).map(\.action) == ["create"])
         try EditService(store: store).setNotes(stampID: s.id, "  oat flat white ")
         #expect(try store.stamp(s.id)?.note == "oat flat white")
-        #expect(store.schemaVersion == 3)
+        #expect(store.schemaVersion >= 3)
     }
 }
 

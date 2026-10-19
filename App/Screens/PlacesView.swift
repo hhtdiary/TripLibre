@@ -214,6 +214,7 @@ struct PlaceDetailView: View {
     @State private var showMerge = false
     @State private var radiusText = ""
     @State private var confirmDelete = false
+    @State private var loadedRevision: Int?
 
     var body: some View {
         Form {
@@ -231,10 +232,8 @@ struct PlaceDetailView: View {
                 }
                 Section("Place") {
                     TextField("Name", text: Binding(get: { draft?.name ?? "" }, set: { draft?.name = $0.isEmpty ? nil : $0 }))
-                    Picker("Category", selection: Binding(get: { draft?.category }, set: { draft?.category = $0 })) {
-                        Text("None").tag(PlaceCategory?.none)
-                        ForEach(PlaceCategory.allCases) { c in Label(c.label, systemImage: c.symbol).tag(PlaceCategory?.some(c)) }
-                    }
+                    PlaceCategoryPicker(selection: Binding(get: { draft?.category }, set: { draft?.category = $0 }),
+                                        custom: Binding(get: { draft?.customCategory }, set: { draft?.customCategory = $0 }))
                     TextField("Code (IATA, station…)", text: Binding(get: { draft?.code ?? "" }, set: { draft?.code = $0.isEmpty ? nil : $0.uppercased() }))
                         .capsKeyboard()
                     HStack {
@@ -283,7 +282,12 @@ struct PlaceDetailView: View {
         .toonBackground()
         .navigationTitle(place?.displayName ?? "Place")
         .inlineTitle()
-        .task(id: model.revision) { load() }
+        .task(id: model.revision) {
+            // .task also re-runs when a pushed screen (e.g. the category list) pops; keep unsaved edits then.
+            guard loadedRevision != model.revision else { return }
+            loadedRevision = model.revision
+            load()
+        }
         .confirmationDialog("Delete this place?", isPresented: $confirmDelete, titleVisibility: .visible) {
             Button("Delete place and its \(visitWord(visits.count))", role: .destructive) {
                 model.perform { try model.edit.deletePlace(placeID) }
@@ -329,3 +333,151 @@ enum PlaceDeletion {
 }
 
 private func visitWord(_ n: Int) -> String { n == 1 ? "1 visit" : "\(n) visits" }
+
+/// Form row that opens a grouped, searchable list of place categories (issue #56).
+/// Categories already used by your places are listed first. "Other" can carry a custom type name.
+struct PlaceCategoryPicker: View {
+    @Binding var selection: PlaceCategory?
+    @Binding var custom: String?
+
+    var body: some View {
+        NavigationLink {
+            PlaceCategoryList(selection: $selection, custom: $custom)
+        } label: {
+            HStack {
+                Text("Category")
+                Spacer()
+                if let c = selection { Image(systemName: c.symbol).foregroundStyle(Toon.accent) }
+                Text(label).foregroundStyle(.secondary).lineLimit(1)
+            }
+        }
+    }
+
+    private var label: String {
+        guard let c = selection else { return "None" }
+        if c == .other, let name = Place.cleanCustom(custom) { return name }
+        return c.label
+    }
+}
+
+private struct PlaceCategoryList: View {
+    @EnvironmentObject var model: AppModel
+    @Environment(\.dismiss) private var dismiss
+    @Binding var selection: PlaceCategory?
+    @Binding var custom: String?
+    @State private var query = ""
+    @State private var newCustom = ""
+    @State private var used: [PlaceCategory] = []
+    @State private var customNames: [String] = []
+
+    var body: some View {
+        List {
+            if query.isEmpty {
+                Section { row(nil) }
+                if !used.isEmpty {
+                    Section("Your categories") { ForEach(used) { row($0) } }
+                }
+            }
+            ForEach(PlaceCategoryGroup.allCases) { g in
+                let cats = g.categories.filter { $0.matches(query) }
+                if !cats.isEmpty { Section(g.label) { ForEach(cats) { row($0) } } }
+            }
+            customSection
+        }
+        .toonBackground()
+        .searchable(text: $query, prompt: "Search categories")
+        .navigationTitle("Category")
+        .inlineTitle()
+        .onAppear(perform: loadUsage)
+    }
+
+    /// Your own type names (stored as "Other" + name), plus a field to add one.
+    @ViewBuilder private var customSection: some View {
+        let names = customNames.filter { matchesQuery($0) }
+        let typed = query.trimmingCharacters(in: .whitespaces)
+        Section {
+            ForEach(names, id: \.self) { customRow($0) }
+            if query.isEmpty {
+                HStack {
+                    TextField("New type, e.g. Volunteering", text: $newCustom)
+                        .submitLabel(.done)
+                        .onSubmit { useCustom(newCustom) }
+                    Button("Use") { useCustom(newCustom) }
+                        .disabled(Place.cleanCustom(newCustom) == nil)
+                }
+            } else if !typed.isEmpty, !names.contains(where: { $0.caseInsensitiveCompare(typed) == .orderedSame }) {
+                Button { useCustom(typed) } label: {
+                    Label { Text("Use \u{201C}\(typed)\u{201D} as your own type").foregroundStyle(Toon.ink) } icon: {
+                        Image(systemName: "plus.circle.fill").foregroundStyle(Toon.accent)
+                    }
+                }
+                .buttonStyle(.plain)
+            }
+        } header: {
+            Text("Your own types")
+        } footer: {
+            if query.isEmpty { Text("Saved as \u{201C}Other\u{201D} with your name for it, so it exports and analyses like Other.") }
+        }
+    }
+
+    private func matchesQuery(_ name: String) -> Bool {
+        let q = query.trimmingCharacters(in: .whitespaces)
+        return q.isEmpty || name.range(of: q, options: [.caseInsensitive, .diacriticInsensitive]) != nil
+    }
+
+    private func row(_ c: PlaceCategory?) -> some View {
+        choiceRow(c?.label ?? "None", symbol: c?.symbol ?? "circle.dashed",
+                  selected: selection == c && (c != .other || Place.cleanCustom(custom) == nil)) {
+            selection = c
+            custom = nil
+        }
+    }
+
+    private func customRow(_ name: String) -> some View {
+        choiceRow(name, symbol: PlaceCategory.other.symbol,
+                  selected: selection == .other && Place.cleanCustom(custom) == name) {
+            selection = .other
+            custom = name
+        }
+    }
+
+    private func useCustom(_ text: String) {
+        guard let name = Place.cleanCustom(text) else { return }
+        selection = .other
+        custom = name
+        dismiss()
+    }
+
+    private func choiceRow(_ title: String, symbol: String, selected: Bool, action: @escaping () -> Void) -> some View {
+        Button {
+            action()
+            dismiss()
+        } label: {
+            HStack {
+                Label {
+                    Text(title).foregroundStyle(Toon.ink)
+                } icon: {
+                    Image(systemName: symbol).foregroundStyle(Toon.accent)
+                }
+                Spacer()
+                if selected { Image(systemName: "checkmark").font(.body.weight(.bold)).foregroundStyle(Toon.accent) }
+            }
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+    }
+
+    private func loadUsage() {
+        let places = (try? model.store.places()) ?? []
+        var counts: [PlaceCategory: Int] = [:]
+        var names: [String: Int] = [:]
+        for p in places {
+            if let c = p.category { counts[c, default: 0] += 1 }
+            if p.category == .other, let n = Place.cleanCustom(p.customCategory) { names[n, default: 0] += 1 }
+        }
+        // a name chosen but not saved yet (e.g. while creating a place) is still offered
+        if selection == .other, let n = Place.cleanCustom(custom), names[n] == nil { names[n] = 0 }
+        used = counts.sorted { $0.value != $1.value ? $0.value > $1.value : $0.key.label < $1.key.label }.prefix(5).map(\.key)
+        customNames = names.sorted { $0.value != $1.value ? $0.value > $1.value : $0.key < $1.key }.map(\.key)
+    }
+}

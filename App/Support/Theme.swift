@@ -58,13 +58,13 @@ extension PlaceCategory {
     var toonColor: Color {
         switch self {
         case .home: return Toon.sun
-        case .workSchool: return Toon.sky
-        case .restaurant, .cafe: return Toon.orange
-        case .grocery, .shopping: return Toon.bubblegum
-        case .recreation, .entertainment: return Toon.lime
-        case .airport, .railStation, .transitStation, .hotel: return Toon.grape
-        case .friendFamily: return Toon.mint
-        case .medical: return Toon.aqua
+        case .workSchool, .library: return Toon.sky
+        case .restaurant, .cafe, .bar: return Toon.orange
+        case .grocery, .shopping, .convenienceStore, .gasStation: return Toon.bubblegum
+        case .recreation, .entertainment, .stadium, .eventVenue, .museum, .gym: return Toon.lime
+        case .airport, .railStation, .transitStation, .hotel, .parking: return Toon.grape
+        case .friendFamily, .religious: return Toon.mint
+        case .medical, .pharmacy, .bank, .civic: return Toon.aqua
         case .other: return Toon.paper
         }
     }
