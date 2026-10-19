@@ -214,6 +214,7 @@ struct PlaceDetailView: View {
     @State private var showMerge = false
     @State private var radiusText = ""
     @State private var confirmDelete = false
+    @State private var loadedRevision: Int?
 
     var body: some View {
         Form {
@@ -280,7 +281,12 @@ struct PlaceDetailView: View {
         .toonBackground()
         .navigationTitle(place?.displayName ?? "Place")
         .inlineTitle()
-        .task(id: model.revision) { load() }
+        .task(id: model.revision) {
+            // .task also re-runs when a pushed screen (e.g. the category list) pops; keep unsaved edits then.
+            guard loadedRevision != model.revision else { return }
+            loadedRevision = model.revision
+            load()
+        }
         .confirmationDialog("Delete this place?", isPresented: $confirmDelete, titleVisibility: .visible) {
             Button("Delete place and its \(visitWord(visits.count))", role: .destructive) {
                 model.perform { try model.edit.deletePlace(placeID) }
@@ -336,8 +342,11 @@ struct PlaceCategoryPicker: View {
         NavigationLink {
             PlaceCategoryList(selection: $selection)
         } label: {
-            LabeledContent("Category") {
-                if let c = selection { Label(c.label, systemImage: c.symbol) } else { Text("None") }
+            HStack {
+                Text("Category")
+                Spacer()
+                if let c = selection { Image(systemName: c.symbol).foregroundStyle(Toon.accent) }
+                Text(selection?.label ?? "None").foregroundStyle(.secondary).lineLimit(1)
             }
         }
     }
@@ -363,6 +372,10 @@ private struct PlaceCategoryList: View {
                 if !cats.isEmpty { Section(g.label) { ForEach(cats) { row($0) } } }
             }
         }
+        .overlay {
+            if !PlaceCategory.allCases.contains(where: { $0.matches(query) }) { ContentUnavailableView.search(text: query) }
+        }
+        .toonBackground()
         .searchable(text: $query, prompt: "Search categories")
         .navigationTitle("Category")
         .inlineTitle()
@@ -379,10 +392,16 @@ private struct PlaceCategoryList: View {
             dismiss()
         } label: {
             HStack {
-                Label(c?.label ?? "None", systemImage: c?.symbol ?? "circle.dashed").foregroundStyle(.primary)
+                Label {
+                    Text(c?.label ?? "None").foregroundStyle(Toon.ink)
+                } icon: {
+                    Image(systemName: c?.symbol ?? "circle.dashed").foregroundStyle(Toon.accent)
+                }
                 Spacer()
-                if selection == c { Image(systemName: "checkmark").foregroundStyle(Toon.accent) }
+                if selection == c { Image(systemName: "checkmark").font(.body.weight(.bold)).foregroundStyle(Toon.accent) }
             }
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
     }
 }
