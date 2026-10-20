@@ -14,3 +14,4 @@ __pycache__/
 .vercel
 .env*
 calibration-data/
+node_modules/

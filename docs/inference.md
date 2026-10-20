@@ -5,14 +5,17 @@ Defaults shown in brackets. Everything is deterministic and rule-based; tests in
 `Packages/HHTCore/Tests/HHTCoreTests/InferenceTests.swift` cover the 14 fixture scenarios from the brief.
 
 ## 1. Cleaning
+
 - Drop fixes with horizontal accuracy > `maxHorizontalAccuracy` [100 m] (CLVisit events: [250 m]). They stay in the raw table.
 - Drop single-point spikes: A→B and B→C both faster than `maxPlausibleSpeed` [320 m/s] while A→C is not.
 
 ## 2. Stay (visit) detection — sequential clustering
+
 Walk through fixes in time order. A fix reporting speed > 1.5 m/s cannot start a cluster. From a seed fix, keep adding
 fixes while they are within `stayRadius` [100 m] of the running, accuracy-weighted centroid (fixes moving > 1 m/s count 10× less).
 
 When a fix falls outside the radius:
+
 - **Drift**: if the cluster is established (≥ 60 s) and a later fix within `driftMaxDuration` [120 s] returns inside,
   the excursion is GPS drift and skipped.
 - **Departure**: otherwise the cluster ends.
@@ -22,6 +25,7 @@ A gap is treated as *stationary* if CoreMotion shows < `gapMovingSeconds` [20 mi
 during it, or — with no motion data — if the last fix was recorded in `stationary` collector mode. (20 min, not 5, was
 calibrated on real days: indoor pottering adds up to 5–20 min of "walking" over a long silence at one place; see
 [research/inference-calibration.md](research/inference-calibration.md).)
+
 - Stationary gap, next fix inside the radius → the stay continues through the gap.
 - Next fix outside → if the motion log shows a movement bout (≥ `minSegmentDuration`, blips ≤ 3 min joined) that began
   early enough to cover the distance at a plausible speed, the departure is the start of the latest such bout
@@ -43,15 +47,18 @@ still ongoing, the visit gets no departure.
 `mergeMaxExcursionDuration` [10 min] that never went beyond `mergeMaxExcursionDistance` [250 m], are merged.
 
 ## 3. Places
+
 Each stay is matched to the nearest active place whose radius + `placeMatchSlack` [40 m] contains its centroid
 (named places win over unnamed ones). Otherwise an unnamed place is created with radius `newPlaceRadius` [80 m].
 Naming or categorising a place therefore makes all future visits to it recognised automatically.
 
 ## 4. Trips and modes
+
 A trip connects consecutive visits; its path is every cleaned fix between departure and arrival plus both visit centroids.
 Distance = path length (straight line across gaps). `has_gap` = any > 15 min hole.
 
 **Per-interval class** between consecutive fixes (speed = distance / time; CoreMotion activity at the midpoint):
+
 - ≥ `airMinSpeed` [70 m/s] → air
 - motion walking / running / cycling → walk / run / bike (vehicle if faster than plausible); automotive → vehicle
 - no motion: < 0.3 m/s still; ≤ `walkMaxSpeed` [2.2] walk; ≤ `bikeMaxSpeed` [7] bike (vehicle across a signal gap); else vehicle
@@ -64,6 +71,7 @@ A walk run whose straight-line displacement is ≥ `walkCheckMinDisplacement` [1
 
 **Segment refinement**: an air run shorter than `airMinDistance` [50 km] is a GPS jump and is refined as vehicle.
 Vehicle runs, in order (issue #46 round 2 added the road-evidence and no-evidence rules):
+
 1. airplane if avg ≥ 0.6·air speed over > 150 km; intercity rail if ≥ 60 km with p90 speed 38–70 m/s (conf 0.35);
 2. **road evidence → car**: CoreMotion automotive ≥ `roadMinAutomotiveShare` [60 %] of covered time and ≥
    `roadMinGoodFixShare` [50 %] (and ≥ `roadMinGoodFixes` [5]) of fixes are "good" (accuracy ≤ `roadFixMaxAccuracy`
@@ -93,15 +101,18 @@ old trip is re-attached (keeping seat, flight number, notes) instead of a new ro
 with no trip and no user-entered details are removed.
 
 ## 5. Confidence
+
 - Visit: 0.5 + 0.5 × min(1, fixes/5) × min(1, duration/20 min).
 - Trip existence: 0.5 with a data gap, else 0.6 + 0.1 × fixes per minute (≤ 0.95).
 
 ## 6. Incremental runs and reprocessing
+
 `processNew()` runs on launch, on foreground, when the collector declares a stop, and from background refresh.
 It reprocesses from the arrival of the latest visit, loading `contextMargin` [30 min] of earlier fixes so the anchor
 stay is detected exactly as in a full run. `process(from:to:)` rebuilds any range (window widened to whole visits).
 
 Rules that keep user corrections safe:
+
 1. Records with `user_status ≠ auto`, and auto visits referenced by such trips, are **locked** — never modified
    (an ongoing locked visit may receive its departure time; logged as `infer_departure`).
 2. A detected stay overlapping a locked trip or a user-deleted visit is ignored (the user said it was travel / not a stop).
@@ -113,11 +124,13 @@ Rules that keep user corrections safe:
 Tests assert: incremental == one-shot, repeated runs change nothing, edits survive full rebuilds, deleted stops stay deleted.
 
 ## 7. Calibration against a real diary
+
 `hht-calibrate` replays raw points through this engine offline (batch or streaming), and `analysis/calibrate.py`
 scores the result against a human-corrected diary. Protocol, matching rules, results and limitations:
 [research/inference-calibration.md](research/inference-calibration.md).
 
 ## 8. Self-reported stamps
+
 *Stamp this moment* on Today saves a **stamp**: "something worth recording happened around here, around now".
 It is user evidence, not ground truth for the stop's position, and it complements passive detection instead of
 overriding it. Code: `Inference/StampAnchoring.swift`; thresholds in `InferenceConfig` (`stamp*`).
@@ -127,6 +140,7 @@ with an uncertainty radius = fix accuracy + half a rounding cell (≈ 70 m) + 1.
 10 min is not used; the stamp is then saved with its time only. Poor GPS just makes the radius larger.
 
 **How inference uses it** (after stays are detected and merged, before they are resolved to visits):
+
 1. *Match.* A stay accounts for a stamp if the tap is within the stay ± `stampTimeTolerance` [10 min] and, when the stamp
    has a location, the stay centroid is within its uncertainty + `stayRadius` + `placeMatchSlack`. Nothing changes.
 2. *Conflict.* A tap inside a stay that is too far away contradicts the sensors; the stamp stays unmatched.
@@ -147,6 +161,7 @@ stamp removes a stop that only it supported. Stamps are human input, so the cali
 like every other correction.
 
 ## Known limitations / next steps
+
 - Bus vs car vs ride-hail needs GTFS/route matching.
 - Short (< 2 min) access/egress walks are merged into the main segment.
 - The collector's region-exit wake-up can lag departure by a few minutes; CLVisit departure events and back-dating correct most of it.

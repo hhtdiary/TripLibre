@@ -10,7 +10,7 @@ developer's machine.
 
 ### Data flow
 
-```
+```text
 CoreLocation / CLVisit / region exits / significant change ─┐
 CoreMotion activity (synced before each run) ───────────────┤
                                                             ▼

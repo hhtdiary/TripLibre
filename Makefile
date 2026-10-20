@@ -11,10 +11,10 @@ PY          := analysis/.venv/bin/python
 CAL_DIR     := $(BUILD_DIR)/calibrate-smoke
 CALIBRATE   := Packages/HHTCore/.build/release/hht-calibrate
 
-.PHONY: help test project build sim phone analysis-env export-check calibrate-tool calibrate-smoke ci clean
+.PHONY: help test project build sim phone analysis-env export-check calibrate-tool calibrate-smoke lint a11y ci clean
 
 help:            ## list targets
-	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
+	@grep -E '^[a-z0-9-]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
 
 test:            ## run the core test suite (inference, edits, export, analytics)
 	cd Packages/HHTCore && swift test
@@ -57,7 +57,19 @@ calibrate-smoke: calibrate-tool  ## synthetic end-to-end calibration: fixture â†
 	python3 analysis/calibrate.py evaluate --reference $(CAL_DIR)/reference --pred $(CAL_DIR)/pred.json --out $(CAL_DIR)/results --days all --db $(CAL_DIR)/fixture.sqlite
 	python3 analysis/check_calibration.py $(CAL_DIR)/results/metrics-all.json
 
-ci: test build export-check calibrate-smoke   ## everything GitHub Actions runs
+# npm writes node_modules/.package-lock.json on install, so this reinstalls whenever the lockfile changes.
+node_modules/.package-lock.json: package-lock.json
+	npm ci
+
+lint: node_modules/.package-lock.json   ## docs JS/CSS/HTML (incl. accessibility rules), Markdown, Python (needs node + ruff)
+	npm run lint
+	ruff check
+
+a11y: node_modules/.package-lock.json   ## axe-core WCAG 2.1 AA check of every docs page, light + dark (needs node + Chromium)
+	npx playwright install chromium
+	npm run a11y
+
+ci: lint a11y test build export-check calibrate-smoke   ## everything GitHub Actions runs
 
 clean:
 	rm -rf $(BUILD_DIR) Packages/HHTCore/.build

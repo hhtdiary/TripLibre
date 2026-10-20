@@ -1,0 +1,9 @@
+# Lints the Python analysis scripts (analysis/). Run: ruff check
+target-version = "py310"
+extend-exclude = [".claude", ".build-xcode", "calibration-data"]
+
+[lint]
+# Pyflakes + pycodestyle errors + import sorting + common bug patterns.
+select = ["E4", "E7", "E9", "F", "I", "B", "UP"]
+# The scripts are written densely on purpose (`a = 1; b = 2`, small lambdas).
+ignore = ["E702", "E731", "E741"]

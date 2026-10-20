@@ -94,7 +94,7 @@ function buildToc(layout, content) {
   heads.forEach(h => {
     if (!h.id) h.id = slug(h.textContent);
     const a = document.createElement('a');
-    a.className = 'anchor'; a.href = '#' + h.id; a.textContent = '#'; a.setAttribute('aria-hidden', 'true');
+    a.className = 'anchor'; a.href = '#' + h.id; a.textContent = '#'; a.tabIndex = -1; a.setAttribute('aria-hidden', 'true');
     h.append(a);
   });
   const toc = document.createElement('aside');
@@ -177,6 +177,17 @@ function addCopyButtons() {
   });
 }
 
+// Wide tables scroll sideways; make each wrapper focusable so keyboard users can scroll it too.
+function labelScrollRegions(content) {
+  content.querySelectorAll('.table-wrap').forEach(w => {
+    let h = w.previousElementSibling;
+    while (h && !/^H[2-4]$/.test(h.tagName)) h = h.previousElementSibling;
+    w.tabIndex = 0;
+    w.setAttribute('role', 'region');
+    w.setAttribute('aria-label', h ? `Table: ${h.firstChild.textContent.trim()}` : 'Table');
+  });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
   const main = document.querySelector('main.dx-main');
   const content = main.querySelector('.dx-content');
@@ -189,4 +200,5 @@ document.addEventListener('DOMContentLoaded', () => {
   buildToc(layout, content);
   buildPager(content);
   addCopyButtons();
+  labelScrollRegions(content);
 });

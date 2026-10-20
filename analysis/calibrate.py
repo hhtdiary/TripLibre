@@ -157,7 +157,7 @@ def quality_checks(con) -> dict:
     q["segments_orphan"] = one("SELECT COUNT(*) FROM trip_segments s WHERE NOT EXISTS (SELECT 1 FROM trips t WHERE t.id = s.trip_id)")
     # sampling gaps (> 15 min between consecutive fixes) — normal while stationary, informative while moving
     rows = con.execute("SELECT ts, collector_mode FROM raw_location_points ORDER BY ts, id").fetchall()
-    gaps = [(b[0] - a[0], a[1]) for a, b in zip(rows, rows[1:]) if b[0] - a[0] > 900]
+    gaps = [(b[0] - a[0], a[1]) for a, b in zip(rows, rows[1:], strict=False) if b[0] - a[0] > 900]
     q["sampling_gaps_over_15min"] = len(gaps)
     q["sampling_gaps_over_15min_while_moving_mode"] = sum(1 for g, m in gaps if m == "moving")
     q["sampling_gap_hours_total"] = r(sum(g for g, _ in gaps) / 3600, 1)

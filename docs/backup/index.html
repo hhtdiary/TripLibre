@@ -12,7 +12,7 @@
 <style>
   :root {
     --bg: #faf8f4; --surface: #fff; --surface-warm: #f5f2ec;
-    --ink: #0b2345; --ink-navy: #0b2345; --ink-soft: rgba(11,35,69,.72); --ink-faint: rgba(11,35,69,.5);
+    --ink: #0b2345; --ink-navy: #0b2345; --ink-soft: rgba(11,35,69,.72); --ink-faint: rgba(11,35,69,.65);
     --red: #a51c30; --blue: #456a96; --sand: #e9dcc7; --sand-deep: #d9c5a5; --sage: #c8d5c5; --terracotta: #d76a54;
     --line: rgba(11,35,69,.14); --line-soft: rgba(11,35,69,.08); --num: #efece4;
     --serif: 'Source Serif 4', Georgia, 'Times New Roman', serif;
@@ -58,7 +58,7 @@
   .diary .what { padding: 7px 0; }
   .diary .place { font-weight: 600; font-family: var(--serif); font-size: 16px; }
   .diary .meta { color: var(--ink-soft); font-size: 13px; }
-  .chip { display: inline-block; font: 600 10.5px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: var(--terracotta); background: #fbece7; border-radius: 3px; padding: 1px 6px; margin-left: 6px; vertical-align: 1px; }
+  .chip { display: inline-block; font: 600 10.5px var(--sans); letter-spacing: .08em; text-transform: uppercase; color: #b04a35; background: #fbece7; border-radius: 3px; padding: 1px 6px; margin-left: 6px; vertical-align: 1px; }
   figcaption { font: 400 15.5px/1.6 var(--serif); color: var(--ink-soft); margin-top: 14px; }
 
   /* layers */
@@ -101,7 +101,7 @@
   .read-link { color: var(--red); }
   .lede-row { margin-top: 34px; padding-top: 30px; border-top: 1px solid var(--line); }
   .kicker { color: var(--red); }
-  .n { color: var(--sand-deep); }
+  .n { color: #9c8560; }
   .footer-name, .footer-identity { margin-top: 0; }
   .footer-identity { margin-bottom: 0; }
   section.item { scroll-margin-top: 90px; }
@@ -136,7 +136,7 @@
 					<a class="nav-name" href="https://www.zhanchaoyang.com/">Zhanchao Yang</a>
 					<span class="nav-affil">Penn Weitzman</span>
 				</div>
-				<button
+				<button type="button"
 					class="nav-toggle"
 					id="nav-toggle"
 					aria-label="Open menu"
@@ -289,7 +289,7 @@
 				<div class="footer-hometown">
 					<img src="../assets/qingdao-footer.png" width="2172" height="724"
 						alt="Qingdao, my hometown — a sketch of Zhanqiao Pier and the seafront."
-						loading="lazy" decoding="async" />
+						loading="lazy" decoding="async">
 				</div>
 				<div class="footer-note">
 					<span>© <span id="year">2026</span> Zhanchao Yang</span>

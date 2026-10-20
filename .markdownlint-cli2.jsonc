@@ -1,0 +1,21 @@
+{
+  "globs": ["**/*.md"],
+  "ignores": [
+    "node_modules/**", ".build-xcode/**", "Packages/**/.build/**", "analysis/.venv/**",
+    "calibration-data/**", ".claude/**",
+    // Original product brief, kept verbatim for reference.
+    "design/**"
+  ],
+  "config": {
+    "default": true,
+    // Prose is wrapped by hand (or not at all); tables and HTML banners are long by nature.
+    "MD013": false,
+    "MD060": false,
+    // README banner and docs use inline HTML on purpose.
+    "MD033": false,
+    // Release notes start at "##" because they are pasted into GitHub releases.
+    "MD041": false,
+    "MD036": false,
+    "MD024": { "siblings_only": true }
+  }
+}
