@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css?v=6">
+<link rel="stylesheet" href="assets/docs.css?v=7">
 <script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <script src="assets/docs.js" defer></script>
 </head>
@@ -129,6 +129,36 @@ See <a href="using-the-app.html#correcting-the-diary">Correcting the diary</a> f
   </ol>
 </div>
 
+<h2 id="widgets">Home Screen widgets</h2>
+<p>Long-press the Home Screen, tap <b>Edit › Add Widget</b> and search for <b>HHT</b>. The widgets only show what the app
+has already worked out: they update when iOS lets HHT run, which is why each one says when it was last updated. Tapping
+a widget opens the matching screen.</p>
+<figure class="widget-shot"><img src="assets/screens/widgets.jpg" alt="Tracking, Today and Last 7 days widgets in the sticker style" loading="lazy">
+<figcaption>Tracking (small), Today (medium) and Last 7 days (large). Simulator demo data covers earlier days, so today is still empty.</figcaption></figure>
+<div class="table-wrap"><table>
+  <tr><th>Widget</th><th>Size</th><th>Shows</th><th>Tap opens</th></tr>
+  <tr><td><b>Tracking</b></td><td>small</td><td>Whether HHT is recording, how long ago the last location came in, and trips to check.</td><td>Today, or Settings when something needs fixing</td></tr>
+  <tr><td><b>Today</b></td><td>medium</td><td>Trips, distance and places so far today, where you are now, and today's trips to check.</td><td>Today</td></tr>
+  <tr><td><b>Last 7 days</b></td><td>large</td><td>Trips, distance and time on the move; trips per day (today in orange); how you got around, by distance; where you spent the most time.</td><td>Stats on <i>7 days</i></td></tr>
+  <tr><td><b>Tracking (simple)</b></td><td>small</td><td>The same status as a plain white card.</td><td>Same as Tracking</td></tr>
+  <tr><td><b>Today's timeline</b></td><td>medium</td><td>Today from midnight to midnight: stays as coloured blocks, trips as ink lines. Dashed blocks are HHT's guesses you haven't checked.</td><td>Today</td></tr>
+</table></div>
+<figure class="widget-shot"><img src="assets/screens/widgets-alt.jpg" alt="Tracking (simple) and Today's timeline widgets" loading="lazy">
+<figcaption>The alternate styles: Tracking (simple) and Today's timeline.</figcaption></figure>
+
+<h3>Tracking states</h3>
+<div class="table-wrap"><table>
+  <tr><th>Badge</th><th>Meaning</th><th>What to do</th></tr>
+  <tr><td><span class="toon-badge" style="background:#8BDB5E">RECORDING</span></td><td>Tracking is on with <i>Always</i> location access.</td><td>Nothing</td></tr>
+  <tr><td><span class="toon-badge" style="background:#FFC93C">QUIET</span></td><td>Tracking is on, but no new location for over 12 hours. A few hours of quiet are normal: HHT stops asking for GPS while you stay put.</td><td>Open HHT if you've been out and about</td></tr>
+  <tr><td><span class="toon-badge" style="background:#FFC93C">LIMITED</span></td><td>Location access is <i>While Using</i>, so trips are missed in the background.</td><td>Tap, then allow <i>Always</i></td></tr>
+  <tr><td><span class="toon-badge" style="background:#D8D2C4">PAUSED</span></td><td>You turned tracking off in HHT.</td><td>Tap to resume in Settings</td></tr>
+  <tr><td><span class="toon-badge" style="background:#D8D2C4">NOT RECORDING</span></td><td>Location access is denied or was never granted.</td><td>Tap to fix in Settings</td></tr>
+</table></div>
+<p>After midnight the Today widgets start a fresh day and fill in as HHT records. Place names you've given are hidden on a
+locked phone; places you haven't named never show an address. In dark mode the cream background turns deep purple, and the
+coloured stickers stay the same.</p>
+
 <h2>Design system</h2>
 <p>The look is defined in one file, <code>App/Support/Theme.swift</code>, as the <code>Toon</code> namespace. The rules:</p>
 <ul>
@@ -159,6 +189,7 @@ See <a href="using-the-app.html#correcting-the-diary">Correcting the diary</a> f
   <tr><td>Badge</td><td><code>ToonBadge</code></td><td>"check", "here now", "1 to check"</td></tr>
   <tr><td>Tab bar</td><td><code>ToonTabBar</code> (RootView)</td><td>The floating bottom navigation</td></tr>
   <tr><td>Background</td><td><code>.toonBackground()</code></td><td>Cream ground with a dot grid</td></tr>
+  <tr><td>Widget ground</td><td><code>DotGround</code>, <code>WTheme</code> (Widgets/WidgetStyle.swift)</td><td>The same dot grid for widgets, with a dark-mode variant</td></tr>
 </table></div>
 
 <h3>Palette</h3>
@@ -191,12 +222,14 @@ See <a href="using-the-app.html#correcting-the-diary">Correcting the diary</a> f
   <tr><td><span class="toon-chip" style="background:#5FD3B0;width:22px;height:22px;border-width:2px"></span> mint</td><td>Run</td><td>Friend / family</td></tr>
   <tr><td><span class="toon-chip" style="background:#D8D2C4;width:22px;height:22px;border-width:2px"></span> stone</td><td>Other / unknown</td><td>Unnamed places</td></tr>
 </table></div>
-<p>Mode colours are defined in <code>App/Support/Formatting.swift</code> (<code>TravelMode.color</code>, <code>ModeGroup.color</code>);
-place colours in <code>Theme.swift</code> (<code>PlaceCategory.toonColor</code>).</p>
+<p>Mode colours are defined in <code>App/Support/Formatting.swift</code> (<code>TravelMode.color</code>); group colours
+(<code>ModeGroup.color</code>) and place colours (<code>PlaceCategory.toonColor</code>) live in <code>Theme.swift</code>, which the
+widget extension shares, so the widgets use the same colours.</p>
 
 <div class="callout tip"><div class="ic">✓</div>
 <p>Changing the UI? Keep new surfaces on <code>.toonCard</code> and colours in <code>Toon</code> so the look stays consistent,
-and refresh these screenshots with <code>make sim</code> if a screen changes noticeably.</p></div>
+and refresh these screenshots with <code>make sim</code> if a screen changes noticeably. Widget shots come from the
+widget gallery (long-press the Home Screen › Edit › Add Widget › HHT).</p></div>
 
 </article></main>
 </body>

@@ -42,12 +42,14 @@ The product brief is in [`design/`](design/personal_travel_tracker_claude_brief.
 App/                    SwiftUI iOS app (Today · Timeline · Map · Stats · Places · Settings)
   Location/             background collector, CoreMotion sync, optional geocoder
   Screens/              UI
+Widgets/                read-only Home Screen widgets (WidgetKit extension)
 Packages/HHTCore/       platform-independent core (Swift package, no dependencies)
   Database/             SQLite wrapper, schema + migrations, repository
   Inference/            stay detection, self-reported stamps, trip building, mode classification, reprocessing
   Editing/              every correction (mode, place, times, split/merge/delete) + audit log
   Analytics/            HHTS metrics, radius of gyration, entropy, tours…
   Export/               CSV/JSON/GeoJSON/SQLite export; CSV/GPX/airport import
+  Widget/               the small summary the widgets read (no coordinates)
   Tests/                94 tests incl. the brief's 14 synthetic scenarios
 analysis/               Python loader + example analysis (pandas)
 docs/                   project page (index.html), documentation site (docs/), markdown specs
@@ -80,6 +82,8 @@ After changing `project.yml`, regenerate with `xcodegen generate` (`brew install
 - **Timeline**: days by month, trip search/filters, flights, life phases.
 - **Map / Stats**: activity space, radius of gyration, mode share, departure times, tours, weekday/weekend, and
   period-vs-period comparisons (e.g. two semesters).
+- **Home Screen widgets**: Tracking (is recording healthy?), Today, and Last 7 days, plus plain and timeline styles.
+  They show what the app last worked out and never collect location themselves ([UI guide](docs/ui-guide.html#widgets)).
 - **Settings** (gear on Today): collection status, export/import, rebuild from raw data, backups, privacy.
 
 ## Research workflow

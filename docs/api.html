@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css?v=6">
+<link rel="stylesheet" href="assets/docs.css?v=7">
 <script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <script src="assets/docs.js" defer></script>
 </head>
@@ -177,6 +177,22 @@ let engine = InferenceEngine(store: store, config: config)</code></pre>
 <p><code>Geo</code> (<code>Geo/Geo.swift</code>): <code>distance</code> (haversine), <code>pathLength</code>, <code>centroid</code>,
 <code>sphericalCentroid</code>, <code>radiusOfGyration</code>, <code>convexHull</code>, <code>simplify</code> (Douglas–Peucker),
 <code>project</code> / <code>unproject</code>. <code>Polyline.encode</code> / <code>decode</code> for Google polylines.</p>
+
+<h2 id="widget-snapshot">Widget snapshot</h2>
+<div class="api">
+  <div class="api-head"><span class="kind">struct</span><span class="name">WidgetSnapshot</span><span class="file">Widget/WidgetSnapshot.swift</span></div>
+  <div class="api-body">
+    <div class="sig"><code>static build(store:, tracking:, diaryUpdatedAt:, usesMetric:, now:, calendar:) throws -&gt; WidgetSnapshot</code><span>Everything the widgets show, from the same queries as Today and Stats › 7 days.</span></div>
+    <div class="sig"><code>write(to: URL) throws</code><span>Atomic JSON write (file protection until first unlock).</span></div>
+    <div class="sig"><code>static read(from: URL) -&gt; WidgetSnapshot?</code><span><code>nil</code> when missing, unreadable or from another <code>currentVersion</code>.</span></div>
+    <div class="sig"><code>sameContent(as:) -&gt; Bool</code><span>Equal apart from <code>generatedAt</code>; the app skips widget reloads when true.</span></div>
+  </div>
+</div>
+<p>Fields: <code>tracking</code> (<code>recording</code>, <code>paused</code>, <code>permissionNeeded</code>, <code>backgroundLimited</code>),
+<code>lastPointAt</code>, <code>diaryUpdatedAt</code>, <code>reviewPending</code> (last 7 days, same as Today's banner),
+<code>today</code> (<code>trips</code>, <code>places</code>, <code>distance</code>, <code>travelTime</code>, <code>unconfirmedTrips</code>,
+<code>current</code> stay, <code>timeline</code> blocks) and <code>week</code> (<code>tripsPerDay</code>, totals, <code>modeDistance</code> by
+<code>ModeGroup</code>, <code>topPlace</code>). See <a href="architecture.html#widgets">Architecture › Home Screen widgets</a>.</p>
 
 <h2>Python analysis helpers</h2>
 <p><code>analysis/hht.py</code> loads an export folder or a <code>travel.sqlite</code> file into pandas. Install with

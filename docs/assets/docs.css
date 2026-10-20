@@ -381,6 +381,9 @@ td code { white-space: nowrap; }
 .showcase .phone:nth-child(3) { transform: rotate(4deg) translateY(14px); }
 .showcase .phone figcaption { color: #5b5270; font-weight: 500; }
 
+.widget-shot { margin: 8px 0 24px; }
+.widget-shot img { display: block; width: 100%; max-width: 640px; height: auto; border-radius: 18px; border: 1px solid var(--line); }
+.widget-shot figcaption { margin-top: 8px; font-size: 12.5px; color: var(--ink-faint); }
 .gallery { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px 14px; margin: 0 0 48px; }
 .gallery .phone { border-radius: 22px; padding: 5px; }
 .gallery .phone img { border-radius: 18px; }

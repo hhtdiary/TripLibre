@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css?v=6">
+<link rel="stylesheet" href="assets/docs.css?v=7">
 <script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <script src="assets/docs.js" defer></script>
 </head>
@@ -28,6 +28,8 @@ A stamp keeps only a coarse location (rounded to about 110 m) and doesn't need a
 <ul>
   <li>Daily snapshots go to <code>Documents/Backups</code> (the last 7 are kept).</li>
   <li>Exports go to <code>Documents/Exports</code>.</li>
+  <li>For the Home Screen widgets, a small summary file (<code>widget-snapshot.json</code>) sits in the app's App Group container.
+    It holds counts, times and the names of places you named yourself: no GPS points, routes, coordinates or addresses.</li>
   <li>Both are visible in the Files app under <i>On My iPhone › HHT</i>.</li>
 </ul>
 

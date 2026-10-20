@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css?v=6">
+<link rel="stylesheet" href="assets/docs.css?v=7">
 <script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <script src="assets/docs.js" defer></script>
 </head>
@@ -85,6 +85,8 @@ computer. Then repeat steps 4–7 above on the new phone.</p>
   <tr><td><code>No iPhone found</code></td><td>Check the cable and unlock the phone; tap <b>Trust</b>; make sure Developer Mode is on.</td></tr>
   <tr><td>Xcode says "Preparing iPhone…"</td><td>Normal on first connection or after an iOS update. Wait a few minutes and rerun.</td></tr>
   <tr><td>Signing / provisioning error</td><td>Xcode › Settings › Accounts: sign in again (e.g. after a password change), then <code>make phone</code>.</td></tr>
+  <tr><td>Signing error mentioning <code>group.com.zyang91.hht</code> or <code>com.zyang91.hht.widgets</code></td><td>The widget extension needs the App Groups capability on both targets. Run <code>make phone</code> again (it passes <code>-allowProvisioningUpdates</code>), or open the project in Xcode once and let Signing &amp; Capabilities register the group under your team.</td></tr>
+  <tr><td>Widgets say "Open HHT"</td><td>Open the app once after installing; it writes the summary the widgets read.</td></tr>
   <tr><td>"Untrusted Developer"</td><td>Settings › General › VPN &amp; Device Management › your Apple ID › Trust.</td></tr>
   <tr><td>Installed but not recording</td><td>Location must be <b>Always</b> + Precise; Motion &amp; Fitness on; check the 7-day signature hasn't expired.</td></tr>
   <tr><td><code>xcodegen: command not found</code></td><td><code>xcode-select --install</code>, then <code>brew install xcodegen</code>.</td></tr>
