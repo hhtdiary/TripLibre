@@ -30,6 +30,22 @@ jobs:
       - name: Ruff (analysis/)
         run: pipx run ruff==0.15.1 check
 
+  a11y:
+    name: Docs accessibility (axe-core, WCAG 2.1 AA, light + dark)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: axe-core on every docs page
+        run: npm run a11y
+
   core:
     name: Core tests + export contract
     runs-on: macos-15

@@ -7,13 +7,13 @@
   --bg-code: #f5f5f3;
   --ink: #18181b;
   --ink-soft: #52525b;
-  --ink-faint: #8a8a93;
+  --ink-faint: #696971;
   --line: #e6e6e3;
   --line-strong: #d4d4d0;
-  --accent: #c96a2b;
-  --accent-soft: rgba(201, 106, 43, .1);
-  --teal: #1f9b77;
-  --teal-soft: rgba(31, 155, 119, .1);
+  --accent: #a8551c;
+  --accent-soft: rgba(168, 85, 28, .1);
+  --teal: #137a5a;
+  --teal-soft: rgba(19, 122, 90, .1);
   --blue: #3b6fd8;
   --blue-soft: rgba(59, 111, 216, .1);
   --warn: #b7791f;
@@ -35,7 +35,7 @@
     --bg-code: #141417;
     --ink: #ececee;
     --ink-soft: #a6a6ad;
-    --ink-faint: #6e6e76;
+    --ink-faint: #8b8b94;
     --line: #26262b;
     --line-strong: #34343a;
     --accent: #e8945a;
@@ -57,7 +57,7 @@
   --bg-code: #141417;
   --ink: #ececee;
   --ink-soft: #a6a6ad;
-  --ink-faint: #6e6e76;
+  --ink-faint: #8b8b94;
   --line: #26262b;
   --line-strong: #34343a;
   --accent: #e8945a;
@@ -84,6 +84,10 @@ body {
 }
 a { color: var(--accent); text-decoration: none; }
 a:hover { text-decoration: underline; text-underline-offset: 3px; }
+/* Links inside running text are underlined so they don't rely on colour alone (WCAG 1.4.1). */
+.dx-content :is(p, li, td, dd, blockquote, figcaption, span) > a:not([class]) {
+  text-decoration: underline; text-decoration-thickness: 1px; text-underline-offset: 3px;
+}
 img { max-width: 100%; }
 
 /* ── Header ─────────────────────────────────────────────── */
@@ -424,7 +428,7 @@ td code { white-space: nowrap; }
 .toon-stat small { font-size: 13px; }
 .toon-pill { padding: 6px 16px; border-radius: 999px; font-size: 14px; box-shadow: 2.5px 2.5px 0 #22193a; }
 .toon-pill.dark { background: #22193a; color: #fff; }
-.toon-badge { display: inline-block; padding: 1px 9px; border: 2px solid #22193a; border-radius: 999px; font-weight: 800; font-size: 12px; line-height: 1.4; }
+.toon-badge { display: inline-block; color: #22193a; padding: 1px 9px; border: 2px solid #22193a; border-radius: 999px; font-weight: 800; font-size: 12px; line-height: 1.4; }
 .toon-chip { width: 38px; height: 38px; border-radius: 12px; display: inline-grid; place-items: center; border: 2.5px solid #22193a; font-size: 18px; }
 .toon-tabbar { display: flex; align-items: center; gap: 6px; padding: 6px; border-radius: 999px; }
 .toon-tabbar span { width: 38px; height: 34px; display: grid; place-items: center; font-size: 16px; }
@@ -478,7 +482,7 @@ td code { white-space: nowrap; }
 .home .pillars > div:nth-child(3) { --fill: #5c9bff; transform: rotate(.4deg); }
 .home .pillars > div:nth-child(4) { --fill: #ff7eb3; transform: rotate(-.5deg); }
 .home .pillars b { font-size: 16.5px; font-weight: 800; }
-.home .pillars span { color: var(--t-ink); opacity: .82; }
+.home .pillars span { color: var(--t-ink); opacity: .88; }
 
 .home .toon-grid { gap: 18px; padding: 2px 6px 6px 0; }
 .home .toon-grid .card { padding: 18px 18px 16px; transition: transform .12s, box-shadow .12s; }
@@ -532,7 +536,7 @@ td code { white-space: nowrap; }
   transition: transform .12s, box-shadow .12s;
 }
 .home .route .body b { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; font-size: 16.5px; font-weight: 800; }
-.home .route .body small { display: block; font-size: 14px; opacity: .82; margin-top: 2px; }
+.home .route .body small { display: block; font-size: 14px; opacity: .88; margin-top: 2px; }
 .home .route .body .toon-badge { font-size: 11px; color: var(--t-ink); }
 .home .route .go {
   width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;

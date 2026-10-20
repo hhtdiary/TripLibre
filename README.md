@@ -117,6 +117,7 @@ make test          # core test suite (94 tests incl. the brief's 14 scenarios)
 make sim           # build + run in the simulator with demo data
 make phone         # build, sign and install on the cable-connected iPhone (renews the 7-day signature)
 make lint          # docs JS/CSS/HTML (incl. accessibility rules), Markdown, Python; needs node + ruff
+make a11y          # axe-core WCAG 2.1 AA check of the rendered docs site, light + dark theme
 make ci            # what GitHub Actions runs: lint + tests + app build + export→Python contract check
 ```
 
