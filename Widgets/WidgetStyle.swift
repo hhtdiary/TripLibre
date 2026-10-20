@@ -77,15 +77,6 @@ enum WFmt {
 }
 
 extension ModeGroup {
-    var toonColor: Color {
-        switch self {
-        case .active: return Toon.lime
-        case .car: return Toon.sky
-        case .transit: return Toon.grape
-        case .longDistance: return Toon.orange
-        case .other: return Toon.stone
-        }
-    }
     var shortLabel: String {
         switch self {
         case .active: return "Active"

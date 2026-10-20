@@ -251,7 +251,7 @@ private struct ModeBar: View {
             GeometryReader { geo in
                 HStack(spacing: 0) {
                     ForEach(rows, id: \.0) { g, f in
-                        Rectangle().fill(g.toonColor).frame(width: geo.size.width * f)
+                        Rectangle().fill(g.color).frame(width: geo.size.width * f)
                     }
                 }
             }
