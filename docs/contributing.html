@@ -26,7 +26,11 @@ interesting logic lives in a package you can test without a phone.</p>
 cd HHT-app
 brew install xcodegen
 make test     # core tests, no simulator needed
-make sim      # run the app with demo data</code></pre>
+make sim      # run the app with demo data
+make lint     # docs JS/CSS/HTML + accessibility, Markdown, Python (needs node + ruff)</code></pre>
+<p>Changing the docs site? Run <code>npm run lint</code> (or <code>npm run lint:fix</code>) before opening a PR. The HTML check includes
+<code>html-validate</code>'s accessibility rules: images need <code>alt</code>, buttons need a <code>type</code> and an accessible name, and
+<code>aria-label</code> only goes on elements that can carry one.</p>
 
 <h2>Where to make a change</h2>
 <div class="table-wrap"><table>

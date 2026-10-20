@@ -12,7 +12,6 @@ import matplotlib
 
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
-
 from hht import load, mode_share, summary
 
 

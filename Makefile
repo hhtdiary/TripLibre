@@ -11,7 +11,7 @@ PY          := analysis/.venv/bin/python
 CAL_DIR     := $(BUILD_DIR)/calibrate-smoke
 CALIBRATE   := Packages/HHTCore/.build/release/hht-calibrate
 
-.PHONY: help test project build sim phone analysis-env export-check calibrate-tool calibrate-smoke ci clean
+.PHONY: help test project build sim phone analysis-env export-check calibrate-tool calibrate-smoke lint ci clean
 
 help:            ## list targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -57,7 +57,12 @@ calibrate-smoke: calibrate-tool  ## synthetic end-to-end calibration: fixture â†
 	python3 analysis/calibrate.py evaluate --reference $(CAL_DIR)/reference --pred $(CAL_DIR)/pred.json --out $(CAL_DIR)/results --days all --db $(CAL_DIR)/fixture.sqlite
 	python3 analysis/check_calibration.py $(CAL_DIR)/results/metrics-all.json
 
-ci: test build export-check calibrate-smoke   ## everything GitHub Actions runs
+lint:            ## docs JS/CSS/HTML (incl. accessibility rules), Markdown, Python (needs node + ruff)
+	@[ -d node_modules ] || npm ci
+	npm run lint
+	ruff check
+
+ci: lint test build export-check calibrate-smoke   ## everything GitHub Actions runs
 
 clean:
 	rm -rf $(BUILD_DIR) Packages/HHTCore/.build

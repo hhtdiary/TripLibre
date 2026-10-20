@@ -14,6 +14,22 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  lint:
+    name: Lint (docs JS/CSS/HTML + a11y, Markdown, Python)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - name: ESLint, Stylelint, html-validate (incl. a11y rules), markdownlint
+        run: npm run lint
+      - name: Ruff (analysis/)
+        run: pipx run ruff==0.15.1 check
+
   core:
     name: Core tests + export contract
     runs-on: macos-15

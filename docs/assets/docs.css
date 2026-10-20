@@ -2,7 +2,7 @@
 
 :root {
   --bg: #fbfbfa;
-  --bg-elev: #ffffff;
+  --bg-elev: #fff;
   --bg-soft: #f3f3f1;
   --bg-code: #f5f5f3;
   --ink: #18181b;
@@ -20,7 +20,7 @@
   --warn-soft: rgba(183, 121, 31, .12);
   --shadow: 0 1px 2px rgba(0, 0, 0, .04), 0 6px 24px rgba(0, 0, 0, .05);
   --sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --mono: 'JetBrains Mono', ui-monospace, sfmono-regular, menlo, monospace;
   --header-h: 60px;
   --sidebar-w: 264px;
   --toc-w: 220px;
@@ -351,7 +351,7 @@ td code { white-space: nowrap; }
   .dx-main { padding: 28px 16px 64px; }
   .flow { grid-template-columns: minmax(0, 1fr); gap: 18px; }
   .flow .node { margin-right: 0; }
-  .flow .node:not(:last-child)::after { content: "↓"; right: auto; left: 50%; top: auto; bottom: -19px; transform: translateX(-50%); }
+  .flow .node:not(:last-child)::after { content: "↓"; inset: auto auto -19px 50%; transform: translateX(-50%); }
   .hero { grid-template-columns: minmax(0, 1fr); }
   .hero img.logo { width: 60px; height: 60px; border-radius: 15px; order: -1; }
   .pager { grid-template-columns: minmax(0, 1fr); }
@@ -385,12 +385,11 @@ td code { white-space: nowrap; }
 .widget-shot img { display: block; width: 100%; max-width: 640px; height: auto; border-radius: 18px; border: 1px solid var(--line); }
 .widget-shot figcaption { margin-top: 8px; font-size: 12.5px; color: var(--ink-faint); }
 .gallery { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px 14px; margin: 0 0 48px; }
-.gallery .phone { border-radius: 22px; padding: 5px; }
+.gallery .phone { border-radius: 22px; padding: 5px; transition: transform .15s; }
 .gallery .phone img { border-radius: 18px; }
 .gallery a { color: inherit; }
 .gallery a:hover { text-decoration: none; }
 .gallery a:hover .phone { transform: translateY(-2px); }
-.gallery .phone { transition: transform .15s; }
 
 .screen { display: grid; grid-template-columns: 230px minmax(0, 1fr); gap: 32px; align-items: start; margin: 8px 0 12px; }
 .screen .phone { position: sticky; top: calc(var(--header-h) + 20px); }
@@ -410,7 +409,7 @@ td code { white-space: nowrap; }
   padding: 22px 20px 26px; margin: 0 0 22px; border-radius: 16px;
   background: radial-gradient(circle at 1px 1px, rgba(34, 25, 58, .12) 1px, transparent 0) 0 0 / 14px 14px, #fff3d6;
   border: 1px solid var(--line); color: #22193a;
-  font-family: ui-rounded, 'SF Pro Rounded', 'Nunito', var(--sans);
+  font-family: ui-rounded, 'SF Pro Rounded', Nunito, var(--sans);
 }
 .toon {
   --fill: #fff;
@@ -421,18 +420,18 @@ td code { white-space: nowrap; }
 }
 .toon.dashed { border-style: dashed; box-shadow: none; background: #fff8e6; }
 .toon-stat { padding: 10px 16px 9px; min-width: 120px; line-height: 1.1; }
-.toon-stat big { display: block; font-size: 26px; }
+.toon-stat strong { display: block; font-size: 26px; font-weight: inherit; }
 .toon-stat small { font-size: 13px; }
 .toon-pill { padding: 6px 16px; border-radius: 999px; font-size: 14px; box-shadow: 2.5px 2.5px 0 #22193a; }
 .toon-pill.dark { background: #22193a; color: #fff; }
-.toon-badge { display: inline-block; padding: 1px 9px; border: 2px solid #22193a; border-radius: 999px; font: 800 12px/1.4 inherit; font-family: inherit; }
+.toon-badge { display: inline-block; padding: 1px 9px; border: 2px solid #22193a; border-radius: 999px; font-weight: 800; font-size: 12px; line-height: 1.4; }
 .toon-chip { width: 38px; height: 38px; border-radius: 12px; display: inline-grid; place-items: center; border: 2.5px solid #22193a; font-size: 18px; }
 .toon-tabbar { display: flex; align-items: center; gap: 6px; padding: 6px; border-radius: 999px; }
 .toon-tabbar span { width: 38px; height: 34px; display: grid; place-items: center; font-size: 16px; }
 .toon-tabbar span.on { width: auto; padding: 0 16px; border-radius: 999px; background: #ff6b4a; border: 2.5px solid #22193a; font-size: 14px; gap: 6px; }
 .toon-bubble { display: flex; align-items: center; gap: 12px; }
 .toon-bubble .pin { width: 34px; height: 42px; position: relative; flex: none; }
-.toon-bubble .pin::before { content: ""; position: absolute; inset: 0 0 8px 0; background: #ff6b4a; border: 2.5px solid #22193a; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); }
+.toon-bubble .pin::before { content: ""; position: absolute; inset: 0 0 8px; background: #ff6b4a; border: 2.5px solid #22193a; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); }
 .toon-bubble .say { padding: 9px 14px; font-size: 14.5px; font-weight: 700; }
 
 .swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; margin: 0 0 22px; }
@@ -454,7 +453,7 @@ td code { white-space: nowrap; }
 .home {
   --t-ink: #22193a;
   --t-shadow: #22193a;
-  --t-paper: #ffffff;
+  --t-paper: #fff;
   --t-muted: #5b5270;
 }
 @media (prefers-color-scheme: dark) {
@@ -510,7 +509,7 @@ td code { white-space: nowrap; }
 .home .toon-grid.two .card:nth-child(2) { --fill: #5fd3b0; transform: rotate(-.6deg); }
 .home .toon-grid.two .card:nth-child(3) { --fill: #b596ff; transform: rotate(-.4deg); }
 .home .toon-grid.two .card:nth-child(4) { --fill: #6fd6e8; transform: rotate(.5deg); }
-.home .toon-grid.two .card { --chip: #ffffff; }
+.home .toon-grid.two .card { --chip: #fff; }
 .home .toon-grid.two .card p { color: var(--t-ink) !important; opacity: .82; }
 
 /* "Where to go next": the docs as a day in the app's diary — stops (pages) joined by trips (reading time). */
@@ -567,7 +566,7 @@ td code { white-space: nowrap; }
 
 /* ── Shared sticker tokens (usable on any page) ─────────── */
 .metro, .conveyor, .dev {
-  --t-ink: #22193a; --t-shadow: #22193a; --t-paper: #ffffff; --t-muted: #5b5270;
+  --t-ink: #22193a; --t-shadow: #22193a; --t-paper: #fff; --t-muted: #5b5270;
   --rounded: ui-rounded, 'SF Pro Rounded', var(--sans);
 }
 @media (prefers-color-scheme: dark) {
@@ -627,7 +626,7 @@ td code { white-space: nowrap; }
   .metro span.d { padding: 2px 0 0; }
   .conveyor { grid-template-columns: minmax(0, 1fr); gap: 20px; }
   .conveyor li:nth-child(even) { transform: rotate(1deg); }
-  .conveyor li:not(:last-child)::after { top: auto; bottom: -21px; right: auto; left: 30px; width: 0; height: 18px; border-top: 0; border-left: 3px dashed var(--ink-soft); }
+  .conveyor li:not(:last-child)::after { inset: auto auto -21px 30px; width: 0; height: 18px; border-top: 0; border-left: 3px dashed var(--ink-soft); }
 }
 
 /* ── Meet the developer ─────────────────────────────── */

@@ -32,14 +32,14 @@ class HHT:
     stamps: pd.DataFrame | None = None   # self-reported stops; visit_id = the visit inference attached it to
 
     # ---- convenience -------------------------------------------------------
-    def phase(self, name: str) -> "HHT":
+    def phase(self, name: str) -> HHT:
         """Subset trips/visits/segments to a life phase by name."""
         p = self.life_phases.set_index("name").loc[name]
         start = pd.Timestamp(p["start_date"])
         end = pd.Timestamp(p["end_date"]) + pd.Timedelta(days=1) if isinstance(p["end_date"], str) else pd.Timestamp.max
         return self.between(start, end)
 
-    def between(self, start, end) -> "HHT":
+    def between(self, start, end) -> HHT:
         start, end = pd.Timestamp(start), pd.Timestamp(end)
         day = pd.to_datetime(self.trips["person_day_id"])
         t = self.trips[(day >= start.tz_localize(None)) & (day < end.tz_localize(None))]
@@ -101,7 +101,7 @@ def _load_sqlite(db: Path) -> HHT:
     trips["departure_utc"] = pd.to_datetime(trips["departure_ts"], unit="s", utc=True)
     trips["arrival_utc"] = pd.to_datetime(trips["arrival_ts"], unit="s", utc=True)
     trips["travel_time_min"] = trips["duration_s"] / 60
-    local = [d.tz_convert(tz or "UTC") for d, tz in zip(trips["departure_utc"], trips["tz"])]
+    local = [d.tz_convert(tz or "UTC") for d, tz in zip(trips["departure_utc"], trips["tz"], strict=True)]
     trips["person_day_id"] = [d.strftime("%Y-%m-%d") for d in local]
     trips["departure_hour_local"] = [d.hour + d.minute / 60 for d in local]
     trips["trip_seq"] = trips.groupby("person_day_id").cumcount() + 1

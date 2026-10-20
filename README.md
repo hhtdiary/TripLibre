@@ -38,7 +38,7 @@ It records location in the background, rebuilds each day into **visits, trips, m
 mistakes in one or two taps, and exports a clean, research-grade dataset (CSV / JSON / GeoJSON / SQLite).
 The product brief is in [`design/`](design/personal_travel_tracker_claude_brief.md).
 
-```
+```text
 App/                    SwiftUI iOS app (Today · Timeline · Map · Stats · Places · Settings)
   Location/             background collector, CoreMotion sync, optional geocoder
   Screens/              UI
@@ -73,6 +73,7 @@ database lives in the app container. A paid developer account makes it last a ye
 After changing `project.yml`, regenerate with `xcodegen generate` (`brew install xcodegen`).
 
 ## Daily use
+
 - **Today**: the reconstructed day on a map plus the chronological diary. Uncertain trips show quick mode buttons;
   tap any trip or visit to change mode/segments, place, purpose, times, split, merge/delete or add notes.
   **Stamp this moment** records, in one tap, that you stopped somewhere around here, around now (coffee, a quick pickup,
@@ -87,6 +88,7 @@ After changing `project.yml`, regenerate with `xcodegen generate` (`brew install
 - **Settings** (gear on Today): collection status, export/import, rebuild from raw data, backups, privacy.
 
 ## Research workflow
+
 Settings › *Create export* writes a folder (also in Files › On My iPhone › HHT › Exports) and offers a share sheet.
 
 ```bash
@@ -103,17 +105,21 @@ d = load("~/Downloads/hht-export-…")        # or the travel.sqlite snapshot
 d.trips          # one row per trip: person_day_id, trip_seq, OD, times, mode, purpose, distance…
 summary(d.phase("Fall 2026"))
 ```
+
 Or query `travel.sqlite` directly (`v_trips`, `v_visits` views) from R/DBI, DuckDB or QGIS. Every user correction is in
 `audit_log`, a ready-made labelled set for improving mode detection later.
 
 ## Development
+
 ```bash
 make help          # list everything
 make test          # core test suite (94 tests incl. the brief's 14 scenarios)
 make sim           # build + run in the simulator with demo data
 make phone         # build, sign and install on the cable-connected iPhone (renews the 7-day signature)
-make ci            # what GitHub Actions runs: tests + app build + export→Python contract check
+make lint          # docs JS/CSS/HTML (incl. accessibility rules), Markdown, Python; needs node + ruff
+make ci            # what GitHub Actions runs: lint + tests + app build + export→Python contract check
 ```
+
 CI (`.github/workflows/ci.yml`) runs on every push/PR on a macOS runner: Swift tests, an end-to-end check that the
 Python loader reads the app's real export (CSV and SQLite agree), a simulator build, a device build, and a check that
 `HHT.xcodeproj` matches `project.yml`.
@@ -129,9 +135,10 @@ exportability → analytics → polish. Raw observations are never modified; inf
 touching anything you corrected.
 
 ## Citation
+
 If you use HHT in research, please cite the archived software ([`CITATION.cff`](CITATION.cff); GitHub's *Cite this repository* button gives APA and BibTeX):
 
-> Yang, Z. *HHT: An Open-Source, Privacy-First Travel Diary for Mobility Research.* Zenodo. https://doi.org/10.5281/zenodo.23307589
+> Yang, Z. *HHT: An Open-Source, Privacy-First Travel Diary for Mobility Research.* Zenodo. <https://doi.org/10.5281/zenodo.23307589>
 
 ---
 
