@@ -34,6 +34,13 @@ struct StatsView: View {
         }
         .background(ToonBackground())
         .navigationTitle("Stats")
+        .onReceive(model.$route) { r in
+            // the "Last 7 days" widget lands here
+            guard r == .stats else { return }
+            model.route = nil
+            period = .week
+            compare = nil
+        }
         .task(id: "\(period.id)-\(compare?.id ?? "")-\(model.revision)") { load() }
     }
 

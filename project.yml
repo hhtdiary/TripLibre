@@ -24,6 +24,11 @@ targets:
       - path: App
     dependencies:
       - package: HHTCore
+      - target: HHTWidgets
+    entitlements:
+      path: App/Support/HHT.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.zyang91.hht]
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.zyang91.hht
@@ -48,3 +53,37 @@ targets:
         UIFileSharingEnabled: true
         LSSupportsOpeningDocumentsInPlace: true
         ITSAppUsesNonExemptEncryption: false
+        # widget taps open hht://today, hht://stats, hht://settings
+        CFBundleURLTypes:
+          - CFBundleURLName: com.zyang91.hht
+            CFBundleURLSchemes: [hht]
+  # Read-only Home Screen widgets (issue #47). They read the snapshot the app writes into the App Group.
+  HHTWidgets:
+    type: app-extension
+    platform: iOS
+    sources:
+      - path: Widgets
+      - path: App/Support/Theme.swift
+    dependencies:
+      - package: HHTCore
+      - sdk: WidgetKit.framework
+      - sdk: SwiftUI.framework
+    entitlements:
+      path: Widgets/HHTWidgets.entitlements
+      properties:
+        com.apple.security.application-groups: [group.com.zyang91.hht]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.zyang91.hht.widgets
+        PRODUCT_NAME: HHTWidgets
+        TARGETED_DEVICE_FAMILY: "1"
+        ENABLE_PREVIEWS: YES
+        SKIP_INSTALL: YES
+    info:
+      path: Widgets/Info.plist
+      properties:
+        CFBundleDisplayName: HHT
+        CFBundleShortVersionString: "$(MARKETING_VERSION)"
+        CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        NSExtension:
+          NSExtensionPointIdentifier: com.apple.widgetkit-extension

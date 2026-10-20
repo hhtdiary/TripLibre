@@ -9,13 +9,19 @@
 /* Begin PBXBuildFile section */
 		0376EC5D7E729401F8ED6609 /* StatsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F96F5C8A80B4ABEBFC16059 /* StatsView.swift */; };
 		06B9F74A77B1602EE5434A86 /* PlaceGeocoder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5B4DD2CCC596A81020E7437D /* PlaceGeocoder.swift */; };
+		07794E340C5AB55F8B1DA8F9 /* HHTWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 43EBF07D957183369057AFE5 /* HHTWidgets.swift */; };
 		0FA228FAA43071E5F460591A /* HHTCore in Frameworks */ = {isa = PBXBuildFile; productRef = 60C4195EF363E09731B3069D /* HHTCore */; };
 		1458B51EAC17FF0C6C826DE3 /* DayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8ED6C857A70E348310232B42 /* DayView.swift */; };
+		1AC5898634ED74566CC1BBF8 /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62BE89ABB92216C4CD6D3BB7 /* Theme.swift */; };
+		1BAEEE22F3735E9AC5CF462A /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = CCC58B1632AE47AEB7B304CF /* SwiftUI.framework */; };
 		1D60E853138492F2AC27A245 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8E3214E2F8FEC4777BA5B89F /* SettingsView.swift */; };
 		34F1FD5303B15CBD943DA54E /* Theme.swift in Sources */ = {isa = PBXBuildFile; fileRef = 62BE89ABB92216C4CD6D3BB7 /* Theme.swift */; };
 		3F420F728D96A3417B91447F /* AppModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 49D161A218F9AA3F473ED9CA /* AppModel.swift */; };
+		57E78F9AB56F2F85FCD01415 /* WidgetStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = B4814A8D13202E2D6B7DC35A /* WidgetStyle.swift */; };
 		5DC16A0B78C0EB02DD5F9D02 /* RootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 495655A63CE92A5F9CAE8DE3 /* RootView.swift */; };
 		608839344CE1FBFF228B6C6C /* PlacesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71589A2C32BC9B00D1D61EF9 /* PlacesView.swift */; };
+		6561E87B6D8005D77F20B401 /* AlternateWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112A11944067E24BC2270F2F /* AlternateWidgets.swift */; };
+		6ABAFE59B6830A8E38200443 /* WidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E23C8B44EDF9AA4C6622630 /* WidgetBridge.swift */; };
 		74E2B631F9A5FD7625C00B52 /* VisitDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E68982A3B90AB6A7DF1B6D0 /* VisitDetailView.swift */; };
 		817BD9DC493B9F2A9440FBC2 /* FlightsAndPhases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7C175AD8BE3FB6B2F54954 /* FlightsAndPhases.swift */; };
 		85C3BED772CCA27C5872F1C2 /* LocationCollector.swift in Sources */ = {isa = PBXBuildFile; fileRef = 469EC6E7B715E8BA0E40B491 /* LocationCollector.swift */; };
@@ -23,21 +29,55 @@
 		8E1100B1172683C530C3A02F /* MotionSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = A316C813FEF8EF6A1E648E6E /* MotionSync.swift */; };
 		A1771A5E3B9DAC3B223CDD08 /* Formatting.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5CCE27794644139AEC80139 /* Formatting.swift */; };
 		A51A2FF412664D9F6E5E35BD /* ExploreMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = ABE1BD8E9C215B70B363144E /* ExploreMapView.swift */; };
+		A84AA621B7A18071537A041C /* HHTWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FD10D5E29E78AF295BA325C7 /* HHTWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		A979E72D33DE197157B22D97 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E0C39A4527CD2B9F02BADE42 /* WidgetKit.framework */; };
+		B784B030DD84BF95953E593A /* StickerWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 547562DE9D36DA87638056CF /* StickerWidgets.swift */; };
 		CC0119CC1B3CB500FF98CB79 /* HHTApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A92382C3C1A2201092CE29 /* HHTApp.swift */; };
 		CD9D346A13D380C7AC187B94 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A893397672D1738BEBB64118 /* HistoryView.swift */; };
+		D0CF77917F0BE9A182AEF683 /* Provider.swift in Sources */ = {isa = PBXBuildFile; fileRef = D441C842E8E1B09C700BCBEC /* Provider.swift */; };
 		F1AEA5C8F845A8BDBFA25B8B /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 10F0FEB75419C751C3771C55 /* Assets.xcassets */; };
+		F5AA41516717F85740B5746D /* HHTCore in Frameworks */ = {isa = PBXBuildFile; productRef = 59345F1609A1D82AB20F0B8C /* HHTCore */; };
 		FDF878614627A4C2F44DAC70 /* DemoData.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8913AD8066795697027233AD /* DemoData.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		A7EB7201D1CC2B2BA4ED8DC0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 26EE9214A3ADE59E0AA08D4A /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 15811E84563B57FDBF544882;
+			remoteInfo = HHTWidgets;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		E311A5C5463C5DAF8D6882A0 /* Embed Foundation Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				A84AA621B7A18071537A041C /* HHTWidgets.appex in Embed Foundation Extensions */,
+			);
+			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
 /* Begin PBXFileReference section */
 		10F0FEB75419C751C3771C55 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		112A11944067E24BC2270F2F /* AlternateWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlternateWidgets.swift; sourceTree = "<group>"; };
 		2C7C175AD8BE3FB6B2F54954 /* FlightsAndPhases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightsAndPhases.swift; sourceTree = "<group>"; };
+		347CADD18533359EC7F11C5D /* HHTWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HHTWidgets.entitlements; sourceTree = "<group>"; };
 		36FD87C27B6FC3029998840B /* HHTCore */ = {isa = PBXFileReference; lastKnownFileType = folder; name = HHTCore; path = Packages/HHTCore; sourceTree = SOURCE_ROOT; };
 		39F7B9AB62DBD1C5AF83287B /* TripDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TripDetailView.swift; sourceTree = "<group>"; };
+		43EBF07D957183369057AFE5 /* HHTWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HHTWidgets.swift; sourceTree = "<group>"; };
 		469EC6E7B715E8BA0E40B491 /* LocationCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationCollector.swift; sourceTree = "<group>"; };
 		495655A63CE92A5F9CAE8DE3 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		49D161A218F9AA3F473ED9CA /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		4E23C8B44EDF9AA4C6622630 /* WidgetBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBridge.swift; sourceTree = "<group>"; };
 		4E68982A3B90AB6A7DF1B6D0 /* VisitDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisitDetailView.swift; sourceTree = "<group>"; };
+		547562DE9D36DA87638056CF /* StickerWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerWidgets.swift; sourceTree = "<group>"; };
 		5B4DD2CCC596A81020E7437D /* PlaceGeocoder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceGeocoder.swift; sourceTree = "<group>"; };
 		62BE89ABB92216C4CD6D3BB7 /* Theme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme.swift; sourceTree = "<group>"; };
 		6544BC08F3444F44C797A80A /* HHT.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = HHT.app; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -50,8 +90,15 @@
 		A316C813FEF8EF6A1E648E6E /* MotionSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MotionSync.swift; sourceTree = "<group>"; };
 		A893397672D1738BEBB64118 /* HistoryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HistoryView.swift; sourceTree = "<group>"; };
 		ABE1BD8E9C215B70B363144E /* ExploreMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreMapView.swift; sourceTree = "<group>"; };
+		B4814A8D13202E2D6B7DC35A /* WidgetStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetStyle.swift; sourceTree = "<group>"; };
 		B5CCE27794644139AEC80139 /* Formatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatting.swift; sourceTree = "<group>"; };
+		CCC58B1632AE47AEB7B304CF /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
+		D048DB21BB959E102A1984B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		D441C842E8E1B09C700BCBEC /* Provider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Provider.swift; sourceTree = "<group>"; };
 		D6E22BF26DE4774473381CFC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		E0C39A4527CD2B9F02BADE42 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
+		EB63ACBA673D5D6BC0CD8A3F /* HHT.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HHT.entitlements; sourceTree = "<group>"; };
+		FD10D5E29E78AF295BA325C7 /* HHTWidgets.appex */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = "wrapper.app-extension"; path = HHTWidgets.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,13 +110,47 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		B98F1244D7D2753444EBA887 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				F5AA41516717F85740B5746D /* HHTCore in Frameworks */,
+				A979E72D33DE197157B22D97 /* WidgetKit.framework in Frameworks */,
+				1BAEEE22F3735E9AC5CF462A /* SwiftUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		0FED4225595BDF3DDB29D05B /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				CCC58B1632AE47AEB7B304CF /* SwiftUI.framework */,
+				E0C39A4527CD2B9F02BADE42 /* WidgetKit.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		18195D1825CAE902CBA26423 /* Widgets */ = {
+			isa = PBXGroup;
+			children = (
+				112A11944067E24BC2270F2F /* AlternateWidgets.swift */,
+				347CADD18533359EC7F11C5D /* HHTWidgets.entitlements */,
+				43EBF07D957183369057AFE5 /* HHTWidgets.swift */,
+				D048DB21BB959E102A1984B4 /* Info.plist */,
+				D441C842E8E1B09C700BCBEC /* Provider.swift */,
+				547562DE9D36DA87638056CF /* StickerWidgets.swift */,
+				B4814A8D13202E2D6B7DC35A /* WidgetStyle.swift */,
+			);
+			path = Widgets;
+			sourceTree = "<group>";
+		};
 		1E17AD9CC85672104D3B3C53 /* Products */ = {
 			isa = PBXGroup;
 			children = (
 				6544BC08F3444F44C797A80A /* HHT.app */,
+				FD10D5E29E78AF295BA325C7 /* HHTWidgets.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -79,8 +160,10 @@
 			children = (
 				8913AD8066795697027233AD /* DemoData.swift */,
 				B5CCE27794644139AEC80139 /* Formatting.swift */,
+				EB63ACBA673D5D6BC0CD8A3F /* HHT.entitlements */,
 				D6E22BF26DE4774473381CFC /* Info.plist */,
 				62BE89ABB92216C4CD6D3BB7 /* Theme.swift */,
+				4E23C8B44EDF9AA4C6622630 /* WidgetBridge.swift */,
 			);
 			path = Support;
 			sourceTree = "<group>";
@@ -115,6 +198,8 @@
 			children = (
 				EBF6F79D312B75160DB98441 /* App */,
 				698DCCF3C51DF3FAE7878352 /* Packages */,
+				18195D1825CAE902CBA26423 /* Widgets */,
+				0FED4225595BDF3DDB29D05B /* Frameworks */,
 				1E17AD9CC85672104D3B3C53 /* Products */,
 			);
 			sourceTree = "<group>";
@@ -145,6 +230,25 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		15811E84563B57FDBF544882 /* HHTWidgets */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 72293678E6547DD702A2E5E3 /* Build configuration list for PBXNativeTarget "HHTWidgets" */;
+			buildPhases = (
+				BCC75C7AD3A8042FAE3BD4CF /* Sources */,
+				B98F1244D7D2753444EBA887 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = HHTWidgets;
+			packageProductDependencies = (
+				59345F1609A1D82AB20F0B8C /* HHTCore */,
+			);
+			productName = HHTWidgets;
+			productReference = FD10D5E29E78AF295BA325C7 /* HHTWidgets.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		2E15847CDF673C073F01592A /* HHT */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 0B1BDFE2483E35BF908A1CCF /* Build configuration list for PBXNativeTarget "HHT" */;
@@ -152,10 +256,12 @@
 				9AAAAD740BE7EABBAC4A3E26 /* Sources */,
 				4FF987D48454FA862D1BB2EC /* Resources */,
 				64E50DCB9B9A03E7CF6B02A3 /* Frameworks */,
+				E311A5C5463C5DAF8D6882A0 /* Embed Foundation Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				D8928E8E8A5162E8907AAC0B /* PBXTargetDependency */,
 			);
 			name = HHT;
 			packageProductDependencies = (
@@ -174,6 +280,10 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1430;
 				TargetAttributes = {
+					15811E84563B57FDBF544882 = {
+						DevelopmentTeam = 8HRS3Q2SF3;
+						ProvisioningStyle = Automatic;
+					};
 					2E15847CDF673C073F01592A = {
 						DevelopmentTeam = 8HRS3Q2SF3;
 						ProvisioningStyle = Automatic;
@@ -198,6 +308,7 @@
 			projectRoot = "";
 			targets = (
 				2E15847CDF673C073F01592A /* HHT */,
+				15811E84563B57FDBF544882 /* HHTWidgets */,
 			);
 		};
 /* End PBXProject section */
@@ -236,10 +347,32 @@
 				34F1FD5303B15CBD943DA54E /* Theme.swift in Sources */,
 				8B38AC34B499BCA9BEA838AF /* TripDetailView.swift in Sources */,
 				74E2B631F9A5FD7625C00B52 /* VisitDetailView.swift in Sources */,
+				6ABAFE59B6830A8E38200443 /* WidgetBridge.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		BCC75C7AD3A8042FAE3BD4CF /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				6561E87B6D8005D77F20B401 /* AlternateWidgets.swift in Sources */,
+				07794E340C5AB55F8B1DA8F9 /* HHTWidgets.swift in Sources */,
+				D0CF77917F0BE9A182AEF683 /* Provider.swift in Sources */,
+				B784B030DD84BF95953E593A /* StickerWidgets.swift in Sources */,
+				1AC5898634ED74566CC1BBF8 /* Theme.swift in Sources */,
+				57E78F9AB56F2F85FCD01415 /* WidgetStyle.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		D8928E8E8A5162E8907AAC0B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 15811E84563B57FDBF544882 /* HHTWidgets */;
+			targetProxy = A7EB7201D1CC2B2BA4ED8DC0 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		0ADE82FF545CCECE6FC3D7AD /* Release */ = {
@@ -306,6 +439,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/Support/HHT.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = App/Support/Info.plist;
@@ -392,6 +526,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = App/Support/HHT.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = App/Support/Info.plist;
@@ -407,6 +542,44 @@
 			};
 			name = Debug;
 		};
+		CDF9A6F0EEB57C7FE6108FE7 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widgets/HHTWidgets.entitlements;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Widgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.zyang91.hht.widgets;
+				PRODUCT_NAME = HHTWidgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+		FA631767739F2D9BB087A6FB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_ENTITLEMENTS = Widgets/HHTWidgets.entitlements;
+				ENABLE_PREVIEWS = YES;
+				INFOPLIST_FILE = Widgets/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@executable_path/../../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.zyang91.hht.widgets;
+				PRODUCT_NAME = HHTWidgets;
+				SDKROOT = iphoneos;
+				SKIP_INSTALL = YES;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -415,6 +588,15 @@
 			buildConfigurations = (
 				BFB0EEA6AB38418C7DD1236A /* Debug */,
 				332FFF02AD8A36F001E199AC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		72293678E6547DD702A2E5E3 /* Build configuration list for PBXNativeTarget "HHTWidgets" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FA631767739F2D9BB087A6FB /* Debug */,
+				CDF9A6F0EEB57C7FE6108FE7 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;
@@ -438,6 +620,10 @@
 /* End XCLocalSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		59345F1609A1D82AB20F0B8C /* HHTCore */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = HHTCore;
+		};
 		60C4195EF363E09731B3069D /* HHTCore */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = HHTCore;

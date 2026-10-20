@@ -18,6 +18,9 @@ final class AppModel: ObservableObject {
     @Published private(set) var revision = 0
     @Published var errorMessage: String?
     @Published private(set) var isProcessing = false
+    /// A screen a widget tap asked for; the root view consumes it.
+    @Published var route: AppRoute?
+    private(set) var widgets: WidgetBridge!
 
     static var supportDirectory: URL {
         let url = FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
@@ -50,6 +53,7 @@ final class AppModel: ObservableObject {
         collector.onStationary = { [weak self] in
             Task { @MainActor in await self?.runInference() }
         }
+        widgets = WidgetBridge(model: self)
     }
 
     private var launched = false
@@ -67,6 +71,7 @@ final class AppModel: ObservableObject {
         }
         #endif
         refreshInferenceStatus()
+        widgets.schedule()
         Task { await runInference() }
         autoBackupIfDue()
     }
