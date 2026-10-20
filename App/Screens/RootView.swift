@@ -26,6 +26,11 @@ struct RootView: View {
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in keyboardUp = true }
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillHideNotification)) { _ in keyboardUp = false }
         #endif
+        .onOpenURL { url in
+            guard url.scheme == "hht", let r = url.host().flatMap(AppRoute.init(rawValue:)) else { return }
+            tab = r == .stats ? 3 : 0
+            if r != .today { model.route = r }
+        }
         .tint(Toon.accentDeep)
         .fontDesign(.rounded)
         .preferredColorScheme(.light)

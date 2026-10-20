@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css?v=6">
+<link rel="stylesheet" href="assets/docs.css?v=7">
 <script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <script src="assets/docs.js" defer></script>
 </head>
@@ -35,7 +35,8 @@ tested without a phone.</p>
 </div>
 <p>The collector writes every fix to SQLite immediately. Inference runs on launch, when the app comes to the foreground,
 when the collector decides you've stopped, and from a background refresh task. It is deterministic: the same raw data and
-the same corrections always produce the same diary.</p>
+the same corrections always produce the same diary.
+After each run (and after any edit) the app also refreshes a small summary for the <a href="#widgets">Home Screen widgets</a>.</p>
 
 <h2>Repository layout</h2>
 <pre class="tree" data-lang="text"><code>App/                     SwiftUI iOS app
@@ -43,7 +44,8 @@ the same corrections always produce the same diary.</p>
   AppModel.swift         owns the store and services; views observe it
   Location/              LocationCollector, MotionSync, PlaceGeocoder
   Screens/               Today, Timeline, Map, Stats, Places, Settings, detail screens
-  Support/               theme, formatting, demo data, Info.plist
+  Support/               theme, formatting, demo data, Info.plist, WidgetBridge
+Widgets/                 WidgetKit extension: read-only Home Screen widgets
 Packages/HHTCore/        Swift package, no third-party dependencies
   Sources/HHTCore/
     Database/            SQLite wrapper, schema + migrations, TravelStore
@@ -53,6 +55,7 @@ Packages/HHTCore/        Swift package, no third-party dependencies
     Export/              Exporter, Importer, CSV
     Geo/                 haversine, centroids, convex hull, Douglas–Peucker, polyline
     Models/              records (Place, Visit, Trip…) and enums (TravelMode…)
+    Widget/              WidgetSnapshot, the summary the widgets read
   Tests/HHTCoreTests/    fixture scenarios, edits, reprocessing, export
 analysis/                Python loader (hht.py), example analysis, export contract check
 docs/                    project page (index.html), these docs (docs/), markdown specs
@@ -80,6 +83,7 @@ counter and reload after any change.</p>
   <tr><td><code>EditService</code></td><td>Every user correction, each one transactional and audit-logged.</td></tr>
   <tr><td><code>MobilityMetrics</code></td><td>Survey-style metrics for any date range.</td></tr>
   <tr><td><code>Exporter</code> / <code>Importer</code></td><td>The export bundle; CSV, GPX and airport-list import.</td></tr>
+  <tr><td><code>WidgetSnapshot</code></td><td>The small, versioned summary the Home Screen widgets read (counts, labels, times).</td></tr>
 </table></div>
 
 <h2>Three data layers</h2>
@@ -104,6 +108,24 @@ That's what makes it safe to re-run inference at any time.</p>
     "quiet because stationary" from "lost signal".</li>
   <li>A background refresh task (<code>com.zyang91.hht.refresh</code>, roughly every 2 h when iOS allows) runs inference and the daily backup.</li>
 </ul>
+
+<h2 id="widgets">Home Screen widgets</h2>
+<p>The <code>HHTWidgets</code> extension (<code>Widgets/</code>) shows the diary on the Home Screen. It is a window onto the
+app, not a second engine: it never opens the database, collects location or runs inference.</p>
+<div class="table-wrap"><table>
+  <tr><th>Step</th><th>Where</th><th>What happens</th></tr>
+  <tr><td>Build</td><td><code>WidgetSnapshot.build(store:…)</code> (HHTCore)</td><td>Today counts with the same overlap rules as the Today screen; 7-day totals from the same <code>Analytics.compute</code> as Stats; tracking state, last point, trips to check.</td></tr>
+  <tr><td>Write</td><td><code>WidgetBridge</code> (App/Support)</td><td>Runs 2 s after a <code>revision</code> bump, a location-permission change or a collector mode change, at most every 10 min while new fixes arrive, and when the app goes to the background. Writes <code>widget-snapshot.json</code> atomically into the App Group <code>group.com.zyang91.hht</code>.</td></tr>
+  <tr><td>Reload</td><td><code>WidgetCenter</code></td><td>Asked to reload only when the content changed (or at most hourly), to stay inside iOS's reload budget.</td></tr>
+  <tr><td>Show</td><td><code>SnapshotProvider</code> (Widgets)</td><td>Reads the file once per timeline and adds an entry every 15 min plus one at midnight, so "3 min ago" and the day rollover stay right without the app running. After midnight the week widget relabels itself "7 days to &lt;day&gt;" until a new snapshot arrives.</td></tr>
+</table></div>
+<ul>
+  <li><b>Privacy:</b> the snapshot holds no points, routes or coordinates, and a place name only if you named the place yourself (never an address). Names on the widget are marked <code>.privacySensitive()</code>.</li>
+  <li><b>Versioning:</b> the file carries <code>version</code>. A widget ignores a snapshot from an incompatible build and shows its set-up state until the app writes a new one. Bump <code>WidgetSnapshot.currentVersion</code> when you change the shape.</li>
+  <li><b>Not live:</b> widgets update when iOS lets the app run, so they show "Updated … ago" rather than claiming live GPS. Hours without new points are normal while you stay put; the status widget calls it <i>quiet</i> only after 12 h.</li>
+  <li><b>Taps</b> open <code>hht://today</code>, <code>hht://stats</code> (Stats on 7 days) or <code>hht://settings</code>, handled in <code>RootView.onOpenURL</code>.</li>
+</ul>
+<p>What each widget looks like is on the <a href="ui-guide.html#widgets">UI guide</a>.</p>
 
 <h2>Design priorities</h2>
 <p>When two goals conflict, the earlier one wins:</p>

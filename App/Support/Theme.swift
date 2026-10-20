@@ -70,6 +70,19 @@ extension PlaceCategory {
     }
 }
 
+/// Shared with the widget extension, so mode colours match everywhere.
+extension ModeGroup {
+    var color: Color {
+        switch self {
+        case .active: return Toon.lime
+        case .car: return Toon.grape
+        case .transit: return Toon.sky
+        case .longDistance: return Toon.bubblegum
+        case .other: return Toon.stone
+        }
+    }
+}
+
 extension Place {
     var toonColor: Color { category?.toonColor ?? (isNamed ? Toon.paper : Toon.stone) }
 }

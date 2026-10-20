@@ -146,6 +146,11 @@ struct DayView: View {
         .refreshable { await model.runInference() }
         .sheet(item: $selectedTrip) { box in TripDetailView(tripID: box.id).environmentObject(model) }
         .sheet(item: $selectedVisit) { box in VisitDetailView(visitID: box.id).environmentObject(model) }
+        .onReceive(model.$route) { r in
+            guard r == .settings, !fixedDay else { return }
+            model.route = nil
+            showSettings = true
+        }
         .sheet(isPresented: $showSettings) { NavigationStack { SettingsView() }.environmentObject(model) }
         .sheet(isPresented: $showDatePicker) {
             NavigationStack {

@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css?v=6">
+<link rel="stylesheet" href="assets/docs.css?v=7">
 <script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <script src="assets/docs.js" defer></script>
 </head>
@@ -37,6 +37,7 @@ make sim      # run the app with demo data</code></pre>
   <tr><td>Add a metric</td><td><code>Analytics/MobilityMetrics.swift</code>, mirrored in <code>analysis/hht.py</code> and <code>docs/analytics.md</code></td></tr>
   <tr><td>Add an export column</td><td><code>Export/Exporter.swift</code>; the Python contract check (<code>make export-check</code>) must still pass</td></tr>
   <tr><td>Change background collection</td><td><code>App/Location/LocationCollector.swift</code>; test on a real device, the simulator can't reproduce it</td></tr>
+  <tr><td>Change a Home Screen widget</td><td>Views in <code>Widgets/</code>; data in <code>Widget/WidgetSnapshot.swift</code> (bump <code>currentVersion</code> if its shape changes, and extend <code>WidgetSnapshotTests</code>)</td></tr>
   <tr><td>Change the UI</td><td><code>App/Screens/</code>, styling in <code>App/Support/Theme.swift</code></td></tr>
   <tr><td>Edit these docs</td><td><code>docs/*.html</code>; navigation is in <code>docs/assets/docs.js</code></td></tr>
 </table></div>

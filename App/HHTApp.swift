@@ -27,6 +27,8 @@ struct HHTApp: App {
             if phase == .active {
                 model.collector.startMotionUpdatesIfAuthorized()   // e.g. Motion & Fitness enabled in Settings
                 Task { await model.runInference() }
+            } else if phase == .background {
+                model.widgets.publish()
             }
         }
     }
