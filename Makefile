@@ -11,7 +11,7 @@ PY          := analysis/.venv/bin/python
 CAL_DIR     := $(BUILD_DIR)/calibrate-smoke
 CALIBRATE   := Packages/HHTCore/.build/release/hht-calibrate
 
-.PHONY: help test project build sim phone analysis-env export-check calibrate-tool calibrate-smoke lint ci clean
+.PHONY: help test project build sim phone analysis-env export-check calibrate-tool calibrate-smoke lint a11y ci clean
 
 help:            ## list targets
 	@grep -E '^[a-z-]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -62,7 +62,12 @@ lint:            ## docs JS/CSS/HTML (incl. accessibility rules), Markdown, Pyth
 	npm run lint
 	ruff check
 
-ci: lint test build export-check calibrate-smoke   ## everything GitHub Actions runs
+a11y:            ## axe-core WCAG 2.1 AA check of every docs page, light + dark (needs node + Chromium)
+	@[ -d node_modules ] || npm ci
+	npx playwright install chromium
+	npm run a11y
+
+ci: lint a11y test build export-check calibrate-smoke   ## everything GitHub Actions runs
 
 clean:
 	rm -rf $(BUILD_DIR) Packages/HHTCore/.build
