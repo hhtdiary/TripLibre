@@ -120,7 +120,9 @@ private struct DayStrip: View {
         VStack(spacing: 4) {
             GeometryReader { geo in
                 let w = geo.size.width, h = geo.size.height
-                let x = { (d: Date) in w * CGFloat(min(max(d.timeIntervalSince(day.start) / 86_400, 0), 1)) }
+                // 23 or 25 hours on daylight-saving days
+                let length = Calendar.current.date(byAdding: .day, value: 1, to: day.start)!.timeIntervalSince(day.start)
+                let x = { (d: Date) in w * CGFloat(min(max(d.timeIntervalSince(day.start) / length, 0), 1)) }
                 ZStack(alignment: .leading) {
                     Path { p in p.move(to: CGPoint(x: x(now), y: h / 2)); p.addLine(to: CGPoint(x: w, y: h / 2)) }
                         .stroke(theme.muted.opacity(0.6), style: StrokeStyle(lineWidth: 1.5, dash: [2, 3]))
@@ -143,7 +145,7 @@ private struct DayStrip: View {
             HStack {
                 ForEach(Array([0, 6, 12, 18, 24].enumerated()), id: \.offset) { i, hour in
                     if i > 0 { Spacer(minLength: 0) }
-                    Text(day.start.addingTimeInterval(Double(hour) * 3600).formatted(.dateTime.hour()))
+                    Text(Calendar.current.date(bySettingHour: hour % 24, minute: 0, second: 0, of: day.start)!.formatted(.dateTime.hour()))
                         .font(.toon(9, .heavy)).foregroundStyle(theme.muted)
                 }
             }

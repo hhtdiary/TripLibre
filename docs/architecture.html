@@ -115,9 +115,9 @@ app, not a second engine: it never opens the database, collects location or runs
 <div class="table-wrap"><table>
   <tr><th>Step</th><th>Where</th><th>What happens</th></tr>
   <tr><td>Build</td><td><code>WidgetSnapshot.build(store:…)</code> (HHTCore)</td><td>Today counts with the same overlap rules as the Today screen; 7-day totals from the same <code>Analytics.compute</code> as Stats; tracking state, last point, trips to check.</td></tr>
-  <tr><td>Write</td><td><code>WidgetBridge</code> (App/Support)</td><td>Runs 2 s after a <code>revision</code> bump, a location-permission change or a collector mode change, and when the app goes to the background. Writes <code>widget-snapshot.json</code> atomically into the App Group <code>group.com.zyang91.hht</code>.</td></tr>
+  <tr><td>Write</td><td><code>WidgetBridge</code> (App/Support)</td><td>Runs 2 s after a <code>revision</code> bump, a location-permission change or a collector mode change, at most every 10 min while new fixes arrive, and when the app goes to the background. Writes <code>widget-snapshot.json</code> atomically into the App Group <code>group.com.zyang91.hht</code>.</td></tr>
   <tr><td>Reload</td><td><code>WidgetCenter</code></td><td>Asked to reload only when the content changed (or at most hourly), to stay inside iOS's reload budget.</td></tr>
-  <tr><td>Show</td><td><code>SnapshotProvider</code> (Widgets)</td><td>Reads the file once per timeline and adds an entry every 15 min plus one at midnight, so "3 min ago" and the day rollover stay right without the app running.</td></tr>
+  <tr><td>Show</td><td><code>SnapshotProvider</code> (Widgets)</td><td>Reads the file once per timeline and adds an entry every 15 min plus one at midnight, so "3 min ago" and the day rollover stay right without the app running. After midnight the week widget relabels itself "7 days to &lt;day&gt;" until a new snapshot arrives.</td></tr>
 </table></div>
 <ul>
   <li><b>Privacy:</b> the snapshot holds no points, routes or coordinates, and a place name only if you named the place yourself (never an address). Names on the widget are marked <code>.privacySensitive()</code>.</li>

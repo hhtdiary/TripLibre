@@ -165,7 +165,10 @@ struct StickerWeekView: View {
         let t = WTheme(scheme)
         VStack(alignment: .leading, spacing: 12) {
             HStack(alignment: .firstTextBaseline) {
-                Text("Last 7 days").font(.toon(18, .black)).foregroundStyle(t.text)
+                // past midnight the stored week ends yesterday until the app runs again: say so instead of "Last 7 days"
+                Text(entry.snapshot.map { $0.week.isCurrent(at: entry.date) ? "Last 7 days"
+                        : "7 days to \($0.week.end.formatted(.dateTime.weekday(.abbreviated)))" } ?? "Last 7 days")
+                    .font(.toon(18, .black)).foregroundStyle(t.text).lineLimit(1).minimumScaleFactor(0.8)
                 Spacer(minLength: 6)
                 if let w = entry.snapshot?.week {
                     Text("\(w.start.formatted(.dateTime.day().month(.abbreviated))) – \(w.end.formatted(.dateTime.day().month(.abbreviated)))")
@@ -189,7 +192,7 @@ struct StickerWeekView: View {
             Sticker(value: dist.value, label: dist.unit, color: Toon.mint, tilt: 1)
             Sticker(value: WFmt.duration(w.travelTime), label: "on the move", color: Toon.bubblegum, tilt: -0.5)
         }
-        TripBars(week: w, theme: t)
+        TripBars(week: w, current: w.isCurrent(at: entry.date), theme: t)
         if !w.modeDistance.isEmpty { ModeBar(shares: w.modeDistance, theme: t) }
         Spacer(minLength: 0)
         HStack(spacing: 8) {
@@ -208,6 +211,8 @@ struct StickerWeekView: View {
 
 private struct TripBars: View {
     let week: WidgetSnapshot.Week
+    /// The last bar is today; otherwise it's just the last day of a week that has rolled over.
+    let current: Bool
     let theme: WTheme
 
     var body: some View {
@@ -221,11 +226,11 @@ private struct TripBars: View {
                         Spacer(minLength: 0)
                         Text("\(n)").font(.toon(10, .black)).foregroundStyle(Toon.ink).fixedSize()
                         UnevenRoundedRectangle(topLeadingRadius: 6, bottomLeadingRadius: 2, bottomTrailingRadius: 2, topTrailingRadius: 6)
-                            .fill(i == week.tripsPerDay.count - 1 ? Toon.accent : Toon.sun)
+                            .fill(current && i == week.tripsPerDay.count - 1 ? Toon.accent : Toon.sun)
                             .overlay(UnevenRoundedRectangle(topLeadingRadius: 6, bottomLeadingRadius: 2, bottomTrailingRadius: 2, topTrailingRadius: 6)
                                 .strokeBorder(Toon.ink, lineWidth: 2))
                             .frame(height: max(4, 58 * CGFloat(n) / CGFloat(top)))
-                        Text(i == week.tripsPerDay.count - 1 ? "Today" : days[i].formatted(.dateTime.weekday(.narrow)))
+                        Text(current && i == week.tripsPerDay.count - 1 ? "Today" : days[i].formatted(.dateTime.weekday(.narrow)))
                             .font(.toon(9, .black)).foregroundStyle(Toon.ink).lineLimit(1).fixedSize()
                     }
                     .frame(maxWidth: .infinity, minHeight: 92)
@@ -243,9 +248,20 @@ private struct ModeBar: View {
     let shares: [WidgetSnapshot.ModeShare]
     let theme: WTheme
 
+    /// The three biggest groups, everything else summed into Other, so the bar fills and the percentages add up.
+    static func rows(_ shares: [WidgetSnapshot.ModeShare]) -> [(ModeGroup, Double)] {
+        var byGroup: [(ModeGroup, Double)] = shares.map { (ModeGroup(rawValue: $0.group) ?? .other, $0.distance) }
+            .sorted { $0.1 > $1.1 }
+        guard byGroup.count > 3 else { return byGroup }
+        let rest = byGroup[3...].reduce(0) { $0 + $1.1 }
+        byGroup = Array(byGroup.prefix(3))
+        if let i = byGroup.firstIndex(where: { $0.0 == .other }) { byGroup[i].1 += rest } else { byGroup.append((.other, rest)) }
+        return byGroup
+    }
+
     var body: some View {
         let total = shares.reduce(0) { $0 + $1.distance }
-        let rows = shares.prefix(4).map { (ModeGroup(rawValue: $0.group) ?? .other, $0.distance / max(total, 1)) }
+        let rows = Self.rows(shares).map { ($0.0, $0.1 / max(total, 1)) }
         VStack(alignment: .leading, spacing: 5) {
             Text("How you got around · by distance").font(.toon(11, .black)).foregroundStyle(theme.muted)
             GeometryReader { geo in

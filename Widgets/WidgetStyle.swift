@@ -76,6 +76,11 @@ enum WFmt {
     static func dayTitle(_ d: Date) -> String { d.formatted(.dateTime.weekday(.abbreviated).day().month(.abbreviated)) }
 }
 
+extension WidgetSnapshot.Week {
+    /// The window still ends today; after midnight it ends yesterday until the app writes a new snapshot.
+    func isCurrent(at date: Date) -> Bool { Calendar.current.isDate(end, inSameDayAs: date) }
+}
+
 extension ModeGroup {
     var shortLabel: String {
         switch self {

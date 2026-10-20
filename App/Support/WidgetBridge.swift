@@ -27,6 +27,11 @@ final class WidgetBridge {
         model.$revision.dropFirst().sink { [weak self] _ in self?.schedule() }.store(in: &bag)
         model.collector.$authorization.dropFirst().sink { [weak self] _ in self?.schedule() }.store(in: &bag)
         model.collector.$mode.dropFirst().sink { [weak self] _ in self?.schedule() }.store(in: &bag)
+        // fixes arrive every few seconds while moving and bump nothing above; refresh "last point" at most every
+        // 10 min so the tracking widgets don't go stale mid-trip without spending the reload budget
+        model.collector.$lastFix.dropFirst()
+            .throttle(for: .seconds(600), scheduler: RunLoop.main, latest: true)
+            .sink { [weak self] _ in self?.schedule() }.store(in: &bag)
     }
 
     func schedule(after delay: Duration = .seconds(2)) {
