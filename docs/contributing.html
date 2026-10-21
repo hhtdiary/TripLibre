@@ -9,7 +9,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css?v=8">
+<link rel="stylesheet" href="assets/docs.css?v=9">
 <script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <script src="assets/docs.js" defer></script>
 </head>
@@ -49,7 +49,7 @@ dark theme, and runs axe-core's WCAG 2.1 AA rules against the finished page, inc
   <tr><td>Change background collection</td><td><code>App/Location/LocationCollector.swift</code>; test on a real device, the simulator can't reproduce it</td></tr>
   <tr><td>Change a Home Screen widget</td><td>Views in <code>Widgets/</code>; data in <code>Widget/WidgetSnapshot.swift</code> (bump <code>currentVersion</code> if its shape changes, and extend <code>WidgetSnapshotTests</code>)</td></tr>
   <tr><td>Change the UI</td><td><code>App/Screens/</code>, styling in <code>App/Support/Theme.swift</code></td></tr>
-  <tr><td>Edit these docs</td><td><code>docs/*.html</code>; navigation is in <code>docs/assets/docs.js</code></td></tr>
+  <tr><td>Edit these docs</td><td><code>docs/*.html</code>; navigation is in <code>docs/assets/docs.js</code>. See <a href="#documentation">Documentation</a> below</td></tr>
 </table></div>
 
 <h2>Ground rules</h2>
@@ -63,6 +63,45 @@ dark theme, and runs axe-core's WCAG 2.1 AA rules against the finished page, inc
   <li>Thresholds go in <code>InferenceConfig</code>, not inline.</li>
 </ul>
 
+<h2>Proposing an inference test case</h2>
+<p>Wrong visits, trips and modes are the most useful reports, and the hardest to share safely: the evidence is your
+location history. Please <b>never attach an export, a <code>travel.sqlite</code> file, a GPX track or screenshots of
+your map</b> to a public issue. Describe the <i>shape</i> of the problem instead, so it can be rebuilt as a synthetic
+fixture:</p>
+<ol class="steps">
+  <li><b>Describe what happened</b>"Walked 600 m between two buildings, stayed 40 min, took a rideshare for 12 min."
+    Times can be relative ("+0:40"); no addresses or coordinates needed.</li>
+  <li><b>Describe what HHT recorded</b>"One 2 h visit, no trip" or "the rideshare was labelled subway". Include the
+    mode confidence and whether the trip showed a gap, if you can see them.</li>
+  <li><b>Add the signal, not the place</b>If you're comfortable, read from your own export: roughly how often fixes
+    arrived, their accuracy (<code>h_accuracy</code>), speeds, any silences longer than a couple of minutes, and the
+    CoreMotion activity during the problem.</li>
+  <li><b>Write or request the fixture</b>Test cases are written with the synthetic <code>Trajectory</code> builder in
+    <code>Packages/HHTCore/Tests/HHTCoreTests/Fixtures.swift</code>, using its fixed Philadelphia landmarks, and go in
+    <code>CalibrationTests.swift</code> or <code>InferenceTests.swift</code>. A good fixture fails on the current engine
+    and states the expected visits, trips and modes.</li>
+</ol>
+<p>If a real trace is truly needed, share it privately with the maintainer, and only after shifting it far from where it
+happened, rotating it and offsetting the times. Even then, home and work can sometimes be recovered from the pattern.
+Accuracy measurements on real data are summarised in aggregate only; see <a href="validation.html">Validation</a>.</p>
+
+<h2 id="documentation">Documentation</h2>
+<ul>
+  <li><b>The site is plain HTML.</b> Pages are <code>docs/*.html</code>, published as-is at
+    <a href="https://hhtdiary.org/">hhtdiary.org</a>. There is no Markdown build: a <code>.md</code> file in
+    <code>docs/</code> is visible on GitHub but not on the site. To add a page, copy an existing one and add it to
+    <code>NAV</code> in <code>docs/assets/docs.js</code>.</li>
+  <li><b>Say what is true today.</b> Label anything that isn't built yet with a status: <span class="status available">Available</span>
+    <span class="status progress">In progress</span> <span class="status planned">Planned</span>
+    <span class="status exploratory">Exploratory</span> (<code>&lt;span class="status planned"&gt;</code>). Don't add dates
+    to plans, and don't call accuracy "research-grade" without a benchmark to point to.</li>
+  <li><b>Check against the code.</b> Field names, defaults and file lists should be copied from the source
+    (<code>Exporter.swift</code>, <code>Schema.swift</code>, <code>InferenceConfig.swift</code>), not from memory.</li>
+  <li><b>Use the project's terms</b>: HHT, household travel survey (HHTS), visit, trip, segment, tour, person-day, local-first.</li>
+  <li><b>Use synthetic examples only.</b> <code>make sim</code> and <code>make export-check</code> produce demo data you can quote.</li>
+  <li>Run <code>npm run lint</code> and <code>npm run a11y</code>. A Vercel preview is posted on every pull request that touches <code>docs/</code>.</li>
+</ul>
+
 <h2>Before opening a pull request</h2>
 <ol class="steps">
   <li><b>Run the checks CI runs</b>
@@ -72,17 +111,30 @@ dark theme, and runs axe-core's WCAG 2.1 AA rules against the finished page, inc
   <li><b>Open the PR</b> against <code>main</code> with a short description of what changed and why.</li>
 </ol>
 
+<h2>Releases</h2>
+<p>Released versions are listed in <a href="https://github.com/zyang91/HHT-app/blob/main/CHANGELOG.md"><code>CHANGELOG.md</code></a>
+and on <a href="https://github.com/zyang91/HHT-app/releases">GitHub Releases</a>. Each GitHub release is archived on Zenodo
+under one concept DOI, <a href="https://doi.org/10.5281/zenodo.23307589">10.5281/zenodo.23307589</a>. Before tagging
+<code>vX.Y.Z</code>, set the same version in all three places, or the archive will be labelled with the old one:</p>
+<ul>
+  <li><code>MARKETING_VERSION</code> in <code>project.yml</code> (then <code>make project</code>)</li>
+  <li><code>version</code> and <code>date-released</code> in <code>CITATION.cff</code></li>
+  <li><code>version</code> in <code>.zenodo.json</code></li>
+</ul>
+<p>Then add a section to <code>CHANGELOG.md</code>.</p>
+
 <h2>Reporting issues</h2>
 <p>Use the <a href="https://github.com/zyang91/HHT-app/issues/new/choose">issue templates</a> for bugs and feature requests.
-For a wrong trip or visit, describe what happened and what HHT recorded. <b>Don't attach raw exports</b>: they contain your
-location history. Security problems go through
+For a wrong trip or visit, follow <a href="#proposing-an-inference-test-case">proposing an inference test case</a>
+above. <b>Don't attach raw exports</b>: they contain your location history. Security problems go through
 <a href="https://github.com/zyang91/HHT-app/blob/main/SECURITY.md"><code>SECURITY.md</code></a>, not public issues.</p>
 <p>Everyone participating is expected to follow the
 <a href="https://github.com/zyang91/HHT-app/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a>.</p>
 
 <h2>License</h2>
 <p>HHT is released under the <a href="https://github.com/zyang91/HHT-app/blob/main/LICENSE">Apache License 2.0</a>.
-Contributions are accepted under the same license.</p>
+Contributions are accepted under the same license. The repository has no <code>NOTICE</code> file; if a contribution
+brings in third-party code that requires one, add it in the same pull request.</p>
 
 </article></main>
 </body>

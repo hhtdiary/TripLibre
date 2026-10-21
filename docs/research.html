@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Research uses &amp; limitations · HHT Docs</title>
+<meta name="description" content="What HHT data is good for in transportation research, the biases and privacy risks that come with it, and what GPS trajectories cannot tell you.">
+<link rel="icon" href="assets/hht-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=9">
+<script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<script src="assets/docs.js" defer></script>
+</head>
+<body>
+<main class="dx-main"><article class="dx-content">
+
+<p class="eyebrow">Research</p>
+<h1>Research uses &amp; limitations</h1>
+<p class="lede">HHT produces a household-travel-survey-shaped diary from one phone. That is useful for some research
+questions and misleading for others. This page is meant to help you decide which kind yours is, before you collect anything.</p>
+
+<div class="callout warn"><div class="ic">!</div>
+<p>HHT today is a single-user app. A study with several participants means each person installs HHT, exports their own
+data and hands it over under your consent process. There are no built-in study, enrolment or upload features
+(see the <a href="roadmap.html">roadmap</a>).</p></div>
+
+<h2>What HHT data is good for</h2>
+<div class="table-wrap"><table>
+  <tr><th>Use</th><th>Why HHT fits</th><th>Watch out for</th></tr>
+  <tr><td><b>Longitudinal mobility</b> (N-of-1, small panels)</td><td>Continuous recording over months, with life phases to compare semesters, jobs or moves.</td><td>Collection gaps (expired install, permissions, dead battery) look like "no travel".</td></tr>
+  <tr><td><b>Trip and stay inference research</b></td><td>Raw fixes and motion are kept beside the inferred and corrected diary, so a new algorithm can be compared with the old one on the same input.</td><td>Edited records overwrite the engine's first answer. See <a href="validation.html#known-limitations">Validation</a>.</td></tr>
+  <tr><td><b>Mode classification</b></td><td>Every mode correction is in <code>audit_log</code>: a labelled set for evaluation or training.</td><td>Labels come from whoever corrected them, only on trips they chose to review.</td></tr>
+  <tr><td><b>Human-in-the-loop correction</b></td><td>The app records which records were confirmed, edited, created or deleted (<code>user_status</code>, <code>audit_log</code>).</td><td>Correction effort varies by person and over time.</td></tr>
+  <tr><td><b>Exploratory or pilot surveys</b></td><td>No vendor, no licence fee, HHTS-like output (person-day, trip, segment, mode, purpose, tour).</td><td>Not a substitute for a designed, weighted survey.</td></tr>
+  <tr><td><b>Teaching</b></td><td>Readable, tested Swift and Python; synthetic demo days in the simulator; documented metrics.</td><td>Use demo or self-collected data. Don't pass classmates' raw traces around.</td></tr>
+  <tr><td><b>Low-budget research</b></td><td>Only needs a Mac to build and iPhones the participants already own.</td><td>Who owns an iPhone is itself a selection filter.</td></tr>
+</table></div>
+
+<h2>Biases and data-quality limits</h2>
+<h3>Who ends up in the data</h3>
+<ul>
+  <li><b>Sampling and self-selection.</b> People who install a travel-tracking app are not a random sample. Expect them
+    to be more interested in data, technology or their own travel.</li>
+  <li><b>Phone access.</b> HHT runs only on iPhones with iOS 17 or later. iPhone ownership varies by income, age, region
+    and country. People without a smartphone, or who share one, are excluded entirely.</li>
+  <li><b>Nonresponse and attrition.</b> Some people decline, some stop recording, some don't correct their diary. Those
+    who keep going differ from those who stop.</li>
+  <li><b>Data-sharing selection.</b> Even with full consent, participants may export only some periods, or withdraw days
+    they consider sensitive. The days you receive are not a random subset of the days they lived.</li>
+  <li><b>Representativeness.</b> Without a sampling frame and weights, totals and shares describe <i>these
+    participants</i>, not a population. Report them that way.</li>
+</ul>
+
+<h3>What the sensors miss</h3>
+<ul>
+  <li><b>GPS drift.</b> Indoors and in dense downtowns, fixes wander by hundreds of metres. That can split one stay into
+    two or invent a short trip. HHT filters most drift, but large venues still cause duplicate stays.</li>
+  <li><b>Signal loss.</b> Underground and in some vehicles there are no fixes for minutes. Subway trips are inferred from
+    the blackout itself; distances and routes are straight lines across the gap.</li>
+  <li><b>Short stops and access walks.</b> Stops under about five minutes and very short walks are often absent unless
+    the user stamps or adds them.</li>
+  <li><b>Incomplete days.</b> If collection stops (permissions revoked, a 7-day signature expired, battery died), the day
+    is partial. HHT flags trips with a gap of more than 15 minutes (<code>has_gap</code>) but cannot know what happened
+    during a silence it never recorded.</li>
+  <li><b>Mode confusion.</b> Bus and car look alike without transit schedules; fast surface rail can look like a car.
+    Measured accuracy is on the <a href="validation.html">Validation</a> page.</li>
+</ul>
+
+<h3>What trajectories alone can't tell you</h3>
+<p>A GPS trace records <i>where</i> and <i>when</i>. It doesn't record:</p>
+<ul>
+  <li><b>Purpose</b>: HHT guesses from the destination's place category, which you set. An unnamed place has no purpose.</li>
+  <li><b>Who else was there</b>: household members, passengers, escorts, trip companions.</li>
+  <li><b>Driver or passenger</b>: auto-classification says <code>car</code>; only a correction says <code>car_driver</code> or <code>car_passenger</code>.</li>
+  <li><b>Cost, fare, parking, vehicle type</b>, or how the trip was paid for.</li>
+  <li><b>Household context</b>: income, car ownership, licence, household size, the usual HHTS demographics.</li>
+  <li><b>Why not</b>: trips not taken, constraints, unmet demand, satisfaction.</li>
+</ul>
+<p>If your question needs any of these, pair HHT with a questionnaire, and say so in your methods.</p>
+
+<h2>Privacy and ethics</h2>
+<ul>
+  <li><b>Location traces identify people.</b> A few home and work locations are often enough to re-identify someone,
+    even with names removed. Treat <code>raw_location_points</code>, <code>visits</code>, places and routes as identifiable
+    personal data.</li>
+  <li><b>Ethics review.</b> Research with other people's location data usually needs ethics or IRB approval. Plan
+    consent, storage, retention and deletion before anyone installs the app. HHT does not handle any of this for you.</li>
+  <li><b>Export selectively, today, by hand.</b> The <i>Include raw GPS points</i> switch and the 30-day range apply to
+    the CSV and JSON files only. Every export also contains a full <code>travel.sqlite</code> snapshot, so for minimal
+    sharing delete that file (and anything else you don't need) before it leaves the phone. See
+    <a href="privacy.html#what-an-export-contains">what an export contains</a>.</li>
+  <li><b>Publish aggregates.</b> Mode shares, trip rates and distances by group are usually safe; individual diaries,
+    home locations and routes are not. Aggregate over enough people and days, and drop small cells.</li>
+  <li><b>Third parties.</b> Places a participant visits can reveal others: a friend's home, a clinic, a place of worship.</li>
+</ul>
+
+<h2>Reporting checklist</h2>
+<p>When you publish work that uses HHT data, readers will want to know:</p>
+<ol>
+  <li>The HHT release or commit you built, the schema version (Settings › Database, and <code>schema_version</code> in every
+    export's <code>data.json</code>), and the <a href="https://doi.org/10.5281/zenodo.23307589">software citation</a>.</li>
+  <li>How participants were recruited, how many started, and how many contributed usable days.</li>
+  <li>How you defined a usable or complete day, and how many days were excluded.</li>
+  <li>Whether participants corrected their diaries, and how you treated uncorrected (<code>user_status = auto</code>) records.</li>
+  <li>Which fields came from inference, which from corrections, and which from a separate questionnaire.</li>
+  <li>How location data was stored, de-identified and deleted.</li>
+</ol>
+
+<h2>Related pages</h2>
+<ul>
+  <li><a href="data-dictionary.html">Data dictionary</a>: every exported file and column.</li>
+  <li><a href="validation.html">Validation</a>: what has been measured, and how.</li>
+  <li><a href="inference.html">How inference works</a>: the rules behind visits, trips and modes.</li>
+  <li><a href="privacy.html">Privacy</a>: what stays on the phone and what doesn't.</li>
+</ul>
+
+</article></main>
+</body>
+</html>

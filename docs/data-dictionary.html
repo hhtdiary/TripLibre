@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Data dictionary · HHT Docs</title>
+<meta name="description" content="Every file and column in an HHT export: definitions, units, time zones, IDs, missing values, schema versioning and synthetic examples.">
+<link rel="icon" href="assets/hht-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=9">
+<script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<script src="assets/docs.js" defer></script>
+</head>
+<body>
+<main class="dx-main"><article class="dx-content">
+
+<p class="eyebrow">Reference</p>
+<h1>Data dictionary</h1>
+<p class="lede">What you get when you export from HHT: each file, each column, and the rules for times, units, IDs and
+missing values. Written for researchers receiving an export. It describes schema version 5, the current one.</p>
+<p>For the database internals (every table and migration), see
+<a href="https://github.com/zyang91/HHT-app/blob/main/docs/data-model.md"><code>docs/data-model.md</code></a>. For a
+shorter overview, see <a href="data.html">Data model &amp; export</a>. All examples on this page come from the synthetic
+test fixture that CI exports on every run, not from a real person.</p>
+
+<h2>Concepts</h2>
+<div class="table-wrap"><table>
+  <tr><th>Term</th><th>Definition in HHT</th></tr>
+  <tr><td><b>Raw observation</b></td><td>A GPS fix (<code>raw_location_points</code>) or a CoreMotion activity episode (<code>motion_activities</code>). Append-only: never edited or thinned.</td></tr>
+  <tr><td><b>Inferred record</b></td><td>A visit, trip or segment produced by the inference engine (<code>user_status = auto</code>). Can be rebuilt from raw data at any time.</td></tr>
+  <tr><td><b>User correction</b></td><td>A record the user confirmed, edited or created (<code>user_status</code> = <code>confirmed</code>, <code>edited</code> or <code>manual</code>), or deleted (<code>deleted = 1</code>). Locked against rebuilds. Each change is a row in <code>audit_log</code>.</td></tr>
+  <tr><td><b>Visit</b></td><td>A stay of at least 5 minutes within about 100 m (the default stay radius) of one spot. HHTS: an activity location.</td></tr>
+  <tr><td><b>Place</b></td><td>A location visits are matched to. Named and categorised by the user, or unnamed.</td></tr>
+  <tr><td><b>Trip</b></td><td>Movement from one visit to the next. HHTS: a linked trip, possibly with several modes.</td></tr>
+  <tr><td><b>Segment</b></td><td>A single-mode part of a trip (an unlinked trip). A walk–subway–walk trip has three.</td></tr>
+  <tr><td><b>Mode</b></td><td>The trip's main mode, chosen from its segments by the hierarchy air &gt; rail &gt; transit &gt; car &gt; bike &gt; walk.</td></tr>
+  <tr><td><b>Person-day</b></td><td>A local calendar date (in the record's own time zone) with at least one trip or visit. <code>person_day_id</code> is that date.</td></tr>
+  <tr><td><b>Tour</b></td><td>A home-based tour: the trips from leaving a Home place to the next arrival at a Home place. Computed in analytics, not stored in the export.</td></tr>
+  <tr><td><b>Stamp</b></td><td>A one-tap self-report that a stop happened "around here, around now". Coarse location only.</td></tr>
+</table></div>
+
+<h2>Conventions</h2>
+<div class="table-wrap"><table>
+  <tr><th>Topic</th><th>Rule</th></tr>
+  <tr><td>IDs</td><td>Lowercase UUID strings for places, visits, trips, segments and stamps. They are stable across exports, so files from different days can be joined. Raw points, motion rows and audit rows use integer IDs.</td></tr>
+  <tr><td><code>*_ts</code>, <code>ts</code></td><td>Unix seconds, UTC (decimal). In CSV files each one is followed by an ISO-8601 UTC string: <code>arrival_ts</code> → <code>arrival_utc</code>, <code>ts</code> → <code>time_utc</code>.</td></tr>
+  <tr><td><code>created_at</code>, <code>updated_at</code>, <code>inserted_at</code></td><td>Unix seconds, UTC, with no ISO companion. Bookkeeping only.</td></tr>
+  <tr><td><code>*_local</code></td><td>ISO-8601 with offset, in the time zone in <code>tz</code>.</td></tr>
+  <tr><td><code>tz</code></td><td>IANA zone of the phone when the record was made, e.g. <code>America/New_York</code>. Local dates use each record's own zone, so trips across zones stay correct.</td></tr>
+  <tr><td>Dates</td><td><code>YYYY-MM-DD</code>, local (<code>person_day_id</code>, <code>flights.date</code>, <code>life_phases.start_date</code>).</td></tr>
+  <tr><td>Coordinates</td><td>WGS84 decimal degrees. <code>trips.csv</code> rounds them to 6 decimals; stamps to 3 (≈ 110 m). GeoJSON uses <code>[lon, lat]</code>.</td></tr>
+  <tr><td>Units</td><td>Distances in metres; speeds in m/s; accuracies in metres; durations in minutes (<code>*_min</code>) or seconds (<code>*_s</code>).</td></tr>
+  <tr><td>Distance</td><td>Along the recorded path, great-circle between fixes; a straight line across a data gap.</td></tr>
+  <tr><td><code>route_polyline</code></td><td>Google encoded polyline (precision 1e-5), simplified (Douglas–Peucker, 8 m).</td></tr>
+  <tr><td>Booleans</td><td><code>0</code> / <code>1</code>.</td></tr>
+  <tr><td>Confidence</td><td><code>0</code>–<code>1</code>. Higher is more certain; trips below the review threshold are flagged in the app.</td></tr>
+</table></div>
+
+<h3>Missing values</h3>
+<ul>
+  <li>In CSV, an <b>empty field</b> means NULL. In JSON it is <code>null</code>. There are no sentinel values like <code>-1</code>.</li>
+  <li><code>departure_ts</code> empty: the visit is still going on. Its <code>duration_min</code> then runs to the moment of export.</li>
+  <li><code>mode_user</code> empty: the user never set the mode. <code>mode</code> then equals <code>mode_auto</code>, or <code>unknown</code>.</li>
+  <li><code>purpose</code> empty: no explicit purpose and the destination has no category that implies one.</li>
+  <li>Place name empty: an unnamed place. In <code>trips.csv</code> the name column then shows its coordinates, like <code>Place 39.9540, -75.2009</code>.</li>
+  <li>Raw sensor fields (<code>altitude</code>, <code>speed</code>, <code>course</code>…) are empty when iOS reported them as invalid.</li>
+  <li>A day with no rows is <b>not</b> evidence of no travel. Collection may have been off. See <a href="research.html#what-the-sensors-miss">what the sensors miss</a>.</li>
+</ul>
+
+<h3>Deleted and merged records</h3>
+<ul>
+  <li>CSV and GeoJSON files contain only active records: soft-deleted rows (<code>deleted = 1</code>) are left out.</li>
+  <li><code>data.json</code> and <code>travel.sqlite</code> contain <b>everything</b>, including deleted rows. Filter on <code>deleted = 0</code>, or use the <code>v_trips</code> / <code>v_visits</code> views.</li>
+  <li>A merged place stays as a tombstone with <code>merged_into</code> set to the place that replaced it.</li>
+</ul>
+
+<h2>The export folder</h2>
+<p>Settings › <b>Create export</b> writes <code>hht-export-YYYYMMDD-HHMMSS/</code> (the phone's local time) to
+<i>Files › On My iPhone › HHT › Exports</i>:</p>
+<div class="table-wrap"><table>
+  <tr><th>File</th><th>Format</th><th>Range filter applies?</th><th>Contents</th></tr>
+  <tr><td><code>trips.csv</code></td><td>CSV</td><td>Yes</td><td>One row per trip, HHTS-style.</td></tr>
+  <tr><td><code>trip_segments.csv</code></td><td>CSV</td><td>Yes</td><td>Mode segments of each trip.</td></tr>
+  <tr><td><code>visits.csv</code></td><td>CSV</td><td>Yes</td><td>Stays.</td></tr>
+  <tr><td><code>places.csv</code></td><td>CSV</td><td>No</td><td>All active places, with visit counts.</td></tr>
+  <tr><td><code>stamps.csv</code></td><td>CSV</td><td>Yes</td><td>Self-reported stops.</td></tr>
+  <tr><td><code>flights.csv</code>, <code>life_phases.csv</code>, <code>audit_log.csv</code></td><td>CSV</td><td>No</td><td>As stored.</td></tr>
+  <tr><td><code>raw_location_points.csv</code>, <code>motion_activities.csv</code></td><td>CSV</td><td>Yes</td><td>Only when <i>Include raw GPS points</i> is on.</td></tr>
+  <tr><td><code>data.json</code></td><td>JSON</td><td>Visits, trips, segments, stamps</td><td>All tables except raw points and motion.</td></tr>
+  <tr><td><code>places.geojson</code>, <code>trips.geojson</code>, <code>trip_ends.geojson</code></td><td>GeoJSON</td><td>Trips only</td><td>Points and LineStrings for GIS.</td></tr>
+  <tr><td><code>travel.sqlite</code></td><td>SQLite</td><td><b>No</b></td><td>The <b>complete</b> database, raw points included, whatever the options.</td></tr>
+  <tr><td><code>README.txt</code></td><td>Text</td><td>—</td><td>A short guide to the files.</td></tr>
+</table></div>
+<div class="callout warn"><div class="ic">!</div>
+<p>The <i>Last 30 days</i> range and the <i>Include raw GPS points</i> switch don't apply to <code>travel.sqlite</code>.
+If you're sharing a limited export, delete <code>travel.sqlite</code> first. Selective export is
+<span class="status planned">Planned</span>.</p></div>
+
+<h2>trips.csv</h2>
+<p>One row per non-deleted trip, ordered by departure. Example values are from the synthetic fixture.</p>
+<div class="table-wrap"><table>
+  <tr><th>Column</th><th>Meaning</th><th>Example</th></tr>
+  <tr><td><code>person_day_id</code></td><td>Local date of departure</td><td><code>2026-09-15</code></td></tr>
+  <tr><td><code>trip_id</code></td><td>Trip UUID</td><td><code>25da27b4-…</code></td></tr>
+  <tr><td><code>trip_seq</code></td><td>Order within the person-day, from 1</td><td><code>1</code></td></tr>
+  <tr><td><code>origin_visit_id</code>, <code>destination_visit_id</code></td><td>→ <code>visits.csv</code>. Empty for imported or hand-made history</td><td><code>02db441f-…</code></td></tr>
+  <tr><td><code>origin_place_id</code>, <code>origin_place_name</code>, <code>origin_category</code></td><td>Origin place (→ <code>places.csv</code>)</td><td><code>…</code>, <code>Home</code>, <code>home</code></td></tr>
+  <tr><td><code>origin_lat</code>, <code>origin_lon</code></td><td>Origin visit centroid (else place), 6 decimals</td><td><code>39.952611</code>, <code>-75.165261</code></td></tr>
+  <tr><td><code>destination_*</code></td><td>Same five columns for the destination</td><td><code>Penn</code>, <code>work_school</code></td></tr>
+  <tr><td><code>departure_utc</code>, <code>arrival_utc</code></td><td>ISO-8601 UTC</td><td><code>2026-09-15T12:00:15Z</code></td></tr>
+  <tr><td><code>departure_local</code>, <code>arrival_local</code></td><td>ISO-8601 with offset, in <code>tz</code></td><td><code>2026-09-15T08:00:15-04:00</code></td></tr>
+  <tr><td><code>tz</code></td><td>IANA time zone</td><td><code>America/New_York</code></td></tr>
+  <tr><td><code>day_of_week</code></td><td>1 = Sunday … 7 = Saturday, local</td><td><code>3</code></td></tr>
+  <tr><td><code>travel_time_min</code></td><td>Arrival − departure, minutes (2 decimals)</td><td><code>27.50</code></td></tr>
+  <tr><td><code>distance_m</code></td><td>Path distance, metres (1 decimal)</td><td><code>2415.8</code></td></tr>
+  <tr><td><code>mode</code></td><td>Final mode: <code>mode_user</code>, else <code>mode_auto</code>, else <code>unknown</code></td><td><code>bicycle</code></td></tr>
+  <tr><td><code>mode_group</code></td><td><code>active</code>, <code>car</code>, <code>transit</code>, <code>long_distance</code>, <code>other</code></td><td><code>active</code></td></tr>
+  <tr><td><code>mode_auto</code>, <code>mode_confidence</code></td><td>Classifier output and its confidence</td><td><code>walk</code>, <code>0.85</code></td></tr>
+  <tr><td><code>mode_user</code></td><td>User's correction, if any</td><td><code>bicycle</code></td></tr>
+  <tr><td><code>n_segments</code>, <code>segment_modes</code></td><td>Segment count and their modes joined by <code>|</code></td><td><code>1</code>, <code>bicycle</code></td></tr>
+  <tr><td><code>purpose</code></td><td>Explicit trip purpose, else destination visit purpose, else the place category's default</td><td><code>work</code></td></tr>
+  <tr><td><code>has_gap</code></td><td><code>1</code> if GPS was silent for more than 15 minutes during the trip</td><td><code>0</code></td></tr>
+  <tr><td><code>auto_confidence</code></td><td>Engine's confidence in the trip itself</td><td><code>0.95</code></td></tr>
+  <tr><td><code>source</code></td><td><code>inferred</code>, <code>manual</code> or <code>imported_csv</code></td><td><code>inferred</code></td></tr>
+  <tr><td><code>user_status</code></td><td><code>auto</code>, <code>confirmed</code>, <code>edited</code> or <code>manual</code></td><td><code>edited</code></td></tr>
+  <tr><td><code>notes</code></td><td>User's free text</td><td>(empty)</td></tr>
+  <tr><td><code>route_polyline</code></td><td>Encoded route</td><td><code>yfzrFzuwiM`AhxBE~UTdKGzP</code></td></tr>
+</table></div>
+
+<h2>Other CSV files</h2>
+<h3>visits.csv</h3>
+<p><code>visit_id, place_id, place_name, place_category, place_category_custom, arrival_ts, arrival_utc, departure_ts,
+departure_utc, tz, duration_min, lat, lon, purpose, auto_confidence, source, user_status, point_count, notes</code>.
+<code>lat</code>/<code>lon</code> is the observed centroid of the stay; <code>point_count</code> the number of fixes in it.</p>
+
+<h3>trip_segments.csv</h3>
+<p><code>segment_id, trip_id, seq, start_ts, start_utc, end_ts, end_utc, mode, mode_auto, mode_confidence, mode_user,
+distance_m, route_polyline</code>. <code>seq</code> starts at 0. Segments of a trip are contiguous and don't overlap.
+A segment with <code>mode_user</code> set and no <code>mode_auto</code> was drawn by hand.</p>
+
+<h3>places.csv</h3>
+<p><code>place_id, name, category, category_custom, code, lat, lon, radius_m, address, city, region, country, favorite,
+source, merged_into, notes, created_ts, created_utc, visit_count, first_visit_ts, first_visit_utc, last_visit_ts,
+last_visit_utc</code>. Address fields are filled only if the user turned on address lookup. <code>code</code> is an
+IATA or station code.</p>
+
+<h3>stamps.csv</h3>
+<p><code>stamp_id, ts, time_utc, tz, lat, lon, uncertainty_m, fix_accuracy_m, fix_age_s, visit_id, note</code>.
+<code>lat</code>/<code>lon</code> are rounded to 3 decimals and empty if there was no fix in the last 10 minutes.
+<code>visit_id</code> is the visit inference attached the stamp to, empty if none.</p>
+
+<h3>raw_location_points.csv</h3>
+<p><code>id, ts, time_utc, lat, lon, h_accuracy, altitude, v_accuracy, speed, speed_accuracy, course, source,
+collector_mode, tz, inserted_at</code>. <code>source</code> is <code>gps</code>, <code>significant_change</code>,
+<code>region_exit</code>, <code>visit_arrival</code>, <code>visit_departure</code>, <code>stationary_marker</code> or
+<code>imported_gpx</code>. <code>collector_mode</code> (<code>moving</code> / <code>stationary</code>) says whether a silence
+afterwards was deliberate.</p>
+
+<h3>motion_activities.csv</h3>
+<p><code>id, ts, time_utc, activity, confidence</code>. <code>activity</code> is <code>stationary</code>,
+<code>walking</code>, <code>running</code>, <code>cycling</code>, <code>automotive</code> or <code>unknown</code>;
+<code>confidence</code> 0 (low) to 2 (high). Each row lasts until the next one.</p>
+
+<h3>audit_log.csv</h3>
+<p><code>id, ts, time_utc, entity_type, entity_id, action, field, old_value, new_value</code>. One row per correction.
+<code>entity_type</code>: <code>visit</code>, <code>trip</code>, <code>trip_segment</code>, <code>place</code>,
+<code>flight</code>, <code>stamp</code>. <code>action</code> includes <code>set_mode</code>, <code>set_purpose</code>,
+<code>set_place</code>, <code>set_times</code>, <code>merge</code>, <code>split</code>, <code>delete</code>,
+<code>confirm</code>, <code>create</code>. Values are stored as text and may contain place names or IDs.</p>
+
+<h3>flights.csv and life_phases.csv</h3>
+<p>Flights: <code>flight_id</code> (repeated as <code>id</code>), <code>trip_id</code>, <code>date</code>, airport codes and
+coordinates, times, airline, flight number, aircraft, seat, cabin, <code>distance_m</code>, <code>booking_reference</code>,
+notes, source. Life phases: <code>id, name, kind, start_date, end_date</code> (inclusive; empty = ongoing),
+<code>notes</code>.</p>
+
+<h2>Codes</h2>
+<p><b>Modes</b>: <code>walk run bicycle ebike scooter car car_driver car_passenger taxi bus subway light_rail
+commuter_rail intercity_rail coach shuttle ferry airplane other unknown</code>. The classifier only produces a subset; see
+<a href="validation.html#known-limitations">known limitations</a>.</p>
+<p><b>Purposes</b>: <code>home work school meal shopping recreation social personal_business medical travel transfer
+escort other</code>.</p>
+<p><b>Place categories</b>: <code>home work_school restaurant cafe grocery shopping recreation entertainment airport
+rail_station transit_station hotel friend_family medical other stadium event_venue museum library convenience_store
+gas_station bar gym pharmacy bank civic religious parking</code>. Codes are never renamed between versions.</p>
+
+<h2>JSON, GeoJSON and SQLite</h2>
+<h3>data.json</h3>
+<p>One object: <code>format</code> (<code>"hht-personal-travel-diary"</code>), <code>schema_version</code>,
+<code>exported_at</code>, <code>range</code> (<code>null</code> for everything), then one array per table:
+<code>places, visits, trips, trip_segments, flights, journeys, journey_members, life_phases, stamps, audit_log</code>.
+Rows are the database columns as stored: times are Unix seconds, and <code>trips.purpose</code> is the explicit purpose
+only (the CSV's <code>purpose</code> is the resolved one).</p>
+<pre data-lang="text"><code>{"format": "hht-personal-travel-diary", "schema_version": 5, "range": null,
+ "trips": [{"id": "25da27b4-…", "departure_ts": 1789473615, "arrival_ts": 1789475265,
+            "mode_auto": "walk", "mode_user": "bicycle", "purpose": null, "deleted": 0, …}], …}</code></pre>
+
+<h3>GeoJSON</h3>
+<ul>
+  <li><code>places.geojson</code>: a Point per active place, with <code>place_id, name, category, visit_count, total_dwell_h</code> and first/last visit.</li>
+  <li><code>trips.geojson</code>: a LineString per trip with a route, with <code>trip_id, person_day_id, trip_seq, mode, purpose, departure_local, arrival_local, distance_m, origin, destination</code>.</li>
+  <li><code>trip_ends.geojson</code>: two Points per trip (<code>end</code> = <code>origin</code> / <code>destination</code>).</li>
+</ul>
+
+<h3>travel.sqlite</h3>
+<p>A full copy of the app's database. Open it with <code>sqlite3</code>, DuckDB, R (DBI), pandas or QGIS. The views
+<code>v_trips</code> and <code>v_visits</code> leave out deleted rows and add <code>mode_final</code>,
+<code>purpose_final</code> and <code>duration_s</code>.</p>
+
+<h2>Loading in Python</h2>
+<pre data-lang="python"><code>from hht import load
+
+d = load("hht-export-20260915-210000")   # export folder, or a travel.sqlite file
+d.trips       # trips.csv, times parsed as UTC
+d.segments    # trip_segments.csv
+d.visits, d.places, d.flights, d.life_phases
+d.stamps      # self-reported stops
+d.points      # raw GPS, None if not exported
+d.motion      # CoreMotion episodes</code></pre>
+<p><code>analysis/hht.py</code> reads both formats into the same columns. <code>make export-check</code> verifies on every CI
+run that the CSV and SQLite versions of one export agree. More helpers are on the
+<a href="api.html#python-analysis-helpers">Developer API</a> page.</p>
+
+<h2>Schema versioning</h2>
+<ul>
+  <li>The database schema version is stored in SQLite's <code>PRAGMA user_version</code>, shown in Settings › Database,
+    and written to <code>data.json</code> and <code>README.txt</code> in every export.</li>
+  <li>Migrations only ever add (<code>Schema.swift</code>). Columns and codes are not renamed or removed, so code written
+    for an older export keeps working.</li>
+  <li>History: v1 initial schema · v2 places can be deleted · v3 stamps · v4 more place categories · v5 custom place types.</li>
+  <li>A formal, machine-readable schema file for exports is <span class="status planned">Planned</span>.</li>
+</ul>
+
+</article></main>
+</body>
+</html>

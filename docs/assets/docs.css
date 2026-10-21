@@ -232,6 +232,7 @@ pre:hover .copy-btn, .copy-btn:focus { opacity: 1; }
 .callout.tip .ic { background: var(--teal-soft); color: var(--teal); }
 .callout.warn { border-color: color-mix(in srgb, var(--warn) 35%, var(--line)); background: var(--warn-soft); }
 .callout.warn .ic { background: var(--warn-soft); color: var(--warn); }
+.callout.warn a { color: color-mix(in srgb, var(--accent) 85%, var(--ink)); }
 
 .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin: 0 0 24px; }
 .card {
@@ -311,6 +312,19 @@ td code { white-space: nowrap; }
 .sig span { font-size: 13.5px; color: var(--ink-soft); }
 
 .badge { display: inline-block; font: 500 11.5px var(--mono); padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--ink-soft); vertical-align: 2px; }
+
+/* Status labels (vision, roadmap, research, validation): what HHT does today vs. what is only planned. */
+.status { display: inline-block; font: 600 11.5px var(--mono); padding: 1px 8px; border-radius: 999px; border: 1px solid; vertical-align: 2px; white-space: nowrap; }
+/* Text is mixed toward --ink: darker in light mode, lighter in dark mode, so small labels keep 4.5:1 on their tint. */
+.status.available { color: color-mix(in srgb, var(--teal) 75%, var(--ink)); background: var(--teal-soft); }
+.status.progress { color: color-mix(in srgb, var(--blue) 70%, var(--ink)); background: var(--blue-soft); }
+.status.planned { color: color-mix(in srgb, var(--accent) 75%, var(--ink)); background: var(--accent-soft); }
+.status.exploratory { color: var(--ink-soft); border-style: dashed; }
+.legend { display: flex; flex-wrap: wrap; gap: 8px 16px; margin: 0 0 24px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 10px; background: var(--bg-elev); font-size: 14px; color: var(--ink-soft); }
+.legend > span { display: inline-flex; align-items: center; gap: 6px; }
+.phase { border: 1px solid var(--line); border-radius: 12px; background: var(--bg-elev); padding: 14px 18px 4px; margin: 0 0 16px; }
+.phase > h3 { margin-top: 0; }
+.phase > h3 .status { margin-left: 6px; }
 
 /* hero (overview page) */
 .hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: center; margin-bottom: 8px; }

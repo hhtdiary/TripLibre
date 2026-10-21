@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Vision · HHT Docs</title>
+<meta name="description" content="From a travel survey of one to travel surveys within reach: why HHT is free, open, local-first and user-controlled, and what it is and isn't.">
+<link rel="icon" href="assets/hht-logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="assets/docs.css?v=9">
+<script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
+<script src="assets/docs.js" defer></script>
+</head>
+<body>
+<main class="dx-main"><article class="dx-content">
+
+<p class="eyebrow">Vision</p>
+<h1>From a travel survey of one to travel surveys within reach</h1>
+<p class="lede">HHT started as one transportation researcher's private travel diary. The longer-term aim is a free, open
+toolkit that lets anyone collect basic, well-documented travel data without a vendor contract, a server, or giving up
+control of their location history.</p>
+
+<div class="legend" role="note" aria-label="Status labels used on this page">
+  <span><span class="status available">Available</span> in the app today</span>
+  <span><span class="status progress">In progress</span> being worked on now</span>
+  <span><span class="status planned">Planned</span> intended, not built</span>
+  <span><span class="status exploratory">Exploratory</span> an idea, no commitment</span>
+</div>
+
+<h2>Where HHT is today</h2>
+<p>HHT is an iOS app that records where its user goes, rebuilds each day into visits, trips and travel modes, lets the
+user correct it in a tap or two, and exports the result. Everything is stored on the phone. It has one user per
+install, no account and no server. See <a href="index.html#what-it-does-today">what it does</a> for the full list.</p>
+<p>That is a <b>personal</b> tool. It is not yet a survey platform: there is no way to enrol participants, configure a
+study, or collect data from more than one phone. Those ideas are on the <a href="roadmap.html">roadmap</a> as
+<span class="status planned">Planned</span> or <span class="status exploratory">Exploratory</span>.</p>
+
+<h2>The gap HHT tries to bridge</h2>
+<p>Three groups need travel data and rarely meet in the same tool:</p>
+<div class="cards">
+  <div class="card"><div class="k">planners</div><h3>Transportation planners</h3><p>Know what a good household travel survey (HHTS) looks like: person-days, trips, modes, purposes, tours. Usually buy the collection from a vendor.</p></div>
+  <div class="card"><div class="k">developers</div><h3>Software developers</h3><p>Can build reliable background location and clean exports, but rarely see survey conventions or what researchers need to defend a dataset.</p></div>
+  <div class="card"><div class="k">researchers</div><h3>Resource-constrained researchers</h3><p>Students, small agencies, community groups and teachers who want travel data but can't fund a commercial smartphone-survey platform.</p></div>
+</div>
+<p>HHT is an attempt to put the planner's data model, the developer's engineering and the researcher's need for
+transparency into one open codebase.</p>
+
+<h2>An initiative for cities with limited capacity</h2>
+<p><span class="status exploratory">Exploratory</span> The gap is widest in many developing cities and countries. Travel
+patterns there often change fastest, through rapid urban growth, new transit lines and informal transport, yet many
+cities have no recent household travel survey at all. A traditional survey costs a lot, commercial smartphone platforms
+charge licence fees and often store data abroad, and a local agency may not have the software staff to build or
+maintain its own tool.</p>
+<p>HHT's design points at that problem. It is free to use and to change, so a city, university or NGO could adapt it
+without paying a vendor. It works offline and keeps data on the phone, so it doesn't depend on a reliable connection or a
+foreign server. Its data model follows familiar travel-survey concepts, and every inference rule is documented, so local
+analysts can check and adjust them instead of trusting a black box.</p>
+<p>It is not ready for this today, and pretending otherwise would waste a partner's time. Before HHT could help:</p>
+<ul>
+  <li><b>Android is a prerequisite.</b> In many of these places most residents use Android phones, and HHT runs only on iPhone.</li>
+  <li><b>The interface needs local languages</b>, and the place categories and modes need local options
+    (shared taxis, minibuses, motorcycle taxis, walking as the main mode).</li>
+  <li><b>Inference needs local calibration.</b> The rules were tuned on one person in Philadelphia; dense informal
+    transit, very different speeds and other GPS conditions will behave differently.</li>
+  <li><b>A study design is still needed.</b> HHT would make data collection cheaper, not representative. Sampling,
+    recruitment, weighting and ethics review stay with the local team.</li>
+  <li><b>It would need local partners</b> who know the city, can train data collectors and can own the data.</li>
+</ul>
+<p>If you work with a city or agency in this situation, an <a href="https://github.com/zyang91/HHT-app/issues/new/choose">issue</a>
+describing the context is the most useful starting point. The steps that would lead here are under the research edition
+on the <a href="roadmap.html#two-editions">Roadmap</a>.</p>
+
+<h2>Principles</h2>
+<div class="pillars">
+  <div><b>Free</b><span>No subscription, paid tier, ads or data resale. <span class="status available">Available</span></span></div>
+  <div><b>Open source (Apache 2.0)</b><span>Every line that touches location data can be read, audited and forked. <span class="status available">Available</span></span></div>
+  <div><b>Local-first</b><span>One SQLite file on the phone. No account, no sync, no analytics SDK. <span class="status available">Available</span></span></div>
+  <div><b>Privacy-first</b><span>Network access is limited and listed on the <a href="privacy.html">Privacy</a> page. Off-device sharing happens only when the user exports. <span class="status available">Available</span></span></div>
+  <div><b>Transparent</b><span>Inference rules are deterministic, documented and tested. Raw data is never rewritten. <span class="status available">Available</span></span></div>
+  <div><b>User-controlled</b><span>The user decides what to correct, what to export and when to erase. Finer-grained export is <span class="status planned">Planned</span>.</span></div>
+  <div><b>Adaptable</b><span>Thresholds live in one config struct and a calibration harness measures changes. Study-specific configuration is <span class="status planned">Planned</span>.</span></div>
+</div>
+
+<h2>What HHT is not</h2>
+<p>Being clear about limits matters more than the vision itself.</p>
+<ul>
+  <li><b>Not a representative household travel survey.</b> A regional HHTS relies on a sampling frame, recruitment,
+    weighting, household rosters and nonresponse follow-up. HHT provides none of that. It gives you
+    <i>accessible basic data collection</i>: a clean, correctable trip diary from whoever chooses to run it. A set of
+    HHT diaries is a convenience sample unless a study design makes it something more. See
+    <a href="research.html">Research uses &amp; limitations</a>.</li>
+  <li><b>Not risk-free.</b> Keeping data on the device removes the server, not the risk. A trace of where someone sleeps
+    and works can re-identify them, the phone can be lost or backed up to iCloud, and an export can be forwarded. HHT
+    reduces privacy exposure; it does not eliminate it.</li>
+  <li><b>Not validated at research grade.</b> HHT's output follows survey conventions, and its accuracy has been measured
+    on a small personal sample. It has not been benchmarked against a formal ground truth across many people. See
+    <a href="validation.html">Validation</a>.</li>
+  <li><b>Not a behaviour-change app.</b> No streaks, goals or nudges. It records and summarises.</li>
+</ul>
+
+<h2>Who it serves</h2>
+<div class="table-wrap"><table>
+  <tr><th>Who</th><th>What they can do today</th><th>What would help them later</th></tr>
+  <tr><td>Anyone wanting a private travel diary</td><td>Install from source, record, correct, export. <span class="status available">Available</span></td><td>An App Store build, no Xcode needed. <span class="status progress">In progress</span></td></tr>
+  <tr><td>Researchers studying their own travel (N-of-1, longitudinal)</td><td>Analyse HHTS-shaped exports in Python, R, SQL or QGIS. <span class="status available">Available</span></td><td>Validation fixtures and a published accuracy benchmark. <span class="status planned">Planned</span></td></tr>
+  <tr><td>Teachers and students</td><td>Use the code and synthetic demo data to teach trip reconstruction and HHTS concepts. <span class="status available">Available</span></td><td>Tutorials and teaching datasets. <span class="status planned">Planned</span></td></tr>
+  <tr><td>Small exploratory studies</td><td>Volunteers export and hand over their own data under the study's consent process. <span class="status available">Available</span>, but manual</td><td>Selective export, study configuration and prompted recall. <span class="status planned">Planned</span></td></tr>
+  <tr><td>Agencies and larger studies</td><td>Read the code as a reference implementation.</td><td>A research edition with multi-device, self-hosted infrastructure. <span class="status exploratory">Exploratory</span></td></tr>
+  <tr><td>Cities and countries with limited budgets or technical staff</td><td>Read and adapt the code; nothing turnkey yet.</td><td>Android, local languages and modes, local calibration, partner-led studies. <span class="status exploratory">Exploratory</span></td></tr>
+</table></div>
+
+<h2>How we'll get there</h2>
+<p>Two tracks, one engine. The <b>personal edition</b> is today's app: a private diary that stays simple. A possible
+<b>research edition</b> would add what studies need (study setup, consent, prompted recall, controlled hand-over) without
+loading those features onto everyday users. Both would share the same inference engine and data format.</p>
+<p>Each step stays inside the same principles: data on the device by default, sharing only by the user's explicit
+choice, and documentation that says what is and isn't true yet. The phases, and the status of each item, are on the
+<a href="roadmap.html">Roadmap</a>.</p>
+<div class="callout note"><div class="ic">i</div>
+<p>Nothing on this page expands what the first App Store version will contain. That release is the existing personal
+diary, packaged for easier installation.</p></div>
+
+</article></main>
+</body>
+</html>

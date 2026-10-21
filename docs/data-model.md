@@ -140,6 +140,10 @@ Key/value: `last_inference_at`.
 
 ## Export files
 
+The researcher-facing reference for every exported file and column (units, missing values, synthetic examples) is the
+[Data dictionary](https://hhtdiary.org/data-dictionary.html) ([`data-dictionary.html`](data-dictionary.html)).
+Note that `travel.sqlite` in an export is always the complete database, whatever the range and raw-points options.
+
 `trips.csv` is the canonical HHTS-style table: `person_day_id` (local date of departure), `trip_seq` (order within
 the person-day), OD place ids/names/categories/coordinates, UTC and local times, `travel_time_min`, `distance_m`,
 `mode`, `mode_group`, `mode_auto`, `mode_confidence`, `mode_user`, `n_segments`, `segment_modes` (`walk|subway|walk`),

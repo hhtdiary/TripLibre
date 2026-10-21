@@ -75,6 +75,11 @@ jobs:
               ['Installation', '/installation.html'],
               ['Using the app', '/using-the-app.html'],
               ['Privacy', '/privacy.html'],
+              ['Vision', '/vision.html'],
+              ['Roadmap', '/roadmap.html'],
+              ['Research uses & limitations', '/research.html'],
+              ['Validation', '/validation.html'],
+              ['Data dictionary', '/data-dictionary.html'],
             ];
             const list = pages
               .map(([name, path]) => `- [${name}](${url}${path})`)

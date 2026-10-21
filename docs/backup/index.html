@@ -171,7 +171,7 @@
       </div>
       <div class="lede-row">
         <p class="lede">Household travel surveys ask thousands of people to remember one weekday. I wanted the opposite: one person, every day, for years. HHT is a private iPhone app that quietly records where I go and rebuilds each day into visits, trips, modes and trip chains, then gets out of the way.</p>
-        <p class="aside">Built for exactly one user. Not on the App Store, no account, no server. The data never leaves the phone unless I export it.</p>
+        <p class="aside">Built for exactly one user. Not on the App Store (yet), no account, no server. The data never leaves the phone unless I export it.</p>
       </div>
     </div>
   </div>
@@ -258,6 +258,22 @@
         <p>One tap produces CSVs with stable IDs that join across tables (<code>trips</code>, <code>trip_segments</code>, <code>visits</code>, <code>places</code>, <code>flights</code>), a full JSON dump, GeoJSON routes and places, and a SQLite snapshot for R, Python, DuckDB or QGIS. The trips table is HHTS-shaped: <code>person_day_id</code>, <code>trip_seq</code>, origin, destination, times, distance, mode, purpose.</p>
         <p>Inside the app, the dashboard already computes the usual suspects: trips and distance per person-day, mode share, departure-time profile, time away from home, radius of gyration, convex-hull activity space, destination and mode entropy, repeat OD pairs and home-based tour complexity. Any two periods (two semesters, before and after a move) can be compared side by side.</p>
         <p class="note">What it can't do yet: tell a bus from a car without transit schedules, or catch very short access walks. Those are the next rabbit holes.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="item" id="beyond-one-person">
+    <div class="container">
+      <div class="item-head">
+        <span class="n">06</span>
+        <div><p class="kicker">Beyond one person</p><h2>From a travel survey of one to travel surveys within reach.</h2></div>
+      </div>
+      <div class="body">
+        <p>I built HHT for myself, and most of it I built in conversation with an AI coding assistant, Claude. I wrote the brief, made the design calls and checked every trip against days I had actually lived; Claude wrote much of the Swift and the tests. That pairing is part of the story: a planner with a clear idea of the data can now build a working survey instrument without a software team.</p>
+        <p>Which raises a bigger question. Household travel surveys are among the most expensive datasets in transportation planning. Smartphone survey platforms exist, but they are mostly commercial, and students, small agencies, community groups and researchers in places with tight budgets often can't afford them, or can't accept sending participants' locations to someone else's server.</p>
+        <p>The same pieces that make HHT work for me (local-first storage, transparent rules, cheap corrections, survey-shaped exports, an open license) could lower those barriers. In time that might mean choosing exactly which days to share, end-of-day questions for a study, published accuracy benchmarks, and maybe Android or self-hosted versions.</p>
+        <p>None of that exists yet. Today HHT is still a personal diary, and a handful of HHT diaries is a convenience sample, not a representative survey. Keeping data on the phone reduces the privacy risk; it doesn't remove it.</p>
+        <p class="note">What exists and what is only planned: <a href="../vision.html">Vision</a> · <a href="../roadmap.html">Roadmap</a> · <a href="../research.html">Research uses &amp; limitations</a> · <a href="../validation.html">Validation</a>.</p>
       </div>
     </div>
   </section>

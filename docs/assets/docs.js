@@ -15,7 +15,14 @@ const NAV = [
     { href: 'data.html', title: 'Data model & export' },
     { href: 'privacy.html', title: 'Privacy' },
   ] },
+  { group: 'Vision & research', items: [
+    { href: 'vision.html', title: 'Vision' },
+    { href: 'roadmap.html', title: 'Roadmap' },
+    { href: 'research.html', title: 'Research uses & limitations' },
+    { href: 'validation.html', title: 'Validation' },
+  ] },
   { group: 'Reference', items: [
+    { href: 'data-dictionary.html', title: 'Data dictionary' },
     { href: 'api.html', title: 'Developer API' },
     { href: 'contributing.html', title: 'Contributing' },
   ] },
@@ -54,6 +61,7 @@ function buildHeader() {
     <a class="dx-brand" href="index.html"><img src="assets/hht-logo.png" alt="">HHT <span class="tag">docs</span></a>
     <nav>
       <a class="hide-sm" href="installation.html">Install</a>
+      <a class="hide-sm" href="roadmap.html">Roadmap</a>
       <a class="hide-sm" href="api.html">API</a>
       <a class="hide-sm" href="backup/">Project story</a>
       <a class="icon-btn" href="${REPO}" aria-label="GitHub repository">${ICONS.github}</a>
@@ -130,8 +138,10 @@ function buildPager(content) {
 
   const foot = document.createElement('footer');
   foot.className = 'dx-foot';
-  foot.innerHTML = `<span>HHT · Apache 2.0 · local-first travel diary for iOS</span>
-    <a href="${REPO}/edit/main/docs/${currentFile()}">Edit this page on GitHub</a>`;
+  foot.innerHTML = `<span>HHT · Apache 2.0 · from a travel survey of one to travel surveys within reach</span>
+    <span><a href="vision.html">Vision</a> · <a href="roadmap.html">Roadmap</a> ·
+    <a href="https://doi.org/10.5281/zenodo.23307589">Cite</a> ·
+    <a href="${REPO}/edit/main/docs/${currentFile()}">Edit this page on GitHub</a></span>`;
   content.append(foot);
 }
 
