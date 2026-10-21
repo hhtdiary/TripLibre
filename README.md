@@ -59,7 +59,8 @@ The original product brief is in [`design/`](design/personal_travel_tracker_clau
 | Selective export (chosen dates, trips, detail level) | 📋 Planned |
 | Prompted recall and study configuration for research | 📋 Planned |
 | Formal accuracy benchmark | 📋 Planned |
-| Android, multilingual, self-hosted | 🔭 Exploratory |
+| Research edition beside the personal app, sharing the same engine | 🔭 Exploratory |
+| Android, multilingual, self-hosted (incl. for cities with limited capacity) | 🔭 Exploratory |
 
 Screenshots of every screen are in the [UI guide](https://hhtdiary.org/ui-guide.html).
 

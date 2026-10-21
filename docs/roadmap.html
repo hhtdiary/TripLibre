@@ -31,8 +31,25 @@ app today. Apart from the App Store target below, there are no dates: a planned 
 <p>Progress is tracked in <a href="https://github.com/zyang91/HHT-app/issues">GitHub issues</a> and released versions
 are listed in the <a href="https://github.com/zyang91/HHT-app/blob/main/CHANGELOG.md">changelog</a>.</p>
 
+<h2 id="two-editions">Two editions, one engine</h2>
+<p>A private diary and a research instrument pull in different directions. A diary should stay simple and ask nothing
+of its user; a study needs consent screens, fixed settings, questions and a controlled hand-over of data. Rather than
+pile study features onto the personal app, HHT may split into two editions over time:</p>
+<div class="cards">
+  <div class="card"><div class="k">personal edition</div><h3>Personal diary <span class="status available">Available</span></h3><p>Today's app, and the App Store release. For one person keeping their own record: automatic diary, quick corrections, stats, full export. Stays free and needs no account.</p></div>
+  <div class="card"><div class="k">research edition</div><h3>Research support <span class="status exploratory">Exploratory</span></h3><p>For studies run by a researcher, class, agency or city: study configuration, consent, prompted recall, selective hand-over, a researcher toolkit for checking and pooling data, and later Android and local languages.</p></div>
+  <div class="card"><div class="k">shared core</div><h3>Same engine and data <span class="status available">Available</span></h3><p>Both would use HHTCore: the same inference rules, data model and export format, so a fix or a calibration in one edition improves the other, and data from both can be analysed the same way.</p></div>
+</div>
+<p>How the split would happen is not decided: a separate app, a separate build of this repository, or a study mode
+that a researcher's configuration file switches on. That choice depends on App Store rules, how studies want to recruit,
+and what partners need. Until then, the research features below are listed as Planned or Exploratory, and none of them
+are part of the App Store version 1.0.</p>
+
+<h2>Phases</h2>
+
 <div class="phase">
 <h3>Phase 1 · Personal diary, stabilised <span class="status available">Available</span></h3>
+<p class="muted">Track: personal edition and shared core</p>
 <ul>
   <li>Background collection with motion-aware GPS and battery-saving stationary mode. <span class="status available">Available</span></li>
   <li>Deterministic reconstruction of visits, trips, mode segments and named places. <span class="status available">Available</span></li>
@@ -47,6 +64,7 @@ are listed in the <a href="https://github.com/zyang91/HHT-app/blob/main/CHANGELO
 
 <div class="phase">
 <h3>Phase 2 · Public iOS release <span class="status progress">In progress</span></h3>
+<p class="muted">Track: personal edition</p>
 <p>The same personal diary, installable from the App Store instead of being built with Xcode. The target is
 <b>around 10 November 2026</b>. It depends on App Review and may move.</p>
 <ul>
@@ -58,6 +76,7 @@ are listed in the <a href="https://github.com/zyang91/HHT-app/blob/main/CHANGELO
 
 <div class="phase">
 <h3>Phase 3 · Granular, voluntary export <span class="status planned">Planned</span></h3>
+<p class="muted">Track: both. Useful for anyone sharing their own data, and the basis of a study hand-over.</p>
 <p>Today an export covers everything or the last 30 days, and always includes a full database snapshot (see
 <a href="privacy.html#what-an-export-contains">what an export contains</a>). This phase would let a user share less.</p>
 <ul>
@@ -70,16 +89,20 @@ are listed in the <a href="https://github.com/zyang91/HHT-app/blob/main/CHANGELO
 
 <div class="phase">
 <h3>Phase 4 · Research-oriented recall and study configuration <span class="status planned">Planned</span></h3>
+<p class="muted">Track: research edition. Where the two editions would start to diverge.</p>
 <ul>
   <li>Prompted recall: end-of-day questions about trips the app is unsure of (mode, purpose, companions). <span class="status planned">Planned</span></li>
   <li>A study configuration file: which questions to ask, which fields to export, study ID. <span class="status planned">Planned</span></li>
   <li>Built-in consent text and an explicit hand-over step to the researcher. <span class="status planned">Planned</span></li>
   <li>Keeping the engine's original output when a record is first edited, so accuracy can be measured from real use. <span class="status planned">Planned</span></li>
+  <li>A researcher toolkit: checks for incomplete days, pooling several participants' exports, aggregate-only summaries. <span class="status planned">Planned</span></li>
+  <li>Deciding how the research edition is packaged (separate app, separate build, or study mode). <span class="status exploratory">Exploratory</span></li>
 </ul>
 </div>
 
 <div class="phase">
 <h3>Phase 5 · Validation and data standards <span class="status planned">Planned</span></h3>
+<p class="muted">Track: shared core</p>
 <ul>
   <li>A formal, multi-participant accuracy benchmark with published protocol and results. <span class="status planned">Planned</span></li>
   <li>Shareable, reproducible GPS test fixtures (synthetic or consented and de-identified). <span class="status planned">Planned</span></li>
@@ -92,10 +115,12 @@ are listed in the <a href="https://github.com/zyang91/HHT-app/blob/main/CHANGELO
 
 <div class="phase">
 <h3>Phase 6 · Broader infrastructure <span class="status exploratory">Exploratory</span></h3>
+<p class="muted">Track: research edition, with an eye on <a href="vision.html#an-initiative-for-cities-with-limited-capacity">cities and countries with limited capacity</a></p>
 <ul>
-  <li>An Android version. <span class="status exploratory">Exploratory</span></li>
+  <li>An Android version, which most of those places would need first. <span class="status exploratory">Exploratory</span></li>
   <li>Offline-first data hand-over for places with poor connectivity. <span class="status exploratory">Exploratory</span></li>
-  <li>A multilingual interface. <span class="status exploratory">Exploratory</span></li>
+  <li>A multilingual interface, with locally relevant modes and place types (shared taxis, minibuses, motorcycle taxis). <span class="status exploratory">Exploratory</span></li>
+  <li>Calibrating inference with local partners on local travel conditions. <span class="status exploratory">Exploratory</span></li>
   <li>Optional, self-hosted collection for studies that run their own server. <span class="status exploratory">Exploratory</span></li>
 </ul>
 <p class="muted">Any feature that sends data off the device would be opt-in, documented on the Privacy page, and
