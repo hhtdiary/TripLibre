@@ -29,6 +29,20 @@ class HHTUITestCase: XCTestCase {
         XCTAssertTrue(tripRows.firstMatch.waitForExistence(timeout: 60), "demo inference produced no trips")
     }
 
+    /// Screens show their title at once but fill in only after the launch-time inference run turns the demo points
+    /// into trips, visits and places. Wait for something that only exists afterwards, so audits see populated screens.
+    func waitForSeededContent(_ element: XCUIElement, _ what: String, file: StaticString = #filePath, line: UInt = #line) {
+        XCTAssertTrue(element.waitForExistence(timeout: 60), "\(what) never appeared; demo inference unfinished?", file: file, line: line)
+    }
+
+    func text(containing s: String) -> XCUIElement {
+        app.staticTexts.matching(NSPredicate(format: "label CONTAINS %@", s)).firstMatch
+    }
+
+    func element(labelContaining s: String) -> XCUIElement {
+        app.descendants(matching: .any).matching(NSPredicate(format: "label CONTAINS %@", s)).firstMatch
+    }
+
     var tripRows: XCUIElementQuery { app.descendants(matching: .any).matching(identifier: "tripRow") }
     var visitRows: XCUIElementQuery { app.descendants(matching: .any).matching(identifier: "visitRow") }
 

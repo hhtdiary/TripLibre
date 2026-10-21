@@ -7,6 +7,7 @@ import XCTest
 final class AccessibilityAuditTests: HHTUITestCase {
     func testToday() throws {
         waitForNavigationTitle("Today")
+        waitForSeededContent(visitRows.firstMatch, "today's visit")
         try audit("Today")
     }
 
@@ -34,24 +35,28 @@ final class AccessibilityAuditTests: HHTUITestCase {
     func testTimeline() throws {
         openTab("Timeline")
         waitForNavigationTitle("Timeline")
+        waitForSeededContent(text(containing: " trips · "), "day rows")
         try audit("Timeline")
     }
 
     func testMap() throws {
         openTab("Map")
         waitForNavigationTitle("Map")
+        waitForSeededContent(element(labelContaining: " visits"), "place markers")
         try audit("Map")
     }
 
     func testStats() throws {
         openTab("Stats")
         waitForNavigationTitle("Stats")
+        waitForSeededContent(app.staticTexts["Walk"], "mode share rows")
         try audit("Stats")
     }
 
     func testPlaces() throws {
         openTab("Places")
         waitForNavigationTitle("Places")
+        waitForSeededContent(text(containing: " visits · "), "place rows")
         try audit("Places")
     }
 
