@@ -1,0 +1,51 @@
+# SwiftLint (`make lint`, CI). Issue #63.
+# Opt-in list of correctness/accessibility rules rather than the default style set, which mostly flags naming and
+# line length in this codebase. Violations that predate this file are recorded in .swiftlint-baseline.json and
+# don't fail CI; anything new does (CI runs with --strict). After fixing old ones, refresh the baseline with
+# `make swiftlint-baseline`.
+included:
+  - App
+  - Widgets
+  - Packages/HHTCore/Sources
+  - Packages/HHTCore/Tests
+  - Packages/HHTCore/Package.swift
+excluded:
+  - "**/.build"
+
+only_rules:
+  # Crashes waiting to happen
+  - force_cast
+  - force_try
+  - force_unwrapping
+  - unhandled_throwing_task
+  - self_in_property_initialization
+  # Retain cycles / leaks
+  - weak_delegate
+  - class_delegate_protocol
+  - unowned_variable_capture
+  - discarded_notification_center_observer
+  # Likely logic slips
+  - duplicate_conditions
+  - duplicate_enum_cases
+  - duplicated_key_in_dictionary_literal
+  - identical_operands
+  - unused_closure_parameter
+  - unused_enumerated
+  - unused_optional_binding
+  - unused_setter_value
+  - duplicate_imports
+  - lower_acl_than_parent
+  - fatal_error_message
+  - empty_count
+  - contains_over_first_not_nil
+  - array_init
+  - legacy_random
+  - orphaned_doc_comment
+  - private_swiftui_state
+  # VoiceOver
+  - accessibility_label_for_image
+  - accessibility_trait_for_button
+  # Keep `swiftlint:disable` comments honest
+  - blanket_disable_command
+  - invalid_swiftlint_command
+  - superfluous_disable_command

@@ -11,7 +11,7 @@ PY          := analysis/.venv/bin/python
 CAL_DIR     := $(BUILD_DIR)/calibrate-smoke
 CALIBRATE   := Packages/HHTCore/.build/release/hht-calibrate
 
-.PHONY: help test project build sim phone analysis-env export-check calibrate-tool calibrate-smoke lint a11y ci clean
+.PHONY: help test project build sim phone analysis-env export-check calibrate-tool calibrate-smoke lint swift-lint swiftlint-baseline a11y ci clean
 
 help:            ## list targets
 	@grep -E '^[a-z0-9-]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -61,9 +61,17 @@ calibrate-smoke: calibrate-tool  ## synthetic end-to-end calibration: fixture â†
 node_modules/.package-lock.json: package-lock.json
 	npm ci
 
-lint: node_modules/.package-lock.json   ## docs JS/CSS/HTML (incl. accessibility rules), Markdown, Python (needs node + ruff)
+lint: node_modules/.package-lock.json swift-lint   ## docs JS/CSS/HTML (incl. accessibility rules), Markdown, Python, Swift (needs node, ruff, swiftlint, swiftformat)
 	npm run lint
 	ruff check
+
+# Same versions CI pins (.github/workflows/ci.yml). `brew install swiftlint swiftformat` gets you close enough.
+swift-lint:      ## SwiftLint (new violations only) + SwiftFormat check; CI pins SwiftLint 0.65.1, SwiftFormat 0.63.1
+	swiftlint lint --strict --quiet --baseline .swiftlint-baseline.json
+	swiftformat --lint .
+
+swiftlint-baseline:  ## re-record existing SwiftLint violations after fixing some (commit the result)
+	swiftlint lint --quiet --write-baseline .swiftlint-baseline.json || true
 
 a11y: node_modules/.package-lock.json   ## axe-core WCAG 2.1 AA check of every docs page, light + dark (needs node + Chromium)
 	npx playwright install chromium
