@@ -11,7 +11,7 @@ PY          := analysis/.venv/bin/python
 CAL_DIR     := $(BUILD_DIR)/calibrate-smoke
 CALIBRATE   := Packages/HHTCore/.build/release/hht-calibrate
 
-.PHONY: help test project build sim phone analysis-env export-check calibrate-tool calibrate-smoke lint swift-lint swiftlint-baseline a11y ci clean
+.PHONY: help test project build sim phone analysis-env export-check calibrate-tool calibrate-smoke lint swift-lint swiftlint-baseline a11y ui-test ci clean
 
 help:            ## list targets
 	@grep -E '^[a-z0-9-]+:.*##' $(MAKEFILE_LIST) | awk -F':.*## ' '{printf "  make %-14s %s\n", $$1, $$2}'
@@ -34,6 +34,10 @@ sim: build       ## install + launch in the simulator with demo data (SIM_NAME="
 
 phone: project   ## build, sign and install on the USB-connected iPhone (also renews the 7-day signature)
 	./scripts/install-phone.sh
+
+ui-test: project ## XCUITest flows + accessibility audits in the simulator (SIM_NAME="iPhone 17"; ONLY=HHTUITests/CoreFlowTests)
+	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination 'platform=iOS Simulator,name=$(SIM_NAME)' \
+		-derivedDataPath $(BUILD_DIR) CODE_SIGNING_ALLOWED=NO $(if $(ONLY),-only-testing:$(ONLY)) test
 
 analysis-env:    ## create analysis/.venv with pandas etc.
 	python3 -m venv analysis/.venv

@@ -104,6 +104,7 @@ struct DayView: View {
                         case .visit(let v, let p):
                             VisitRow(visit: v, place: p, day: day, stamps: data.stampsByVisit[v.id] ?? []).contentShape(Rectangle())
                                 .onTapGesture { selectedVisit = IDBox(id: v.id) }
+                                .detailRowAccessibility("visitRow", hint: "Opens the visit to correct it") { selectedVisit = IDBox(id: v.id) }
                                 .toonRow(top: 5, bottom: 5)
                         case .trip(let t):
                             TripRow(trip: t, quickModes: quickModes, day: day) { mode in
@@ -111,6 +112,7 @@ struct DayView: View {
                             }
                             .contentShape(Rectangle())
                             .onTapGesture { selectedTrip = IDBox(id: t.id) }
+                            .detailRowAccessibility("tripRow", hint: "Opens the trip to correct it") { selectedTrip = IDBox(id: t.id) }
                             .toonRow(top: 3, bottom: 3)
                         case .stamp(let s):
                             StampRow(stamp: s)
@@ -135,12 +137,13 @@ struct DayView: View {
             if !fixedDay {
                 ToolbarItem(placement: .navigation) {
                     Button { showSettings = true } label: { Image(systemName: "gearshape") }
+                        .accessibilityLabel("Settings")
                 }
             }
             ToolbarItemGroup(placement: .primaryAction) {
-                Button { shift(-1) } label: { Image(systemName: "chevron.left") }
-                Button { showDatePicker = true } label: { Image(systemName: "calendar") }
-                Button { shift(1) } label: { Image(systemName: "chevron.right") }.disabled(isToday)
+                Button { shift(-1) } label: { Image(systemName: "chevron.left") }.accessibilityLabel("Previous day")
+                Button { showDatePicker = true } label: { Image(systemName: "calendar") }.accessibilityLabel("Choose day")
+                Button { shift(1) } label: { Image(systemName: "chevron.right") }.disabled(isToday).accessibilityLabel("Next day")
             }
         }
         .refreshable { await model.runInference() }
@@ -380,6 +383,18 @@ struct TripRow: View {
     private var uniqueModes: [TravelMode] { trip.displayModes }
 
     private var modeText: String { trip.displayModes.map(\.label).joined(separator: " + ") }
+}
+
+extension View {
+    /// Diary rows open their detail sheet on tap. VoiceOver reads the row as one button (its own buttons, like the
+    /// quick mode picks, become actions on it) and activating it opens the same sheet.
+    func detailRowAccessibility(_ identifier: String, hint: String, open: @escaping () -> Void) -> some View {
+        accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityHint(hint)
+            .accessibilityAction { open() }
+            .accessibilityIdentifier(identifier)
+    }
 }
 
 /// Vertical line used for the dashed path between diary stickers.
