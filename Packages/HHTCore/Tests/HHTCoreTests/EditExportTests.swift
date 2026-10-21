@@ -550,4 +550,3 @@ struct GeoAnalyticsTests {
         #expect(t.segments.allSatisfy { $0.routePolyline != nil })
     }
 }
-

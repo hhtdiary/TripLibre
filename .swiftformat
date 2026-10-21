@@ -1,0 +1,6 @@
+# SwiftFormat in check-only mode (`make lint`, CI). Issue #63.
+# The codebase is written densely on purpose (one-line bodies, aligned columns), so the default rule set would
+# reformat every file. Only whitespace hygiene is enforced; widen `--rules` deliberately, one rule at a time.
+--swiftversion 6.0
+--rules trailingSpace,consecutiveBlankLines,linebreakAtEndOfFile,blankLinesAtEndOfScope,duplicateImports,semicolons,spaceAroundComments,spaceInsideComments,leadingDelimiters,todos
+--exclude **/.build,.build-xcode,.claude,node_modules

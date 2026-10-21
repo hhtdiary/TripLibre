@@ -116,7 +116,8 @@ make help          # list everything
 make test          # core test suite (94 tests incl. the brief's 14 scenarios)
 make sim           # build + run in the simulator with demo data
 make phone         # build, sign and install on the cable-connected iPhone (renews the 7-day signature)
-make lint          # docs JS/CSS/HTML (incl. accessibility rules), Markdown, Python; needs node + ruff
+make lint          # docs JS/CSS/HTML (incl. accessibility rules), Markdown, Python, Swift; needs node, ruff, swiftlint, swiftformat
+make swift-lint    # just SwiftLint (new violations vs. .swiftlint-baseline.json) + SwiftFormat check
 make a11y          # axe-core WCAG 2.1 AA check of the rendered docs site, light + dark theme
 make ci            # what GitHub Actions runs: lint + tests + app build + export→Python contract check
 ```
@@ -124,6 +125,9 @@ make ci            # what GitHub Actions runs: lint + tests + app build + export
 CI (`.github/workflows/ci.yml`) runs on every push/PR on a macOS runner: Swift tests, an end-to-end check that the
 Python loader reads the app's real export (CSV and SQLite agree), a simulator build, a device build, and a check that
 `HHT.xcodeproj` matches `project.yml`.
+An Ubuntu job runs the linters, including SwiftLint (`.swiftlint.yml`: correctness and VoiceOver rules only; existing
+violations are recorded in `.swiftlint-baseline.json`, so only new ones fail) and SwiftFormat in check-only mode
+(`.swiftformat`: whitespace hygiene only). Install locally with `brew install swiftlint swiftformat`.
 
 Why no Docker: iOS apps can only be built and signed on macOS with Xcode, which doesn't run in Linux containers.
 The reproducible "package" here is `project.yml` (XcodeGen) + `Makefile` + CI on macOS runners.

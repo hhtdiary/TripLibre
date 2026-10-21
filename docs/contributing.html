@@ -24,10 +24,14 @@ interesting logic lives in a package you can test without a phone.</p>
 <h2>Development setup</h2>
 <pre data-lang="bash"><code>git clone https://github.com/zyang91/HHT-app.git
 cd HHT-app
-brew install xcodegen
+brew install xcodegen swiftlint swiftformat
 make test     # core tests, no simulator needed
 make sim      # run the app with demo data
-make lint     # docs JS/CSS/HTML + accessibility, Markdown, Python (needs node + ruff)</code></pre>
+make lint     # docs JS/CSS/HTML + accessibility, Markdown, Python, Swift (needs node + ruff)</code></pre>
+<p>Changing Swift? <code>make swift-lint</code> runs the same SwiftLint and SwiftFormat checks as CI. SwiftLint only enforces
+correctness and VoiceOver rules (<code>.swiftlint.yml</code>); violations that already existed are listed in
+<code>.swiftlint-baseline.json</code>, so only new ones fail. If you fix old ones, run <code>make swiftlint-baseline</code> and commit
+the updated file. SwiftFormat checks whitespace only (<code>.swiftformat</code>) and never rewrites files in CI.</p>
 <p>Changing the docs site? Run <code>npm run lint</code> (or <code>npm run lint:fix</code>) before opening a PR. The HTML check includes
 <code>html-validate</code>'s accessibility rules: images need <code>alt</code>, buttons need a <code>type</code> and an accessible name, and
 <code>aria-label</code> only goes on elements that can carry one. <code>npm run a11y</code> then loads every page in Chromium, in light and

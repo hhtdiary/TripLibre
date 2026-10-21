@@ -84,7 +84,7 @@ public struct MobilityMetrics: Equatable, Sendable {
     public var topODPairs: [ODPair] = []
     public var repeatODShare: Double?         // share of trips whose OD pair occurred earlier in the range
     public var radiusOfGyrationDwell: Double? // m, dwell-weighted over visits
-    public var radiusOfGyrationVisits: Double?// m, visit-weighted
+    public var radiusOfGyrationVisits: Double? // m, visit-weighted
     public var activitySpaceHullArea: Double? // m², convex hull of visited places
     public var activitySpaceHull: [Coordinate] = []
     public var destinationEntropy: Double?    // bits, Shannon over visit counts per place

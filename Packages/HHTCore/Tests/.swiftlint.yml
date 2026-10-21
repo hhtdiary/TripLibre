@@ -1,0 +1,4 @@
+# Tests may force-unwrap: a crash there is a test failure, which is the point.
+disabled_rules:
+  - force_unwrapping
+  - force_try
