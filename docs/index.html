@@ -4,12 +4,12 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>HHT Documentation</title>
-<meta name="description" content="Documentation for HHT, a free, open-source, local-first iOS app that runs a continuous household travel survey for one person.">
+<meta name="description" content="Documentation for HHT, a free, open-source, local-first iOS travel diary that rebuilds each day into visits, trips and modes, and keeps the data on the phone.">
 <link rel="icon" href="assets/hht-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css?v=8">
+<link rel="stylesheet" href="assets/docs.css?v=9">
 <script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <script src="assets/docs.js" defer></script>
 </head>
@@ -19,13 +19,14 @@
 <div class="hero">
   <div>
     <p class="eyebrow">Documentation</p>
-    <h1>HHT: a travel survey for one person</h1>
+    <h1>HHT: a travel survey of one</h1>
   </div>
   <img class="logo" src="assets/hht-logo.png" alt="HHT logo">
 </div>
 <p class="lede">HHT is a free, open-source iOS app that records where you go, rebuilds each day into
 visits, trips and travel modes, and keeps all of it on your phone. Think of it as a household travel survey
-that fills itself in, with a sample size of one.</p>
+that fills itself in, with a sample size of one. The longer-term aim: <a href="vision.html">travel surveys within reach</a>
+of anyone who needs one.</p>
 
 <div class="actions">
   <a class="btn primary" href="installation.html">Install on your iPhone →</a>
@@ -39,26 +40,7 @@ that fills itself in, with a sample size of one.</p>
   <figure class="phone"><img src="assets/screens/stats.jpg" alt="The Stats screen: trips per day, distance, travel time and mode share bars" loading="lazy"><figcaption>Stats</figcaption></figure>
 </div>
 
-<h2>Why this app exists</h2>
-<p>Location history is one of the most revealing datasets a person produces. Most apps that collect it
-are run by companies or individual developers who either charge a subscription, upload your movements to their
-servers, or both. Once the data is on someone else's server, you are trusting their business model,
-their security, and whatever they decide to do with it later.</p>
-<p>HHT takes the opposite position:</p>
-
-<div class="pillars">
-  <div><b>Free and open source</b><span>Apache 2.0. No subscription, no paid tier, no ads. Read every line that touches your data.</span></div>
-  <div><b>Nothing goes to a cloud</b><span>No account, no server, no analytics SDK, no sync. The database is one SQLite file in the app's sandbox.</span></div>
-  <div><b>Built for one person</b><span>A personal tool, not a platform. You install it yourself from source and you own the output.</span></div>
-  <div><b>Research-grade output</b><span>Trips follow household-travel-survey (HHTS) conventions and export to CSV, JSON, GeoJSON and SQLite.</span></div>
-</div>
-
-<p>The design comes from transportation research. A household travel survey asks people to keep a one- or two-day
-diary of every trip: where they started, where they went, when, by what mode, and why. Those diaries are expensive,
-short, and depend on memory. HHT keeps the same diary continuously, from GPS and motion sensors, and lets you correct
-it in a tap or two.</p>
-
-<h2>What it does</h2>
+<h2>What it does today</h2>
 <div class="cards toon-grid two">
   <div class="card"><div class="k">collect</div><h3>Background recording</h3><p>GPS runs only while you are moving. When you stop, it switches to a geofence to save battery.</p></div>
   <div class="card"><div class="k">reconstruct</div><h3>Visits, trips and modes</h3><p>A deterministic engine turns raw fixes into stays, trips, mode segments and named places.</p></div>
@@ -77,16 +59,48 @@ friendly map-pin mascot that sums up your day.</p>
 </div>
 <p><a href="ui-guide.html">Tour every screen in the UI guide →</a></p>
 
-<h2>Who it's for</h2>
+<h2>Why it matters</h2>
+<p>Location history is one of the most revealing datasets a person produces. Most apps that collect it are run by
+companies or individual developers who either charge a subscription, upload your movements to their servers, or both.
+Once the data is on someone else's server, you are trusting their business model, their security, and whatever they
+decide to do with it later.</p>
+<p>Researchers face a similar problem from the other side. A household travel survey asks people to keep a one- or
+two-day diary of every trip: where they started, where they went, when, by what mode, and why. Those diaries are
+expensive, short, and depend on memory, and smartphone survey platforms are usually commercial. HHT keeps the same
+diary continuously, from GPS and motion sensors, lets you correct it in a tap or two, and publishes every line of code
+that does it.</p>
+
+<div class="pillars">
+  <div><b>Free and open source</b><span>Apache 2.0. No subscription, no paid tier, no ads. Read every line that touches your data.</span></div>
+  <div><b>Nothing goes to a cloud</b><span>No account, no server, no analytics SDK, no sync. The database is one SQLite file in the app's sandbox. The few network requests are listed on the Privacy page.</span></div>
+  <div><b>You stay in control</b><span>You decide what to correct, what to export, who gets it, and when to erase.</span></div>
+  <div><b>Survey-shaped output</b><span>Trips follow household-travel-survey (HHTS) conventions and export to CSV, JSON, GeoJSON and SQLite. Accuracy has been measured, but only on a small sample so far.</span></div>
+</div>
+
+<h2>Who it serves</h2>
 <ul>
   <li><b>Anyone who wants a private travel diary</b> without handing their location history to a company.</li>
-  <li><b>Transportation and urban researchers</b> who want clean, HHTS-style data about their own travel, or a reference
-    implementation of trip reconstruction.</li>
+  <li><b>Transportation and urban researchers</b> who want clean, HHTS-style data about their own travel, a small pilot,
+    or a reference implementation of trip reconstruction. Read <a href="research.html">Research uses &amp; limitations</a>
+    first: HHT data is not a representative survey.</li>
+  <li><b>Teachers and students</b> learning how trip diaries are built, using the code and synthetic demo data.</li>
   <li><b>iOS and Swift developers</b> curious about long-running background location, or wanting to fork the app and extend it.</li>
 </ul>
 
+<h2>What is planned</h2>
+<p>Everything above works today. The ideas below don't exist yet, and the <a href="roadmap.html">roadmap</a> labels each
+one as in progress, planned or exploratory.</p>
+<ul>
+  <li><span class="status progress">In progress</span> An App Store release, so installing no longer needs Xcode (target: around November 2026).</li>
+  <li><span class="status planned">Planned</span> Choosing exactly which dates, trips and level of detail to export.</li>
+  <li><span class="status planned">Planned</span> Prompted recall and study configuration for small research projects.</li>
+  <li><span class="status planned">Planned</span> A formal accuracy benchmark and reproducible test fixtures.</li>
+  <li><span class="status exploratory">Exploratory</span> Android, multilingual and self-hosted versions.</li>
+</ul>
+<p>The reasoning behind all of this is on the <a href="vision.html">Vision</a> page.</p>
+
 <div class="callout note"><div class="ic">i</div>
-<p>HHT is not on the App Store. You build it from source with Xcode and install it on your own phone. With a free Apple ID
+<p>HHT is not on the App Store yet. You build it from source with Xcode and install it on your own phone. With a free Apple ID
 the install lasts 7 days and you renew it with one command, and your data is kept between installs. See <a href="installation.html">Installation</a>.</p></div>
 
 <h2>Where to go next</h2>
@@ -117,6 +131,9 @@ the install lasts 7 days and you renew it with one command, and your data is kep
     <span class="body"><b>Developer API <span class="toon-badge" style="background:#ff6b4a">destination</span></b><small>HHTCore (Swift) and the Python analysis helpers.</small></span>
     <span class="go">→</span></a></li>
 </ol>
+
+<p><b>Planning a study or evaluating the data?</b> Start with <a href="research.html">Research uses &amp; limitations</a>,
+then <a href="validation.html">Validation</a> and the <a href="data-dictionary.html">Data dictionary</a>.</p>
 
 </article></main>
 </body>
