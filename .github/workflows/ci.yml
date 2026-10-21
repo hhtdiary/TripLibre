@@ -41,8 +41,11 @@ jobs:
           9e10090e0213378c68cedb42adc2c6461916a9c8e457cf452b5585b84096c333  swiftformat_linux.zip
           SUMS
           unzip -q swiftlint_linux_amd64.zip swiftlint-static && unzip -q swiftformat_linux.zip
-          install -m 755 swiftlint-static /usr/local/bin/swiftlint
-          install -m 755 swiftformat_linux /usr/local/bin/swiftformat
+          # A runner-owned bin dir, so this doesn't depend on /usr/local/bin being writable.
+          mkdir -p bin
+          install -m 755 swiftlint-static bin/swiftlint
+          install -m 755 swiftformat_linux bin/swiftformat
+          echo "$RUNNER_TEMP/bin" >> "$GITHUB_PATH"
       - name: SwiftLint (new violations only; see .swiftlint-baseline.json)
         run: swiftlint lint --strict --quiet --baseline .swiftlint-baseline.json --reporter github-actions-logging
       - name: SwiftFormat (check only; see .swiftformat)
