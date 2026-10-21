@@ -153,7 +153,9 @@ struct StatsView: View {
                         Image(systemName: "chevron.down").font(.system(size: 10, weight: .black))
                     }
                     .font(.toon(13, .heavy)).foregroundStyle(Toon.muted)
+                    .frame(minHeight: 44).contentShape(Rectangle())
                 }
+                .accessibilityLabel("Share basis: \(["by trips", "by distance", "by time"][shareBasis])")
             }
             VStack(alignment: .leading, spacing: 12) {
                 if rows.isEmpty {

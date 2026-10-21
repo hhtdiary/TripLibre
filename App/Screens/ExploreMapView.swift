@@ -104,6 +104,8 @@ struct ExploreMapView: View {
                             Circle().fill(p.toonColor == Toon.paper ? Toon.accent : p.toonColor)
                                 .frame(width: CGFloat(10 + min(24, sqrt(Double(n)) * 3)), height: CGFloat(10 + min(24, sqrt(Double(n)) * 3)))
                                 .overlay(Circle().strokeBorder(Toon.ink, lineWidth: 2))
+                                .frame(minWidth: 44, minHeight: 44).contentShape(Circle())   // tappable size, not drawn
+                                .accessibilityLabel("\(p.isNamed ? p.displayName : "Unnamed place"), \(n) \(n == 1 ? "visit" : "visits")")
                         }
                     }
                 }
@@ -150,6 +152,7 @@ struct ExploreMapView: View {
                     }
                     .pickerStyle(.inline)
                 } label: { Image(systemName: "square.3.layers.3d") }
+                .accessibilityLabel("Map layers")
             }
         }
         .task(id: "\(period.id)-\(model.revision)") { load() }

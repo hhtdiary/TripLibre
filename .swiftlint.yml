@@ -6,6 +6,7 @@
 included:
   - App
   - Widgets
+  - UITests
   - Packages/HHTCore/Sources
   - Packages/HHTCore/Tests
   - Packages/HHTCore/Package.swift

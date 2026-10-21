@@ -34,8 +34,24 @@ final class AppModel: ObservableObject {
     static var exportsDirectory: URL { documentsDirectory.appendingPathComponent("Exports", isDirectory: true) }
     static var backupsDirectory: URL { documentsDirectory.appendingPathComponent("Backups", isDirectory: true) }
 
+    /// Launch argument `-hhtUITest YES` (simulator builds only, issue #64): UI tests get a fresh throwaway database
+    /// seeded with demo data, and no location collection or backups touch the real one.
+    static var isUITest: Bool {
+        #if targetEnvironment(simulator)
+        UserDefaults.standard.bool(forKey: "hhtUITest")
+        #else
+        false
+        #endif
+    }
+
+    private static func freshUITestDatabase() -> URL {
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("hht-uitest.sqlite")
+        for suffix in ["", "-wal", "-shm"] { try? FileManager.default.removeItem(atPath: url.path + suffix) }
+        return url
+    }
+
     init() {
-        let path = Self.supportDirectory.appendingPathComponent("travel.sqlite")
+        let path = Self.isUITest ? Self.freshUITestDatabase() : Self.supportDirectory.appendingPathComponent("travel.sqlite")
         do {
             store = try TravelStore(path: path.path)
         } catch {
@@ -62,10 +78,10 @@ final class AppModel: ObservableObject {
     func launch() {
         guard !launched else { return }
         launched = true
-        collector.resumeIfEnabled()
+        if !Self.isUITest { collector.resumeIfEnabled() }
         #if targetEnvironment(simulator)
         // launch argument `-hhtDemo YES` seeds demo data (simulator builds only)
-        if UserDefaults.standard.bool(forKey: "hhtDemo") && store.pointCount() == 0 {
+        if UserDefaults.standard.bool(forKey: "hhtDemo") || Self.isUITest, store.pointCount() == 0 {
             UserDefaults.standard.set(true, forKey: "onboarded")
             try? DemoData.generate(into: store)
         }
@@ -215,6 +231,7 @@ final class AppModel: ObservableObject {
 
     /// Daily SQLite snapshot into Documents/Backups (keeps the last 7). Never deletes anything else.
     func autoBackupIfDue() {
+        guard !Self.isUITest else { return }
         let key = "lastAutoBackup"
         let last = UserDefaults.standard.object(forKey: key) as? Date ?? .distantPast
         guard Date().timeIntervalSince(last) > 86_400, store.pointCount() > 0 else { return }

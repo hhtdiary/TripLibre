@@ -25,6 +25,8 @@ targets:
     dependencies:
       - package: HHTCore
       - target: HHTWidgets
+    scheme:
+      testTargets: [HHTUITests]
     entitlements:
       path: App/Support/HHT.entitlements
       properties:
@@ -57,6 +59,19 @@ targets:
         CFBundleURLTypes:
           - CFBundleURLName: com.zyang91.hht
             CFBundleURLSchemes: [hht]
+  # XCUITest flows + accessibility audits (issue #64). `make ui-test`; see docs/accessibility-testing.md.
+  HHTUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: UITests
+    dependencies:
+      - target: HHT
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.zyang91.hht.uitests
+        TARGETED_DEVICE_FAMILY: "1"
+        GENERATE_INFOPLIST_FILE: YES
   # Read-only Home Screen widgets (issue #47). They read the snapshot the app writes into the App Group.
   HHTWidgets:
     type: app-extension

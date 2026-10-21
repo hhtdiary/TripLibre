@@ -70,6 +70,7 @@ extension EnvironmentValues {
 /// Floating sticker tab bar: the selected tab grows into a labelled pill.
 struct ToonTabBar: View {
     @Binding var selection: Int
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Bar height + shadow + breathing room above it.
     static let reservedHeight: CGFloat = 80
@@ -87,7 +88,7 @@ struct ToonTabBar: View {
             ForEach(items, id: \.tag) { item in
                 let on = selection == item.tag
                 Button {
-                    withAnimation(.spring(duration: 0.3, bounce: 0.3)) { selection = item.tag }
+                    withAnimation(reduceMotion ? nil : .spring(duration: 0.3, bounce: 0.3)) { selection = item.tag }
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: item.symbol).font(.system(size: 18, weight: .bold))
@@ -106,6 +107,7 @@ struct ToonTabBar: View {
                 .buttonStyle(.plain)
                 .accessibilityLabel(item.title)
                 .accessibilityAddTraits(on ? .isSelected : [])
+                .accessibilityIdentifier("tab-\(item.title)")
                 if item.tag != items.last?.tag { Spacer(minLength: 0) }
             }
         }

@@ -12,7 +12,7 @@ enum Toon {
     static let paper = Color.white
     static let cream = Color(hex: 0xFFF8E6)
     static let accent = Color(hex: 0xFF6B4A)
-    static let accentDeep = Color(hex: 0xD9452A)
+    static let accentDeep = Color(hex: 0xC73D22)   // ≥ 4.5:1 on white/cream: it tints toolbar buttons and links
     static let sun = Color(hex: 0xFFC93C)
     static let lime = Color(hex: 0x8BDB5E)
     static let mint = Color(hex: 0x5FD3B0)
@@ -160,7 +160,7 @@ struct ToonButtonStyle: ButtonStyle {
         configuration.label
             .font(.toon(fontSize))
             .foregroundStyle(text)
-            .lineLimit(1)
+            .lineLimit(1).minimumScaleFactor(0.8)
             .padding(.horizontal, height * 0.32)
             .frame(minHeight: height)
             .modifier(ToonCard(fill: fill, radius: height / 2, shadow: pressed ? 0 : shadow))
@@ -234,6 +234,7 @@ struct Mascot: View {
     var color: Color = Toon.accent
     var bob = true
     @State private var up = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     var body: some View {
         Canvas { ctx, canvas in
@@ -279,7 +280,7 @@ struct Mascot: View {
         .frame(width: size, height: size * 1.2)
         .offset(y: up ? -size * 0.04 : 0)
         .onAppear {
-            guard bob else { return }
+            guard bob, !reduceMotion else { return }
             withAnimation(.easeInOut(duration: 1.1).repeatForever(autoreverses: true)) { up = true }
         }
         .accessibilityHidden(true)

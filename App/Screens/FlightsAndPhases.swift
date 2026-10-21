@@ -51,7 +51,7 @@ struct FlightsView: View {
         }
         .toonBackground()
         .navigationTitle("Flights")
-        .toolbar { ToolbarItem(placement: .primaryAction) { Button { adding = true } label: { Image(systemName: "plus") } } }
+        .toolbar { ToolbarItem(placement: .primaryAction) { Button { adding = true } label: { Image(systemName: "plus") }.accessibilityLabel("Add flight") } }
         .sheet(isPresented: $adding) { FlightEditor(flight: nil).environmentObject(model) }
         .sheet(item: $editing) { f in FlightEditor(flight: f).environmentObject(model) }
         .task(id: model.revision) { flights = (try? model.store.flights()) ?? [] }
@@ -151,6 +151,7 @@ struct LifePhasesView: View {
         .toolbar {
             ToolbarItem(placement: .primaryAction) {
                 Button { editing = LifePhase(name: "", startDate: Fmt.ymd(Date())) } label: { Image(systemName: "plus") }
+                    .accessibilityLabel("Add life phase")
             }
         }
         .sheet(item: $editing) { p in PhaseEditor(phase: p).environmentObject(model) }
