@@ -9,18 +9,45 @@ struct RootView: View {
     @AppStorage("onboarded") private var onboarded = false
     @State private var tab = UserDefaults.standard.integer(forKey: "hhtTab")
     @State private var keyboardUp = false
+    /// The agent's conversation lives for the session once opened, so switching tabs doesn't wipe it.
+    @State private var agentOpened = false
+    /// The agent is opt-in (Settings › Experimental); while off, its tab doesn't exist.
+    @AppStorage("agentEnabled") private var agentEnabled = false
+    /// The last system tab, kept on screen under the agent.
+    @State private var lastTab = 0
+
+    /// iPhone tab bars show at most five tabs and move the rest into a "More" list, so the agent (tag 5)
+    /// sits over the TabView instead of inside it.
+    private static let agentTag = 5
 
     var body: some View {
-        TabView(selection: $tab) {
+        TabView(selection: Binding(get: { tab == Self.agentTag ? lastTab : tab }, set: { tab = $0 })) {
             NavigationStack { DayView() }.tabBarSpace(!keyboardUp).tag(0)
             NavigationStack { HistoryView() }.tabBarSpace(!keyboardUp).tag(1)
             NavigationStack { ExploreMapView() }.tabBarSpace(!keyboardUp).tag(2)
             NavigationStack { StatsView() }.tabBarSpace(!keyboardUp).tag(3)
             NavigationStack { PlacesView() }.tabBarSpace(!keyboardUp).tag(4)
         }
+        .overlay {
+            if agentEnabled && (agentOpened || tab == Self.agentTag) {
+                let on = tab == Self.agentTag
+                NavigationStack { AgentView() }.tabBarSpace(!keyboardUp)
+                    .opacity(on ? 1 : 0)
+                    .allowsHitTesting(on)
+                    .accessibilityHidden(!on)
+                    .onAppear { agentOpened = true }
+            }
+        }
+        .onChange(of: tab) { old, _ in if old != Self.agentTag { lastTab = old } }
+        .onChange(of: agentEnabled, initial: true) { _, on in
+            if !on {
+                agentOpened = false
+                if tab == Self.agentTag { tab = lastTab }
+            }
+        }
         .overlay(alignment: .bottom) {
             // the floating bar would otherwise ride up on top of the keyboard
-            if !keyboardUp { ToonTabBar(selection: $tab) }
+            if !keyboardUp { ToonTabBar(selection: $tab, showAgent: agentEnabled) }
         }
         #if canImport(UIKit)
         .onReceive(NotificationCenter.default.publisher(for: UIResponder.keyboardWillShowNotification)) { _ in keyboardUp = true }
@@ -70,13 +97,17 @@ extension EnvironmentValues {
 /// Floating sticker tab bar: the selected tab grows into a labelled pill.
 struct ToonTabBar: View {
     @Binding var selection: Int
+    var showAgent = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     /// Bar height + shadow + breathing room above it.
     static let reservedHeight: CGFloat = 80
 
-    private let items: [(tag: Int, title: String, symbol: String)] = [
+    private var items: [(tag: Int, title: String, symbol: String)] { Self.allItems.filter { showAgent || $0.tag != 5 } }
+
+    private static let allItems: [(tag: Int, title: String, symbol: String)] = [
         (0, "Today", "calendar.day.timeline.left"),
+        (5, "Agent", "bubble.left.and.text.bubble.right"),
         (1, "Timeline", "list.bullet.below.rectangle"),
         (2, "Map", "map"),
         (3, "Stats", "chart.bar.xaxis"),

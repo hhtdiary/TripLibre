@@ -33,6 +33,7 @@
 		A84AA621B7A18071537A041C /* HHTWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FD10D5E29E78AF295BA325C7 /* HHTWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A8ECBAC83B3027AA138D6365 /* CoreFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F723BF25119810CD3AE5ADD /* CoreFlowTests.swift */; };
 		A979E72D33DE197157B22D97 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E0C39A4527CD2B9F02BADE42 /* WidgetKit.framework */; };
+		B52499FB561C4152A8896C8E /* AgentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2505117CDE49BA7C2886CAA /* AgentView.swift */; };
 		B784B030DD84BF95953E593A /* StickerWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 547562DE9D36DA87638056CF /* StickerWidgets.swift */; };
 		CC0119CC1B3CB500FF98CB79 /* HHTApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A92382C3C1A2201092CE29 /* HHTApp.swift */; };
 		CD9D346A13D380C7AC187B94 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A893397672D1738BEBB64118 /* HistoryView.swift */; };
@@ -105,6 +106,7 @@
 		ABE1BD8E9C215B70B363144E /* ExploreMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreMapView.swift; sourceTree = "<group>"; };
 		B4814A8D13202E2D6B7DC35A /* WidgetStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetStyle.swift; sourceTree = "<group>"; };
 		B5CCE27794644139AEC80139 /* Formatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatting.swift; sourceTree = "<group>"; };
+		C2505117CDE49BA7C2886CAA /* AgentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentView.swift; sourceTree = "<group>"; };
 		CCC58B1632AE47AEB7B304CF /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		D048DB21BB959E102A1984B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		D441C842E8E1B09C700BCBEC /* Provider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Provider.swift; sourceTree = "<group>"; };
@@ -196,6 +198,7 @@
 		499B60E0284D7DC244584F2A /* Screens */ = {
 			isa = PBXGroup;
 			children = (
+				C2505117CDE49BA7C2886CAA /* AgentView.swift */,
 				8ED6C857A70E348310232B42 /* DayView.swift */,
 				ABE1BD8E9C215B70B363144E /* ExploreMapView.swift */,
 				2C7C175AD8BE3FB6B2F54954 /* FlightsAndPhases.swift */,
@@ -389,6 +392,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				B52499FB561C4152A8896C8E /* AgentView.swift in Sources */,
 				3F420F728D96A3417B91447F /* AppModel.swift in Sources */,
 				1458B51EAC17FF0C6C826DE3 /* DayView.swift in Sources */,
 				FDF878614627A4C2F44DAC70 /* DemoData.swift in Sources */,
