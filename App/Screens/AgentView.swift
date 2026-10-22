@@ -339,7 +339,7 @@ struct AgentAnswerView: View {
         let what: String = switch a.topic {
         case .modeShare: "Computed mode share by trips"
         case .distance: "Added up distance travelled"
-        case .trips: "Counted trips per day out"
+        case .trips: "Counted trips per recorded day"
         case .places: "Ranked places by time spent"
         }
         return VStack(alignment: .leading, spacing: 6) {
@@ -359,6 +359,7 @@ struct AgentAnswerView: View {
     private func step(_ s: String) -> some View {
         HStack(spacing: 8) {
             Image(systemName: "checkmark").font(.system(size: 10, weight: .bold)).foregroundStyle(A.green)
+                .accessibilityHidden(true)
             Text(s)
         }
     }
@@ -371,16 +372,18 @@ struct AgentAnswerView: View {
             switch a.topic {
             case .modeShare: modeShare(a)
             case .distance:
-                Text("You travelled **\(Fmt.distance(cur.totalDistance))** in the last \(a.days) days, about \(Fmt.distance(cur.distancePerDay)) a day out")
+                Text("You travelled **\(Fmt.distance(cur.totalDistance))** in the last \(a.days) days, about \(Fmt.distance(cur.distancePerDay)) per recorded day")
                     + Text(prev.trips > 0 ? ", compared with \(Fmt.distance(prev.totalDistance)) the \(a.days) days before." : ".")
                 comparison(prev: prev.totalDistance, cur: cur.totalDistance, label: Fmt.distance)
             case .trips:
-                Text("You made **\(cur.trips) trips** in the last \(a.days) days, \(String(format: "%.1f", cur.tripsPerDay)) a day when you went out")
+                Text("You made **\(cur.trips) trips** in the last \(a.days) days, \(String(format: "%.1f", cur.tripsPerDay)) per recorded day")
                     + Text(prev.trips > 0 ? ", compared with \(prev.trips) the \(a.days) days before." : ".")
                 comparison(prev: Double(prev.trips), cur: Double(cur.trips), label: { String(Int($0)) })
             case .places:
                 let top = cur.topPlaces.prefix(3)
-                Text("You spent the most time at **\(top.first!.name)**: \(Fmt.hours(top.first!.dwell)) over \(top.first!.visits) visits.")
+                if let first = top.first {
+                    Text("You spent the most time at **\(first.name)**: \(Fmt.hours(first.dwell)) over \(first.visits) visits.")
+                }
                 card(title: "Most time, last \(a.days) days") {
                     ForEach(Array(top)) { p in
                         HStack {
@@ -396,10 +399,11 @@ struct AgentAnswerView: View {
 
     @ViewBuilder private func modeShare(_ a: DiaryAgent.Answer) -> some View {
         let cur = a.current.groupShareByTrips, prev = a.previous.groupShareByTrips
-        let top = cur.max { $0.value < $1.value }!
         let pct = { (x: Double) in "\(Int((x * 100).rounded()))%" }
-        Text("**\(pct(top.value))** of your trips in the last \(a.days) days were \(top.key.label.lowercased())")
-            + Text(a.previous.trips > 0 ? ", compared with \(pct(prev[top.key] ?? 0)) the \(a.days) days before." : ".")
+        if let top = cur.max(by: { $0.value < $1.value }) {
+            Text("**\(pct(top.value))** of your trips in the last \(a.days) days were \(top.key.label.lowercased())")
+                + Text(a.previous.trips > 0 ? ", compared with \(pct(prev[top.key] ?? 0)) the \(a.days) days before." : ".")
+        }
         card(title: "Mode share by trips") {
             shareBar("PREV", prev, pct: pct)
             shareBar("LAST \(a.days) D", cur, pct: pct)
@@ -471,6 +475,7 @@ struct AgentAnswerView: View {
 /// One proposed mode fix: the route, the agent's reasons, and accept / pick / keep.
 struct AgentCorrectionView: View {
     @EnvironmentObject var model: AppModel
+    @Environment(\.tabBarSpace) private var tabBarSpace
     let proposal: DiaryAgent.ModeProposal
     @State private var trip: Trip?
     @State private var origin: Place?
@@ -577,7 +582,7 @@ struct AgentCorrectionView: View {
             }
         }
         .disabled(result != nil)
-        .padding(.horizontal, 16).padding(.top, 12).padding(.bottom, 10)
+        .padding(.horizontal, 16).padding(.top, 12).padding(.bottom, 10 + tabBarSpace)
         .background(A.bar.ignoresSafeArea(edges: .bottom))
         .overlay(alignment: .top) { A.hairline.frame(height: 1) }
     }

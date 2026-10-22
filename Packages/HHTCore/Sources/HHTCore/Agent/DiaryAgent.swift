@@ -27,7 +27,7 @@ public enum DiaryAgent {
         let vs = visits.filter { !$0.deleted }, ts = trips.filter { !$0.deleted }
         let events: [(Date, ChainStep)] = vs.map { v in
             let p = v.placeID.flatMap { places[$0] }
-            let name = p?.isNamed == true ? p!.displayName : label(v)
+            let name = p.flatMap { $0.isNamed ? $0.displayName : nil } ?? label(v)
             return (v.arrival, .stop(label: name, askingVisitID: asking.contains(v.id) ? v.id : nil))
         } + ts.map { ($0.departure, .leg($0.mode)) }
         let placeKeys = Set(vs.map { $0.placeID ?? "visit-" + $0.id })
@@ -95,8 +95,7 @@ public enum DiaryAgent {
         guard !history.isEmpty else { return nil }
         var counts: [TravelMode: Int] = [:]
         for m in history { counts[m, default: 0] += 1 }
-        let best = counts.values.max()!
-        guard let mode = history.first(where: { counts[$0] == best }),
+        guard let best = counts.values.max(), let mode = history.first(where: { counts[$0] == best }),
               best >= 2, Double(best) / Double(history.count) >= 0.6 else { return nil }
         return (mode, best)
     }
@@ -133,7 +132,8 @@ public enum DiaryAgent {
     public static func answer(_ topic: Topic, store: TravelStore, now: Date = Date(), days: Int = 30,
                               calendar: Calendar = .current) throws -> Answer {
         let cur = DateRange.lastDays(days, until: now, calendar: calendar)
-        let prev = DateRange.lastDays(days, until: calendar.date(byAdding: .day, value: -days, to: now)!, calendar: calendar)
+        let prevEnd = calendar.date(byAdding: .day, value: -days, to: now) ?? now.addingTimeInterval(-Double(days) * 86_400)
+        let prev = DateRange.lastDays(days, until: prevEnd, calendar: calendar)
         return Answer(topic: topic, days: days,
                       current: try Analytics.compute(store: store, range: cur, now: now),
                       previous: try Analytics.compute(store: store, range: prev, now: now))
