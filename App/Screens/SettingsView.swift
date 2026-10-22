@@ -12,6 +12,7 @@ struct SettingsView: View {
     @AppStorage("reverseGeocoding") private var reverseGeocoding = false
     @AppStorage("collectorProfile") private var profile = LocationCollector.Profile.balanced.rawValue
     @AppStorage("units") private var units = ""
+    @AppStorage("agentEnabled") private var agentEnabled = false
 
     @State private var counts: [String: Int] = [:]
     @State private var exportRange = 0          // 0 all, 1 last 30 days
@@ -39,6 +40,11 @@ struct SettingsView: View {
                 Picker("Units", selection: $units) {
                     Text("System").tag(""); Text("Metric").tag("metric"); Text("Imperial").tag("imperial")
                 }
+            }
+            Section {
+                Toggle("Diary agent", isOn: $agentEnabled)
+            } header: { Text("Experimental") } footer: {
+                Text("Adds an Agent tab that recaps your day, asks about stops it can't explain, suggests mode fixes and answers simple questions. It runs on this iPhone with fixed rules: no AI model, nothing is sent anywhere. Off by default.")
             }
             aboutSection
         }
