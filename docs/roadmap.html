@@ -3,135 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Roadmap · HHT Docs</title>
-<meta name="description" content="HHT's phases from personal diary to research-ready, open travel survey infrastructure, with every item labelled available, in progress, planned or exploratory.">
-<link rel="icon" href="assets/hht-logo.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css?v=9">
-<script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
-<script src="assets/docs.js" defer></script>
+<title>Roadmap · HHT Diary</title>
+<link rel="canonical" href="https://hhtdiary.org/roadmap/">
+<meta name="robots" content="noindex">
+<!-- Moved to /roadmap/ (#70). The script keeps any #anchor; the meta refresh covers no-JS visitors. -->
+<script>location.replace('roadmap/' + location.hash);</script>
+<meta http-equiv="refresh" content="0; url=roadmap/">
 </head>
 <body>
-<main class="dx-main"><article class="dx-content">
-
-<p class="eyebrow">Vision</p>
-<h1>Roadmap</h1>
-<p class="lede">Where HHT is, and where it might go. Each item carries a status. Only <i>Available</i> items exist in the
-app today. Apart from the App Store target below, there are no dates: a planned item is an intention, not a promise.</p>
-
-<div class="legend" role="note" aria-label="Status labels used on this page">
-  <span><span class="status available">Available</span> in the app today</span>
-  <span><span class="status progress">In progress</span> being worked on now</span>
-  <span><span class="status planned">Planned</span> intended, not built</span>
-  <span><span class="status exploratory">Exploratory</span> an idea, no commitment</span>
-</div>
-
-<p>Progress is tracked in <a href="https://github.com/zyang91/HHT-app/issues">GitHub issues</a> and released versions
-are listed in the <a href="https://github.com/zyang91/HHT-app/blob/main/CHANGELOG.md">changelog</a>.</p>
-
-<h2 id="two-editions">Two editions, one engine</h2>
-<p>A private diary and a research instrument pull in different directions. A diary should stay simple and ask nothing
-of its user; a study needs consent screens, fixed settings, questions and a controlled hand-over of data. Rather than
-pile study features onto the personal app, HHT may split into two editions over time:</p>
-<div class="cards">
-  <div class="card"><div class="k">personal edition</div><h3>Personal diary <span class="status available">Available</span></h3><p>Today's app, and the App Store release. For one person keeping their own record: automatic diary, quick corrections, stats, full export. Stays free and needs no account.</p></div>
-  <div class="card"><div class="k">research edition</div><h3>Research support <span class="status exploratory">Exploratory</span></h3><p>For studies run by a researcher, class, agency or city: study configuration, consent, prompted recall, selective hand-over, a researcher toolkit for checking and pooling data, and later Android and local languages.</p></div>
-  <div class="card"><div class="k">shared core</div><h3>Same engine and data <span class="status available">Available</span></h3><p>Both would use HHTCore: the same inference rules, data model and export format, so a fix or a calibration in one edition improves the other, and data from both can be analysed the same way.</p></div>
-</div>
-<p>How the split would happen is not decided: a separate app, a separate build of this repository, or a study mode
-that a researcher's configuration file switches on. That choice depends on App Store rules, how studies want to recruit,
-and what partners need. Until then, the research features below are listed as Planned or Exploratory, and none of them
-are part of the App Store version 1.0.</p>
-
-<h2>Phases</h2>
-
-<div class="phase">
-<h3>Phase 1 · Personal diary, stabilised <span class="status available">Available</span></h3>
-<p class="muted">Track: personal edition and shared core</p>
-<ul>
-  <li>Background collection with motion-aware GPS and battery-saving stationary mode. <span class="status available">Available</span></li>
-  <li>Deterministic reconstruction of visits, trips, mode segments and named places. <span class="status available">Available</span></li>
-  <li>Corrections (mode, place, purpose, times, split, merge, delete) locked against rebuilds, with an audit log. <span class="status available">Available</span></li>
-  <li>One-tap self-reported stamps for stops too short to detect. <span class="status available">Available</span></li>
-  <li>Stats, Home Screen widgets, flights, life phases, period comparisons. <span class="status available">Available</span></li>
-  <li>Export to CSV, JSON, GeoJSON and SQLite, plus a Python loader. <span class="status available">Available</span></li>
-  <li>Calibration harness and regression fixtures for known failure modes (<a href="https://github.com/zyang91/HHT-app/issues/46">#46</a>). <span class="status available">Available</span></li>
-  <li>Accessibility audits for the app and the docs. <span class="status available">Available</span></li>
-</ul>
-</div>
-
-<div class="phase">
-<h3>Phase 2 · Public iOS release <span class="status progress">In progress</span></h3>
-<p class="muted">Track: personal edition</p>
-<p>The same personal diary, installable from the App Store instead of being built with Xcode. The target is
-<b>around 10 November 2026</b>. It depends on App Review and may move.</p>
-<ul>
-  <li>App Store packaging, review and privacy disclosures that match the <a href="privacy.html">Privacy</a> page. <span class="status progress">In progress</span></li>
-  <li>Documentation that separates current features from future plans (this page). <span class="status progress">In progress</span></li>
-</ul>
-<p class="muted">Version 1.0 on the App Store does not add the research features in the phases below.</p>
-</div>
-
-<div class="phase">
-<h3>Phase 3 · Granular, voluntary export <span class="status planned">Planned</span></h3>
-<p class="muted">Track: both. Useful for anyone sharing their own data, and the basis of a study hand-over.</p>
-<p>Today an export covers everything or the last 30 days, and always includes a full database snapshot (see
-<a href="privacy.html#what-an-export-contains">what an export contains</a>). This phase would let a user share less.</p>
-<ul>
-  <li>Choose specific dates or trips to export. <span class="status planned">Planned</span></li>
-  <li>Choose the level of detail: aggregates only, trips without routes, or full traces. <span class="status planned">Planned</span></li>
-  <li>Make the SQLite snapshot follow the same selection, or leave it out. <span class="status planned">Planned</span></li>
-  <li>A preview of exactly what will leave the phone before sharing. <span class="status planned">Planned</span></li>
-</ul>
-</div>
-
-<div class="phase">
-<h3>Phase 4 · Research-oriented recall and study configuration <span class="status planned">Planned</span></h3>
-<p class="muted">Track: research edition. Where the two editions would start to diverge.</p>
-<ul>
-  <li>Prompted recall: end-of-day questions about trips the app is unsure of (mode, purpose, companions). <span class="status planned">Planned</span></li>
-  <li>A study configuration file: which questions to ask, which fields to export, study ID. <span class="status planned">Planned</span></li>
-  <li>Built-in consent text and an explicit hand-over step to the researcher. <span class="status planned">Planned</span></li>
-  <li>Keeping the engine's original output when a record is first edited, so accuracy can be measured from real use. <span class="status planned">Planned</span></li>
-  <li>A researcher toolkit: checks for incomplete days, pooling several participants' exports, aggregate-only summaries. <span class="status planned">Planned</span></li>
-  <li>Deciding how the research edition is packaged (separate app, separate build, or study mode). <span class="status exploratory">Exploratory</span></li>
-</ul>
-</div>
-
-<div class="phase">
-<h3>Phase 5 · Validation and data standards <span class="status planned">Planned</span></h3>
-<p class="muted">Track: shared core</p>
-<ul>
-  <li>A formal, multi-participant accuracy benchmark with published protocol and results. <span class="status planned">Planned</span></li>
-  <li>Shareable, reproducible GPS test fixtures (synthetic or consented and de-identified). <span class="status planned">Planned</span></li>
-  <li>A battery and completeness benchmark across devices. <span class="status planned">Planned</span></li>
-  <li>A versioned, machine-readable export schema, and mapping to common HHTS codebooks. <span class="status planned">Planned</span></li>
-  <li>Transit-aware mode detection (for example GTFS) to separate bus from car. <span class="status exploratory">Exploratory</span></li>
-</ul>
-<p>What is measured today is on the <a href="validation.html">Validation</a> page.</p>
-</div>
-
-<div class="phase">
-<h3>Phase 6 · Broader infrastructure <span class="status exploratory">Exploratory</span></h3>
-<p class="muted">Track: research edition, with an eye on <a href="vision.html#an-initiative-for-cities-with-limited-capacity">cities and countries with limited capacity</a></p>
-<ul>
-  <li>An Android version, which most of those places would need first. <span class="status exploratory">Exploratory</span></li>
-  <li>Offline-first data hand-over for places with poor connectivity. <span class="status exploratory">Exploratory</span></li>
-  <li>A multilingual interface, with locally relevant modes and place types (shared taxis, minibuses, motorcycle taxis). <span class="status exploratory">Exploratory</span></li>
-  <li>Calibrating inference with local partners on local travel conditions. <span class="status exploratory">Exploratory</span></li>
-  <li>Optional, self-hosted collection for studies that run their own server. <span class="status exploratory">Exploratory</span></li>
-</ul>
-<p class="muted">Any feature that sends data off the device would be opt-in, documented on the Privacy page, and
-discussed publicly before it is built.</p>
-</div>
-
-<h2>How to influence the roadmap</h2>
-<p>Open a <a href="https://github.com/zyang91/HHT-app/issues/new/choose">feature request</a>, or comment on an existing
-issue with your use case. Concrete research needs ("I need trip purpose for 20 volunteers over two weeks") are the most
-useful input. See <a href="contributing.html">Contributing</a>.</p>
-
-</article></main>
+<p>The Roadmap page has moved to <a href="roadmap/">hhtdiary.org/roadmap/</a>.</p>
 </body>
 </html>

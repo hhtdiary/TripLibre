@@ -7,6 +7,8 @@ single summary, so release notes aren't kept anywhere else in the repository.
 
 ## Unreleased
 
+- Website: organization homepage for HHT Diary, top-level Vision, Roadmap and Products pages, `/docs/` landing;
+  old `vision.html` and `roadmap.html` redirect (#70)
 - Docs: Vision, Roadmap, Research uses & limitations, Validation and Data dictionary pages; landing page, privacy
   (export contents, erase, re-identification risk) and contributing updates; citation metadata aligned (#45)
 - Home Screen widgets: Tracking, Today and Last 7 days, read-only (#47, #60)
