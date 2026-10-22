@@ -122,7 +122,7 @@ struct WidgetSnapshotTests {
         #expect(!snap.sameContent(as: empty))           // a new stamp reloads the widgets
 
         // a snapshot written before lastStampAt existed still reads
-        var json = try JSONSerialization.jsonObject(with: JSONEncoder().encode(snap)) as! [String: Any]
+        var json = try #require(try JSONSerialization.jsonObject(with: JSONEncoder().encode(snap)) as? [String: Any])
         json["lastStampAt"] = nil
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("hht-widget-\(UUID().uuidString).json")
         defer { try? FileManager.default.removeItem(at: url) }
