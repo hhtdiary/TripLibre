@@ -12,6 +12,7 @@ single summary, so release notes aren't kept anywhere else in the repository.
 - Docs: Vision, Roadmap, Research uses & limitations, Validation and Data dictionary pages; landing page, privacy
   (export contents, erase, re-identification risk) and contributing updates; citation metadata aligned (#45)
 - Home Screen widgets: Tracking, Today and Last 7 days, read-only (#47, #60)
+- Stamp widget: one tap opens HHT and stamps through the same path as Today's button; repeat taps within 30 s keep one stamp (#47)
 - XCUITest flows and accessibility audits for the iOS app (#64, #68)
 - Linting for docs, Markdown, Python and Swift; axe-core accessibility check for the docs site (#61, #62, #66)
 - Dependency security fixes (#65)

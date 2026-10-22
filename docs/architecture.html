@@ -124,6 +124,7 @@ app, not a second engine: it never opens the database, collects location or runs
   <li><b>Versioning:</b> the file carries <code>version</code>. A widget ignores a snapshot from an incompatible build and shows its set-up state until the app writes a new one. Bump <code>WidgetSnapshot.currentVersion</code> when you change the shape.</li>
   <li><b>Not live:</b> widgets update when iOS lets the app run, so they show "Updated … ago" rather than claiming live GPS. Hours without new points are normal while you stay put; the status widget calls it <i>quiet</i> only after 12 h.</li>
   <li><b>Taps</b> open <code>hht://today</code>, <code>hht://stats</code> (Stats on 7 days) or <code>hht://settings</code>, handled in <code>RootView.onOpenURL</code>.</li>
+  <li><b>Quick Stamp:</b> the Stamp widget opens <code>hht://stamp</code>; Today then calls the same <code>AppModel.stampNow()</code> as its button, which goes through <code>EditService.stampOnce</code>, so a link delivered twice or a double tap within 30 s keeps one stamp. The stamp is written in the app, not the extension: a widget can't get a fresh fix or write the database safely, and an App Intent running in the extension would need both. Before onboarding the link only opens the app. The snapshot's <code>lastStampAt</code> lets the widget confirm the last stamp.</li>
 </ul>
 <p>What each widget looks like is on the <a href="ui-guide.html#widgets">UI guide</a>.</p>
 

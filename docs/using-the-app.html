@@ -50,14 +50,19 @@ and builds your diary whenever it gets a chance. Opening it once a day to confir
 <h2>Home Screen widgets</h2>
 <p>To check on HHT without opening it, long-press the Home Screen, tap <b>Edit › Add Widget</b> and search for <b>HHT</b>.
 <b>Tracking</b> (small) shows whether recording is healthy, <b>Today</b> (medium) shows today's trips, distance and places,
-and <b>Last 7 days</b> (large) shows your week. Plain-card and timeline styles are there too. Widgets show what HHT last worked
+and <b>Last 7 days</b> (large) shows your week. Plain-card and timeline styles are there too, and <b>Stamp</b> (small)
+stamps a short stop from the Home Screen. Widgets show what HHT last worked
 out, with an "updated … ago" time; tap one to open the app on that screen. See the <a href="ui-guide.html#widgets">UI guide</a>
 for every widget and status.</p>
 
 <h2>Stamping a short stop</h2>
 <p><b>Stamp this moment</b> (Today, top) saves that <i>something worth recording happened around here, around now</i>.
 It records the time immediately and only a coarse location (rounded to about 110 m), and it works with poor GPS or none at all.
-A line confirms it with an <b>Undo</b> for a few seconds.</p>
+A line confirms it with an <b>Undo</b> for a few seconds. A second tap within 30 seconds keeps the first stamp rather than
+adding another.</p>
+<p>The <b>Stamp</b> Home Screen widget does the same from outside the app: tapping it opens HHT on Today and stamps, with the
+same confirmation and <b>Undo</b>. The widget itself saves nothing and never asks for your location, so the stamp gets the
+same coarse location the button would. The widget shows when you last stamped.</p>
 <ul>
   <li>If HHT already sees a visit there, the stamp is attached to it and the visit shows a yellow stamp badge.</li>
   <li>If not, HHT looks at the GPS fixes around the tap and adds the short stop it missed, splitting the trip in two.

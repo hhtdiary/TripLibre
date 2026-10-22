@@ -61,7 +61,7 @@ extension WidgetSnapshot {
         ].filter { $0.start < now }
         return WidgetSnapshot(
             generatedAt: now.addingTimeInterval(-12 * 60), tracking: .recording, lastPointAt: now.addingTimeInterval(-3 * 60),
-            diaryUpdatedAt: now.addingTimeInterval(-12 * 60), reviewPending: 2,
+            diaryUpdatedAt: now.addingTimeInterval(-12 * 60), reviewPending: 2, lastStampAt: h(12.4) < now ? h(12.4) : nil,
             usesMetric: Locale.current.measurementSystem == .metric,
             today: Day(start: day, trips: 4, places: 3, distance: 18_400, travelTime: 4100, unconfirmedTrips: 1,
                        current: Stay(name: "Home", category: "home", since: h(17.8)), timeline: blocks),

@@ -150,9 +150,16 @@ struct DayView: View {
         .sheet(item: $selectedTrip) { box in TripDetailView(tripID: box.id).environmentObject(model) }
         .sheet(item: $selectedVisit) { box in VisitDetailView(visitID: box.id).environmentObject(model) }
         .onReceive(model.$route) { r in
-            guard r == .settings, !fixedDay else { return }
+            guard let r, r == .settings || r == .stamp, !fixedDay else { return }
             model.route = nil
-            showSettings = true
+            if r == .settings { showSettings = true; return }
+            // the Stamp widget: back to today, where the confirmation and Undo show, then the same tap as the button
+            day = Calendar.current.startOfDay(for: Date())
+            showSettings = false
+            showDatePicker = false
+            selectedTrip = nil
+            selectedVisit = nil
+            model.stampNow()
         }
         .sheet(isPresented: $showSettings) { NavigationStack { SettingsView() }.environmentObject(model) }
         .sheet(isPresented: $showDatePicker) {
@@ -434,7 +441,8 @@ struct StampButton: View {
 
             if let s = model.lastStamp {
                 HStack(spacing: 8) {
-                    Text("Stamped at \(Fmt.time(s.timestamp)). I'll fit it into your day.")
+                    Text(model.lastStampRepeated ? "Already stamped at \(Fmt.time(s.timestamp)), so I kept just one."
+                         : "Stamped at \(Fmt.time(s.timestamp)). I'll fit it into your day.")
                         .font(.toon(12, .bold)).foregroundStyle(Toon.muted)
                     Spacer(minLength: 0)
                     Button("Undo") { model.undoStamp(s) }

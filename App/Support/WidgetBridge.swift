@@ -76,7 +76,7 @@ final class WidgetBridge {
     }
 }
 
-/// Where a widget tap lands (`hht://<route>`).
+/// Where a widget tap lands (`hht://<route>`). `stamp` opens Today and stamps, exactly like its button.
 enum AppRoute: String {
-    case today, stats, settings
+    case today, stats, settings, stamp
 }

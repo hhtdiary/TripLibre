@@ -56,6 +56,8 @@ struct RootView: View {
         .onOpenURL { url in
             guard url.scheme == "hht", let r = url.host().flatMap(AppRoute.init(rawValue:)) else { return }
             tab = r == .stats ? 3 : 0
+            // before onboarding there's no location permission yet: just open, don't save a stamp behind the sheet
+            if r == .stamp && !onboarded { return }
             if r != .today { model.route = r }
         }
         .tint(Toon.accentDeep)

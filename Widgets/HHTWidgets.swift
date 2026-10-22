@@ -2,8 +2,8 @@ import WidgetKit
 import SwiftUI
 import HHTCore
 
-/// Read-only Home Screen widgets (issue #47, phase 1). They show the snapshot the app writes to the App Group;
-/// they never start location collection or inference themselves.
+/// Home Screen widgets (issue #47). They show the snapshot the app writes to the App Group and never start location
+/// collection or inference themselves; the Stamp widget only opens the app's own stamp (phase 2).
 @main
 struct HHTWidgets: WidgetBundle {
     var body: some Widget {
@@ -12,6 +12,7 @@ struct HHTWidgets: WidgetBundle {
         WeekWidget()
         SimpleStatusWidget()
         TimelineTodayWidget()
+        StampWidget()
     }
 }
 

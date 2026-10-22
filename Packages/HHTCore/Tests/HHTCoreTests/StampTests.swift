@@ -216,6 +216,26 @@ struct StampTests {
         #expect(try store.stamp(s.id)?.note == "oat flat white")
         #expect(store.schemaVersion >= 3)
     }
+
+    /// A widget link delivered twice, or a double tap, must not leave two stamps (issue #47, phase 2).
+    @Test func stampOnceIgnoresARepeatTap() throws {
+        let store = try TravelStore.inMemory()
+        let edit = EditService(store: store)
+        let t = Trajectory.date("2026-09-16 08:00")
+        let first = try edit.stampOnce(at: t, fix: coffee, fixAccuracy: 10, fixTime: t)
+        let again = try edit.stampOnce(at: t.addingTimeInterval(5), fix: coffee, fixAccuracy: 10, fixTime: t)
+        #expect(first.isNew && !again.isNew)
+        #expect(again.stamp.id == first.stamp.id)
+        #expect(try store.stamps(from: t, to: t.addingTimeInterval(60)).count == 1)
+
+        // past the window, or after an Undo, a tap is a new stamp
+        let later = try edit.stampOnce(at: t.addingTimeInterval(EditService.stampRepeatWindow + 1),
+                                       fix: nil, fixAccuracy: nil, fixTime: nil)
+        #expect(later.isNew)
+        try edit.deleteStamp(later.stamp.id)
+        let redo = try edit.stampOnce(at: later.stamp.timestamp.addingTimeInterval(2), fix: nil, fixAccuracy: nil, fixTime: nil)
+        #expect(redo.isNew && redo.stamp.id != later.stamp.id)
+    }
 }
 
 private extension Coordinate {

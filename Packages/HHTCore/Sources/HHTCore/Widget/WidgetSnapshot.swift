@@ -15,14 +15,18 @@ public struct WidgetSnapshot: Codable, Equatable, Sendable {
     public var diaryUpdatedAt: Date?
     /// Trips in the last 7 days that could use a check: the same count as Today's review banner.
     public var reviewPending: Int
+    /// Newest stamp in the last 7 days, so the Stamp widget can confirm the last one (added in phase 2; optional,
+    /// so snapshots written before it still read).
+    public var lastStampAt: Date?
     public var usesMetric: Bool
     public var today: Day
     public var week: Week
 
     public init(generatedAt: Date, tracking: Tracking, lastPointAt: Date?, diaryUpdatedAt: Date?, reviewPending: Int,
-                usesMetric: Bool, today: Day, week: Week) {
+                lastStampAt: Date? = nil, usesMetric: Bool, today: Day, week: Week) {
         self.generatedAt = generatedAt; self.tracking = tracking; self.lastPointAt = lastPointAt
-        self.diaryUpdatedAt = diaryUpdatedAt; self.reviewPending = reviewPending; self.usesMetric = usesMetric
+        self.diaryUpdatedAt = diaryUpdatedAt; self.reviewPending = reviewPending; self.lastStampAt = lastStampAt
+        self.usesMetric = usesMetric
         self.today = today; self.week = week
     }
 
@@ -135,6 +139,7 @@ extension WidgetSnapshot {
             generatedAt: now, tracking: tracking, lastPointAt: store.lastPoint()?.timestamp,
             diaryUpdatedAt: diaryUpdatedAt,
             reviewPending: try store.reviewCount(since: now.addingTimeInterval(-7 * 86_400)),
+            lastStampAt: try store.stamps(from: now.addingTimeInterval(-7 * 86_400), to: now).last?.timestamp,
             usesMetric: usesMetric,
             today: try day(store: store, places: places, now: now, calendar: calendar),
             week: try week(store: store, places: places, now: now, calendar: calendar))
