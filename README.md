@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/data-local--first-5ac8a0" alt="Local-first data">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="Apache 2.0 license"></a>
   <a href="https://doi.org/10.5281/zenodo.23307589"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23307589.svg" alt="DOI 10.5281/zenodo.23307589"></a>
-  <a href="https://hhtdiary.org/"><img src="https://img.shields.io/badge/docs-hhtdiary.org-f4a93b" alt="Documentation"></a>
+  <a href="https://hhtdiary.org/docs/"><img src="https://img.shields.io/badge/docs-hhtdiary.org-f4a93b" alt="Documentation"></a>
 </p>
 
 <p align="center">
@@ -28,8 +28,8 @@
   <a href="#daily-use">Daily use</a> ·
   <a href="#research-workflow">Research workflow</a> ·
   <a href="#development">Development</a> ·
-  <a href="https://hhtdiary.org/">Docs</a> ·
-  <a href="https://hhtdiary.org/roadmap.html">Roadmap</a> ·
+  <a href="https://hhtdiary.org/docs/">Docs</a> ·
+  <a href="https://hhtdiary.org/roadmap/">Roadmap</a> ·
   <a href="https://hhtdiary.org/backup/">Project story</a>
 </p>
 
@@ -42,7 +42,7 @@ No account, no server, no analytics: the data stays on the phone unless you expo
 
 HHT began as one transportation researcher's travel survey of one, built with AI assistance (Claude). The longer-term
 aim is open, affordable travel data collection for researchers, students and small agencies. That is a plan, not a
-feature: see the [Vision](https://hhtdiary.org/vision.html) and [Roadmap](https://hhtdiary.org/roadmap.html).
+feature: see the [Vision](https://hhtdiary.org/vision/) and [Roadmap](https://hhtdiary.org/roadmap/).
 The original product brief is in [`design/`](design/personal_travel_tracker_claude_brief.md).
 
 ## What it does today
@@ -78,7 +78,7 @@ Packages/HHTCore/       platform-independent core (Swift package, no dependencie
   Widget/               the small summary the widgets read (no coordinates)
   Tests/                112 tests incl. the brief's 14 synthetic scenarios
 analysis/               Python loader + example analysis (pandas)
-docs/                   documentation site (static HTML, published at hhtdiary.org) + markdown specs
+docs/                   website (static HTML, published at hhtdiary.org): organization pages + docs + markdown specs
 project.yml             XcodeGen spec (HHT.xcodeproj is generated from it)
 ```
 

@@ -3,139 +3,126 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HHT Documentation</title>
-<meta name="description" content="Documentation for HHT, a free, open-source, local-first iOS travel diary that rebuilds each day into visits, trips and modes, and keeps the data on the phone.">
+<title>HHT Diary · Every trip tells a story</title>
+<meta name="description" content="HHT Diary builds open, local-first tools that turn everyday movement into travel data people can understand, correct and own. Its first product is HHT for iOS, a free, open-source travel diary.">
+<link rel="canonical" href="https://hhtdiary.org/">
 <link rel="icon" href="assets/hht-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css?v=9">
+<link rel="stylesheet" href="assets/site.css?v=1">
 <script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
-<script src="assets/docs.js" defer></script>
+<script src="assets/site.js?v=1" defer></script>
 </head>
 <body>
-<main class="dx-main"><article class="dx-content home">
+<main id="main">
 
-<div class="hero">
-  <div>
-    <p class="eyebrow">Documentation</p>
-    <h1>HHT: a travel survey of one</h1>
+<section class="s-hero center" aria-labelledby="hero-title">
+  <svg class="route-line" viewBox="0 0 1200 140" preserveAspectRatio="none" aria-hidden="true">
+    <path d="M0 120 L260 120 L340 70 L520 82 L640 30 L860 52 L1000 18 L1200 18"/>
+    <circle cx="340" cy="70" r="5"/><circle cx="520" cy="82" r="5"/><circle cx="640" cy="30" r="5"/><circle cx="1000" cy="18" r="5"/>
+  </svg>
+  <div class="wrap">
+    <p class="eyebrow">HHT Diary · open mobility tools</p>
+    <h1 class="display" id="hero-title">Every trip tells <span class="grad">a story.</span></h1>
+    <p class="lede">HHT Diary builds open, local-first tools that turn everyday movement into travel data you can
+    understand, correct and keep. Our first product, HHT for iOS, is a travel diary that writes itself.</p>
+    <div class="actions">
+      <a class="btn primary" href="installation.html">Install HHT for iPhone <span class="arr" aria-hidden="true">→</span></a>
+      <a class="btn" href="products/ios/">Explore the app</a>
+    </div>
+    <p class="note">Free and open source. Installed today by building from source with Xcode; an App Store release is
+    <a href="roadmap/">in progress</a>.</p>
+
+    <div class="phones" role="group" aria-label="Screenshots of HHT for iOS">
+      <figure class="phone"><img src="assets/screens/diary.jpg" width="600" height="1304" alt="The Diary screen: the day's visits and trips in order, with a trip asking 'Did I get that right?'"><figcaption>Diary</figcaption></figure>
+      <figure class="phone"><img src="assets/screens/today.jpg" width="600" height="1304" alt="The Today screen: a mascot sums up the day, the routes on a map, and stat tiles for trips, distance, travel time and places"><figcaption>Today</figcaption></figure>
+      <figure class="phone"><img src="assets/screens/stats.jpg" width="600" height="1304" alt="The Stats screen: trips per day, distance, travel time and mode share bars" loading="lazy"><figcaption>Stats</figcaption></figure>
+    </div>
   </div>
-  <img class="logo" src="assets/hht-logo.png" alt="HHT logo">
-</div>
-<p class="lede">HHT is a free, open-source iOS app that records where you go, rebuilds each day into
-visits, trips and travel modes, and keeps all of it on your phone. Think of it as a household travel survey
-that fills itself in, with a sample size of one. The longer-term aim: <a href="vision.html">travel surveys within reach</a>
-of anyone who needs one.</p>
+</section>
 
-<div class="actions">
-  <a class="btn primary" href="installation.html">Install on your iPhone →</a>
-  <a class="btn" href="architecture.html">How it's built</a>
-  <a class="btn" href="https://github.com/zyang91/HHT-app">View on GitHub</a>
-</div>
+<section class="section" aria-labelledby="mission-title">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Who we are</p>
+      <h2 class="h2" id="mission-title">Travel data that people can see, check and own.</h2>
+      <p class="lede">Where we go says a great deal about our lives, yet the tools that record it usually keep the data on
+      someone else's server, and the tools researchers use to study travel are expensive and closed. HHT Diary is an
+      open-source effort to make travel-behaviour data collection more accessible, transparent, affordable and
+      user-controlled, for everyday people and for the researchers who plan our cities.</p>
+    </div>
+    <p><a class="link" href="vision/">Read the vision →</a></p>
+  </div>
+</section>
 
-<div class="showcase" role="group" aria-label="Screenshots of the HHT app">
-  <figure class="phone"><img src="assets/screens/diary.jpg" alt="The day's diary: visits and trips in order, with a trip asking 'Did I get that right?'" loading="lazy"><figcaption>Diary</figcaption></figure>
-  <figure class="phone"><img src="assets/screens/today.jpg" alt="The Today screen: a mascot speech bubble, the day's routes on a map, and four colourful stat tiles" loading="lazy"><figcaption>Today</figcaption></figure>
-  <figure class="phone"><img src="assets/screens/stats.jpg" alt="The Stats screen: trips per day, distance, travel time and mode share bars" loading="lazy"><figcaption>Stats</figcaption></figure>
-</div>
+<section class="section" aria-labelledby="product-title">
+  <div class="wrap">
+    <div class="spot">
+      <div>
+        <p class="eyebrow">Flagship product</p>
+        <h2 class="h2" id="product-title">HHT for iOS</h2>
+        <div class="badge-row"><span class="status available">Available · build from source</span><span class="status progress">App Store · in progress</span></div>
+        <p class="muted">A free iPhone app that records where you go and rebuilds each day into visits, trips and travel modes.</p>
+        <ul class="ticks">
+          <li><span><b>Trips and visits, automatically.</b> Recording runs in the background; a deterministic engine
+            turns raw GPS into stays, trips, modes and named places, and a tap fixes anything it got wrong.</span></li>
+          <li><span><b>Local-first, you stay in control.</b> No account, no server, no analytics SDK. Everything lives in
+            one database on your phone, and you decide what to export and when to erase.</span></li>
+          <li><span><b>Data you can actually use.</b> Trips follow household-travel-survey conventions and export to CSV,
+            JSON, GeoJSON and SQLite, ready for Python, R, DuckDB or QGIS.</span></li>
+        </ul>
+        <div class="actions">
+          <a class="btn primary" href="products/ios/">See the app <span class="arr" aria-hidden="true">→</span></a>
+          <a class="btn" href="installation.html">Install guide</a>
+        </div>
+      </div>
+      <div class="shots">
+        <img src="assets/screens/map.jpg" width="600" height="1304" loading="lazy" alt="The Map screen: the day's trips drawn over Philadelphia with radius of gyration, hull area, places and trip counts">
+        <img src="assets/screens/trip.jpg" width="600" height="1304" loading="lazy" alt="A trip's detail sheet: the route on a map, start and end, and a grid of travel modes to correct it">
+      </div>
+    </div>
+  </div>
+</section>
 
-<h2>What it does today</h2>
-<div class="cards toon-grid two">
-  <div class="card"><div class="k">collect</div><h3>Background recording</h3><p>GPS runs only while you are moving. When you stop, it switches to a geofence to save battery.</p></div>
-  <div class="card"><div class="k">reconstruct</div><h3>Visits, trips and modes</h3><p>A deterministic engine turns raw fixes into stays, trips, mode segments and named places.</p></div>
-  <div class="card"><div class="k">correct</div><h3>One-tap fixes</h3><p>Change a mode, rename a place, split or merge. Corrections are locked and survive rebuilds.</p></div>
-  <div class="card"><div class="k">analyse</div><h3>Stats and export</h3><p>Mode share, radius of gyration, tours, flights. Export everything for pandas, R, DuckDB or QGIS.</p></div>
-</div>
+<section class="section" aria-labelledby="explore-title">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Explore</p>
+      <h2 class="h2" id="explore-title">One organization, clear places to start.</h2>
+    </div>
+    <div class="grid four">
+      <a class="card" href="products/">
+        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 18.5h3"/></svg></div>
+        <h3>Products</h3><p>What you can use today, starting with HHT for iOS.</p><span class="go">Browse products →</span></a>
+      <a class="card" href="vision/">
+        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg></div>
+        <h3>Vision</h3><p>Why we exist, the principles we hold, and what HHT is not.</p><span class="go">Read the vision →</span></a>
+      <a class="card" href="roadmap/">
+        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18l6-7 4 3 8-9"/><circle cx="9" cy="11" r="1.6"/><circle cx="13" cy="14" r="1.6"/></svg></div>
+        <h3>Roadmap</h3><p>Three workstreams, with honest Now, Next and Exploratory labels.</p><span class="go">See the roadmap →</span></a>
+      <a class="card" href="docs/">
+        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h10l4 4v12H5z"/><path d="M9 12h6M9 16h6"/></svg></div>
+        <h3>Docs</h3><p>Getting started, how inference works, data schemas and the developer API.</p><span class="go">Open the docs →</span></a>
+    </div>
+  </div>
+</section>
 
-<p>All of this sits behind a playful "sticker" interface: thick ink outlines, solid shadows, bright flat colours and a
-friendly map-pin mascot that sums up your day.</p>
-<div class="toon-stage" aria-hidden="true">
-  <div class="toon-bubble"><span class="pin"></span><span class="toon say">5 trips and 4.1 mi. Your feet did most of the work!</span></div>
-  <span class="toon toon-stat" style="--fill:#ffc93c"><strong>5</strong><small>trips</small></span>
-  <span class="toon toon-stat" style="--fill:#8bdb5e"><strong>4.1 mi</strong><small>distance</small></span>
-  <span class="toon-chip" style="background:#8bdb5e">🚶</span><span class="toon-chip" style="background:#5c9bff">🚇</span><span class="toon-chip" style="background:#b596ff">🚗</span>
-  <span class="toon-badge" style="background:#ffc93c">check</span>
-</div>
-<p><a href="ui-guide.html">Tour every screen in the UI guide →</a></p>
+<section class="section" aria-labelledby="open-title">
+  <div class="wrap">
+    <div class="cta">
+      <p class="eyebrow">Built in the open</p>
+      <h2 class="h2" id="open-title">Read every line that touches your data.</h2>
+      <p>HHT is Apache 2.0 licensed. The inference rules are documented and tested, accuracy is
+      <a class="link" href="validation.html">measured in public</a> (on a small sample so far), and ideas start as GitHub issues.</p>
+      <div class="actions">
+        <a class="btn primary" href="https://github.com/zyang91/HHT-app">View on GitHub <span class="arr" aria-hidden="true">→</span></a>
+        <a class="btn" href="contributing.html">Contribute</a>
+      </div>
+    </div>
+  </div>
+</section>
 
-<h2>Why it matters</h2>
-<p>Location history is one of the most revealing datasets a person produces. Most apps that collect it are run by
-companies or individual developers who either charge a subscription, upload your movements to their servers, or both.
-Once the data is on someone else's server, you are trusting their business model, their security, and whatever they
-decide to do with it later.</p>
-<p>Researchers face a similar problem from the other side. A household travel survey asks people to keep a one- or
-two-day diary of every trip: where they started, where they went, when, by what mode, and why. Those diaries are
-expensive, short, and depend on memory, and smartphone survey platforms are usually commercial. HHT keeps the same
-diary continuously, from GPS and motion sensors, lets you correct it in a tap or two, and publishes every line of code
-that does it.</p>
-
-<div class="pillars">
-  <div><b>Free and open source</b><span>Apache 2.0. No subscription, no paid tier, no ads. Read every line that touches your data.</span></div>
-  <div><b>Nothing goes to a cloud</b><span>No account, no server, no analytics SDK, no sync. The database is one SQLite file in the app's sandbox. The few network requests are listed on the Privacy page.</span></div>
-  <div><b>You stay in control</b><span>You decide what to correct, what to export, who gets it, and when to erase.</span></div>
-  <div><b>Survey-shaped output</b><span>Trips follow household-travel-survey (HHTS) conventions and export to CSV, JSON, GeoJSON and SQLite. Accuracy has been measured, but only on a small sample so far.</span></div>
-</div>
-
-<h2>Who it serves</h2>
-<ul>
-  <li><b>Anyone who wants a private travel diary</b> without handing their location history to a company.</li>
-  <li><b>Transportation and urban researchers</b> who want clean, HHTS-style data about their own travel, a small pilot,
-    or a reference implementation of trip reconstruction. Read <a href="research.html">Research uses &amp; limitations</a>
-    first: HHT data is not a representative survey.</li>
-  <li><b>Teachers and students</b> learning how trip diaries are built, using the code and synthetic demo data.</li>
-  <li><b>iOS and Swift developers</b> curious about long-running background location, or wanting to fork the app and extend it.</li>
-</ul>
-
-<h2>What is planned</h2>
-<p>Everything above works today. The ideas below don't exist yet, and the <a href="roadmap.html">roadmap</a> labels each
-one as in progress, planned or exploratory.</p>
-<ul>
-  <li><span class="status progress">In progress</span> An App Store release, so installing no longer needs Xcode (target: around November 2026).</li>
-  <li><span class="status planned">Planned</span> Choosing exactly which dates, trips and level of detail to export.</li>
-  <li><span class="status planned">Planned</span> Prompted recall and study configuration for small research projects.</li>
-  <li><span class="status planned">Planned</span> A formal accuracy benchmark and reproducible test fixtures.</li>
-  <li><span class="status exploratory">Exploratory</span> A separate research edition beside today's personal app, sharing the same engine.</li>
-  <li><span class="status exploratory">Exploratory</span> Android, multilingual and self-hosted versions, aimed partly at cities and countries with limited budgets or technical staff.</li>
-</ul>
-<p>The reasoning behind all of this is on the <a href="vision.html">Vision</a> page.</p>
-
-<div class="callout note"><div class="ic">i</div>
-<p>HHT is not on the App Store yet. You build it from source with Xcode and install it on your own phone. With a free Apple ID
-the install lasts 7 days and you renew it with one command, and your data is kept between installs. See <a href="installation.html">Installation</a>.</p></div>
-
-<h2>Where to go next</h2>
-<p class="muted">Your route through the docs, step by step, drawn like a day in the app's diary.</p>
-<ol class="route">
-  <li class="stop" style="--fill:#ffc93c"><a href="installation.html">
-    <span class="pin">1</span>
-    <span class="body"><b>Installation <span class="toon-badge" style="background:#fff">start here</span></b><small>Build, sign and install on your iPhone.</small></span>
-    <span class="go">→</span></a></li>
-  <li class="leg"><span class="toon-chip" style="background:#8bdb5e">🚶</span>Walk · 4 min read</li>
-  <li class="stop" style="--fill:#8bdb5e"><a href="using-the-app.html">
-    <span class="pin">2</span>
-    <span class="body"><b>Using the app</b><small>The screens, daily routine, corrections and export.</small></span>
-    <span class="go">→</span></a></li>
-  <li class="leg"><span class="toon-chip" style="background:#ffc93c">🚲</span>Bike · 5 min read</li>
-  <li class="stop" style="--fill:#ff7eb3"><a href="ui-guide.html">
-    <span class="pin">3</span>
-    <span class="body"><b>UI guide</b><small>Every screen, annotated, plus the sticker design system.</small></span>
-    <span class="go">→</span></a></li>
-  <li class="leg"><span class="toon-chip" style="background:#5c9bff">🚇</span>Subway · 6 min read</li>
-  <li class="stop" style="--fill:#5c9bff"><a href="architecture.html">
-    <span class="pin">4</span>
-    <span class="body"><b>Architecture</b><small>Modules, data flow, and the three data layers.</small></span>
-    <span class="go">→</span></a></li>
-  <li class="leg"><span class="toon-chip" style="background:#b596ff">🚗</span>Car · 4 min read</li>
-  <li class="stop" style="--fill:#b596ff"><a href="api.html">
-    <span class="pin">5</span>
-    <span class="body"><b>Developer API <span class="toon-badge" style="background:#ff6b4a">destination</span></b><small>HHTCore (Swift) and the Python analysis helpers.</small></span>
-    <span class="go">→</span></a></li>
-</ol>
-
-<p><b>Planning a study or evaluating the data?</b> Start with <a href="research.html">Research uses &amp; limitations</a>,
-then <a href="validation.html">Validation</a> and the <a href="data-dictionary.html">Data dictionary</a>.</p>
-
-</article></main>
+</main>
 </body>
 </html>
