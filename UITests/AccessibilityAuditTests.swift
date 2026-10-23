@@ -32,6 +32,23 @@ final class AccessibilityAuditTests: HHTUITestCase {
         try audit("Visit detail")
     }
 
+    func testSpending() throws {
+        showYesterday()
+        let add = app.buttons["addCost"]
+        reveal(add)
+        add.tap()
+        waitForNavigationTitle("Add a cost")
+        try audit("Add a cost")
+        app.textFields["costAmount"].typeText("4.50")
+        app.buttons["costSave"].tap()
+        let card = app.descendants(matching: .any).matching(identifier: "daySpend").firstMatch
+        reveal(card)
+        card.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).tap()
+        waitForNavigationTitle("Spending")
+        waitForSeededContent(text(containing: "$4.50"), "the cost just added")
+        try audit("Spending")
+    }
+
     func testTimeline() throws {
         openTab("Timeline")
         waitForNavigationTitle("Timeline")

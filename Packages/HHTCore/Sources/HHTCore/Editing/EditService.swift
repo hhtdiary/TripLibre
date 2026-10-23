@@ -428,6 +428,7 @@ public final class EditService {
                 if a.notes == nil { a.notes = b.notes } else if let bn = b.notes { a.notes = a.notes! + "\n" + bn }
                 touch(&a)
                 try store.upsertTrip(a)
+                try relinkExpenses("trip_id", from: b.id, to: a.id)
                 try softDelete(trip: b)
             } else if let only = inc ?? out {
                 // stop at the edge of the data: the dangling trip goes too
@@ -436,6 +437,7 @@ public final class EditService {
             v.deleted = true
             touch(&v)
             try store.upsertVisit(v)
+            try relinkExpenses("visit_id", from: v.id, to: nil)
             try store.audit("visit", visitID, "delete")
         }
     }
@@ -451,6 +453,7 @@ public final class EditService {
                 touch(&a)
                 try store.upsertVisit(a)
                 try store.audit("visit", a.id, "merge", field: "absorbed_visit", new: b.id)
+                try relinkExpenses("visit_id", from: b.id, to: a.id)
                 if var next = try outgoingTrip(b.id) {
                     next.originVisitID = a.id
                     touch(&next)
@@ -472,6 +475,7 @@ public final class EditService {
         touch(&t)
         try store.upsertTrip(t, replaceSegments: false)
         try db.run("UPDATE flights SET trip_id = NULL WHERE trip_id = ?", t.id)
+        try relinkExpenses("trip_id", from: t.id, to: nil)
         try store.audit("trip", t.id, "delete")
     }
 
@@ -672,4 +676,67 @@ public final class EditService {
         try db.run("UPDATE stamps SET note = ?, updated_at = ? WHERE id = ?", new, Date(), stampID)
         try store.audit("stamp", stampID, "set_notes", field: "note", old: s.note, new: new)
     }
+
+    // MARK: - Costs (issue #17)
+
+    /// Add a cost, or save changes to one. A trip or visit that gets a cost is locked like any other edit, so
+    /// reprocessing can't replace it and leave the cost pointing at nothing.
+    @discardableResult
+    public func saveExpense(_ expense: Expense) throws -> Expense {
+        try db.transaction {
+            var e = expense
+            guard e.amount.isFinite, e.amount >= 0 else { throw EditError.invalid("A cost can't be negative.") }
+            e.currency = e.currency.trimmingCharacters(in: .whitespaces).uppercased()
+            guard e.currency.count == 3, e.currency.allSatisfy({ $0.isASCII && $0.isLetter }) else {
+                throw EditError.invalid("The currency must be a 3-letter code such as USD.")
+            }
+            guard e.tripID == nil || e.visitID == nil else { throw EditError.invalid("A cost belongs to a trip or a visit, not both.") }
+            let n = e.note?.trimmingCharacters(in: .whitespacesAndNewlines)
+            e.note = (n?.isEmpty ?? true) ? nil : n
+            if let id = e.tripID {
+                var t = try tripOrThrow(id)
+                if t.userStatus == .auto {
+                    touch(&t)
+                    try store.upsertTrip(t, replaceSegments: false)
+                }
+            }
+            if let id = e.visitID {
+                var v = try visitOrThrow(id)
+                if v.userStatus == .auto {
+                    touch(&v)
+                    try store.upsertVisit(v)
+                }
+            }
+            let old = try store.expense(e.id)
+            e.updatedAt = Date()
+            if let old { e.createdAt = old.createdAt }
+            try store.upsertExpense(e)
+            guard let old else {
+                try store.audit("expense", e.id, "create", field: "amount", new: Self.money(e))
+                return e
+            }
+            for (field, a, b) in [("amount", Self.money(old), Self.money(e)), ("category", old.category.rawValue, e.category.rawValue),
+                                  ("trip_id", old.tripID, e.tripID), ("visit_id", old.visitID, e.visitID),
+                                  ("note", old.note, e.note), ("ts", iso(old.timestamp), iso(e.timestamp))] where a != b {
+                try store.audit("expense", e.id, "update", field: field, old: a, new: b)
+            }
+            return e
+        }
+    }
+
+    public func deleteExpense(_ expenseID: String) throws {
+        guard let e = try store.expense(expenseID) else { throw EditError.notFound("cost \(expenseID)") }
+        try db.run("UPDATE expenses SET deleted = 1, updated_at = ? WHERE id = ?", Date(), expenseID)
+        try store.audit("expense", expenseID, "delete", field: "amount", old: Self.money(e))
+    }
+
+    /// Costs follow a trip or visit merged into another; with nowhere to go they stay on their day, by time.
+    private func relinkExpenses(_ column: String, from: String, to: String?) throws {
+        for r in try db.query("SELECT id FROM expenses WHERE \(column) = ? AND deleted = 0", from) {
+            try store.audit("expense", r.string("id") ?? "", "relink", field: column, old: from, new: to)
+        }
+        try db.run("UPDATE expenses SET \(column) = ?, updated_at = ? WHERE \(column) = ?", to, Date(), from)
+    }
+
+    private static func money(_ e: Expense) -> String { "\(e.amount) \(e.currency)" }
 }

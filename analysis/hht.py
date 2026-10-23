@@ -6,7 +6,7 @@ Load an HHT export (or the raw SQLite database) into pandas for research.
     d.trips.head()
 
 Tables (see docs/data-model.md): trips, segments, visits, places, flights, life_phases,
-points (raw GPS, if exported), motion, stamps (one-tap self-reports). Times are tz-aware; *_local columns use each record's tz.
+points (raw GPS, if exported), motion, stamps (one-tap self-reports), expenses (costs entered by the user). Times are tz-aware; *_local columns use each record's tz.
 """
 from __future__ import annotations
 
@@ -30,6 +30,7 @@ class HHT:
     points: pd.DataFrame | None = None
     motion: pd.DataFrame | None = None
     stamps: pd.DataFrame | None = None   # self-reported stops; visit_id = the visit inference attached it to
+    expenses: pd.DataFrame | None = None  # costs; on a trip_id, a visit_id or neither; amounts never converted
 
     # ---- convenience -------------------------------------------------------
     def phase(self, name: str) -> HHT:
@@ -45,7 +46,7 @@ class HHT:
         t = self.trips[(day >= start.tz_localize(None)) & (day < end.tz_localize(None))]
         v = self.visits[self.visits["visit_id"].isin(set(t["origin_visit_id"]) | set(t["destination_visit_id"]))]
         s = self.segments[self.segments["trip_id"].isin(t["trip_id"])]
-        return HHT(t, s, v, self.places, self.flights, self.life_phases, self.points, self.motion, self.stamps)
+        return HHT(t, s, v, self.places, self.flights, self.life_phases, self.points, self.motion, self.stamps, self.expenses)
 
 
 def _utc(s: pd.Series) -> pd.Series:
@@ -79,8 +80,11 @@ def _load_csv(folder: Path) -> HHT:
     stamps = read("stamps.csv")
     if len(stamps):
         stamps["time_utc"] = _utc(stamps["time_utc"])
+    expenses = read("expenses.csv")
+    if len(expenses):
+        expenses["time_utc"] = _utc(expenses["time_utc"])
     return HHT(trips, seg, visits, read("places.csv"), read("flights.csv"), read("life_phases.csv"),
-               pts if len(pts) else None, read("motion_activities.csv"), stamps)
+               pts if len(pts) else None, read("motion_activities.csv"), stamps, expenses)
 
 
 def _load_sqlite(db: Path) -> HHT:
@@ -127,8 +131,18 @@ def _load_sqlite(db: Path) -> HHT:
                       FROM stamps s LEFT JOIN visits v ON v.id = s.visit_id AND v.deleted = 0
                       WHERE s.deleted = 0 ORDER BY s.ts""")
         stamps["time_utc"] = pd.to_datetime(stamps["ts"], unit="s", utc=True)
+    expenses = pd.DataFrame()
+    if con.execute("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'expenses'").fetchone():  # schema v6+
+        expenses = q("""SELECT e.id AS expense_id, e.ts, e.tz, e.amount, e.currency, e.category,
+                               CASE WHEN t.id IS NULL THEN NULL ELSE e.trip_id END AS trip_id,
+                               CASE WHEN v.id IS NULL THEN NULL ELSE e.visit_id END AS visit_id, e.note
+                        FROM expenses e
+                        LEFT JOIN trips t ON t.id = e.trip_id AND t.deleted = 0
+                        LEFT JOIN visits v ON v.id = e.visit_id AND v.deleted = 0
+                        WHERE e.deleted = 0 ORDER BY e.ts""")
+        expenses["time_utc"] = pd.to_datetime(expenses["ts"], unit="s", utc=True)
     out = HHT(trips, seg, visits, places, q("SELECT * FROM flights"), q("SELECT * FROM life_phases"),
-              pts, q("SELECT * FROM motion_activities"), stamps)
+              pts, q("SELECT * FROM motion_activities"), stamps, expenses)
     con.close()
     return out
 

@@ -7,6 +7,9 @@ single summary, so release notes aren't kept anywhere else in the repository.
 
 ## Unreleased
 
+- Costs: note what a trip or a stop cost. Today asks about the latest transit, taxi or flight trip ("Free" or the usual
+  fare in one tap), a "Spent today" card adds costs to any day, and a Spending page (from Today or Stats) breaks totals
+  down by travel vs destinations, category, mode (per trip, per km) and place. Exported as `expenses.csv` (#17)
 - Website: organization homepage for HHT Diary, top-level Vision, Roadmap and Products pages, `/docs/` landing;
   old `vision.html` and `roadmap.html` redirect (#70)
 - Docs: Vision, Roadmap, Research uses & limitations, Validation and Data dictionary pages; landing page, privacy

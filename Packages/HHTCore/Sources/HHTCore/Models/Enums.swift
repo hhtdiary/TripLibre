@@ -318,3 +318,93 @@ public enum UserStatus: String, Codable, Sendable {
     case manual      // user created it
     public var isLocked: Bool { self != .auto }
 }
+
+/// What money was spent on (issue #17). Raw values are the canonical codes written to the database and exports;
+/// never rename a shipped one, only append new cases.
+public enum ExpenseCategory: String, CaseIterable, Codable, Identifiable, Sendable {
+    case fare            // transit fare, train / bus / ferry ticket, bike share
+    case taxi            // taxi / ride-hail
+    case fuel            // fuel or charging
+    case parking         // parking, tolls
+    case flight
+    case lodging
+    case food            // meals, coffee, snacks
+    case admission       // tickets, entry, activities
+    case shopping
+    case other
+
+    public var id: String { rawValue }
+    public var label: String {
+        switch self {
+        case .fare: return "Fare / ticket"
+        case .taxi: return "Taxi / ride"
+        case .fuel: return "Fuel / charging"
+        case .parking: return "Parking / tolls"
+        case .flight: return "Flight"
+        case .lodging: return "Lodging"
+        case .food: return "Food & drink"
+        case .admission: return "Admission"
+        case .shopping: return "Shopping"
+        case .other: return "Other"
+        }
+    }
+
+    /// SF Symbol name used by the app.
+    public var symbol: String {
+        switch self {
+        case .fare: return "ticket.fill"
+        case .taxi: return "car.side.fill"
+        case .fuel: return "fuelpump.fill"
+        case .parking: return "parkingsign"
+        case .flight: return "airplane"
+        case .lodging: return "bed.double.fill"
+        case .food: return "fork.knife"
+        case .admission: return "theatermasks.fill"
+        case .shopping: return "bag.fill"
+        case .other: return "ellipsis.circle"
+        }
+    }
+
+    /// The cost of getting somewhere, as opposed to spending once there.
+    public var isTravel: Bool {
+        switch self {
+        case .fare, .taxi, .fuel, .parking, .flight: return true
+        case .lodging, .food, .admission, .shopping, .other: return false
+        }
+    }
+
+    /// Best first guess for a cost on a trip by `mode`.
+    public static func suggested(for mode: TravelMode) -> ExpenseCategory {
+        switch mode {
+        case .taxi: return .taxi
+        case .airplane: return .flight
+        case .car, .carDriver, .carPassenger: return .fuel
+        case .walk, .run, .other, .unknown: return .other
+        default: return .fare
+        }
+    }
+
+    /// Best first guess for a cost during a stay at a place of `category`.
+    public static func suggested(for category: PlaceCategory?) -> ExpenseCategory {
+        switch category {
+        case .restaurant, .cafe, .bar, .grocery, .convenienceStore: return .food
+        case .shopping, .pharmacy: return .shopping
+        case .hotel: return .lodging
+        case .museum, .stadium, .eventVenue, .entertainment, .recreation, .gym: return .admission
+        case .parking: return .parking
+        case .gasStation: return .fuel
+        default: return .other
+        }
+    }
+}
+
+extension TravelMode {
+    /// Modes that usually cost something per trip, so the app asks about them (issue #17).
+    /// Cars are left out: fuel and parking rarely map to one trip.
+    public var usuallyPaid: Bool {
+        switch self {
+        case .taxi, .bus, .subway, .lightRail, .commuterRail, .intercityRail, .coach, .ferry, .airplane: return true
+        default: return false
+        }
+    }
+}

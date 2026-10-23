@@ -86,9 +86,10 @@ test fixture that CI exports on every run, not from a real person.</p>
   <tr><td><code>visits.csv</code></td><td>CSV</td><td>Yes</td><td>Stays.</td></tr>
   <tr><td><code>places.csv</code></td><td>CSV</td><td>No</td><td>All active places, with visit counts.</td></tr>
   <tr><td><code>stamps.csv</code></td><td>CSV</td><td>Yes</td><td>Self-reported stops.</td></tr>
+  <tr><td><code>expenses.csv</code></td><td>CSV</td><td>Yes</td><td>Costs the user entered.</td></tr>
   <tr><td><code>flights.csv</code>, <code>life_phases.csv</code>, <code>audit_log.csv</code></td><td>CSV</td><td>No</td><td>As stored.</td></tr>
   <tr><td><code>raw_location_points.csv</code>, <code>motion_activities.csv</code></td><td>CSV</td><td>Yes</td><td>Only when <i>Include raw GPS points</i> is on.</td></tr>
-  <tr><td><code>data.json</code></td><td>JSON</td><td>Visits, trips, segments, stamps</td><td>All tables except raw points and motion.</td></tr>
+  <tr><td><code>data.json</code></td><td>JSON</td><td>Visits, trips, segments, stamps, expenses</td><td>All tables except raw points and motion.</td></tr>
   <tr><td><code>places.geojson</code>, <code>trips.geojson</code>, <code>trip_ends.geojson</code></td><td>GeoJSON</td><td>Trips only</td><td>Points and LineStrings for GIS.</td></tr>
   <tr><td><code>travel.sqlite</code></td><td>SQLite</td><td><b>No</b></td><td>The <b>complete</b> database, raw points included, whatever the options.</td></tr>
   <tr><td><code>README.txt</code></td><td>Text</td><td>—</td><td>A short guide to the files.</td></tr>
@@ -151,6 +152,16 @@ IATA or station code.</p>
 <code>lat</code>/<code>lon</code> are rounded to 3 decimals and empty if there was no fix in the last 10 minutes.
 <code>visit_id</code> is the visit inference attached the stamp to, empty if none.</p>
 
+<h3>expenses.csv</h3>
+<p><code>expense_id, ts, time_utc, tz, amount, currency, category, trip_id, visit_id, note</code>. One row per cost the
+user entered (schema v6). <code>currency</code> is an ISO 4217 code; amounts in different currencies are never converted.
+<code>amount</code> 0 means the user said it was free (a pass, a lift), which differs from no row at all.
+<code>category</code> is <code>fare</code>, <code>taxi</code>, <code>fuel</code>, <code>parking</code>, <code>flight</code>,
+<code>lodging</code>, <code>food</code>, <code>admission</code>, <code>shopping</code> or <code>other</code>.
+A cost is on a <code>trip_id</code>, a <code>visit_id</code>, or neither (a cost on that day, dated by <code>ts</code>);
+an id is empty unless it points at an exported trip or visit. <code>ts</code> is the trip's departure, when the stay
+began (or when it was entered, during an ongoing stay), or the time the user chose.</p>
+
 <h3>raw_location_points.csv</h3>
 <p><code>id, ts, time_utc, lat, lon, h_accuracy, altitude, v_accuracy, speed, speed_accuracy, course, source,
 collector_mode, tz, inserted_at</code>. <code>source</code> is <code>gps</code>, <code>significant_change</code>,
@@ -190,7 +201,7 @@ gas_station bar gym pharmacy bank civic religious parking</code>. Codes are neve
 <h3>data.json</h3>
 <p>One object: <code>format</code> (<code>"hht-personal-travel-diary"</code>), <code>schema_version</code>,
 <code>exported_at</code>, <code>range</code> (<code>null</code> for everything), then one array per table:
-<code>places, visits, trips, trip_segments, flights, journeys, journey_members, life_phases, stamps, audit_log</code>.
+<code>places, visits, trips, trip_segments, flights, journeys, journey_members, life_phases, stamps, expenses, audit_log</code>.
 Rows are the database columns as stored: times are Unix seconds, and <code>trips.purpose</code> is the explicit purpose
 only (the CSV's <code>purpose</code> is the resolved one).</p>
 <pre data-lang="text"><code>{"format": "hht-personal-travel-diary", "schema_version": 5, "range": null,
@@ -217,6 +228,7 @@ d.trips       # trips.csv, times parsed as UTC
 d.segments    # trip_segments.csv
 d.visits, d.places, d.flights, d.life_phases
 d.stamps      # self-reported stops
+d.expenses    # costs entered by the user
 d.points      # raw GPS, None if not exported
 d.motion      # CoreMotion episodes</code></pre>
 <p><code>analysis/hht.py</code> reads both formats into the same columns. <code>make export-check</code> verifies on every CI
@@ -229,7 +241,7 @@ run that the CSV and SQLite versions of one export agree. More helpers are on th
     and written to <code>data.json</code> and <code>README.txt</code> in every export.</li>
   <li>Migrations only ever add (<code>Schema.swift</code>). Columns and codes are not renamed or removed, so code written
     for an older export keeps working.</li>
-  <li>History: v1 initial schema · v2 places can be deleted · v3 stamps · v4 more place categories · v5 custom place types.</li>
+  <li>History: v1 initial schema · v2 places can be deleted · v3 stamps · v4 more place categories · v5 custom place types · v6 costs.</li>
   <li>A formal, machine-readable schema file for exports is <span class="status planned">Planned</span>.</li>
 </ul>
 

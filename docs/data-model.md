@@ -114,6 +114,16 @@ One row per tap of *Stamp this moment*: "something worth recording happened arou
 are replaced by deletion), `note, tz, deleted, created_at, updated_at`.
 The coordinate is never treated as the stop's true position; see [inference.md §8](inference.md#8-self-reported-stamps).
 
+### expenses  (schema v6; costs, issue #17)
+
+Money spent on a trip, during a stop, or on a day: `id, ts, amount, currency (ISO 4217), category`
+(`fare|taxi|fuel|parking|flight|lodging|food|admission|shopping|other`), `trip_id`, `visit_id` (at most one is set; neither =
+a cost on the day of `ts`), `note, tz, deleted, created_at, updated_at`. An amount of 0 records "free" (a pass, a lift).
+No foreign keys, like stamps; the edit that adds a cost locks its trip or visit (`user_status = 'edited'`) so
+reprocessing can't replace it. When trips or visits are merged the costs follow the surviving record; when one is
+deleted its costs stay on the day (`trip_id`/`visit_id` set to NULL). Currencies are never converted: summaries use the
+most common currency and list the others separately.
+
 ### life_phases
 
 `id, name, kind (semester|job|residence|vacation|research_trip|other), start_date, end_date (inclusive, NULL = ongoing), notes`.
@@ -124,7 +134,7 @@ Reference data from OurAirports (public domain), downloaded on request: `iata, i
 
 ### audit_log
 
-`id, ts, entity_type (visit|trip|trip_segment|place|flight|stamp), entity_id, action, field, old_value, new_value`.
+`id, ts, entity_type (visit|trip|trip_segment|place|flight|stamp|expense), entity_id, action, field, old_value, new_value`.
 Actions include `set_mode, set_purpose, set_place, set_times, merge, split, delete, confirm, create, relink, infer_departure`.
 This is also a labelled training set: every `set_mode` row is a ground-truth mode for a trip.
 
@@ -149,4 +159,6 @@ the person-day), OD place ids/names/categories/coordinates, UTC and local times,
 `mode`, `mode_group`, `mode_auto`, `mode_confidence`, `mode_user`, `n_segments`, `segment_modes` (`walk|subway|walk`),
 `purpose`, `has_gap`, provenance. Every other CSV joins on the same IDs. `stamps.csv` lists the non-deleted stamps
 (`stamp_id, ts, time_utc, tz, lat, lon, uncertainty_m, fix_accuracy_m, fix_age_s, visit_id, note`; `visit_id` is empty
-unless it points at an exported visit); `analysis/hht.py` loads it as `d.stamps`. `*_ts` columns are accompanied by `*_utc` ISO strings.
+unless it points at an exported visit); `analysis/hht.py` loads it as `d.stamps`. `expenses.csv` lists the non-deleted
+costs (`expense_id, ts, time_utc, tz, amount, currency, category, trip_id, visit_id, note`; ids empty unless they point
+at an exported trip or visit), loaded as `d.expenses`. `*_ts` columns are accompanied by `*_utc` ISO strings.

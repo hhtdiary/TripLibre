@@ -282,6 +282,10 @@ struct EditExportTests {
         let tap = v[1].arrival.addingTimeInterval(600)
         try edit.addStamp(at: tap, fix: v[1].coordinate, fixAccuracy: 30, fixTime: tap)
         try engine.process(from: tr.points[0].timestamp, to: tr.t, now: tr.t.addingTimeInterval(60))
+        // a cost on the first trip and one at Penn, so the contract check covers expenses.csv
+        let first = try store.allTrips().sorted { $0.departure < $1.departure }[0]
+        try edit.saveExpense(Expense(timestamp: first.departure, amount: 2.9, currency: "USD", category: .fare, tripID: first.id))
+        try edit.saveExpense(Expense(timestamp: tap, amount: 4.5, currency: "USD", category: .food, visitID: v[1].id))
         let folder = try Exporter(store: store).exportBundle(to: URL(fileURLWithPath: dir))
         print("HHT export written to \(folder.path)")
     }

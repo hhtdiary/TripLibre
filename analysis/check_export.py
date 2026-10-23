@@ -39,6 +39,12 @@ def main(path: str) -> None:
     if len(csv.stamps):
         assert set(csv.stamps["stamp_id"]) == set(db.stamps["stamp_id"]), "stamp ids differ between CSV and SQLite"
         assert set(csv.stamps["visit_id"].dropna()) <= visit_ids, "stamps reference unknown visits"
+    # costs: same rows in both, and a linked cost points at an exported trip or visit
+    assert len(csv.expenses) == len(db.expenses), f"CSV has {len(csv.expenses)} costs, SQLite {len(db.expenses)}"
+    if len(csv.expenses):
+        assert set(csv.expenses["expense_id"]) == set(db.expenses["expense_id"]), "cost ids differ between CSV and SQLite"
+        assert set(csv.expenses["trip_id"].dropna()) <= set(csv.trips["trip_id"]), "costs reference unknown trips"
+        assert set(csv.expenses["visit_id"].dropna()) <= visit_ids, "costs reference unknown visits"
 
     s = summary(db)
     assert s["trips"] == len(db.trips)
