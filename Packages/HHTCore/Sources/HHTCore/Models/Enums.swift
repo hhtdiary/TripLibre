@@ -408,3 +408,9 @@ extension TravelMode {
         }
     }
 }
+
+extension PlaceCategory {
+    /// Places where a stay usually costs something (a meal, a ticket, a room), so the app asks about each visit
+    /// there (issue #75). Home, work and other everyday places are left out.
+    public var usuallyPaid: Bool { ExpenseCategory.suggested(for: self) != .other }
+}

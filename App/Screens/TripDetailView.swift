@@ -14,6 +14,7 @@ struct TripDetailView: View {
     @State private var notes = ""
     @State private var history: [AuditEntry] = []
     @State private var costs: [Expense] = []
+    @State private var costSheet: CostSheet?
     @State private var confirmDelete = false
     @State private var showSplit = false
     @State private var showAllModes = false
@@ -101,7 +102,7 @@ struct TripDetailView: View {
                 }
             }
 
-            CostsSection(costs: costs, target: .trip(t))
+            CostsSection(costs: costs, target: .trip(t), sheet: $costSheet)
 
             Section("Notes") {
                 TextField("Add a note", text: $notes, axis: .vertical)
@@ -148,6 +149,7 @@ struct TripDetailView: View {
         } message: {
             Text("Use this for GPS jumps. The stay before and after become one visit. Raw data is kept.")
         }
+        .sheet(item: $costSheet) { c in CostEntrySheet(target: c.target, existing: c.existing).environmentObject(model) }
         .sheet(isPresented: $showSplit) { SplitTripSheet(trip: t).environmentObject(model) }
         .sheet(isPresented: $showModeChange) { ModeChangeSheet(trip: t).environmentObject(model) }
         .sheet(item: $editingSegment) { b in

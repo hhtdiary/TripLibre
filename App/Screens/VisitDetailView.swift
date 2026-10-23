@@ -16,6 +16,7 @@ struct VisitDetailView: View {
     @State private var history: [AuditEntry] = []
     @State private var stamps: [Stamp] = []
     @State private var costs: [Expense] = []
+    @State private var costSheet: CostSheet?
     @State private var showPlacePicker = false
     @State private var showSplit = false
     @State private var confirmDelete = false
@@ -105,7 +106,7 @@ struct VisitDetailView: View {
                 }
             }
 
-            CostsSection(costs: costs, target: .visit(v, place))
+            CostsSection(costs: costs, target: .visit(v, place), sheet: $costSheet)
 
             Section("Notes") {
                 TextField("Add a note", text: $notes, axis: .vertical).onSubmit(saveNotes)
@@ -153,6 +154,7 @@ struct VisitDetailView: View {
             .environmentObject(model)
         }
         .sheet(item: $editPlace) { box in NavigationStack { PlaceDetailView(placeID: box.id) }.environmentObject(model) }
+        .sheet(item: $costSheet) { c in CostEntrySheet(target: c.target, existing: c.existing).environmentObject(model) }
         .sheet(isPresented: $showSplit) { SplitVisitSheet(visit: v).environmentObject(model) }
     }
 

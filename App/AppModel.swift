@@ -232,11 +232,11 @@ final class AppModel: ObservableObject {
         UserDefaults.standard.set(e.currency, forKey: "costCurrency")
     }
 
-    /// Trips the user said not to ask about (newest last, capped): the Today prompt moves on to the next one.
+    /// Trips and visits the user said not to ask about (newest last, capped): their Today prompt goes away.
     private(set) var skippedCostPrompts: [String] = UserDefaults.standard.stringArray(forKey: "costPromptSkipped") ?? []
 
-    func skipCostPrompt(_ tripID: String) {
-        skippedCostPrompts = Array((skippedCostPrompts + [tripID]).suffix(100))
+    func skipCostPrompt(_ id: String) {
+        skippedCostPrompts = Array((skippedCostPrompts + [id]).suffix(300))
         UserDefaults.standard.set(skippedCostPrompts, forKey: "costPromptSkipped")
         revision += 1
     }
