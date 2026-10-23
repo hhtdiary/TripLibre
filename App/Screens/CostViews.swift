@@ -68,6 +68,8 @@ enum CostTarget {
 struct CostSheet: Identifiable {
     var target: CostTarget
     var existing: Expense?
+    /// The day on screen when it was opened from Today's prompt: a cost for a stay is kept on that day.
+    var day: Date?
     var id: String { existing?.id ?? "new" }
 }
 
@@ -90,6 +92,8 @@ struct CostEntrySheet: View {
     @Environment(\.dismiss) private var dismiss
     let target: CostTarget
     var existing: Expense?
+    /// The day on screen, when opened from Today's prompt for a stay (see `CostSheet.day`).
+    var day: Date?
 
     @AppStorage("costCurrency") private var lastCurrency = Expense.defaultCurrency
     @State private var amountText = ""
@@ -329,9 +333,10 @@ struct CostEntrySheet: View {
             if existing?.visitID != id {
                 if isDayTarget {
                     // added from a day's card: keep it on that day, within the part of the stay that falls on it
-                    let d = DateRange.day(time)
-                    let lo = max(v.arrival, d.start), hi = min(v.departure ?? Date(), d.end)
-                    e.timestamp = lo <= hi ? min(max(time, lo), hi) : time
+                    e.timestamp = Self.costTime(v, on: time, preferring: time)
+                } else if let day {
+                    // from Today's prompt for that day (issue #75)
+                    e.timestamp = Self.costTime(v, on: day)
                 } else {
                     // a cost during an ongoing stay is dated now; otherwise when the stay began
                     e.timestamp = v.departure == nil ? max(v.arrival, Date()) : v.arrival
@@ -343,6 +348,15 @@ struct CostEntrySheet: View {
         }
         model.saveCost(e)
         dismiss()
+    }
+
+    /// When a cost for stay `v` added while looking at `day` is dated: `preferred` (by default now on today, else the
+    /// start of the stay's part of the day), kept within the part of the stay that falls on `day`.
+    static func costTime(_ v: Visit, on day: Date, preferring preferred: Date? = nil) -> Date {
+        let d = DateRange.day(day)
+        let lo = max(v.arrival, d.start), hi = min(v.departure ?? Date(), d.end)
+        let want = preferred ?? (Calendar.current.isDateInToday(day) ? Date() : lo)
+        return lo <= hi ? min(max(want, lo), hi) : want
     }
 
     private static func name(_ p: Place?) -> String? { p.flatMap { $0.isNamed ? $0.displayName : nil } }
@@ -456,9 +470,8 @@ struct CostPromptCard: View {
             model.saveCost(Expense(timestamp: t.departure, amount: amount, currency: currency, category: category,
                                    tripID: t.id, timeZone: t.timeZone))
         case .visit(let v, _):
-            // on the day being shown: now during an ongoing stay, else when the stay began (or the day did)
-            let at = v.departure == nil ? max(v.arrival, Date()) : max(v.arrival, DateRange.day(prompt.day).start)
-            model.saveCost(Expense(timestamp: at, amount: amount, currency: currency, category: category,
+            // on the day being shown, not today: a stay can run across several days (issue #75)
+            model.saveCost(Expense(timestamp: CostEntrySheet.costTime(v, on: prompt.day), amount: amount, currency: currency, category: category,
                                    visitID: v.id, timeZone: v.timeZone))
         case .day: break
         }

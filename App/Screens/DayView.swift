@@ -43,6 +43,8 @@ struct DayData {
     var costsByTrip: [String: [Expense]] = [:]
     var costsByVisit: [String: [Expense]] = [:]
     var looseCosts: [Expense] = []
+    /// Trips and visits with a cost on any day: a stay or trip across midnight is already answered on its other days.
+    var paidIDs: Set<String> = []
 
     static func load(_ store: TravelStore, day: Date) -> DayData {
         let r = DateRange.day(day)
@@ -61,6 +63,14 @@ struct DayData {
             if let id = e.tripID, tripIDs.contains(id) { d.costsByTrip[id, default: []].append(e) }
             else if let id = e.visitID, visitIDs.contains(id) { d.costsByVisit[id, default: []].append(e) }
             else { d.looseCosts.append(e) }
+        }
+        d.paidIDs = Set(d.costsByTrip.keys).union(d.costsByVisit.keys)
+        // only records reaching past this day can have costs dated on another one
+        for t in d.trips where d.costsByTrip[t.id] == nil && (t.departure < r.start || t.arrival > r.end) {
+            if !((try? store.expenses(tripID: t.id)) ?? []).isEmpty { d.paidIDs.insert(t.id) }
+        }
+        for v in d.visits where d.costsByVisit[v.id] == nil && (v.arrival < r.start || (v.departure ?? Date()) > r.end) {
+            if !((try? store.expenses(visitID: v.id)) ?? []).isEmpty { d.paidIDs.insert(v.id) }
         }
         d.items = (d.visits.map { DiaryItem.visit($0, $0.placeID.flatMap { d.places[$0] }) } + d.trips.map { DiaryItem.trip($0) }
                    + d.unmatchedStamps.map { DiaryItem.stamp($0) } + d.looseCosts.map { DiaryItem.cost($0) })
@@ -102,7 +112,7 @@ struct DayView: View {
                 MascotSays(text: mascotLine).toonRow(top: 8, bottom: 8)
                 if isToday && !fixedDay { StampButton().toonRow(top: 4, bottom: 6) }
                 ForEach(costPrompts) { p in
-                    CostPromptCard(prompt: p) { costTarget = CostSheet(target: p.target) }
+                    CostPromptCard(prompt: p) { costTarget = CostSheet(target: p.target, day: day) }
                         .toonRow(top: 4, bottom: 6)
                 }
                 if !fixedDay && reviewCount > 0 {
@@ -185,7 +195,7 @@ struct DayView: View {
         .refreshable { await model.runInference() }
         .sheet(item: $selectedTrip) { box in TripDetailView(tripID: box.id).environmentObject(model) }
         .sheet(item: $selectedVisit) { box in VisitDetailView(visitID: box.id).environmentObject(model) }
-        .sheet(item: $costTarget) { c in CostEntrySheet(target: c.target, existing: c.existing).environmentObject(model) }
+        .sheet(item: $costTarget) { c in CostEntrySheet(target: c.target, existing: c.existing, day: c.day).environmentObject(model) }
         .navigationDestination(isPresented: $showSpending) { SpendingView(period: .week) }
         .onReceive(model.$route) { r in
             guard let r, r == .settings || r == .stamp, !fixedDay else { return }
@@ -229,12 +239,12 @@ struct DayView: View {
         guard !fixedDay, now.timeIntervalSince(day) < 7 * 86_400 else { return [] }
         let skipped = Set(model.skippedCostPrompts)
         let trips = data.trips.filter { t in
-            t.mode.usuallyPaid && t.arrival <= now && data.costsByTrip[t.id] == nil && !skipped.contains(t.id)
+            t.mode.usuallyPaid && t.arrival <= now && !data.paidIDs.contains(t.id) && !skipped.contains(t.id)
         }
         .map { (end: $0.arrival, prompt: CostPrompt(target: .trip($0), day: day, destination: destinationName($0), id: $0.id)) }
         let visits = data.visits.compactMap { v -> (end: Date, prompt: CostPrompt)? in
             let p = v.placeID.flatMap { data.places[$0] }
-            guard p?.category?.usuallyPaid == true, v.arrival <= now, data.costsByVisit[v.id] == nil, !skipped.contains(v.id)
+            guard p?.category?.usuallyPaid == true, v.arrival <= now, !data.paidIDs.contains(v.id), !skipped.contains(v.id)
             else { return nil }
             return (v.departure ?? now, CostPrompt(target: .visit(v, p), day: day, id: v.id))
         }
