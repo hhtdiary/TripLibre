@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Architecture · HHT Docs</title>
-<meta name="description" content="How HHT is structured: the SwiftUI app, the HHTCore package, the data flow from GPS to diary, and the three data layers.">
+<title>Architecture · TripLibre Docs</title>
+<meta name="description" content="How TripLibre is structured: the SwiftUI app, the HHTCore package, the data flow from GPS to diary, and the three data layers.">
 <link rel="icon" href="assets/hht-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,13 +18,13 @@
 
 <p class="eyebrow">Concepts</p>
 <h1>Architecture</h1>
-<p class="lede">HHT is two things: a thin SwiftUI app that talks to iOS, and a platform-independent Swift package,
+<p class="lede">TripLibre is two things: a thin SwiftUI app that talks to iOS, and a platform-independent Swift package,
 <code>HHTCore</code>, that does everything else. All logic that matters for data quality lives in the package and is
 tested without a phone.</p>
 
 <h2>Data flow</h2>
 <div class="metro" role="img" aria-label="Data flow: sensors, raw tables, inference, diary, outputs">
-  <div class="line-name"><i>H</i>The HHT Line · from sensors to spreadsheets</div>
+  <div class="line-name"><i>H</i>The TripLibre Line · from sensors to spreadsheets</div>
   <ol>
     <li style="--seg:#5c9bff"><span class="stn"></span><b>Sensors</b><span class="d">CoreLocation fixes, CLVisit events, CoreMotion activity</span></li>
     <li style="--seg:#8bdb5e"><span class="stn"></span><b>Raw tables</b><span class="d">Append-only, never edited</span><span class="tag" style="--chip:#5c9bff">read-only</span></li>

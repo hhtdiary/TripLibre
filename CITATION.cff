@@ -1,9 +1,9 @@
 cff-version: 1.2.0
-message: "If you use HHT in your research, please cite it as below."
+message: "If you use TripLibre in your research, please cite it as below."
 type: software
-title: "HHT: An Open-Source, Privacy-First Travel Diary for Mobility Research"
+title: "TripLibre: An Open-Source, Privacy-First Travel Diary for Mobility Research"
 abstract: >-
-  HHT is an open-source, local-first iOS application designed for personal
+  TripLibre is an open-source, local-first iOS application designed for personal
   mobility tracking and travel behavior research. It records
   location data in the background, reconstructs daily travel activities
   into visits, trips, transportation modes, and trip chains. It allows
@@ -12,7 +12,7 @@ abstract: >-
   and SQLite formats, with a Python loader for further analysis.
 
   By combining automated GPS-based travel detection with user-controlled
-  data management, HHT aims to lower the technical and financial barriers
+  data management, TripLibre aims to lower the technical and financial barriers
   to collecting travel behavior data. Its broader vision is to provide
   researchers, educational institutions, and resource-constrained
   communities with an accessible and adaptable alternative to proprietary
@@ -27,7 +27,7 @@ version: 1.3.0
 date-released: 2026-10-19
 doi: 10.5281/zenodo.23307589
 license: Apache-2.0
-repository-code: "https://github.com/zyang91/HHT-app"
+repository-code: "https://github.com/zyang91/TripLibre"
 url: "https://hhtdiary.org/"
 keywords:
   - household travel survey

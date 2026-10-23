@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Validation &amp; known limitations · HHT Docs</title>
-<meta name="description" content="What has and hasn't been measured about HHT's accuracy: real-world observations, automated tests, a small personal calibration study, planned benchmarks and known failure modes.">
+<title>Validation &amp; known limitations · TripLibre Docs</title>
+<meta name="description" content="What has and hasn't been measured about TripLibre's accuracy: real-world observations, automated tests, a small personal calibration study, planned benchmarks and known failure modes.">
 <link rel="icon" href="assets/hht-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,12 +18,12 @@
 
 <p class="eyebrow">Research</p>
 <h1>Validation &amp; known limitations</h1>
-<p class="lede">How well does HHT reconstruct a day? This page separates three kinds of evidence: what has been observed
+<p class="lede">How well does TripLibre reconstruct a day? This page separates three kinds of evidence: what has been observed
 in everyday use, what the automated tests guarantee, and the formal benchmarking that has <b>not</b> been done yet.</p>
 
 <div class="callout warn"><div class="ic">!</div>
 <p>All accuracy numbers so far come from <b>one person's phone over 17 days</b>, scored against that person's own
-corrected diary. They describe that sample, not HHT in general. Please don't cite them as a general accuracy figure.</p></div>
+corrected diary. They describe that sample, not TripLibre in general. Please don't cite them as a general accuracy figure.</p></div>
 
 <h2>Three kinds of evidence</h2>
 <div class="table-wrap"><table>
@@ -65,10 +65,10 @@ corrected diary. They describe that sample, not HHT in general. Please don't cit
 </ul>
 
 <h2>Personal calibration study</h2>
-<p>Issue <a href="https://github.com/zyang91/HHT-app/issues/46">#46</a> replayed one phone's raw data through the engine
+<p>Issue <a href="https://github.com/zyang91/TripLibre/issues/46">#46</a> replayed one phone's raw data through the engine
 and compared it with the same person's corrected diary. The days were split into calibration days (for tuning) and
 validation days (scored once) before any tuning. The full protocol, metrics and adverse tradeoffs are in
-<a href="https://github.com/zyang91/HHT-app/blob/main/docs/research/inference-calibration.md"><code>docs/research/inference-calibration.md</code></a>.</p>
+<a href="https://github.com/zyang91/TripLibre/blob/main/docs/research/inference-calibration.md"><code>docs/research/inference-calibration.md</code></a>.</p>
 <div class="table-wrap"><table>
   <tr><th>Metric (round 1, 5 validation days)</th><th>Before</th><th>After</th></tr>
   <tr><td>Whole-day time agreement</td><td>0.827</td><td>0.939</td></tr>
@@ -93,7 +93,7 @@ evaluation should report, so that results can be compared across versions and st
   <tr><td>Whole day</td><td>Share of minutes where the diary and the truth agree on "at a place" versus "travelling".</td></tr>
   <tr><td>Mode</td><td>Exact and group-level accuracy, and a confusion matrix, on independently labelled trips.</td></tr>
   <tr><td>Completeness</td><td>Share of each day with collection running; days with gaps over 15 minutes; trips flagged <code>has_gap</code>.</td></tr>
-  <tr><td>Battery</td><td>Battery drain per day attributable to HHT, by collection profile and device model.</td></tr>
+  <tr><td>Battery</td><td>Battery drain per day attributable to TripLibre, by collection profile and device model.</td></tr>
   <tr><td>Correction burden</td><td>Edits per person-day and time spent correcting.</td></tr>
 </table></div>
 

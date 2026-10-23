@@ -1,4 +1,4 @@
-/* HHT documentation — shared styles. Independent of the project page (../index.html). */
+/* TripLibre documentation — shared styles. Independent of the project page (../index.html). */
 
 :root {
   --bg: #fbfbfa;
@@ -313,7 +313,7 @@ td code { white-space: nowrap; }
 
 .badge { display: inline-block; font: 500 11.5px var(--mono); padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--ink-soft); vertical-align: 2px; }
 
-/* Status labels (vision, roadmap, research, validation): what HHT does today vs. what is only planned. */
+/* Status labels (vision, roadmap, research, validation): what TripLibre does today vs. what is only planned. */
 .status { display: inline-block; font: 600 11.5px var(--mono); padding: 1px 8px; border-radius: 999px; border: 1px solid; vertical-align: 2px; white-space: nowrap; }
 /* Text is mixed toward --ink: darker in light mode, lighter in dark mode, so small labels keep 4.5:1 on their tint. */
 .status.available { color: color-mix(in srgb, var(--teal) 75%, var(--ink)); background: var(--teal-soft); }

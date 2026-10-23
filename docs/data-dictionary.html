@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Data dictionary · HHT Docs</title>
-<meta name="description" content="Every file and column in an HHT export: definitions, units, time zones, IDs, missing values, schema versioning and synthetic examples.">
+<title>Data dictionary · TripLibre Docs</title>
+<meta name="description" content="Every file and column in an TripLibre export: definitions, units, time zones, IDs, missing values, schema versioning and synthetic examples.">
 <link rel="icon" href="assets/hht-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,16 +18,16 @@
 
 <p class="eyebrow">Reference</p>
 <h1>Data dictionary</h1>
-<p class="lede">What you get when you export from HHT: each file, each column, and the rules for times, units, IDs and
+<p class="lede">What you get when you export from TripLibre: each file, each column, and the rules for times, units, IDs and
 missing values. Written for researchers receiving an export. It describes schema version 5, the current one.</p>
 <p>For the database internals (every table and migration), see
-<a href="https://github.com/zyang91/HHT-app/blob/main/docs/data-model.md"><code>docs/data-model.md</code></a>. For a
+<a href="https://github.com/zyang91/TripLibre/blob/main/docs/data-model.md"><code>docs/data-model.md</code></a>. For a
 shorter overview, see <a href="data.html">Data model &amp; export</a>. All examples on this page come from the synthetic
 test fixture that CI exports on every run, not from a real person.</p>
 
 <h2>Concepts</h2>
 <div class="table-wrap"><table>
-  <tr><th>Term</th><th>Definition in HHT</th></tr>
+  <tr><th>Term</th><th>Definition in TripLibre</th></tr>
   <tr><td><b>Raw observation</b></td><td>A GPS fix (<code>raw_location_points</code>) or a CoreMotion activity episode (<code>motion_activities</code>). Append-only: never edited or thinned.</td></tr>
   <tr><td><b>Inferred record</b></td><td>A visit, trip or segment produced by the inference engine (<code>user_status = auto</code>). Can be rebuilt from raw data at any time.</td></tr>
   <tr><td><b>User correction</b></td><td>A record the user confirmed, edited or created (<code>user_status</code> = <code>confirmed</code>, <code>edited</code> or <code>manual</code>), or deleted (<code>deleted = 1</code>). Locked against rebuilds. Each change is a row in <code>audit_log</code>.</td></tr>

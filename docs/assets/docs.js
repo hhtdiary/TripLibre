@@ -1,4 +1,4 @@
-// HHT documentation — shared chrome. Every page is just <main> content; the header, sidebar,
+// TripLibre documentation — shared chrome. Every page is just <main> content; the header, sidebar,
 // "On this page" outline and prev/next links are built here from NAV, so adding a page means
 // adding one entry below. Hrefs are relative to the site root (the folder above this script),
 // so the same chrome works for /installation.html and /docs/.
@@ -35,11 +35,11 @@ const NAV = [
     { href: 'vision/', title: 'Vision', ext: true },
     { href: 'roadmap/', title: 'Roadmap', ext: true },
     { href: 'backup/', title: 'Project story', ext: true },
-    { href: 'https://github.com/zyang91/HHT-app', title: 'GitHub', ext: true },
+    { href: 'https://github.com/zyang91/TripLibre', title: 'GitHub', ext: true },
   ] },
 ];
 
-const REPO = 'https://github.com/zyang91/HHT-app';
+const REPO = 'https://github.com/zyang91/TripLibre';
 
 const ICONS = {
   menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
@@ -67,7 +67,7 @@ function buildHeader() {
   h.className = 'dx-header';
   h.innerHTML = `
     <button class="icon-btn menu-btn" aria-label="Open navigation">${ICONS.menu}</button>
-    <a class="dx-brand" href="${url('docs/')}"><img src="${url('assets/hht-logo.png')}" alt="">HHT <span class="tag">docs</span></a>
+    <a class="dx-brand" href="${url('docs/')}"><img src="${url('assets/hht-logo.png')}" alt="">TripLibre <span class="tag">docs</span></a>
     <nav>
       <a class="hide-sm" href="${url('')}">HHT Diary</a>
       <a class="hide-sm" href="${url('products/')}">Products</a>
@@ -147,7 +147,7 @@ function buildPager(content) {
 
   const foot = document.createElement('footer');
   foot.className = 'dx-foot';
-  foot.innerHTML = `<span>HHT · Apache 2.0 · from a travel survey of one to travel surveys within reach</span>
+  foot.innerHTML = `<span>TripLibre · Apache 2.0 · from a travel survey of one to travel surveys within reach</span>
     <span><a href="${url('vision/')}">Vision</a> · <a href="${url('roadmap/')}">Roadmap</a> ·
     <a href="https://doi.org/10.5281/zenodo.23307589">Cite</a> ·
     <a href="${REPO}/edit/main/docs/${currentFile().replace(/\/$/, '/index.html')}">Edit this page on GitHub</a></span>`;

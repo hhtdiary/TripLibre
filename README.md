@@ -1,8 +1,8 @@
 <p align="center">
-  <img src="docs/assets/hht-logo.png" width="112" height="112" alt="HHT logo: a route joining four stops on a dark map grid">
+  <img src="docs/assets/hht-logo.png" width="112" height="112" alt="TripLibre logo: a route joining four stops on a dark map grid">
 </p>
 
-<h1 align="center">HHT — personal travel diary</h1>
+<h1 align="center">TripLibre — personal travel diary</h1>
 
 <p align="center">
   <em>From a travel survey of one to travel surveys within reach.</em><br>
@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <a href="https://github.com/zyang91/HHT-app/actions/workflows/ci.yml"><img src="https://github.com/zyang91/HHT-app/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
+  <a href="https://github.com/zyang91/TripLibre/actions/workflows/ci.yml"><img src="https://github.com/zyang91/TripLibre/actions/workflows/ci.yml/badge.svg?branch=main" alt="CI"></a>
   <img src="https://img.shields.io/badge/iOS-17%2B-0f1f3a?logo=apple&logoColor=white" alt="iOS 17+">
   <img src="https://img.shields.io/badge/Swift-SwiftUI-F05138?logo=swift&logoColor=white" alt="Swift / SwiftUI">
   <img src="https://img.shields.io/badge/data-local--first-5ac8a0" alt="Local-first data">
@@ -38,9 +38,13 @@
 A private, local-first iOS app that works like a continuous **household travel survey for one person**.
 It records location in the background, rebuilds each day into **visits, trips, modes and trip chains**, lets you fix
 mistakes in one or two taps, and exports a clean, survey-shaped dataset (CSV / JSON / GeoJSON / SQLite).
+
+TripLibre (formerly HHT) is the first product of [HHT Diary](https://hhtdiary.org/), the organization led by
+Zhanchao Yang that builds open, local-first mobility tools. Code names still use HHT (`HHTCore`, `HHT.xcodeproj`,
+`analysis/hht.py`), and so does the name under the icon on your phone for now (#77).
 No account, no server, no analytics: the data stays on the phone unless you export it.
 
-HHT began as one transportation researcher's travel survey of one, built with AI assistance (Claude). The longer-term
+TripLibre began as one transportation researcher's travel survey of one, built with AI assistance (Claude). The longer-term
 aim is open, affordable travel data collection for researchers, students and small agencies. That is a plan, not a
 feature: see the [Vision](https://hhtdiary.org/vision/) and [Roadmap](https://hhtdiary.org/roadmap/).
 The original product brief is in [`design/`](design/personal_travel_tracker_claude_brief.md).
@@ -84,7 +88,7 @@ project.yml             XcodeGen spec (HHT.xcodeproj is generated from it)
 
 ## Install on your iPhone (personal use, no App Store)
 
-HHT is not on the App Store yet; you build it from source. Full guide: [Installation](https://hhtdiary.org/installation.html).
+TripLibre is not on the App Store yet; you build it from source. Full guide: [Installation](https://hhtdiary.org/installation.html).
 
 **Reinstalling / renewing every 7 days → see [INSTALL.md](INSTALL.md)** (`make phone`).
 
@@ -145,7 +149,7 @@ Or query `travel.sqlite` directly (`v_trips`, `v_visits` views) from R/DBI, Duck
 
 ### Research use and limitations
 
-HHT data is good for longitudinal N-of-1 studies, trip and mode inference research, human-in-the-loop correction,
+TripLibre data is good for longitudinal N-of-1 studies, trip and mode inference research, human-in-the-loop correction,
 pilots and teaching. It is **not** a representative household travel survey: participants self-select, need an
 iPhone, and may share only some days; GPS drift, signal loss and collection gaps leave holes; and trajectories alone
 don't tell you purpose, companions or household context. Accuracy has been measured only on one person's 17 days so
@@ -197,10 +201,10 @@ under the license's terms.
 
 ## Citation
 
-If you use HHT in research, please cite the archived software ([`CITATION.cff`](CITATION.cff); GitHub's *Cite this repository* button gives APA and BibTeX).
+If you use TripLibre in research, please cite the archived software ([`CITATION.cff`](CITATION.cff); GitHub's *Cite this repository* button gives APA and BibTeX).
 The DOI below is Zenodo's concept DOI: it always resolves to the latest release, and each version also has its own DOI on Zenodo.
 
-> Yang, Z. *HHT: An Open-Source, Privacy-First Travel Diary for Mobility Research.* Zenodo. <https://doi.org/10.5281/zenodo.23307589>
+> Yang, Z. *TripLibre: An Open-Source, Privacy-First Travel Diary for Mobility Research.* Zenodo. <https://doi.org/10.5281/zenodo.23307589>
 
 ---
 

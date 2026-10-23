@@ -1,12 +1,15 @@
 # Changelog
 
-All released versions of HHT. Each GitHub release is archived on Zenodo under the concept DOI
+All released versions of TripLibre (called HHT before the rename in #77). Each GitHub release is archived on Zenodo under the concept DOI
 [10.5281/zenodo.23307589](https://doi.org/10.5281/zenodo.23307589), which always resolves to the latest version.
-Full notes for each release are on [GitHub Releases](https://github.com/zyang91/HHT-app/releases); this file is the
+Full notes for each release are on [GitHub Releases](https://github.com/zyang91/TripLibre/releases); this file is the
 single summary, so release notes aren't kept anywhere else in the repository.
 
 ## Unreleased
 
+- Renamed the app to TripLibre; HHT Diary is now the parent organization. README, docs, website, `CITATION.cff` and
+  Zenodo metadata use the new name and the `zyang91/TripLibre` repository. Code names and the on-device name are
+  unchanged for now (#77)
 - Costs: note what a trip or a stop cost. Today asks about the latest transit, taxi or flight trip ("Free" or the usual
   fare in one tap), a "Spent today" card adds costs to any day, and a Spending page (from Today or Stats) breaks totals
   down by travel vs destinations, category, mode (per trip, per km) and place. Exported as `expenses.csv` (#17)

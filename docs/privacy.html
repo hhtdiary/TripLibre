@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Privacy · HHT Docs</title>
-<meta name="description" content="What HHT stores, what (almost nothing) leaves your phone, and how to share travel data safely.">
+<title>Privacy · TripLibre Docs</title>
+<meta name="description" content="What TripLibre stores, what (almost nothing) leaves your phone, and how to share travel data safely.">
 <link rel="icon" href="assets/hht-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -18,7 +18,7 @@
 
 <p class="eyebrow">Concepts</p>
 <h1>Privacy</h1>
-<p class="lede">HHT has no account, no server, no analytics SDK and no sync. Your travel history stays on your iPhone
+<p class="lede">TripLibre has no account, no server, no analytics SDK and no sync. Your travel history stays on your iPhone
 unless you export it yourself. This page lists every exception, and every statement on it can be checked in the code.</p>
 
 <h2>What is stored</h2>
@@ -34,7 +34,7 @@ A stamp keeps only a coarse location (rounded to about 110 m) and doesn't need a
 </ul>
 <p>Backups and exports are visible in the Files app under <i>On My iPhone › HHT</i>.</p>
 
-<h2>When HHT uses the network</h2>
+<h2>When TripLibre uses the network</h2>
 <p>Recording, inference, corrections, stats, widgets, backups and exports all work offline. The app goes online only in
 these cases:</p>
 <div class="table-wrap" id="what-leaves-the-device"><table>
@@ -45,12 +45,12 @@ these cases:</p>
   <tr><td>Nothing about you (it downloads a public CSV)</td><td>Only when you tap <i>Download airport list</i> and confirm</td><td>The OurAirports data mirror on GitHub Pages (<code>davidmegginson.github.io</code>)</td></tr>
   <tr><td>Whatever you choose to share</td><td>Export › Share</td><td>The destination you pick</td></tr>
 </table></div>
-<p>Map tiles reveal the area you are looking at to Apple, like any map app. HHT has no server of its own, so the
+<p>Map tiles reveal the area you are looking at to Apple, like any map app. TripLibre has no server of its own, so the
 developer never receives anything.</p>
 
 <div class="callout warn"><div class="ic">!</div>
 <p>Your iOS device backup (iCloud or Finder) includes the app's container, like any other app's data, and that includes
-the database and the daily backups. Turn off iCloud Backup for HHT if you don't want that.</p></div>
+the database and the daily backups. Turn off iCloud Backup for TripLibre if you don't want that.</p></div>
 
 <h2>What an export contains</h2>
 <p>An export is the main way data leaves your phone, so it is worth knowing exactly what is in one.</p>
@@ -107,7 +107,7 @@ will be the same app with the same behaviour. Its App Store privacy details will
 page will be updated if anything about data handling changes.</p>
 
 <h2>Verifying it yourself</h2>
-<p>Because HHT is open source, you don't have to take this page's word for it. All network access is in three places:</p>
+<p>Because TripLibre is open source, you don't have to take this page's word for it. All network access is in three places:</p>
 <ul>
   <li><code>App/Location/PlaceGeocoder.swift</code>: optional reverse geocoding</li>
   <li>The airport-list download in <code>App/Screens/SettingsView.swift</code> (URL in <code>Importer.ourAirportsURL</code>)</li>
@@ -115,7 +115,7 @@ page will be updated if anything about data handling changes.</p>
 </ul>
 <p>Export contents are defined in <code>Packages/HHTCore/Sources/HHTCore/Export/Exporter.swift</code>, and Erase in
 <code>TravelStore.eraseAll()</code>. To report a privacy or security problem, see
-<a href="https://github.com/zyang91/HHT-app/blob/main/SECURITY.md"><code>SECURITY.md</code></a>.</p>
+<a href="https://github.com/zyang91/TripLibre/blob/main/SECURITY.md"><code>SECURITY.md</code></a>.</p>
 
 </article></main>
 </body>

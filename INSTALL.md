@@ -1,4 +1,4 @@
-# Installing / reinstalling HHT
+# Installing / reinstalling TripLibre
 
 ## Routine reinstall (every 7 days, or after code changes)
 
@@ -20,7 +20,7 @@ Reinstall on a fixed day each week (e.g. Sunday) instead of waiting for it to ex
 
 **Alternative:** open `HHT.xcodeproj` in Xcode, pick your iPhone as the run destination at the top, press ▶.
 
-> ⚠️ **Never delete HHT from the phone before reinstalling.** Deleting the app deletes all recorded data.
+> ⚠️ **Never delete TripLibre from the phone before reinstalling.** Deleting the app deletes all recorded data.
 > Just install over the existing app.
 
 ## Troubleshooting
@@ -38,7 +38,7 @@ Reinstall on a fixed day each week (e.g. Sunday) instead of waiting for it to ex
 
 1. Install Xcode (App Store) and open it once to accept the license.
 2. Install XcodeGen: `brew install xcodegen`
-3. Get the code: `git clone git@github.com:zyang91/HHT-app.git`, then `cd HHT-app`
+3. Get the code: `git clone git@github.com:zyang91/TripLibre.git`, then `cd TripLibre`
 4. Xcode › Settings › **Accounts** › `+` › sign in with your Apple ID.
 5. `DEVELOPMENT_TEAM` in `project.yml` is the current Apple ID's Team ID (`8HRS3Q2SF3`). If you use a different Apple ID,
    change it to the new one, then run `make project`.
@@ -50,7 +50,7 @@ Reinstall on a fixed day each week (e.g. Sunday) instead of waiting for it to ex
 ## New iPhone
 
 Restoring a new phone from an iCloud / computer backup of the old one also restores the app's data (if the backup
-includes HHT). To be safe, export first on the old phone: gear icon (top left of Today) › **Create export**, and save the
+includes TripLibre). To be safe, export first on the old phone: gear icon (top left of Today) › **Create export**, and save the
 files to your computer or cloud storage. Then do steps 6–8 of "starting from scratch" on the new phone.
 
 ## Backups

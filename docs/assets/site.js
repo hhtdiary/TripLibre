@@ -3,7 +3,7 @@
 // which is the folder above this script.
 
 const ROOT = new URL('..', document.currentScript.src).href;
-const REPO = 'https://github.com/zyang91/HHT-app';
+const REPO = 'https://github.com/zyang91/TripLibre';
 
 const NAV = [
   { href: 'products/', title: 'Products' },
@@ -22,7 +22,7 @@ const FOOTER = [
   ] },
   { group: 'Products', items: [
     { href: 'products/', title: 'All products' },
-    { href: 'products/ios/', title: 'HHT for iOS' },
+    { href: 'products/ios/', title: 'TripLibre for iOS' },
     { href: 'installation.html', title: 'Install' },
   ] },
   { group: 'Docs', items: [
