@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/hht-logo.png" width="112" height="112" alt="TripLibre logo: a route joining four stops on a dark map grid">
+  <img src="docs/assets/triplibre-logo.png" width="112" height="112" alt="TripLibre logo: a route joining four stops on a dark map grid">
 </p>
 
 <h1 align="center">TripLibre — personal travel diary</h1>
@@ -16,7 +16,7 @@
   <img src="https://img.shields.io/badge/data-local--first-5ac8a0" alt="Local-first data">
   <a href="LICENSE"><img src="https://img.shields.io/badge/license-Apache%202.0-blue" alt="Apache 2.0 license"></a>
   <a href="https://doi.org/10.5281/zenodo.23307589"><img src="https://zenodo.org/badge/DOI/10.5281/zenodo.23307589.svg" alt="DOI 10.5281/zenodo.23307589"></a>
-  <a href="https://hhtdiary.org/docs/"><img src="https://img.shields.io/badge/docs-hhtdiary.org-f4a93b" alt="Documentation"></a>
+  <a href="https://hhtdiary.org/triplibre/docs/"><img src="https://img.shields.io/badge/docs-hhtdiary.org-f4a93b" alt="Documentation"></a>
 </p>
 
 <p align="center">
@@ -28,9 +28,9 @@
   <a href="#daily-use">Daily use</a> ·
   <a href="#research-workflow">Research workflow</a> ·
   <a href="#development">Development</a> ·
-  <a href="https://hhtdiary.org/docs/">Docs</a> ·
+  <a href="https://hhtdiary.org/triplibre/docs/">Docs</a> ·
   <a href="https://hhtdiary.org/roadmap/">Roadmap</a> ·
-  <a href="https://hhtdiary.org/backup/">Project story</a>
+  <a href="https://hhtdiary.org/triplibre/story/">Project story</a>
 </p>
 
 ---
@@ -39,8 +39,8 @@ A private, local-first iOS app that works like a continuous **household travel s
 It records location in the background, rebuilds each day into **visits, trips, modes and trip chains**, lets you fix
 mistakes in one or two taps, and exports a clean, survey-shaped dataset (CSV / JSON / GeoJSON / SQLite).
 
-TripLibre (formerly HHT) is the first product of [HHT Diary](https://hhtdiary.org/), the organization led by
-Zhanchao Yang that builds open, local-first mobility tools. Code names still use HHT (`HHTCore`, `HHT.xcodeproj`,
+TripLibre (formerly HHT) is the first product of [HHT Diary](https://hhtdiary.org/) ([GitHub](https://github.com/hhtdiary)),
+the organization led by Zhanchao Yang that builds open, local-first mobility tools. Code names still use HHT (`HHTCore`, `HHT.xcodeproj`,
 `analysis/hht.py`, bundle ID `com.zyang91.hht`), so updating an existing install keeps its data (#77).
 No account, no server, no analytics: the data stays on the phone unless you export it.
 
@@ -66,7 +66,7 @@ The original product brief is in [`design/`](design/personal_travel_tracker_clau
 | Research edition beside the personal app, sharing the same engine | 🔭 Exploratory |
 | Android, multilingual, self-hosted (incl. for cities with limited capacity) | 🔭 Exploratory |
 
-Screenshots of every screen are in the [UI guide](https://hhtdiary.org/ui-guide.html).
+Screenshots of every screen are in the [UI guide](https://hhtdiary.org/triplibre/docs/ui-guide.html).
 
 ```text
 App/                    SwiftUI iOS app (Today · Timeline · Map · Stats · Places · Settings)
@@ -82,13 +82,14 @@ Packages/HHTCore/       platform-independent core (Swift package, no dependencie
   Widget/               the small summary the widgets read (no coordinates)
   Tests/                112 tests incl. the brief's 14 synthetic scenarios
 analysis/               Python loader + example analysis (pandas)
-docs/                   website (static HTML, published at hhtdiary.org): organization pages + docs + markdown specs
+docs/                   website (static HTML, published at hhtdiary.org): HHT Diary pages at the top,
+                        TripLibre overview + docs in docs/triplibre/, markdown specs
 project.yml             XcodeGen spec (HHT.xcodeproj is generated from it)
 ```
 
 ## Install on your iPhone (personal use, no App Store)
 
-TripLibre is not on the App Store yet; you build it from source. Full guide: [Installation](https://hhtdiary.org/installation.html).
+TripLibre is not on the App Store yet; you build it from source. Full guide: [Installation](https://hhtdiary.org/triplibre/docs/installation.html).
 
 **Reinstalling / renewing every 7 days → see [INSTALL.md](INSTALL.md)** (`make phone`).
 
@@ -116,7 +117,7 @@ After changing `project.yml`, regenerate with `xcodegen generate` (`brew install
 - **Map / Stats**: activity space, radius of gyration, mode share, departure times, tours, weekday/weekend, and
   period-vs-period comparisons (e.g. two semesters).
 - **Home Screen widgets**: Tracking (is recording healthy?), Today, and Last 7 days, plus plain and timeline styles, and
-  a one-tap Stamp that opens the app's own stamp. They show what the app last worked out and never collect location themselves ([UI guide](docs/ui-guide.html#widgets)).
+  a one-tap Stamp that opens the app's own stamp. They show what the app last worked out and never collect location themselves ([UI guide](docs/triplibre/docs/ui-guide.html#widgets)).
 - **Settings** (gear on Today): collection status, export/import, rebuild from raw data, backups, privacy.
 
 ## Research workflow
@@ -140,12 +141,12 @@ summary(d.phase("Fall 2026"))
 
 Or query `travel.sqlite` directly (`v_trips`, `v_visits` views) from R/DBI, DuckDB or QGIS. Every user correction is in
 `audit_log`, a ready-made labelled set for improving mode detection later. Every file and column is described in the
-[Data dictionary](https://hhtdiary.org/data-dictionary.html).
+[Data dictionary](https://hhtdiary.org/triplibre/docs/data-dictionary.html).
 
 > [!IMPORTANT]
 > An export always includes `travel.sqlite`, the **complete** database with every GPS fix, even when you pick
 > *Last 30 days* or turn off *Include raw GPS points*. Delete it before sharing a limited export.
-> See [Privacy](https://hhtdiary.org/privacy.html#what-an-export-contains).
+> See [Privacy](https://hhtdiary.org/triplibre/docs/privacy.html#what-an-export-contains).
 
 ### Research use and limitations
 
@@ -153,8 +154,8 @@ TripLibre data is good for longitudinal N-of-1 studies, trip and mode inference 
 pilots and teaching. It is **not** a representative household travel survey: participants self-select, need an
 iPhone, and may share only some days; GPS drift, signal loss and collection gaps leave holes; and trajectories alone
 don't tell you purpose, companions or household context. Accuracy has been measured only on one person's 17 days so
-far. Before using it in a study, read [Research uses & limitations](https://hhtdiary.org/research.html) and
-[Validation](https://hhtdiary.org/validation.html). Research with other people's location data usually needs
+far. Before using it in a study, read [Research uses & limitations](https://hhtdiary.org/triplibre/docs/research.html) and
+[Validation](https://hhtdiary.org/triplibre/docs/validation.html). Research with other people's location data usually needs
 ethics/IRB approval.
 
 ## Development

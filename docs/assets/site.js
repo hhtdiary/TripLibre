@@ -1,43 +1,88 @@
-// HHT Diary — shared header and footer for the organization pages. Pages sit at different
+// HHT Diary — shared header and footer for the organization and TripLibre pages. Pages sit at different
 // depths (/, /vision/, /products/ios/), so every link is resolved against the site root,
 // which is the folder above this script.
 
 const ROOT = new URL('..', document.currentScript.src).href;
+// Two brands share this chrome: the organization (HHT Diary) and its product (TripLibre). A page picks one
+// with <html data-brand="triplibre">; anything else is an organization page.
+const ORG_GITHUB = 'https://github.com/hhtdiary';
 const REPO = 'https://github.com/zyang91/TripLibre';
+const DOI = 'https://doi.org/10.5281/zenodo.23307589';
 
-const NAV = [
-  { href: 'products/', title: 'Products' },
-  { href: 'vision/', title: 'Vision' },
-  { href: 'roadmap/', title: 'Roadmap' },
-  { href: 'docs/', title: 'Docs' },
-  { href: REPO, title: 'GitHub' },
-];
-
-const FOOTER = [
-  { group: 'Organization', items: [
-    { href: '', title: 'Home' },
-    { href: 'vision/', title: 'Vision' },
-    { href: 'roadmap/', title: 'Roadmap' },
-    { href: 'backup/', title: 'Project story' },
-  ] },
-  { group: 'Products', items: [
-    { href: 'products/', title: 'All products' },
-    { href: 'products/ios/', title: 'TripLibre for iOS' },
-    { href: 'installation.html', title: 'Install' },
-  ] },
-  { group: 'Docs', items: [
-    { href: 'docs/', title: 'Overview' },
-    { href: 'using-the-app.html', title: 'Using the app' },
-    { href: 'architecture.html', title: 'Architecture' },
-    { href: 'privacy.html', title: 'Privacy' },
-  ] },
-  { group: 'Community', items: [
-    { href: REPO, title: 'GitHub' },
-    { href: 'contributing.html', title: 'Contributing' },
-    { href: `${REPO}/issues`, title: 'Issues' },
-    { href: 'https://doi.org/10.5281/zenodo.23307589', title: 'Cite' },
-  ] },
-];
+const BRANDS = {
+  org: {
+    name: 'HHT Diary',
+    logo: 'assets/hhtdiary-mark.svg',
+    home: '',
+    blurb: 'Open, local-first tools for understanding everyday travel. Free and Apache 2.0 licensed.',
+    base: '© HHT Diary · Apache 2.0',
+    nav: [
+      { href: 'products/', title: 'Products', prefix: true },
+      { href: 'vision/', title: 'Vision', prefix: true },
+      { href: 'roadmap/', title: 'Roadmap', prefix: true },
+      { href: 'about/', title: 'About', prefix: true },
+      { href: ORG_GITHUB, title: 'GitHub' },
+    ],
+    footer: [
+      { group: 'Organization', items: [
+        { href: '', title: 'Home' },
+        { href: 'vision/', title: 'Vision' },
+        { href: 'roadmap/', title: 'Roadmap' },
+        { href: 'about/', title: 'About' },
+      ] },
+      { group: 'Products', items: [
+        { href: 'products/', title: 'All products' },
+        { href: 'triplibre/', title: 'TripLibre' },
+      ] },
+      { group: 'Community', items: [
+        { href: ORG_GITHUB, title: 'GitHub' },
+        { href: 'triplibre/docs/contributing.html', title: 'Contributing' },
+        { href: 'mailto:zhanchao@upenn.edu', title: 'Contact' },
+      ] },
+    ],
+  },
+  triplibre: {
+    name: 'TripLibre',
+    logo: 'assets/triplibre-logo.png',
+    home: 'triplibre/',
+    byline: true,
+    blurb: 'A free, open-source, local-first travel diary for iPhone. A product of HHT Diary.',
+    base: '© HHT Diary · TripLibre is Apache 2.0 licensed',
+    nav: [
+      { href: 'triplibre/', title: 'Overview' },
+      { href: 'triplibre/docs/installation.html', title: 'Install' },
+      { href: 'triplibre/docs/', title: 'Docs', prefix: true },
+      { href: 'triplibre/story/', title: 'Story', prefix: true },
+      { href: REPO, title: 'GitHub' },
+    ],
+    footer: [
+      { group: 'TripLibre', items: [
+        { href: 'triplibre/', title: 'Overview' },
+        { href: 'triplibre/docs/installation.html', title: 'Install' },
+        { href: 'triplibre/docs/privacy.html', title: 'Privacy' },
+        { href: 'triplibre/story/', title: 'Story' },
+      ] },
+      { group: 'Docs', items: [
+        { href: 'triplibre/docs/', title: 'Overview' },
+        { href: 'triplibre/docs/using-the-app.html', title: 'Using the app' },
+        { href: 'triplibre/docs/architecture.html', title: 'Architecture' },
+        { href: 'triplibre/docs/contributing.html', title: 'Contributing' },
+      ] },
+      { group: 'Code', items: [
+        { href: REPO, title: 'GitHub' },
+        { href: `${REPO}/issues`, title: 'Issues' },
+        { href: DOI, title: 'Cite' },
+      ] },
+      { group: 'HHT Diary', items: [
+        { href: '', title: 'Home' },
+        { href: 'vision/', title: 'Vision' },
+        { href: 'roadmap/', title: 'Roadmap' },
+        { href: 'about/', title: 'About' },
+      ] },
+    ],
+  },
+};
+const BRAND = BRANDS[document.documentElement.dataset.brand] || BRANDS.org;
 
 const ICONS = {
   menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
@@ -53,19 +98,25 @@ function currentPath() {
   return here.startsWith(ROOT) ? here.slice(ROOT.length).replace(/index\.html$/, '') : '';
 }
 
+// The product's pages carry an "by HHT Diary" endorsement that links back to the organization.
+function brandLink() {
+  const by = BRAND.byline ? `<small class="by">by <a href="${url('')}">HHT Diary</a></small>` : '';
+  return `<span class="s-brand"><a href="${url(BRAND.home)}"><img src="${url(BRAND.logo)}" alt="" width="28" height="28">${BRAND.name}</a>${by}</span>`;
+}
+
 function buildHeader() {
   const here = currentPath();
+  // First exact match, else the first section whose pages start with its path.
+  const local = BRAND.nav.filter(n => !/^https?:/.test(n.href));
+  const current = local.find(n => n.href === here) || local.find(n => n.prefix && here.startsWith(n.href));
   const h = document.createElement('header');
   h.className = 's-header';
   h.innerHTML = `
     <a class="skip" href="#main">Skip to content</a>
     <div class="wrap">
-      <a class="s-brand" href="${url('')}"><img src="${url('assets/hht-logo.png')}" alt="" width="28" height="28">HHT Diary</a>
+      ${brandLink()}
       <nav class="s-nav" id="site-nav" aria-label="Main">
-        ${NAV.map(n => {
-          const cur = here.startsWith(n.href) && !/^https?:/.test(n.href);
-          return `<a href="${url(n.href)}"${cur ? ' aria-current="page"' : ''}>${n.title}</a>`;
-        }).join('')}
+        ${BRAND.nav.map(n => `<a href="${url(n.href)}"${n === current ? ' aria-current="page"' : ''}>${n.title}</a>`).join('')}
       </nav>
       <div class="s-tools">
         <button class="icon-btn theme-btn" type="button" aria-label="Toggle dark mode">${ICONS.moon}${ICONS.sun}</button>
@@ -94,17 +145,17 @@ function buildFooter() {
   f.className = 's-footer';
   f.innerHTML = `
     <div class="wrap">
-      <div class="cols">
+      <div class="cols" style="--n: ${BRAND.footer.length}">
         <div class="about">
-          <a class="s-brand" href="${url('')}"><img src="${url('assets/hht-logo.png')}" alt="" width="28" height="28">HHT Diary</a>
-          <p>Open, local-first tools for understanding everyday travel. Free and Apache 2.0 licensed.</p>
+          ${brandLink()}
+          <p>${BRAND.blurb}</p>
         </div>
-        ${FOOTER.map(g => `
+        ${BRAND.footer.map(g => `
           <div><h2>${g.group}</h2><ul>
             ${g.items.map(i => `<li><a href="${url(i.href)}">${i.title}</a></li>`).join('')}
           </ul></div>`).join('')}
       </div>
-      <div class="base"><span>© HHT Diary · Apache 2.0</span><span>Every trip tells a story.</span></div>
+      <div class="base"><span>${BRAND.base}</span><span>Every trip tells a story.</span></div>
     </div>`;
   document.body.append(f);
 }

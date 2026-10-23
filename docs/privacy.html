@@ -4,119 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Privacy · TripLibre Docs</title>
-<meta name="description" content="What TripLibre stores, what (almost nothing) leaves your phone, and how to share travel data safely.">
-<link rel="icon" href="assets/hht-logo.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css?v=9">
-<script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
-<script src="assets/docs.js" defer></script>
+<link rel="canonical" href="https://hhtdiary.org/triplibre/docs/privacy.html">
+<meta name="robots" content="noindex">
+<!-- Moved under /triplibre/ when the site split into HHT Diary and TripLibre (#77). The script keeps any #anchor; the meta refresh covers no-JS visitors. -->
+<script>location.replace('triplibre/docs/privacy.html' + location.hash);</script>
+<meta http-equiv="refresh" content="0; url=triplibre/docs/privacy.html">
 </head>
 <body>
-<main class="dx-main"><article class="dx-content">
-
-<p class="eyebrow">Concepts</p>
-<h1>Privacy</h1>
-<p class="lede">TripLibre has no account, no server, no analytics SDK and no sync. Your travel history stays on your iPhone
-unless you export it yourself. This page lists every exception, and every statement on it can be checked in the code.</p>
-
-<h2>What is stored</h2>
-<p>One SQLite file inside the app's sandbox (<code>Library/Application Support/HHT/travel.sqlite</code>) holds raw GPS fixes,
-CoreMotion activity, inferred and corrected visits and trips, your places, flights, life phases, stamps you tapped, and the audit log.
-A stamp keeps only a coarse location (rounded to about 110 m) and doesn't need a precise fix to be saved.</p>
-<ul>
-  <li><b>Daily backups</b>: a full copy of the database goes to <code>Documents/Backups</code> once a day (the last 7 are kept).</li>
-  <li><b>Exports</b> go to <code>Documents/Exports</code>, one folder per export.</li>
-  <li><b>Widgets</b>: a small summary file (<code>widget-snapshot.json</code>) sits in the app's App Group container.
-    It holds counts, times and the names of places you named yourself: no GPS points, routes, coordinates or addresses.</li>
-  <li><b>Settings</b> (switches like <i>Look up addresses</i>) are kept in the app's preferences.</li>
-</ul>
-<p>Backups and exports are visible in the Files app under <i>On My iPhone › TripLibre</i>.</p>
-
-<h2>When TripLibre uses the network</h2>
-<p>Recording, inference, corrections, stats, widgets, backups and exports all work offline. The app goes online only in
-these cases:</p>
-<div class="table-wrap" id="what-leaves-the-device"><table>
-  <tr><th>What is sent</th><th>When</th><th>To</th></tr>
-  <tr><td><b>Nothing, by default</b></td><td>—</td><td>—</td></tr>
-  <tr><td>One place coordinate at a time</td><td>Only if Settings › <i>Look up addresses</i> is on (off by default)</td><td>Apple's geocoder (CLGeocoder)</td></tr>
-  <tr><td>Map tile requests for the visible area</td><td>Whenever a map is on screen</td><td>Apple Maps</td></tr>
-  <tr><td>Nothing about you (it downloads a public CSV)</td><td>Only when you tap <i>Download airport list</i> and confirm</td><td>The OurAirports data mirror on GitHub Pages (<code>davidmegginson.github.io</code>)</td></tr>
-  <tr><td>Whatever you choose to share</td><td>Export › Share</td><td>The destination you pick</td></tr>
-</table></div>
-<p>Map tiles reveal the area you are looking at to Apple, like any map app. TripLibre has no server of its own, so the
-developer never receives anything.</p>
-
-<div class="callout warn"><div class="ic">!</div>
-<p>Your iOS device backup (iCloud or Finder) includes the app's container, like any other app's data, and that includes
-the database and the daily backups. Turn off iCloud Backup for TripLibre if you don't want that.</p></div>
-
-<h2>What an export contains</h2>
-<p>An export is the main way data leaves your phone, so it is worth knowing exactly what is in one.</p>
-<ul>
-  <li>The <i>Range</i> picker (<i>Everything</i> or <i>Last 30 days</i>) limits trips, segments, visits and stamps in the
-    CSV, JSON and GeoJSON files. Places, flights, life phases and the audit log are always complete.</li>
-  <li>The <i>Include raw GPS points</i> switch (on by default) controls <code>raw_location_points.csv</code> and
-    <code>motion_activities.csv</code>.</li>
-  <li><b>Every export also contains <code>travel.sqlite</code>, a complete copy of the database, whatever the range and the
-    raw-points switch say.</b> It includes every GPS fix you have recorded.</li>
-</ul>
-<p>To share less today, open the export folder in Files and delete <code>travel.sqlite</code> and any other files you
-don't want to send before you share it. The full file list is in the <a href="data-dictionary.html#the-export-folder">Data
-dictionary</a>.</p>
-<p><span class="status planned">Planned</span> Choosing specific dates, trips and a level of detail, with the database
-snapshot following the same choice (see the <a href="roadmap/">roadmap</a>). Not available yet.</p>
-
-<h2>You're in control</h2>
-<ul>
-  <li><b>Stop collection</b> any time: Settings › <i>Record location</i>. Data already recorded is kept until you erase it.</li>
-  <li><b>Correct or delete</b> any visit, trip or place. Deleted records are hidden everywhere and left out of CSV and
-    GeoJSON exports, but stay in the database (and in <code>data.json</code> and <code>travel.sqlite</code>) for the
-    audit trail until you erase.</li>
-  <li><b>Export everything</b> at any time as CSV, JSON, GeoJSON or SQLite.</li>
-  <li><b>Erase all data</b> (two confirmations) deletes every raw point, motion record, visit, trip, place, flight,
-    stamp, life phase and audit entry from the database, and the widget summary is rewritten as empty. Backups and
-    exports in Files are left for you to delete yourself.</li>
-  <li><b>Delete the app</b> to remove everything in its container at once, including the database and the backups and
-    exports stored in it. Copies you shared, and device backups, are not affected.</li>
-</ul>
-<p class="muted">Erase removes the rows, but SQLite can leave fragments of deleted data in unused parts of the file
-until they are overwritten. If that matters for your threat model, delete the app as well.</p>
-
-<h2>Re-identification risk</h2>
-<p>Keeping data on the phone removes the server, not the sensitivity. A location history reveals where you sleep, work,
-worship, see a doctor and spend the night, and a handful of such places is often enough to identify a person even with
-the name removed.</p>
-<ul>
-  <li>Treat <code>raw_location_points</code>, <code>visits</code>, places, trip routes and trip ends as identifying.</li>
-  <li>Trips that start or end at home reveal home, even with the route removed.</li>
-  <li>Place names you type, notes and the audit log can contain personal details too.</li>
-  <li>Places you visit can reveal other people, such as a friend's home.</li>
-</ul>
-
-<h2>Sharing safely</h2>
-<p>If you publish anything, share <b>aggregates only</b>: cities, airports, flight routes, mode shares, trip counts.
-Never share <code>raw_location_points</code>, <code>visits</code>, or trip routes near home. If you give data to a research
-study, make sure you know who will hold it, for how long, and how to withdraw. See
-<a href="research.html#privacy-and-ethics">Research uses &amp; limitations</a>.</p>
-
-<h2>App Store privacy details</h2>
-<p><span class="status progress">In progress</span> The App Store version (see the <a href="roadmap/">roadmap</a>)
-will be the same app with the same behaviour. Its App Store privacy details will be written from this page, and this
-page will be updated if anything about data handling changes.</p>
-
-<h2>Verifying it yourself</h2>
-<p>Because TripLibre is open source, you don't have to take this page's word for it. All network access is in three places:</p>
-<ul>
-  <li><code>App/Location/PlaceGeocoder.swift</code>: optional reverse geocoding</li>
-  <li>The airport-list download in <code>App/Screens/SettingsView.swift</code> (URL in <code>Importer.ourAirportsURL</code>)</li>
-  <li>MapKit views (map tiles)</li>
-</ul>
-<p>Export contents are defined in <code>Packages/HHTCore/Sources/HHTCore/Export/Exporter.swift</code>, and Erase in
-<code>TravelStore.eraseAll()</code>. To report a privacy or security problem, see
-<a href="https://github.com/zyang91/TripLibre/blob/main/SECURITY.md"><code>SECURITY.md</code></a>.</p>
-
-</article></main>
+<p>This page has moved to <a href="triplibre/docs/privacy.html">hhtdiary.org/triplibre/docs/privacy.html</a>.</p>
 </body>
 </html>

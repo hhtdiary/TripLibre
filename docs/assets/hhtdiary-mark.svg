@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <!-- HHT Diary: an open diary with a mint bookmark, on the organization's navy. -->
+  <rect width="64" height="64" rx="14" fill="#0d1830"/>
+  <path d="M13 19.5c6.5-3.2 12.5-3 19 1.2v27.8c-6.5-4.2-12.5-4.4-19-1.2z" fill="none" stroke="#eef2f8" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M51 19.5c-6.5-3.2-12.5-3-19 1.2v27.8c6.5-4.2 12.5-4.4 19-1.2z" fill="none" stroke="#eef2f8" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M39 18.6V33l3.5-2.8L46 33V17.9c-2.4-.3-4.7-.1-7 .7z" fill="#4fd1a5"/>
+</svg>

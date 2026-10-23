@@ -4,126 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Validation &amp; known limitations · TripLibre Docs</title>
-<meta name="description" content="What has and hasn't been measured about TripLibre's accuracy: real-world observations, automated tests, a small personal calibration study, planned benchmarks and known failure modes.">
-<link rel="icon" href="assets/hht-logo.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css?v=9">
-<script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
-<script src="assets/docs.js" defer></script>
+<link rel="canonical" href="https://hhtdiary.org/triplibre/docs/validation.html">
+<meta name="robots" content="noindex">
+<!-- Moved under /triplibre/ when the site split into HHT Diary and TripLibre (#77). The script keeps any #anchor; the meta refresh covers no-JS visitors. -->
+<script>location.replace('triplibre/docs/validation.html' + location.hash);</script>
+<meta http-equiv="refresh" content="0; url=triplibre/docs/validation.html">
 </head>
 <body>
-<main class="dx-main"><article class="dx-content">
-
-<p class="eyebrow">Research</p>
-<h1>Validation &amp; known limitations</h1>
-<p class="lede">How well does TripLibre reconstruct a day? This page separates three kinds of evidence: what has been observed
-in everyday use, what the automated tests guarantee, and the formal benchmarking that has <b>not</b> been done yet.</p>
-
-<div class="callout warn"><div class="ic">!</div>
-<p>All accuracy numbers so far come from <b>one person's phone over 17 days</b>, scored against that person's own
-corrected diary. They describe that sample, not TripLibre in general. Please don't cite them as a general accuracy figure.</p></div>
-
-<h2>Three kinds of evidence</h2>
-<div class="table-wrap"><table>
-  <tr><th>Evidence</th><th>What it shows</th><th>What it doesn't</th><th>Status</th></tr>
-  <tr><td>Everyday use</td><td>Which situations the app handles and which it gets wrong, seen in the developer's daily use since development began in late September 2026.</td><td>Rates. These are observations, not measurements.</td><td><span class="status available">Available</span></td></tr>
-  <tr><td>Automated tests</td><td>The engine behaves as specified on synthetic days, every time, and edits survive rebuilds.</td><td>How often real days look like the synthetic ones.</td><td><span class="status available">Available</span></td></tr>
-  <tr><td>Personal calibration study</td><td>Agreement with a hand-corrected diary on 17 real days, with held-out validation days.</td><td>Other people, other phones, other cities.</td><td><span class="status available">Available</span>, small sample</td></tr>
-  <tr><td>Formal benchmark</td><td>Accuracy, completeness and battery use across participants and devices, against independent ground truth.</td><td>—</td><td><span class="status planned">Planned</span></td></tr>
-</table></div>
-
-<h2>Observed in real-world use</h2>
-<p>Situations the developer has lived through and checked in the diary, mostly in Philadelphia:</p>
-<div class="table-wrap"><table>
-  <tr><th>Scenario</th><th>Usually works</th><th>Known to go wrong</th></tr>
-  <tr><td>Walking between buildings</td><td>Walks over a few hundred metres become their own trip.</td><td>Buildings under about 100 m apart, with no fix in between, merge into one stay.</td></tr>
-  <tr><td>Indoor GPS drift</td><td>Ordinary drift at home or the office is filtered out.</td><td>Large venues can drift hundreds of metres and produce duplicate stays 200–500 m apart.</td></tr>
-  <tr><td>Subway</td><td>Inferred from a signal blackout with vehicle motion, or from coarse fixes at the two stations.</td><td>Fast above-ground rail with clean GPS can read as car.</td></tr>
-  <tr><td>Bus</td><td>Usually right at group level (transit).</td><td>Often labelled subway or car: bus and road traffic look the same without transit schedules.</td></tr>
-  <tr><td>Rideshare / taxi</td><td>Read as car (taxi is never predicted; it counts as car at group level).</td><td>Before round 2, periodic GPS holes made many of these look like subway.</td></tr>
-  <tr><td>Short stops</td><td>Stops of five minutes or more become visits; shorter ones can be stamped.</td><td>Unstamped short stops are missed.</td></tr>
-</table></div>
-
-<h2>Automated tests</h2>
-<p>Run on every push and pull request (<code>.github/workflows/ci.yml</code>). None of them use real location data.</p>
-<ul>
-  <li><b>Core suite</b> (<code>make test</code>): 112 Swift tests in 11 suites, covering inference, edits, reprocessing,
-    export, analytics, stamps and widgets. Fourteen of them are the synthetic scenarios from the original product brief:
-    home–work–home, a trip chain, a walking trip, subway, car, a multimodal trip, a brief stop that must not become a
-    visit, a long stationary period, GPS drift while stationary, a missing GPS interval, an overnight visit, crossing
-    midnight, airport–flight–airport, and several days without opening the app. Others cover daylight-saving time and
-    check that incremental processing equals a one-shot rebuild.</li>
-  <li><b>Calibration regressions</b> (<code>CalibrationTests</code>): one synthetic fixture per failure class found on
-    real data. Each fails on the engine version before the fix.</li>
-  <li><b>Export contract</b> (<code>make export-check</code>): Swift writes a real export, Python loads it, and the CSV
-    and SQLite versions must agree.</li>
-  <li><b>Replay determinism</b> (<code>make calibrate-smoke</code>): a synthetic fixture replayed twice must give
-    byte-identical output, then the full evaluation pipeline runs on it.</li>
-  <li><b>UI tests</b> (<code>make ui-test</code>): core flows and accessibility audits in the simulator, on demo data.</li>
-</ul>
-
-<h2>Personal calibration study</h2>
-<p>Issue <a href="https://github.com/zyang91/TripLibre/issues/46">#46</a> replayed one phone's raw data through the engine
-and compared it with the same person's corrected diary. The days were split into calibration days (for tuning) and
-validation days (scored once) before any tuning. The full protocol, metrics and adverse tradeoffs are in
-<a href="https://github.com/zyang91/TripLibre/blob/main/docs/research/inference-calibration.md"><code>docs/research/inference-calibration.md</code></a>.</p>
-<div class="table-wrap"><table>
-  <tr><th>Metric (round 1, 5 validation days)</th><th>Before</th><th>After</th></tr>
-  <tr><td>Whole-day time agreement</td><td>0.827</td><td>0.939</td></tr>
-  <tr><td>Visit F1</td><td>0.85</td><td>0.86</td></tr>
-  <tr><td>Trip F1</td><td>0.86</td><td>0.86</td></tr>
-  <tr><td>Visit departure error, mean absolute</td><td>32.0 min</td><td>5.6 min</td></tr>
-</table></div>
-<p>Round 2 tuned mode detection. On the 17 calibration days (in-sample), group-level mode accuracy on human-labelled
-trips rose from 0.51 to 0.82; exact mode accuracy rose from 0.39 to 0.54. <b>The held-out check for round 2 is still
-pending</b>, because no new days had been recorded after the cutoff.</p>
-<p class="muted">The study publishes aggregates only. The raw data and per-day reports stay on the developer's machine.</p>
-
-<h2>Planned benchmarking</h2>
-<p><span class="status planned">Planned</span> Nothing in this section has been done yet. It defines what a formal
-evaluation should report, so that results can be compared across versions and studies.</p>
-
-<h3>Metrics</h3>
-<div class="table-wrap"><table>
-  <tr><th>Area</th><th>Metric</th></tr>
-  <tr><td>Stays and trips</td><td>Precision, recall and F1 under the one-to-one matching rules of the calibration study; split and merge counts.</td></tr>
-  <tr><td>Timing</td><td>Signed and absolute arrival and departure error (median, mean, p90).</td></tr>
-  <tr><td>Whole day</td><td>Share of minutes where the diary and the truth agree on "at a place" versus "travelling".</td></tr>
-  <tr><td>Mode</td><td>Exact and group-level accuracy, and a confusion matrix, on independently labelled trips.</td></tr>
-  <tr><td>Completeness</td><td>Share of each day with collection running; days with gaps over 15 minutes; trips flagged <code>has_gap</code>.</td></tr>
-  <tr><td>Battery</td><td>Battery drain per day attributable to TripLibre, by collection profile and device model.</td></tr>
-  <tr><td>Correction burden</td><td>Edits per person-day and time spent correcting.</td></tr>
-</table></div>
-
-<h3>Ground truth</h3>
-<p>The calibration study used the user's own corrections as truth, which risks agreeing with itself. A formal benchmark
-should use an independent reference: a researcher-kept log, a scripted route with timestamps, or a second device. It
-should also report uncertainty (for example, day-level bootstrap intervals) and keep a held-out set.</p>
-
-<h3>Reproducible fixtures</h3>
-<p>Real GPS logs can't be shared without exposing the people in them. Planned fixtures are synthetic or carefully
-de-identified (shifted, rotated, time-offset) traces that reproduce a failure class, stored as SQLite files that
-<code>hht-calibrate replay</code> can read. See <a href="contributing.html#proposing-an-inference-test-case">proposing an
-inference test case</a>.</p>
-
-<h2>Known limitations</h2>
-<ul>
-  <li><b>Unobservable stops.</b> A stop with no GPS fix at all can't be detected. The user has to add or stamp it.</li>
-  <li><b>Walks during GPS silence.</b> When the collector is quiet, a walk can be absorbed into a stay or the next trip.
-    Arrival after a silent walk is dated from the next fix.</li>
-  <li><b>Collector holes while driving.</b> Recurring 4–6 minute silences while in a vehicle make routes and distances
-    straight lines across the gaps.</li>
-  <li><b>Nearby buildings merge</b>, and <b>large venues duplicate stays</b>, as described above.</li>
-  <li><b>Mode is the weakest part.</b> Taxi, bus, light rail and commuter rail are never predicted directly; driver
-    versus passenger is never inferred.</li>
-  <li><b>The engine's first answer is lost when you edit.</b> Records are updated in place, so the app's real-world
-    accuracy can only be estimated by replay, not read from use. Keeping the original is <span class="status planned">Planned</span>.</li>
-  <li><b>No engine version field.</b> A replay is pinned by git commit and configuration, not by a version stored with each record.</li>
-  <li><b>iOS only</b>, and background behaviour depends on iOS power management, which varies by device and iOS version.</li>
-</ul>
-
-</article></main>
+<p>This page has moved to <a href="triplibre/docs/validation.html">hhtdiary.org/triplibre/docs/validation.html</a>.</p>
 </body>
 </html>

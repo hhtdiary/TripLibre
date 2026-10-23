@@ -11,6 +11,10 @@ single summary, so release notes aren't kept anywhere else in the repository.
   Zenodo metadata use the new name and the `zyang91/TripLibre` repository. The app shows as TripLibre on the Home
   Screen, in Settings, in the Files app and on the widgets; the bundle ID and code names stay HHT, so installing
   over an older build keeps its data (#77)
+- Website: hhtdiary.org now separates the organization from the product. HHT Diary keeps the home page, Products,
+  Vision, Roadmap and a new About page, with its own mark and navy palette; TripLibre has its own overview at
+  `/triplibre/`, docs at `/triplibre/docs/` and story at `/triplibre/story/`, in the app's coral and sun colours with
+  a "by HHT Diary" line. Old URLs redirect, `#anchors` included (#77)
 - Costs: note what a trip or a stop cost. Today asks about the latest transit, taxi or flight trip ("Free" or the usual
   fare in one tap), a "Spent today" card adds costs to any day, and a Spending page (from Today or Stats) breaks totals
   down by travel vs destinations, category, mode (per trip, per km) and place. Exported as `expenses.csv` (#17)
