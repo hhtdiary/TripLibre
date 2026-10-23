@@ -177,4 +177,21 @@ struct ExpenseTests {
         #expect((json?["expenses"] as? [Any])?.count == 2)
         #expect(store.counts()["expenses"] == 2)
     }
+
+    @Test func rangedExportDropsLinksToRecordsOutsideIt() throws {
+        let (store, _, edit) = try processed(lunchDay())
+        let stay = try #require(try store.allVisits().sorted { $0.arrival < $1.arrival }.last)
+        let paid = stay.arrival.addingTimeInterval(90 * 60)
+        try edit.saveExpense(cost(4.5, .food, at: paid, visit: stay.id))
+        // the range holds the cost but starts after the stay began, so visits.csv leaves the stay out
+        func visitIDs(_ range: DateRange?) throws -> String {
+            let dir = FileManager.default.temporaryDirectory.appendingPathComponent("hht-cost-\(UUID().uuidString)")
+            defer { try? FileManager.default.removeItem(at: dir) }
+            let folder = try Exporter(store: store).exportBundle(to: dir, options: .init(range: range))
+            let csv = try String(contentsOf: folder.appendingPathComponent("expenses.csv"), encoding: .utf8)
+            return csv.split(separator: "\n").dropFirst().map { String($0) }.joined()
+        }
+        #expect(try visitIDs(nil).contains(stay.id))
+        #expect(try !visitIDs(DateRange(start: paid.addingTimeInterval(-60), end: paid.addingTimeInterval(60))).contains(stay.id))
+    }
 }

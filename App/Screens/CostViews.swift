@@ -28,6 +28,8 @@ extension Fmt {
 
     /// Accepts "2.90", "2,90", "$2.90", " 12 ": nil when it isn't a non-negative number.
     static func parseAmount(_ s: String) -> Double? {
+        // a minus sign anywhere ("-12.50", "$-3", "−4") makes it negative, not something to strip
+        guard !s.contains(where: { $0 == "-" || $0 == "\u{2212}" }) else { return nil }
         var t = s.filter { $0.isNumber || $0 == "." || $0 == "," }
         if !t.contains(".") { t = t.replacingOccurrences(of: ",", with: ".") } else { t = t.replacingOccurrences(of: ",", with: "") }
         guard !t.isEmpty, let v = Double(t), v.isFinite, v >= 0 else { return nil }
@@ -313,8 +315,17 @@ struct CostEntrySheet: View {
             if existing?.tripID != id { e.timestamp = t.departure }
             e.timeZone = t.timeZone
         } else if let id = link.visitID, let (v, _) = visits[id] {
-            // a cost during an ongoing stay is dated now; otherwise when the stay began
-            if existing?.visitID != id { e.timestamp = v.departure == nil ? max(v.arrival, Date()) : v.arrival }
+            if existing?.visitID != id {
+                if isDayTarget {
+                    // added from a day's card: keep it on that day, within the part of the stay that falls on it
+                    let d = DateRange.day(time)
+                    let lo = max(v.arrival, d.start), hi = min(v.departure ?? Date(), d.end)
+                    e.timestamp = lo <= hi ? min(max(time, lo), hi) : time
+                } else {
+                    // a cost during an ongoing stay is dated now; otherwise when the stay began
+                    e.timestamp = v.departure == nil ? max(v.arrival, Date()) : v.arrival
+                }
+            }
             e.timeZone = v.timeZone
         } else {
             e.timestamp = time
