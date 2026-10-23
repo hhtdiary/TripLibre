@@ -6,13 +6,13 @@
 <title>Vision · HHT Diary</title>
 <meta name="description" content="HHT Diary's mission: make travel-behaviour data collection more accessible, transparent, affordable and user-controlled, for everyday people and researchers alike.">
 <link rel="canonical" href="https://hhtdiary.org/vision/">
-<link rel="icon" href="../assets/hht-logo.png">
+<link rel="icon" href="../assets/hhtdiary-mark.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../assets/site.css?v=1">
+<link rel="stylesheet" href="../assets/site.css?v=2">
 <script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
-<script src="../assets/site.js?v=1" defer></script>
+<script src="../assets/site.js?v=3" defer></script>
 </head>
 <body>
 <main id="main">
@@ -21,7 +21,7 @@
   <div class="wrap">
     <p class="eyebrow">Vision</p>
     <h1 class="title" id="page-title">From a travel survey of one to <span class="grad">travel surveys within reach.</span></h1>
-    <p class="lede">HHT started as one transportation researcher's private travel diary. The long-term aim is to make
+    <p class="lede">HHT Diary started with TripLibre, one transportation researcher's private travel diary. The long-term aim is to make
     collecting and understanding travel-behaviour data more accessible, transparent, affordable and user-controlled:
     an open toolkit that anyone can use without a vendor contract, a server, or giving up their location history.</p>
   </div>
@@ -41,7 +41,7 @@
         <h2 class="h2" id="today-title">A personal tool, not yet a survey platform.</h2>
       </div>
       <div class="prose">
-        <p><a href="../products/ios/">HHT for iOS</a> records where its user goes, rebuilds each day into visits, trips and
+        <p><a href="../triplibre/">TripLibre for iOS</a> records where its user goes, rebuilds each day into visits, trips and
         travel modes, lets the user correct it in a tap or two, and exports the result. Everything is stored on the phone.
         It has one user per install, no account and no server. <span class="status available">Available</span></p>
         <p>There is no way yet to enrol participants, configure a study, or collect data from more than one phone. Those
@@ -57,7 +57,7 @@
     <div class="section-head">
       <p class="eyebrow">The gap</p>
       <h2 class="h2" id="gap-title">Three groups need travel data and rarely share a tool.</h2>
-      <p class="lede">HHT tries to put the planner's data model, the developer's engineering and the researcher's need
+      <p class="lede">HHT Diary tries to put the planner's data model, the developer's engineering and the researcher's need
       for transparency into one open codebase.</p>
     </div>
     <div class="grid three">
@@ -72,17 +72,17 @@
   <div class="wrap">
     <div class="section-head">
       <p class="eyebrow">Principles</p>
-      <h2 class="h2" id="principles-title">What every HHT tool holds to.</h2>
+      <h2 class="h2" id="principles-title">What every HHT Diary tool holds to.</h2>
     </div>
     <div class="grid four">
       <div class="card"><h3>Free</h3><p>No subscription, paid tier, ads or data resale.</p><p><span class="status available">Available</span></p></div>
       <div class="card"><h3>Open source</h3><p>Apache 2.0. Every line that touches location data can be read, audited and forked.</p><p><span class="status available">Available</span></p></div>
       <div class="card"><h3>Local-first</h3><p>One SQLite file on the phone. No account, no sync, no analytics SDK.</p><p><span class="status available">Available</span></p></div>
-      <div class="card"><h3>Privacy-first</h3><p>Network access is limited and listed on the <a href="../privacy.html">Privacy</a> page. Data leaves only when the user exports.</p><p><span class="status available">Available</span></p></div>
+      <div class="card"><h3>Privacy-first</h3><p>Network access is limited and listed on the <a href="../triplibre/docs/privacy.html">Privacy</a> page. Data leaves only when the user exports.</p><p><span class="status available">Available</span></p></div>
       <div class="card"><h3>Transparent</h3><p>Inference rules are deterministic, documented and tested. Raw data is never rewritten.</p><p><span class="status available">Available</span></p></div>
       <div class="card"><h3>User-controlled</h3><p>The user decides what to correct, what to export and when to erase. Finer-grained export is planned.</p><p><span class="status available">Available</span> <span class="status planned">Planned</span></p></div>
       <div class="card"><h3>Adaptable</h3><p>Thresholds live in one config struct and a calibration harness measures changes. Study-specific configuration is planned.</p><p><span class="status available">Available</span> <span class="status planned">Planned</span></p></div>
-      <div class="card"><h3>Honest</h3><p>Every page separates what exists today from what is only intended, and says what HHT is not.</p><p><span class="status available">Available</span></p></div>
+      <div class="card"><h3>Honest</h3><p>Every page separates what exists today from what is only intended, and says what TripLibre is not.</p><p><span class="status available">Available</span></p></div>
     </div>
   </div>
 </section>
@@ -100,21 +100,21 @@
         rapid urban growth, new transit lines and informal transport, yet many cities have no recent household travel
         survey at all. A traditional survey costs a lot, commercial platforms charge licence fees and often store data
         abroad, and a local agency may not have the software staff to build or maintain its own tool.</p>
-        <p>HHT's design points at that problem. It is free to use and to change, works offline, keeps data on the phone,
+        <p>TripLibre's design points at that problem. It is free to use and to change, works offline, keeps data on the phone,
         follows familiar travel-survey concepts, and documents every inference rule so local analysts can check and
         adjust them instead of trusting a black box.</p>
-        <p><b>It is not ready for this today.</b> Before HHT could help:</p>
+        <p><b>It is not ready for this today.</b> Before TripLibre could help:</p>
       </div>
     </div>
     <ol class="nlist mt">
-      <li><span><b>Android is a prerequisite.</b> In many of these places most residents use Android phones, and HHT runs only on iPhone.</span></li>
+      <li><span><b>Android is a prerequisite.</b> In many of these places most residents use Android phones, and TripLibre runs only on iPhone.</span></li>
       <li><span><b>The interface needs local languages</b>, and place categories and modes need local options: shared taxis, minibuses, motorcycle taxis, walking as the main mode.</span></li>
       <li><span><b>Inference needs local calibration.</b> The rules were tuned on one person in Philadelphia; dense informal transit, very different speeds and other GPS conditions will behave differently.</span></li>
-      <li><span><b>A study design is still needed.</b> HHT would make data collection cheaper, not representative. Sampling, recruitment, weighting and ethics review stay with the local team.</span></li>
+      <li><span><b>A study design is still needed.</b> TripLibre would make data collection cheaper, not representative. Sampling, recruitment, weighting and ethics review stay with the local team.</span></li>
       <li><span><b>It would need local partners</b> who know the city, can train data collectors and can own the data.</span></li>
     </ol>
     <p class="prose mt">If you work with a city or agency in this situation, an
-    <a href="https://github.com/zyang91/HHT-app/issues/new/choose">issue</a> describing the context is the most useful
+    <a href="https://github.com/zyang91/TripLibre/issues/new/choose">issue</a> describing the context is the most useful
     starting point. The steps that would lead here are on the <a href="../roadmap/#open-mobility-ecosystem">Roadmap</a>.</p>
   </div>
 </section>
@@ -123,20 +123,20 @@
   <div class="wrap">
     <div class="section-head">
       <p class="eyebrow">Limits</p>
-      <h2 class="h2" id="not-title">What HHT is not.</h2>
+      <h2 class="h2" id="not-title">What TripLibre is not.</h2>
       <p class="lede">Being clear about limits matters more than the vision itself.</p>
     </div>
     <ol class="nlist">
       <li><span><b>Not a representative household travel survey.</b> A regional HHTS relies on a sampling frame,
-        recruitment, weighting, household rosters and nonresponse follow-up. HHT provides none of that. It offers
-        accessible basic data collection: a clean, correctable trip diary from whoever chooses to run it. A set of HHT
+        recruitment, weighting, household rosters and nonresponse follow-up. TripLibre provides none of that. It offers
+        accessible basic data collection: a clean, correctable trip diary from whoever chooses to run it. A set of TripLibre
         diaries is a convenience sample unless a study design makes it something more. See
-        <a class="link" href="../research.html">Research uses &amp; limitations</a>.</span></li>
+        <a class="link" href="../triplibre/docs/research.html">Research uses &amp; limitations</a>.</span></li>
       <li><span><b>Not risk-free.</b> Keeping data on the device removes the server, not the risk. A trace of where
         someone sleeps and works can re-identify them, the phone can be lost or backed up to iCloud, and an export can be
-        forwarded. HHT reduces privacy exposure; it does not eliminate it.</span></li>
+        forwarded. TripLibre reduces privacy exposure; it does not eliminate it.</span></li>
       <li><span><b>Not validated at research grade.</b> Its accuracy has been measured on a small personal sample, not
-        benchmarked against a formal ground truth across many people. See <a class="link" href="../validation.html">Validation</a>.</span></li>
+        benchmarked against a formal ground truth across many people. See <a class="link" href="../triplibre/docs/validation.html">Validation</a>.</span></li>
       <li><span><b>Not a behaviour-change app.</b> No streaks, goals or nudges. It records and summarises.</span></li>
     </ol>
   </div>
@@ -148,7 +148,7 @@
       <p class="eyebrow">Who it serves</p>
       <h2 class="h2" id="serves-title">Everyday users and the people who study travel.</h2>
     </div>
-    <section class="table-wrap" tabindex="0" aria-label="Table: who HHT serves"><table class="s-table">
+    <section class="table-wrap" tabindex="0" aria-label="Table: who TripLibre serves"><table class="s-table">
       <thead><tr><th>Who</th><th>What they can do today</th><th>What would help them later</th></tr></thead>
       <tbody>
       <tr><td>Anyone wanting a private travel diary</td><td>Install from source, record, correct, export. <span class="status available">Available</span></td><td>An App Store build, no Xcode needed. <span class="status progress">In progress</span></td></tr>
@@ -172,7 +172,7 @@
       and data format. Nothing here expands what the first App Store version will contain.</p>
       <div class="actions">
         <a class="btn primary" href="../roadmap/">See the roadmap <span class="arr" aria-hidden="true">→</span></a>
-        <a class="btn" href="../products/ios/">HHT for iOS</a>
+        <a class="btn" href="../triplibre/">TripLibre for iOS</a>
       </div>
     </div>
   </div>

@@ -3,22 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Using the app · HHT Docs</title>
-<meta name="description" content="A tour of HHT's screens: the daily diary, corrections, places, timeline, map, stats, import and export.">
-<link rel="icon" href="assets/hht-logo.png">
+<title>Using the app · TripLibre Docs</title>
+<meta name="description" content="A tour of TripLibre's screens: the daily diary, corrections, places, timeline, map, stats, import and export.">
+<link rel="icon" href="../../assets/triplibre-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css?v=9">
+<link rel="stylesheet" href="../../assets/docs.css?v=10">
 <script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
-<script src="assets/docs.js" defer></script>
+<script src="../../assets/docs.js?v=2" defer></script>
 </head>
 <body>
 <main class="dx-main"><article class="dx-content">
 
 <p class="eyebrow">Get started</p>
 <h1>Using the app</h1>
-<p class="lede">Once HHT has "Always" location access you don't need to open it at all. It records in the background
+<p class="lede">Once TripLibre has "Always" location access you don't need to open it at all. It records in the background
 and builds your diary whenever it gets a chance. Opening it once a day to confirm uncertain trips is enough.</p>
 
 <h2>The screens</h2>
@@ -37,10 +37,10 @@ and builds your diary whenever it gets a chance. Opening it once a day to confir
 
 <h2>A typical day</h2>
 <ol class="steps">
-  <li><b>Live your day</b>HHT records GPS while you move and goes quiet when you stop.</li>
+  <li><b>Live your day</b>TripLibre records GPS while you move and goes quiet when you stop.</li>
   <li><b>Open Today</b>The diary updates on launch. You'll see something like
     <i>Home → walk → Coffee → subway → Penn</i>.</li>
-  <li><b>Stamp short stops</b>Grabbing a coffee or picking something up takes less than the ~5 minutes HHT needs to notice a stop.
+  <li><b>Stamp short stops</b>Grabbing a coffee or picking something up takes less than the ~5 minutes TripLibre needs to notice a stop.
     Tap <b>Stamp this moment</b> on Today while you're there: no form, nothing to fill in.</li>
   <li><b>Review uncertain trips</b>"Did I get that right?" cards appear for trips with an unknown or low-confidence mode.
     Tap the right mode, or <b>Looks right</b>.</li>
@@ -51,10 +51,10 @@ and builds your diary whenever it gets a chance. Opening it once a day to confir
 </ol>
 
 <h2>Home Screen widgets</h2>
-<p>To check on HHT without opening it, long-press the Home Screen, tap <b>Edit › Add Widget</b> and search for <b>HHT</b>.
+<p>To check on TripLibre without opening it, long-press the Home Screen, tap <b>Edit › Add Widget</b> and search for <b>TripLibre</b>.
 <b>Tracking</b> (small) shows whether recording is healthy, <b>Today</b> (medium) shows today's trips, distance and places,
 and <b>Last 7 days</b> (large) shows your week. Plain-card and timeline styles are there too, and <b>Stamp</b> (small)
-stamps a short stop from the Home Screen. Widgets show what HHT last worked
+stamps a short stop from the Home Screen. Widgets show what TripLibre last worked
 out, with an "updated … ago" time; tap one to open the app on that screen. See the <a href="ui-guide.html#widgets">UI guide</a>
 for every widget and status.</p>
 
@@ -63,12 +63,12 @@ for every widget and status.</p>
 It records the time immediately and only a coarse location (rounded to about 110 m), and it works with poor GPS or none at all.
 A line confirms it with an <b>Undo</b> for a few seconds. A second tap within 30 seconds keeps the first stamp rather than
 adding another.</p>
-<p>The <b>Stamp</b> Home Screen widget does the same from outside the app: tapping it opens HHT on Today and stamps, with the
+<p>The <b>Stamp</b> Home Screen widget does the same from outside the app: tapping it opens TripLibre on Today and stamps, with the
 same confirmation and <b>Undo</b>. The widget itself saves nothing and never asks for your location, so the stamp gets the
 same coarse location the button would. The widget shows when you last stamped.</p>
 <ul>
-  <li>If HHT already sees a visit there, the stamp is attached to it and the visit shows a yellow stamp badge.</li>
-  <li>If not, HHT looks at the GPS fixes around the tap and adds the short stop it missed, splitting the trip in two.
+  <li>If TripLibre already sees a visit there, the stamp is attached to it and the visit shows a yellow stamp badge.</li>
+  <li>If not, TripLibre looks at the GPS fixes around the tap and adds the short stop it missed, splitting the trip in two.
     The stop's place and times come from those fixes, not from where you tapped.</li>
   <li>A stamp with nothing to place it yet (or one that contradicts the GPS) is listed in the diary as
     <i>You stamped a stop</i>, clearly separate from inferred visits. Swipe it to remove it.</li>
@@ -110,12 +110,12 @@ so automatic rebuilds never overwrite it.</p>
 <ul>
   <li><b>Wrong place? Choose or create…</b>: reassign the stop to another place, or create a new one here.</li>
   <li><b>Times</b>: fix arrival and departure, or mark it <i>Still here</i>.</li>
-  <li><b>I left and came back / add a missing stop</b>: splits the visit around an outing HHT missed.</li>
+  <li><b>I left and came back / add a missing stop</b>: splits the visit around an outing TripLibre missed.</li>
   <li><b>This wasn't a stop</b>: removes it and joins the trips before and after.</li>
 </ul>
 
 <div class="callout tip"><div class="ic">✓</div>
-<p>HHT learns from corrections. If you've corrected trips between the same two places and most of those corrections agree,
+<p>TripLibre learns from corrections. If you've corrected trips between the same two places and most of those corrections agree,
 the next trip on that route gets that mode automatically.</p></div>
 
 <h2>Places, flights and life phases</h2>
@@ -142,7 +142,7 @@ the next trip on that route gets that mode automatically.</p></div>
 
 <h2>Exporting</h2>
 <p>Settings › <b>Create export</b> writes a timestamped folder such as <code>hht-export-20260927-120000/</code> to
-<i>Files › On My iPhone › HHT › Exports</i> and opens the share sheet. It contains CSVs for every table, a JSON dump,
+<i>Files › On My iPhone › TripLibre › Exports</i> and opens the share sheet. It contains CSVs for every table, a JSON dump,
 GeoJSON for places and routes, and a SQLite snapshot. See <a href="data.html">Data model &amp; export</a> for the columns.</p>
 
 <h2>Importing history</h2>
@@ -166,7 +166,7 @@ as: 3-letter code → airport, then existing place by name or code, then coordin
 for that period are then rebuilt automatically.</p>
 
 <h2>Battery</h2>
-<p>GPS runs only while you're moving. When you stop, HHT turns it off and relies on a 150 m geofence plus iOS visit
+<p>GPS runs only while you're moving. When you stop, TripLibre turns it off and relies on a 150 m geofence plus iOS visit
 events. Expect a few percent per day for a typical urban routine; <i>Precise</i> accuracy costs more.</p>
 
 </article></main>

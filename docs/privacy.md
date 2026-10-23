@@ -1,7 +1,7 @@
 # Privacy
 
 The privacy documentation lives on the docs site, so there is one version to keep in sync with the code:
-**<https://hhtdiary.org/privacy.html>** (source: [`privacy.html`](privacy.html)).
+**<https://hhtdiary.org/triplibre/docs/privacy.html>** (source: [`triplibre/docs/privacy.html`](triplibre/docs/privacy.html)).
 
 It covers what is stored and where, every case in which the app uses the network, exactly what an export contains
 (including the full `travel.sqlite` snapshot), erase and deletion, re-identification risk, and how to verify each

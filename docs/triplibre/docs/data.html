@@ -3,22 +3,22 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Data model &amp; export · HHT Docs</title>
-<meta name="description" content="HHT's SQLite schema, export bundle, and how to analyse it in Python, SQL, R or QGIS.">
-<link rel="icon" href="assets/hht-logo.png">
+<title>Data model &amp; export · TripLibre Docs</title>
+<meta name="description" content="TripLibre's SQLite schema, export bundle, and how to analyse it in Python, SQL, R or QGIS.">
+<link rel="icon" href="../../assets/triplibre-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css?v=9">
+<link rel="stylesheet" href="../../assets/docs.css?v=10">
 <script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
-<script src="assets/docs.js" defer></script>
+<script src="../../assets/docs.js?v=2" defer></script>
 </head>
 <body>
 <main class="dx-main"><article class="dx-content">
 
 <p class="eyebrow">Concepts</p>
 <h1>Data model &amp; export</h1>
-<p class="lede">Everything HHT knows is in one SQLite file. The export bundle is that same data as CSV, JSON and GeoJSON,
+<p class="lede">Everything TripLibre knows is in one SQLite file. The export bundle is that same data as CSV, JSON and GeoJSON,
 with stable IDs that join across every table.</p>
 
 <h2>Conventions</h2>
@@ -50,7 +50,7 @@ with stable IDs that join across every table.</p>
   <tr><td><code>audit_log</code></td><td>Correction</td><td><code>ts, entity_type, entity_id, action, field, old_value, new_value</code></td></tr>
 </table></div>
 <p>The final mode of a trip is <code>COALESCE(mode_user, mode_auto, 'unknown')</code>. The full column-by-column reference is in
-<a href="https://github.com/zyang91/HHT-app/blob/main/docs/data-model.md"><code>docs/data-model.md</code></a>.</p>
+<a href="https://github.com/zyang91/TripLibre/blob/main/docs/data-model.md"><code>docs/data-model.md</code></a>.</p>
 
 <h3>Codes</h3>
 <p><b>Modes</b>: <code>walk run bicycle ebike scooter car car_driver car_passenger taxi bus subway light_rail commuter_rail
@@ -123,7 +123,7 @@ which is useful for evaluating or training a better mode classifier.</p></div>
   <tr><td>Home-based tour</td><td>Trips from leaving home to next arriving home; complex tour = ≥ 2 stops.</td></tr>
   <tr><td>Repeat OD share</td><td>Share of trips whose origin→destination pair already occurred earlier in the period.</td></tr>
 </table></div>
-<p>All definitions: <a href="https://github.com/zyang91/HHT-app/blob/main/docs/analytics.md"><code>docs/analytics.md</code></a>.</p>
+<p>All definitions: <a href="https://github.com/zyang91/TripLibre/blob/main/docs/analytics.md"><code>docs/analytics.md</code></a>.</p>
 
 </article></main>
 </body>

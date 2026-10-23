@@ -1,4 +1,4 @@
-/* HHT documentation — shared styles. Independent of the project page (../index.html). */
+/* TripLibre documentation — shared styles. The accent is the app's coral (App/Support/Theme.swift). */
 
 :root {
   --bg: #fbfbfa;
@@ -10,8 +10,8 @@
   --ink-faint: #696971;
   --line: #e6e6e3;
   --line-strong: #d4d4d0;
-  --accent: #a8551c;
-  --accent-soft: rgba(168, 85, 28, .1);
+  --accent: #b8381e;
+  --accent-soft: rgba(255, 107, 74, .1);
   --teal: #137a5a;
   --teal-soft: rgba(19, 122, 90, .1);
   --blue: #3b6fd8;
@@ -38,8 +38,8 @@
     --ink-faint: #8b8b94;
     --line: #26262b;
     --line-strong: #34343a;
-    --accent: #e8945a;
-    --accent-soft: rgba(232, 148, 90, .12);
+    --accent: #ff8a6e;
+    --accent-soft: rgba(255, 138, 110, .12);
     --teal: #4fd1a5;
     --teal-soft: rgba(79, 209, 165, .1);
     --blue: #7aa2ff;
@@ -60,8 +60,8 @@
   --ink-faint: #8b8b94;
   --line: #26262b;
   --line-strong: #34343a;
-  --accent: #e8945a;
-  --accent-soft: rgba(232, 148, 90, .12);
+  --accent: #ff8a6e;
+  --accent-soft: rgba(255, 138, 110, .12);
   --teal: #4fd1a5;
   --teal-soft: rgba(79, 209, 165, .1);
   --blue: #7aa2ff;
@@ -105,6 +105,9 @@ img { max-width: 100%; }
 .dx-brand:hover { text-decoration: none; }
 .dx-brand img { width: 26px; height: 26px; border-radius: 7px; }
 .dx-brand .tag { font: 500 11px var(--mono); color: var(--ink-faint); border: 1px solid var(--line-strong); border-radius: 5px; padding: 1px 6px; }
+.dx-by { font-size: 13px; color: var(--ink-faint); white-space: nowrap; }
+.dx-by a { color: var(--ink-soft); text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--line-strong); }
+.dx-by a:hover { color: var(--ink); }
 .dx-header nav { display: flex; gap: 4px; margin-left: auto; align-items: center; }
 .dx-header nav a, .icon-btn {
   color: var(--ink-soft); font-size: 14px; padding: 6px 10px; border-radius: 8px;
@@ -313,7 +316,7 @@ td code { white-space: nowrap; }
 
 .badge { display: inline-block; font: 500 11.5px var(--mono); padding: 1px 7px; border-radius: 999px; border: 1px solid var(--line-strong); color: var(--ink-soft); vertical-align: 2px; }
 
-/* Status labels (vision, roadmap, research, validation): what HHT does today vs. what is only planned. */
+/* Status labels (vision, roadmap, research, validation): what TripLibre does today vs. what is only planned. */
 .status { display: inline-block; font: 600 11.5px var(--mono); padding: 1px 8px; border-radius: 999px; border: 1px solid; vertical-align: 2px; white-space: nowrap; }
 /* Text is mixed toward --ink: darker in light mode, lighter in dark mode, so small labels keep 4.5:1 on their tint. */
 .status.available { color: color-mix(in srgb, var(--teal) 75%, var(--ink)); background: var(--teal-soft); }

@@ -29,7 +29,7 @@ final class AppModel: ObservableObject {
         return url
     }
 
-    /// Visible in the Files app (On My iPhone › HHT) because UIFileSharingEnabled is set.
+    /// Visible in the Files app (On My iPhone › TripLibre) because UIFileSharingEnabled is set.
     static var documentsDirectory: URL { FileManager.default.urls(for: .documentDirectory, in: .userDomainMask)[0] }
     static var exportsDirectory: URL { documentsDirectory.appendingPathComponent("Exports", isDirectory: true) }
     static var backupsDirectory: URL { documentsDirectory.appendingPathComponent("Backups", isDirectory: true) }

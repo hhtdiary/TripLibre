@@ -9,7 +9,7 @@
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
-	<string>HHT</string>
+	<string>TripLibre</string>
 	<key>CFBundleExecutable</key>
 	<string>$(EXECUTABLE_NAME)</string>
 	<key>CFBundleIdentifier</key>
@@ -40,11 +40,11 @@
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Allow “Always” so HHT can log trips in the background. GPS is used only while you are moving; data stays on your iPhone.</string>
+	<string>Allow “Always” so TripLibre can log trips in the background. GPS is used only while you are moving; data stays on your iPhone.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>HHT records where you go to build your private travel diary. Data never leaves your iPhone.</string>
+	<string>TripLibre records where you go to build your private travel diary. Data never leaves your iPhone.</string>
 	<key>NSMotionUsageDescription</key>
-	<string>Motion activity (walking, cycling, in a vehicle) helps HHT tell travel modes apart. It stays on your iPhone.</string>
+	<string>Motion activity (walking, cycling, in a vehicle) helps TripLibre tell travel modes apart. It stays on your iPhone.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>

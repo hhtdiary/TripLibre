@@ -36,20 +36,20 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.zyang91.hht
         PRODUCT_NAME: HHT
         TARGETED_DEVICE_FAMILY: "1"
-        INFOPLIST_KEY_CFBundleDisplayName: HHT
+        INFOPLIST_KEY_CFBundleDisplayName: TripLibre
         ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
         ENABLE_PREVIEWS: YES
     info:
       path: App/Support/Info.plist
       properties:
-        CFBundleDisplayName: HHT
+        CFBundleDisplayName: TripLibre
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
-        NSLocationWhenInUseUsageDescription: "HHT records where you go to build your private travel diary. Data never leaves your iPhone."
-        NSLocationAlwaysAndWhenInUseUsageDescription: "Allow “Always” so HHT can log trips in the background. GPS is used only while you are moving; data stays on your iPhone."
-        NSMotionUsageDescription: "Motion activity (walking, cycling, in a vehicle) helps HHT tell travel modes apart. It stays on your iPhone."
+        NSLocationWhenInUseUsageDescription: "TripLibre records where you go to build your private travel diary. Data never leaves your iPhone."
+        NSLocationAlwaysAndWhenInUseUsageDescription: "Allow “Always” so TripLibre can log trips in the background. GPS is used only while you are moving; data stays on your iPhone."
+        NSMotionUsageDescription: "Motion activity (walking, cycling, in a vehicle) helps TripLibre tell travel modes apart. It stays on your iPhone."
         UIBackgroundModes: [location, fetch]
         BGTaskSchedulerPermittedIdentifiers: [com.zyang91.hht.refresh]
         UIFileSharingEnabled: true
@@ -97,7 +97,7 @@ targets:
     info:
       path: Widgets/Info.plist
       properties:
-        CFBundleDisplayName: HHT
+        CFBundleDisplayName: TripLibre
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         NSExtension:

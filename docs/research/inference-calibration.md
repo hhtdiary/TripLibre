@@ -1,6 +1,6 @@
 # Inference calibration against a human-corrected diary
 
-Issue [#46](https://github.com/zyang91/HHT-app/issues/46). This note covers the audit (Phase 0), the reference dataset
+Issue [#46](https://github.com/zyang91/TripLibre/issues/46). This note covers the audit (Phase 0), the reference dataset
 and review protocol (1), the offline replay harness (2), matching rules and metrics (3), the first calibration round (4)
 and its held-out validation (5), and calibration round 2 on travel modes (8). Everything published here is aggregate: no coordinates, places, timelines or
 per-day diaries. The private inputs and full reports live in a gitignored `calibration-data/` folder on the

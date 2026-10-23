@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>How inference works · HHT Docs</title>
-<meta name="description" content="How HHT turns raw GPS fixes into visits, places, trips and travel modes, and how it keeps your corrections safe.">
-<link rel="icon" href="assets/hht-logo.png">
+<title>How inference works · TripLibre Docs</title>
+<meta name="description" content="How TripLibre turns raw GPS fixes into visits, places, trips and travel modes, and how it keeps your corrections safe.">
+<link rel="icon" href="../../assets/triplibre-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css?v=9">
+<link rel="stylesheet" href="../../assets/docs.css?v=10">
 <script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
-<script src="assets/docs.js" defer></script>
+<script src="../../assets/docs.js?v=2" defer></script>
 </head>
 <body>
 <main class="dx-main"><article class="dx-content">
@@ -30,9 +30,9 @@ machine learning and no network calls, so every result can be explained and repr
 </ol>
 
 <p>Every threshold is a field of <code>InferenceConfig</code>
-(<a href="https://github.com/zyang91/HHT-app/blob/main/Packages/HHTCore/Sources/HHTCore/Inference/InferenceConfig.swift">source</a>).
+(<a href="https://github.com/zyang91/TripLibre/blob/main/Packages/HHTCore/Sources/HHTCore/Inference/InferenceConfig.swift">source</a>).
 Defaults are shown in brackets. The full specification is
-<a href="https://github.com/zyang91/HHT-app/blob/main/docs/inference.md"><code>docs/inference.md</code></a>.</p>
+<a href="https://github.com/zyang91/TripLibre/blob/main/docs/inference.md"><code>docs/inference.md</code></a>.</p>
 
 <h2>1. Cleaning</h2>
 <ul>

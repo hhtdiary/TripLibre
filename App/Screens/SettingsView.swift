@@ -116,7 +116,7 @@ struct SettingsView: View {
             if !exportedFiles.isEmpty {
                 ShareLink(items: exportedFiles) { Label("Share \(exportedFiles.count) files…", systemImage: "square.and.arrow.up") }
                 if let folder = exportFolder {
-                    Text("Also saved in Files › On My iPhone › HHT › Exports › \(folder.lastPathComponent)").font(.caption).foregroundStyle(.secondary)
+                    Text("Also saved in Files › On My iPhone › TripLibre › Exports › \(folder.lastPathComponent)").font(.caption).foregroundStyle(.secondary)
                 }
             }
         } header: { Text("Export for analysis") } footer: {
@@ -151,7 +151,7 @@ struct SettingsView: View {
                 Task { await model.reprocess(from: .distantPast, to: Date()); message = rebuildMessage }
             }
             Button("Back up database now") {
-                do { let u = try model.backupNow(); message = "Saved \(u.lastPathComponent) in Files › HHT › Backups" } catch { message = "\(error)" }
+                do { let u = try model.backupNow(); message = "Saved \(u.lastPathComponent) in Files › TripLibre › Backups" } catch { message = "\(error)" }
             }
             #if targetEnvironment(simulator)
             Button("Load demo data (simulator only)") {

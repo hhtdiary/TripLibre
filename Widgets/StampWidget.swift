@@ -10,7 +10,7 @@ struct StampWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "HHTStamp", provider: SnapshotProvider()) { StampWidgetView(entry: $0) }
             .configurationDisplayName("Stamp")
-            .description("One tap to mark a stop too short for HHT to notice. Opens HHT to save it.")
+            .description("One tap to mark a stop too short for TripLibre to notice. Opens TripLibre to save it.")
             .supportedFamilies([.systemSmall])
     }
 }
@@ -35,17 +35,17 @@ struct StampWidgetView: View {
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
         .accessibilityElement(children: .combine)
         .accessibilityAddTraits(.isButton)
-        .accessibilityHint("Opens HHT and records that you stopped somewhere around here, around now")
+        .accessibilityHint("Opens TripLibre and records that you stopped somewhere around here, around now")
         .containerBackground(for: .widget) { DotGround(theme: t) }
         .widgetURL(Self.url)
     }
 
     /// The last stamp, so a tap's result shows here too; or what a tap will do.
     private var footer: String {
-        guard let s = entry.snapshot else { return "Opens HHT to save it" }
+        guard let s = entry.snapshot else { return "Opens TripLibre to save it" }
         if let last = s.lastStampAt { return "Last stamp " + WFmt.when(last, now: entry.date) }
         switch s.tracking {
-        case .recording, .backgroundLimited: return "For stops HHT might miss"
+        case .recording, .backgroundLimited: return "For stops TripLibre might miss"
         // a stamp still saves without location access, but only its time; say so before the tap
         case .permissionNeeded: return "No location access: saves the time only"
         case .paused: return "Tracking paused: still saves a stamp"

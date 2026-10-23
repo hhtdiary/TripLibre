@@ -3,27 +3,27 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Contributing · HHT Docs</title>
-<meta name="description" content="How to set up HHT for development, run the tests, and contribute changes.">
-<link rel="icon" href="assets/hht-logo.png">
+<title>Contributing · TripLibre Docs</title>
+<meta name="description" content="How to set up TripLibre for development, run the tests, and contribute changes.">
+<link rel="icon" href="../../assets/triplibre-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/docs.css?v=9">
+<link rel="stylesheet" href="../../assets/docs.css?v=10">
 <script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
-<script src="assets/docs.js" defer></script>
+<script src="../../assets/docs.js?v=2" defer></script>
 </head>
 <body>
 <main class="dx-main"><article class="dx-content">
 
 <p class="eyebrow">Reference</p>
 <h1>Contributing</h1>
-<p class="lede">Bug reports, fixes and new features are welcome. HHT is small enough to read in an afternoon, and most of the
+<p class="lede">Bug reports, fixes and new features are welcome. TripLibre is small enough to read in an afternoon, and most of the
 interesting logic lives in a package you can test without a phone.</p>
 
 <h2>Development setup</h2>
-<pre data-lang="bash"><code>git clone https://github.com/zyang91/HHT-app.git
-cd HHT-app
+<pre data-lang="bash"><code>git clone https://github.com/zyang91/TripLibre.git
+cd TripLibre
 brew install xcodegen swiftlint swiftformat
 make test     # core tests, no simulator needed
 make sim      # run the app with demo data
@@ -49,7 +49,7 @@ dark theme, and runs axe-core's WCAG 2.1 AA rules against the finished page, inc
   <tr><td>Change background collection</td><td><code>App/Location/LocationCollector.swift</code>; test on a real device, the simulator can't reproduce it</td></tr>
   <tr><td>Change a Home Screen widget</td><td>Views in <code>Widgets/</code>; data in <code>Widget/WidgetSnapshot.swift</code> (bump <code>currentVersion</code> if its shape changes, and extend <code>WidgetSnapshotTests</code>)</td></tr>
   <tr><td>Change the UI</td><td><code>App/Screens/</code>, styling in <code>App/Support/Theme.swift</code></td></tr>
-  <tr><td>Edit these docs</td><td><code>docs/*.html</code>; navigation is in <code>docs/assets/docs.js</code>. See <a href="#documentation">Documentation</a> below</td></tr>
+  <tr><td>Edit these docs</td><td><code>docs/triplibre/docs/*.html</code>; navigation is in <code>docs/assets/docs.js</code>. See <a href="#documentation">Documentation</a> below</td></tr>
 </table></div>
 
 <h2>Ground rules</h2>
@@ -71,7 +71,7 @@ fixture:</p>
 <ol class="steps">
   <li><b>Describe what happened</b>"Walked 600 m between two buildings, stayed 40 min, took a rideshare for 12 min."
     Times can be relative ("+0:40"); no addresses or coordinates needed.</li>
-  <li><b>Describe what HHT recorded</b>"One 2 h visit, no trip" or "the rideshare was labelled subway". Include the
+  <li><b>Describe what TripLibre recorded</b>"One 2 h visit, no trip" or "the rideshare was labelled subway". Include the
     mode confidence and whether the trip showed a gap, if you can see them.</li>
   <li><b>Add the signal, not the place</b>If you're comfortable, read from your own export: roughly how often fixes
     arrived, their accuracy (<code>h_accuracy</code>), speeds, any silences longer than a couple of minutes, and the
@@ -87,17 +87,19 @@ Accuracy measurements on real data are summarised in aggregate only; see <a href
 
 <h2 id="documentation">Documentation</h2>
 <ul>
-  <li><b>The site is plain HTML.</b> Pages are <code>docs/*.html</code>, published as-is at
-    <a href="https://hhtdiary.org/">hhtdiary.org</a>. There is no Markdown build: a <code>.md</code> file in
-    <code>docs/</code> is visible on GitHub but not on the site. To add a page, copy an existing one and add it to
-    <code>NAV</code> in <code>docs/assets/docs.js</code>.</li>
+  <li><b>The site is plain HTML.</b> Everything in <code>docs/</code> is published as-is at
+    <a href="https://hhtdiary.org/">hhtdiary.org</a>. The organization's pages (home, products, vision, roadmap, about)
+    sit at the top and use <code>assets/site.js</code>; TripLibre's overview is <code>docs/triplibre/</code> (the same
+    script with <code>data-brand="triplibre"</code>) and these docs are <code>docs/triplibre/docs/</code>. There is no
+    Markdown build: a <code>.md</code> file in <code>docs/</code> is visible on GitHub but not on the site. To add a doc
+    page, copy an existing one and add it to <code>NAV</code> in <code>docs/assets/docs.js</code>.</li>
   <li><b>Say what is true today.</b> Label anything that isn't built yet with a status: <span class="status available">Available</span>
     <span class="status progress">In progress</span> <span class="status planned">Planned</span>
     <span class="status exploratory">Exploratory</span> (<code>&lt;span class="status planned"&gt;</code>). Don't add dates
     to plans, and don't call accuracy "research-grade" without a benchmark to point to.</li>
   <li><b>Check against the code.</b> Field names, defaults and file lists should be copied from the source
     (<code>Exporter.swift</code>, <code>Schema.swift</code>, <code>InferenceConfig.swift</code>), not from memory.</li>
-  <li><b>Use the project's terms</b>: HHT, household travel survey (HHTS), visit, trip, segment, tour, person-day, local-first.</li>
+  <li><b>Use the project's terms</b>: TripLibre, household travel survey (HHTS), visit, trip, segment, tour, person-day, local-first.</li>
   <li><b>Use synthetic examples only.</b> <code>make sim</code> and <code>make export-check</code> produce demo data you can quote.</li>
   <li>Run <code>npm run lint</code> and <code>npm run a11y</code>. A Vercel preview is posted on every pull request that touches <code>docs/</code>.</li>
 </ul>
@@ -112,8 +114,8 @@ Accuracy measurements on real data are summarised in aggregate only; see <a href
 </ol>
 
 <h2>Releases</h2>
-<p>Released versions are listed in <a href="https://github.com/zyang91/HHT-app/blob/main/CHANGELOG.md"><code>CHANGELOG.md</code></a>
-and on <a href="https://github.com/zyang91/HHT-app/releases">GitHub Releases</a>. Each GitHub release is archived on Zenodo
+<p>Released versions are listed in <a href="https://github.com/zyang91/TripLibre/blob/main/CHANGELOG.md"><code>CHANGELOG.md</code></a>
+and on <a href="https://github.com/zyang91/TripLibre/releases">GitHub Releases</a>. Each GitHub release is archived on Zenodo
 under one concept DOI, <a href="https://doi.org/10.5281/zenodo.23307589">10.5281/zenodo.23307589</a>. Before tagging
 <code>vX.Y.Z</code>, set the same version in all three places, or the archive will be labelled with the old one:</p>
 <ul>
@@ -124,15 +126,15 @@ under one concept DOI, <a href="https://doi.org/10.5281/zenodo.23307589">10.5281
 <p>Then add a section to <code>CHANGELOG.md</code>.</p>
 
 <h2>Reporting issues</h2>
-<p>Use the <a href="https://github.com/zyang91/HHT-app/issues/new/choose">issue templates</a> for bugs and feature requests.
+<p>Use the <a href="https://github.com/zyang91/TripLibre/issues/new/choose">issue templates</a> for bugs and feature requests.
 For a wrong trip or visit, follow <a href="#proposing-an-inference-test-case">proposing an inference test case</a>
 above. <b>Don't attach raw exports</b>: they contain your location history. Security problems go through
-<a href="https://github.com/zyang91/HHT-app/blob/main/SECURITY.md"><code>SECURITY.md</code></a>, not public issues.</p>
+<a href="https://github.com/zyang91/TripLibre/blob/main/SECURITY.md"><code>SECURITY.md</code></a>, not public issues.</p>
 <p>Everyone participating is expected to follow the
-<a href="https://github.com/zyang91/HHT-app/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a>.</p>
+<a href="https://github.com/zyang91/TripLibre/blob/main/CODE_OF_CONDUCT.md">Code of Conduct</a>.</p>
 
 <h2>License</h2>
-<p>HHT is released under the <a href="https://github.com/zyang91/HHT-app/blob/main/LICENSE">Apache License 2.0</a>.
+<p>TripLibre is released under the <a href="https://github.com/zyang91/TripLibre/blob/main/LICENSE">Apache License 2.0</a>.
 Contributions are accepted under the same license. The repository has no <code>NOTICE</code> file; if a contribution
 brings in third-party code that requires one, add it in the same pull request.</p>
 
