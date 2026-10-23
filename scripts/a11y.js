@@ -18,11 +18,9 @@ const TYPES = {
   '.png': 'image/png', '.jpg': 'image/jpeg', '.svg': 'image/svg+xml', '.json': 'application/json',
 };
 
-// Every page in docs/ and its folders, minus the redirect stubs left at old URLs (vision.html …).
-const pages = [];
-for (const f of (await readdir(ROOT, { recursive: true })).filter(f => f.endsWith('.html')).sort()) {
-  if (!/http-equiv="refresh"/.test(await readFile(join(ROOT, f), 'utf8'))) pages.push(f.split('\\').join('/'));
-}
+// Every page in docs/ and its folders.
+const pages = (await readdir(ROOT, { recursive: true }))
+  .filter(f => f.endsWith('.html')).sort().map(f => f.split('\\').join('/'));
 
 const server = createServer(async (req, res) => {
   let path = decodeURIComponent(new URL(req.url, 'http://x').pathname);
