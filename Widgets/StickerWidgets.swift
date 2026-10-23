@@ -146,8 +146,8 @@ struct EmptyDay: View {
     var body: some View {
         HStack(spacing: 12) {
             Mascot(size: 40, color: snapshot?.tracking == .recording ? Toon.accent : Toon.stone, bob: false)
-            Text(snapshot == nil ? "Open HHT once and your day shows up here."
-                 : snapshot?.tracking == .recording ? "A new day! It fills in as HHT records your trips."
+            Text(snapshot == nil ? "Open TripLibre once and your day shows up here."
+                 : snapshot?.tracking == .recording ? "A new day! It fills in as TripLibre records your trips."
                  : "Nothing recorded today. Tracking isn't running.")
                 .font(.toon(14, .heavy)).foregroundStyle(theme.text).lineLimit(3).minimumScaleFactor(0.8)
         }

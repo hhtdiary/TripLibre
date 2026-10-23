@@ -31,7 +31,7 @@ Reinstall on a fixed day each week (e.g. Sunday) instead of waiting for it to ex
 | Xcode says "Preparing iPhone…" | Happens on first connection or after an iOS update. Wait a few minutes and run again |
 | Signing / Team / provisioning error | Xcode › Settings › Accounts: check the Apple ID is still signed in (sign in again after a password change), then rerun `make phone` |
 | "Untrusted Developer" when opening the app | Settings › General › VPN & Device Management › tap your Apple ID › **Trust** |
-| Installed but not recording | Settings › HHT › Location: **Always** + **Precise Location** on; Settings › HHT › **Motion & Fitness** on |
+| Installed but not recording | Settings › TripLibre › Location: **Always** + **Precise Location** on; Settings › TripLibre › **Motion & Fitness** on |
 | `make: command not found` / `xcodegen: command not found` | Run `xcode-select --install`, then `brew install xcodegen` |
 
 ## New Mac / starting from scratch
@@ -55,7 +55,7 @@ files to your computer or cloud storage. Then do steps 6–8 of "starting from s
 
 ## Backups
 
-- The app saves a daily database snapshot to **Files › On My iPhone › HHT › Backups** (last 7 kept), but those are
+- The app saves a daily database snapshot to **Files › On My iPhone › TripLibre › Backups** (last 7 kept), but those are
   still on the phone.
 - Export regularly to somewhere off the phone: gear › **Create export** › share / save to your computer.
 - To stop reinstalling every 7 days: join the Apple Developer Program ($99/year). Signatures then last a year, and

@@ -170,7 +170,7 @@ struct OnboardingView: View {
                         Mascot(size: 110)
                         Text("Your private\ntravel diary")
                             .font(.toon(34, .bold)).multilineTextAlignment(.center)
-                        Text("HHT records where you go, reconstructs your day into visits and trips (like a household travel survey for one), and lets you correct it in a couple of taps.")
+                        Text("TripLibre records where you go, reconstructs your day into visits and trips (like a household travel survey for one), and lets you correct it in a couple of taps.")
                             .font(.toon(15, .bold)).foregroundStyle(Toon.muted).multilineTextAlignment(.center)
                     }
                     .padding(.top, 8)

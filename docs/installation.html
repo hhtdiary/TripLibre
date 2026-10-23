@@ -50,12 +50,12 @@ cd TripLibre</code></pre></li>
     <p>When you see <code>✓ Installed</code> you're done. Alternatively open <code>HHT.xcodeproj</code>, pick your iPhone as the
     run destination and press <kbd>▶</kbd>.</p></li>
   <li><b>Trust the developer profile</b>On the phone: Settings › General › VPN &amp; Device Management › your Apple ID › <b>Trust</b>.</li>
-  <li><b>Grant permissions</b>Open HHT › <i>Allow location &amp; start</i> › allow <i>While Using</i>, then
+  <li><b>Grant permissions</b>Open TripLibre › <i>Allow location &amp; start</i> › allow <i>While Using</i>, then
     <b>Change to Always Allow</b> when iOS asks. Allow <b>Motion &amp; Fitness</b> too: it noticeably improves mode detection.</li>
 </ol>
 
 <div class="callout tip"><div class="ic">✓</div>
-<p>Check Settings › HHT › Location is <b>Always</b> with <b>Precise Location</b> on. Without "Always", iOS stops
+<p>Check Settings › TripLibre › Location is <b>Always</b> with <b>Precise Location</b> on. Without "Always", iOS stops
 the app from recording in the background.</p></div>
 
 <h2>Renewing every 7 days</h2>
@@ -86,7 +86,7 @@ computer. Then repeat steps 4–7 above on the new phone.</p>
   <tr><td>Xcode says "Preparing iPhone…"</td><td>Normal on first connection or after an iOS update. Wait a few minutes and rerun.</td></tr>
   <tr><td>Signing / provisioning error</td><td>Xcode › Settings › Accounts: sign in again (e.g. after a password change), then <code>make phone</code>.</td></tr>
   <tr><td>Signing error mentioning <code>group.com.zyang91.hht</code> or <code>com.zyang91.hht.widgets</code></td><td>The widget extension needs the App Groups capability on both targets. Run <code>make phone</code> again (it passes <code>-allowProvisioningUpdates</code>), or open the project in Xcode once and let Signing &amp; Capabilities register the group under your team.</td></tr>
-  <tr><td>Widgets say "Open HHT"</td><td>Open the app once after installing; it writes the summary the widgets read.</td></tr>
+  <tr><td>Widgets say "Open TripLibre"</td><td>Open the app once after installing; it writes the summary the widgets read.</td></tr>
   <tr><td>"Untrusted Developer"</td><td>Settings › General › VPN &amp; Device Management › your Apple ID › Trust.</td></tr>
   <tr><td>Installed but not recording</td><td>Location must be <b>Always</b> + Precise; Motion &amp; Fitness on; check the 7-day signature hasn't expired.</td></tr>
   <tr><td><code>xcodegen: command not found</code></td><td><code>xcode-select --install</code>, then <code>brew install xcodegen</code>.</td></tr>

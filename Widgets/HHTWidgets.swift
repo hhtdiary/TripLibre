@@ -20,7 +20,7 @@ struct StatusWidget: Widget {
     var body: some WidgetConfiguration {
         StaticConfiguration(kind: "HHTStatus", provider: SnapshotProvider()) { StickerStatusView(entry: $0) }
             .configurationDisplayName("Tracking")
-            .description("Whether HHT is recording, and when it last got a location.")
+            .description("Whether TripLibre is recording, and when it last got a location.")
             .supportedFamilies([.systemSmall])
     }
 }

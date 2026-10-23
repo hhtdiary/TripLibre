@@ -107,12 +107,12 @@ struct StatusInfo {
     static func from(_ s: WidgetSnapshot?, now: Date) -> StatusInfo {
         let settings = URL(string: "hht://settings")!, today = URL(string: "hht://today")!
         guard let s else {
-            return StatusInfo(badge: "SET UP", title: "Open HHT", detail: "The widget fills in once the app has run",
+            return StatusInfo(badge: "SET UP", title: "Open TripLibre", detail: "The widget fills in once the app has run",
                               action: nil, tone: .off, url: today)
         }
         switch s.tracking {
         case .paused:
-            return StatusInfo(badge: "PAUSED", title: "Tracking paused", detail: "Turned off in HHT",
+            return StatusInfo(badge: "PAUSED", title: "Tracking paused", detail: "Turned off in TripLibre",
                               action: "Open to resume", tone: .off, url: settings)
         case .permissionNeeded:
             return StatusInfo(badge: "NOT RECORDING", title: "Location access is off", detail: lastLine(s, now),

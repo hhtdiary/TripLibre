@@ -545,7 +545,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = App/Support/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = HHT;
+				INFOPLIST_KEY_CFBundleDisplayName = TripLibre;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -649,7 +649,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				ENABLE_PREVIEWS = YES;
 				INFOPLIST_FILE = App/Support/Info.plist;
-				INFOPLIST_KEY_CFBundleDisplayName = HHT;
+				INFOPLIST_KEY_CFBundleDisplayName = TripLibre;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",

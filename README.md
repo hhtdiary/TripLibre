@@ -41,7 +41,7 @@ mistakes in one or two taps, and exports a clean, survey-shaped dataset (CSV / J
 
 TripLibre (formerly HHT) is the first product of [HHT Diary](https://hhtdiary.org/), the organization led by
 Zhanchao Yang that builds open, local-first mobility tools. Code names still use HHT (`HHTCore`, `HHT.xcodeproj`,
-`analysis/hht.py`), and so does the name under the icon on your phone for now (#77).
+`analysis/hht.py`, bundle ID `com.zyang91.hht`), so updating an existing install keeps its data (#77).
 No account, no server, no analytics: the data stays on the phone unless you export it.
 
 TripLibre began as one transportation researcher's travel survey of one, built with AI assistance (Claude). The longer-term
@@ -121,7 +121,7 @@ After changing `project.yml`, regenerate with `xcodegen generate` (`brew install
 
 ## Research workflow
 
-Settings › *Create export* writes a folder (also in Files › On My iPhone › HHT › Exports) and offers a share sheet.
+Settings › *Create export* writes a folder (also in Files › On My iPhone › TripLibre › Exports) and offers a share sheet.
 
 ```bash
 cd analysis && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt
