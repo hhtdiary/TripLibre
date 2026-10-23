@@ -68,7 +68,7 @@ Screenshots of every screen are in the [UI guide](https://hhtdiary.org/ui-guide.
 App/                    SwiftUI iOS app (Today · Timeline · Map · Stats · Places · Settings)
   Location/             background collector, CoreMotion sync, optional geocoder
   Screens/              UI
-Widgets/                read-only Home Screen widgets (WidgetKit extension)
+Widgets/                Home Screen widgets (WidgetKit extension)
 Packages/HHTCore/       platform-independent core (Swift package, no dependencies)
   Database/             SQLite wrapper, schema + migrations, repository
   Inference/            stay detection, self-reported stamps, trip building, mode classification, reprocessing
@@ -111,8 +111,8 @@ After changing `project.yml`, regenerate with `xcodegen generate` (`brew install
 - **Timeline**: days by month, trip search/filters, flights, life phases.
 - **Map / Stats**: activity space, radius of gyration, mode share, departure times, tours, weekday/weekend, and
   period-vs-period comparisons (e.g. two semesters).
-- **Home Screen widgets**: Tracking (is recording healthy?), Today, and Last 7 days, plus plain and timeline styles.
-  They show what the app last worked out and never collect location themselves ([UI guide](docs/ui-guide.html#widgets)).
+- **Home Screen widgets**: Tracking (is recording healthy?), Today, and Last 7 days, plus plain and timeline styles, and
+  a one-tap Stamp that opens the app's own stamp. They show what the app last worked out and never collect location themselves ([UI guide](docs/ui-guide.html#widgets)).
 - **Settings** (gear on Today): collection status, export/import, rebuild from raw data, backups, privacy.
 
 ## Research workflow

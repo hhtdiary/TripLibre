@@ -644,6 +644,19 @@ public final class EditService {
         return s
     }
 
+    /// A second tap this soon after a stamp (a double tap, a widget link delivered twice) is the same stamp.
+    public static let stampRepeatWindow: TimeInterval = 30
+
+    /// `addStamp`, made idempotent for the app's one-tap entry points (the Today button and the Stamp widget, issue #47):
+    /// a live stamp saved within `stampRepeatWindow` before `time` is returned instead of a new one.
+    public func stampOnce(at time: Date = Date(), fix: Coordinate?, fixAccuracy: Double?,
+                          fixTime: Date?) throws -> (stamp: Stamp, isNew: Bool) {
+        if let recent = try store.stamps(from: time.addingTimeInterval(-Self.stampRepeatWindow), to: time).last {
+            return (recent, false)
+        }
+        return (try addStamp(at: time, fix: fix, fixAccuracy: fixAccuracy, fixTime: fixTime), true)
+    }
+
     /// Withdraw a stamp (soft delete); the stop it alone produced disappears on the next run over that time.
     public func deleteStamp(_ stampID: String) throws {
         guard try store.stamp(stampID) != nil else { throw EditError.notFound("stamp \(stampID)") }

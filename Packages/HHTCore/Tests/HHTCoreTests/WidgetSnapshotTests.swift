@@ -105,4 +105,29 @@ struct WidgetSnapshotTests {
         #expect(WidgetSnapshot.read(from: url) == nil)
         #expect(WidgetSnapshot.read(from: url.appendingPathExtension("missing")) == nil)
     }
+
+    @Test func lastStampFeedsTheStampWidget() throws {
+        let s = try Self.seeded()
+        let empty = try WidgetSnapshot.build(store: s, tracking: .recording, diaryUpdatedAt: nil, usesMetric: true,
+                                             now: Self.at(19, 19), calendar: Self.cal)
+        #expect(empty.lastStampAt == nil)
+
+        let edit = EditService(store: s)
+        _ = try edit.addStamp(at: Self.at(19, 12), fix: nil, fixAccuracy: nil, fixTime: nil)
+        let gone = try edit.addStamp(at: Self.at(19, 18), fix: nil, fixAccuracy: nil, fixTime: nil)
+        try edit.deleteStamp(gone.id)
+        let snap = try WidgetSnapshot.build(store: s, tracking: .recording, diaryUpdatedAt: nil, usesMetric: true,
+                                            now: Self.at(19, 19), calendar: Self.cal)
+        #expect(snap.lastStampAt == Self.at(19, 12))   // a withdrawn stamp doesn't count
+        #expect(!snap.sameContent(as: empty))           // a new stamp reloads the widgets
+
+        // a snapshot written before lastStampAt existed still reads
+        var json = try #require(try JSONSerialization.jsonObject(with: JSONEncoder().encode(snap)) as? [String: Any])
+        json["lastStampAt"] = nil
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("hht-widget-\(UUID().uuidString).json")
+        defer { try? FileManager.default.removeItem(at: url) }
+        try JSONSerialization.data(withJSONObject: json).write(to: url)
+        #expect(WidgetSnapshot.read(from: url)?.lastStampAt == nil)
+        #expect(WidgetSnapshot.read(from: url)?.today == snap.today)
+    }
 }

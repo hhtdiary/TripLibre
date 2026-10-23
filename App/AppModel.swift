@@ -188,16 +188,23 @@ final class AppModel: ObservableObject {
 
     /// The stamp just made, for the "Stamped · Undo" confirmation.
     @Published private(set) var lastStamp: Stamp?
+    /// The last tap repeated a stamp made seconds earlier, so nothing new was saved.
+    @Published private(set) var lastStampRepeated = false
 
     /// One tap: record that something worth noting happened around here, around now (issue #32).
     /// Saves immediately with whatever fix is at hand (only a coarse location is kept), then lets inference place it.
+    /// The Today button and the Stamp widget (`hht://stamp`, issue #47) both come here; a repeat within
+    /// `EditService.stampRepeatWindow` shows the stamp already saved instead of adding another.
     func stampNow() {
         let now = Date()
         var fix = collector.latestLocation.flatMap { $0.horizontalAccuracy >= 0 ? $0 : nil }
             .map { (Coordinate($0.coordinate.latitude, $0.coordinate.longitude), $0.horizontalAccuracy, $0.timestamp) }
         if fix == nil, let p = store.lastPoint() { fix = (p.coordinate, p.horizontalAccuracy ?? 100, p.timestamp) }
         do {
-            lastStamp = try edit.addStamp(at: now, fix: fix?.0, fixAccuracy: fix?.1, fixTime: fix?.2)
+            let r = try edit.stampOnce(at: now, fix: fix?.0, fixAccuracy: fix?.1, fixTime: fix?.2)
+            lastStamp = r.stamp
+            lastStampRepeated = !r.isNew
+            guard r.isNew else { return }
         } catch {
             errorMessage = "Couldn't save the stamp: \(error)"
             return
