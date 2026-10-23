@@ -84,13 +84,6 @@ struct DayView: View {
     @State private var costTarget: CostSheet?
     @State private var showSpending = false
 
-    /// Which cost sheet is open: a new cost (for a trip, or the day) or an existing one.
-    struct CostSheet: Identifiable {
-        var target: CostTarget
-        var existing: Expense?
-        var id: String { existing?.id ?? "new" }
-    }
-
     private var isToday: Bool { Calendar.current.isDateInToday(day) }
 
     /// Raw data past the last stop that falls on this day.
@@ -108,8 +101,8 @@ struct DayView: View {
             Section {
                 MascotSays(text: mascotLine).toonRow(top: 8, bottom: 8)
                 if isToday && !fixedDay { StampButton().toonRow(top: 4, bottom: 6) }
-                if let t = costPromptTrip {
-                    CostPromptCard(trip: t, destination: destinationName(t)) { costTarget = CostSheet(target: .trip(t)) }
+                ForEach(costPrompts) { p in
+                    CostPromptCard(prompt: p) { costTarget = CostSheet(target: p.target) }
                         .toonRow(top: 4, bottom: 6)
                 }
                 if !fixedDay && reviewCount > 0 {
@@ -228,15 +221,24 @@ struct DayView: View {
         }
     }
 
-    /// The day's latest finished trip by a usually-paid mode with no cost yet, unless the user waved it off.
-    /// Only for the last 7 days (like the review banner): later than that, people rarely remember a fare.
-    private var costPromptTrip: Trip? {
+    /// Every finished trip by a usually-paid mode, and every stay at a usually-paid place, with no cost yet and not
+    /// waved off: one card each, newest first (issue #75). Only for the last 7 days (like the review banner): later
+    /// than that, people rarely remember what they paid.
+    private var costPrompts: [CostPrompt] {
         let now = Date()
-        guard !fixedDay, now.timeIntervalSince(day) < 7 * 86_400 else { return nil }
-        return data.trips.filter { t in
-            t.mode.usuallyPaid && t.arrival <= now && data.costsByTrip[t.id] == nil && !model.skippedCostPrompts.contains(t.id)
+        guard !fixedDay, now.timeIntervalSince(day) < 7 * 86_400 else { return [] }
+        let skipped = Set(model.skippedCostPrompts)
+        let trips = data.trips.filter { t in
+            t.mode.usuallyPaid && t.arrival <= now && data.costsByTrip[t.id] == nil && !skipped.contains(t.id)
         }
-        .max { $0.arrival < $1.arrival }
+        .map { (end: $0.arrival, prompt: CostPrompt(target: .trip($0), day: day, destination: destinationName($0), id: $0.id)) }
+        let visits = data.visits.compactMap { v -> (end: Date, prompt: CostPrompt)? in
+            let p = v.placeID.flatMap { data.places[$0] }
+            guard p?.category?.usuallyPaid == true, v.arrival <= now, data.costsByVisit[v.id] == nil, !skipped.contains(v.id)
+            else { return nil }
+            return (v.departure ?? now, CostPrompt(target: .visit(v, p), day: day, id: v.id))
+        }
+        return (trips + visits).sorted { $0.end > $1.end }.map(\.prompt)
     }
 
     private func destinationName(_ t: Trip) -> String? {

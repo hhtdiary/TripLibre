@@ -64,6 +64,13 @@ enum CostTarget {
     case day(Date)
 }
 
+/// Which cost sheet is open: a new cost (for a trip, a visit, or the day) or an existing one.
+struct CostSheet: Identifiable {
+    var target: CostTarget
+    var existing: Expense?
+    var id: String { existing?.id ?? "new" }
+}
+
 /// One choice in the "For" picker.
 private struct CostLink: Hashable, Identifiable {
     var tripID: String?
@@ -97,6 +104,7 @@ struct CostEntrySheet: View {
     @State private var visits: [String: (Visit, Place?)] = [:]
     @State private var suggestions: [Expense] = []
     @State private var confirmDelete = false
+    @State private var didSetUp = false
     @FocusState private var amountFocused: Bool
 
     private var amount: Double? { Fmt.parseAmount(amountText) }
@@ -244,6 +252,9 @@ struct CostEntrySheet: View {
     }
 
     private func setUp() {
+        // onAppear fires again when the "For" picker pops back: setting up twice would undo the pick (issue #75)
+        guard !didSetUp else { return }
+        didSetUp = true
         let store = model.store
         var day = Date()
         switch target {
@@ -349,11 +360,11 @@ struct CostEntrySheet: View {
 
 // MARK: - Today
 
-/// Pip asks about the latest paid-looking trip that has no cost yet: one tap for the usual fare, "Free", or more.
+/// Pip asks about one trip or stay that usually costs something and has no cost yet: one tap for the usual amount,
+/// "Free" / "Nothing", or more. Today shows one card for each (issue #75).
 struct CostPromptCard: View {
     @EnvironmentObject var model: AppModel
-    let trip: Trip
-    var destination: String?
+    let prompt: CostPrompt
     var onMore: () -> Void
     @State private var suggestions: [Expense] = []
     @State private var saved = 0
@@ -361,19 +372,18 @@ struct CostPromptCard: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .top, spacing: 10) {
-                ModeIcon(mode: trip.mode, size: 34)
+                icon
                 VStack(alignment: .leading, spacing: 2) {
-                    Text("What did that \(trip.mode.label.lowercased()) trip cost?").font(.toon(15, .heavy))
-                    Text("\(Fmt.time(trip.departure))–\(Fmt.time(trip.arrival))" + (destination.map { " · to \($0)" } ?? ""))
-                        .font(.toon(12, .bold)).foregroundStyle(Toon.muted)
+                    Text(title).font(.toon(15, .heavy))
+                    Text(subtitle).font(.toon(12, .bold)).foregroundStyle(Toon.muted)
                 }
                 Spacer(minLength: 0)
-                Button { model.skipCostPrompt(trip.id) } label: {
+                Button { model.skipCostPrompt(prompt.id) } label: {
                     Image(systemName: "xmark").font(.system(size: 13, weight: .black)).foregroundStyle(Toon.muted)
                         .frame(width: 32, height: 32).contentShape(Rectangle())
                 }
                 .buttonStyle(.borderless)
-                .accessibilityLabel("Don't ask about this trip")
+                .accessibilityLabel(isTrip ? "Don't ask about this trip" : "Don't ask about this visit")
             }
             .foregroundStyle(Toon.ink)
             HStack(spacing: 6) {
@@ -381,9 +391,9 @@ struct CostPromptCard: View {
                     Button(Fmt.cost(s)) { quickSave(s.amount, s.currency, s.category) }
                         .buttonStyle(ToonButtonStyle(fill: CostStyle.color, height: 34, fontSize: 13, shadow: 2))
                 }
-                Button("Free") { quickSave(0, model.costCurrency, ExpenseCategory.suggested(for: trip.mode)) }
+                Button(isTrip ? "Free" : "Nothing") { quickSave(0, model.costCurrency, category) }
                     .buttonStyle(ToonButtonStyle(height: 34, fontSize: 13, shadow: 2))
-                    .accessibilityHint("Records that this trip cost nothing, e.g. with a pass")
+                    .accessibilityHint(isTrip ? "Records that this trip cost nothing, e.g. with a pass" : "Records that you spent nothing here")
                 Button { onMore() } label: { Label(suggestions.isEmpty ? "Enter amount" : "Other", systemImage: "plus") }
                     .buttonStyle(ToonButtonStyle(height: 34, fontSize: 13, shadow: 2))
                     .accessibilityIdentifier("costPromptMore")
@@ -393,18 +403,77 @@ struct CostPromptCard: View {
         .toonCard(Toon.cream, radius: 18, shadow: 0, dashed: true)
         .sensoryFeedback(.success, trigger: saved)
         .accessibilityIdentifier("costPrompt")
-        .task(id: trip.id) {
+        .task(id: prompt.id) {
+            let recent: [Expense]
+            switch prompt.target {
+            case .trip(let t): recent = (try? model.store.recentExpenses(mode: t.mode)) ?? []
+            case .visit(_, let p): recent = p.flatMap { try? model.store.recentExpenses(placeID: $0.id) } ?? []
+            case .day: recent = []
+            }
             var seen = Set<String>()
-            suggestions = Array(((try? model.store.recentExpenses(mode: trip.mode)) ?? [])
-                .filter { $0.amount > 0 && seen.insert("\($0.amount)-\($0.currency)").inserted }.prefix(2))
+            suggestions = Array(recent.filter { $0.amount > 0 && seen.insert("\($0.amount)-\($0.currency)").inserted }.prefix(2))
+        }
+    }
+
+    private var isTrip: Bool { if case .trip = prompt.target { return true } else { return false } }
+
+    @ViewBuilder private var icon: some View {
+        switch prompt.target {
+        case .trip(let t): ModeIcon(mode: t.mode, size: 34)
+        case .visit(_, let p): ToonChip(symbol: p?.category?.symbol ?? "mappin", color: CostStyle.color, size: 34)
+        case .day: EmptyView()
+        }
+    }
+
+    private var title: String {
+        switch prompt.target {
+        case .trip(let t): return "What did that \(t.mode.label.lowercased()) trip cost?"
+        case .visit(_, let p): return "What did you spend at \(p.flatMap { $0.isNamed ? $0.displayName : nil } ?? "this stop")?"
+        case .day: return ""
+        }
+    }
+
+    private var subtitle: String {
+        switch prompt.target {
+        case .trip(let t): return "\(Fmt.time(t.departure))–\(Fmt.time(t.arrival))" + (prompt.destination.map { " · to \($0)" } ?? "")
+        case .visit(let v, _): return v.departure.map { "\(Fmt.time(v.arrival))–\(Fmt.time($0))" } ?? "Since \(Fmt.time(v.arrival))"
+        case .day: return ""
+        }
+    }
+
+    private var category: ExpenseCategory {
+        switch prompt.target {
+        case .trip(let t): return ExpenseCategory.suggested(for: t.mode)
+        case .visit(_, let p): return ExpenseCategory.suggested(for: p?.category)
+        case .day: return .other
         }
     }
 
     private func quickSave(_ amount: Double, _ currency: String, _ category: ExpenseCategory) {
         saved += 1
-        model.saveCost(Expense(timestamp: trip.departure, amount: amount, currency: currency, category: category,
-                               tripID: trip.id, timeZone: trip.timeZone))
+        switch prompt.target {
+        case .trip(let t):
+            model.saveCost(Expense(timestamp: t.departure, amount: amount, currency: currency, category: category,
+                                   tripID: t.id, timeZone: t.timeZone))
+        case .visit(let v, _):
+            // on the day being shown: now during an ongoing stay, else when the stay began (or the day did)
+            let at = v.departure == nil ? max(v.arrival, Date()) : max(v.arrival, DateRange.day(prompt.day).start)
+            model.saveCost(Expense(timestamp: at, amount: amount, currency: currency, category: category,
+                                   visitID: v.id, timeZone: v.timeZone))
+        case .day: break
+        }
     }
+}
+
+/// One trip or stay Today asks about.
+struct CostPrompt: Identifiable {
+    var target: CostTarget
+    /// The day being shown.
+    var day: Date
+    /// Where a trip went, if the place has a name.
+    var destination: String?
+    /// The trip's or visit's ID, also what "don't ask" remembers.
+    var id: String
 }
 
 /// What the day cost so far, with "+ Cost". Tapping the card opens the spending summary.
@@ -485,18 +554,17 @@ struct CostBadge: View {
 
 // MARK: - Trip / visit detail
 
-/// The "Cost" section of a trip or visit sheet.
+/// The "Cost" section of a trip or visit sheet. The entry sheet is presented by the parent (`sheet`), outside the
+/// list: a sheet on a list row is torn down when the row is re-laid out, e.g. as the keyboard hides (issue #75).
 struct CostsSection: View {
-    @EnvironmentObject var model: AppModel
     let costs: [Expense]
     let target: CostTarget
-    @State private var adding = false
-    @State private var editing: Expense?
+    @Binding var sheet: CostSheet?
 
     var body: some View {
         Section {
             ForEach(costs) { e in
-                Button { editing = e } label: {
+                Button { sheet = CostSheet(target: target, existing: e) } label: {
                     HStack {
                         Image(systemName: e.category.symbol).frame(width: 24).foregroundStyle(Toon.muted).accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 1) {
@@ -510,7 +578,7 @@ struct CostsSection: View {
                 }
                 .buttonStyle(.plain)
             }
-            Button { adding = true } label: { Label(costs.isEmpty ? "Add a cost" : "Add another cost", systemImage: "plus.circle") }
+            Button { sheet = CostSheet(target: target) } label: { Label(costs.isEmpty ? "Add a cost" : "Add another cost", systemImage: "plus.circle") }
                 .accessibilityIdentifier("detailAddCost")
         } header: {
             Text("Cost")
@@ -521,8 +589,6 @@ struct CostsSection: View {
                 Text("Total \(total)")
             }
         }
-        .sheet(isPresented: $adding) { CostEntrySheet(target: target).environmentObject(model) }
-        .sheet(item: $editing) { e in CostEntrySheet(target: target, existing: e).environmentObject(model) }
     }
 
     private var footer: String {

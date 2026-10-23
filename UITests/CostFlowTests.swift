@@ -38,11 +38,14 @@ final class CostFlowTests: HHTUITestCase {
 
     func testPromptOffersFreeForAPaidTrip() throws {
         showYesterday()
-        let prompt = app.descendants(matching: .any).matching(identifier: "costPrompt").firstMatch
-        guard prompt.waitForExistence(timeout: 5) else { throw XCTSkip("no transit trip in yesterday's demo data") }
-        prompt.buttons["Free"].tap()
+        // one card per unpaid trip or stay (issue #75): answering one leaves the others
+        let prompts = app.descendants(matching: .any).matching(identifier: "costPrompt")
+        let trip = prompts.containing(.button, identifier: "Free").firstMatch
+        guard trip.waitForExistence(timeout: 5) else { throw XCTSkip("no transit trip in yesterday's demo data") }
+        let before = prompts.count
+        trip.buttons["Free"].tap()
         XCTAssertTrue(element(labelContaining: "Cost Free").waitForExistence(timeout: 5), "free badge on the trip")
-        XCTAssertFalse(prompt.exists, "the prompt moves on once answered")
+        XCTAssertEqual(prompts.count, before - 1, "only the answered prompt goes away")
     }
 
     private func enterCost(_ amount: String) {

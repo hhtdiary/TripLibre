@@ -25,7 +25,8 @@ and builds your diary whenever it gets a chance. Opening it once a day to confir
 <div class="table-wrap"><table>
   <tr><th>Tab</th><th>What it shows</th></tr>
   <tr><td><b>Today</b></td><td>The reconstructed day on a map plus a chronological diary of visits and trips. Swipe between days.
-    Trips that need review show quick mode buttons. <b>Stamp this moment</b> marks a short stop in one tap.
+    Trips that need review show quick mode buttons. <b>Stamp this moment</b> marks a short stop in one tap, and
+    <b>Spent today</b> adds up what the day cost.
     The gear icon opens <b>Settings</b>.</td></tr>
   <tr><td><b>Timeline</b></td><td>Days grouped by month, trip search and filters (mode, place, weekends only), flights, and life phases.</td></tr>
   <tr><td><b>Map</b></td><td>Your activity space over a chosen range: places, routes, flights and the convex hull of visited places.</td></tr>
@@ -43,6 +44,8 @@ and builds your diary whenever it gets a chance. Opening it once a day to confir
     Tap <b>Stamp this moment</b> on Today while you're there: no form, nothing to fill in.</li>
   <li><b>Review uncertain trips</b>"Did I get that right?" cards appear for trips with an unknown or low-confidence mode.
     Tap the right mode, or <b>Looks right</b>.</li>
+  <li><b>Note what things cost</b>A card asks about each fare-type trip and each stop at a restaurant, shop, hotel or other
+    paid place. Tap the usual amount, <b>Free</b> / <b>Nothing</b>, or enter one. Optional.</li>
   <li><b>Name new places once</b>The first time you stop somewhere, it's an unnamed place. Name it (e.g. "Home", "Lab") and pick a category;
     every future visit is recognised automatically.</li>
 </ol>
@@ -71,6 +74,23 @@ same coarse location the button would. The widget shows when you last stamped.</
     <i>You stamped a stop</i>, clearly separate from inferred visits. Swipe it to remove it.</li>
   <li>The visit's detail screen lists its stamps under <b>Self-reported</b>. <i>This wasn't a stop</i> still wins over a stamp.</li>
 </ul>
+
+<h2>Noting what things cost</h2>
+<p>Costs are optional and stay on the phone like everything else. You can attach one to a trip, a visit, or just a day.</p>
+<ul>
+  <li><b>Today asks for each one.</b> Every finished transit, taxi or flight trip, and every stop at a place whose category
+    usually costs something (food and drink, shops, hotels, museums and venues, parking, fuel), gets its own card until you
+    answer it: one tap for an amount you paid there before, <b>Free</b> (a trip on a pass) or <b>Nothing</b> (a stop where you
+    spent nothing), or <b>Enter amount</b>. Answering one card leaves the others. The ✕ stops asking about that trip or stop.
+    Cards show for the last 7 days; name and categorise a place to get asked about stops there.</li>
+  <li><b>Spent today</b> (Today, below the stats) totals the day. <b>+ Cost</b> adds one; under <b>For</b> pick the trip or
+    visit it belongs to, or <i>Nothing specific</i> to keep it on the day. Tap the card for the <b>Spending</b> page.</li>
+  <li><b>Trip and visit screens</b> have a <b>Cost</b> section for adding, changing or removing costs. Saving a cost locks the
+    trip or visit, like any other correction.</li>
+  <li><b>Spending</b> (from Today or Stats) breaks totals down by travel vs destinations, category, mode (per trip and per km)
+    and place. Currencies are never converted: each one is totalled on its own.</li>
+</ul>
+<p>Costs are exported as <code>expenses.csv</code> and in <code>data.json</code>; see the <a href="data-dictionary.html">data dictionary</a>.</p>
 
 <h2>Correcting the diary</h2>
 <p>Tap any trip or visit to open its detail screen. Every correction is written to an audit log and <b>locks</b> the record

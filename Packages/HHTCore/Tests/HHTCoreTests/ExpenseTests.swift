@@ -33,6 +33,14 @@ private func cost(_ amount: Double, _ category: ExpenseCategory, at t: Date, cur
 @Suite("Costs (issue #17)")
 struct ExpenseTests {
 
+    @Test func paidPlacesAreTheOnesWithASuggestedCategory() {
+        #expect(PlaceCategory.restaurant.usuallyPaid)
+        #expect(PlaceCategory.hotel.usuallyPaid)
+        #expect(PlaceCategory.museum.usuallyPaid)
+        #expect(!PlaceCategory.home.usuallyPaid)
+        #expect(!PlaceCategory.workSchool.usuallyPaid)
+    }
+
     @Test func costLocksItsTripAndSurvivesReprocessing() throws {
         let tr = lunchDay()
         let (store, engine, edit) = try processed(tr)
