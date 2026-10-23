@@ -15,6 +15,8 @@ struct RootView: View {
     @AppStorage("agentEnabled") private var agentEnabled = false
     /// The last system tab, kept on screen under the agent.
     @State private var lastTab = 0
+    /// Bumped to pop Today back to its root, so a Stamp widget tap lands where its confirmation and Undo show.
+    @State private var todayStack = 0
 
     /// iPhone tab bars show at most five tabs and move the rest into a "More" list, so the agent (tag 5)
     /// sits over the TabView instead of inside it.
@@ -22,7 +24,7 @@ struct RootView: View {
 
     var body: some View {
         TabView(selection: Binding(get: { tab == Self.agentTag ? lastTab : tab }, set: { tab = $0 })) {
-            NavigationStack { DayView() }.tabBarSpace(!keyboardUp).tag(0)
+            NavigationStack { DayView() }.id(todayStack).tabBarSpace(!keyboardUp).tag(0)
             NavigationStack { HistoryView() }.tabBarSpace(!keyboardUp).tag(1)
             NavigationStack { ExploreMapView() }.tabBarSpace(!keyboardUp).tag(2)
             NavigationStack { StatsView() }.tabBarSpace(!keyboardUp).tag(3)
@@ -58,6 +60,7 @@ struct RootView: View {
             tab = r == .stats ? 3 : 0
             // before onboarding there's no location permission yet: just open, don't save a stamp behind the sheet
             if r == .stamp && !onboarded { return }
+            if r == .stamp { todayStack += 1 }
             if r != .today { model.route = r }
         }
         .tint(Toon.accentDeep)

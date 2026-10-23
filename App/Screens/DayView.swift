@@ -450,7 +450,8 @@ struct StampButton: View {
                         .font(.toon(12, .heavy)).foregroundStyle(Toon.accentDeep)
                 }
                 .task(id: s.id) {
-                    try? await Task.sleep(for: .seconds(6))
+                    // cancelled when the view goes away (e.g. a Stamp widget tap rebuilds Today): leave it for the new one
+                    do { try await Task.sleep(for: .seconds(6)) } catch { return }
                     if model.lastStamp?.id == s.id { model.dismissStampConfirmation() }
                 }
             }
