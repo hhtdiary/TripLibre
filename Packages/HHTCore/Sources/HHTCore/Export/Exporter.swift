@@ -211,6 +211,7 @@ public final class Exporter {
             "journey_members": try rows("SELECT * FROM journey_members"),
             "life_phases": try rows("SELECT * FROM life_phases"),
             "stamps": try rows("SELECT * FROM stamps \(sw)", sa),
+            "expenses": try rows("SELECT * FROM expenses \(sw)", sa),
             "audit_log": try rows("SELECT * FROM audit_log"),
         ]
         return try JSONSerialization.data(withJSONObject: obj, options: [.sortedKeys])
@@ -267,6 +268,16 @@ public final class Exporter {
                 \(pw.isEmpty ? "WHERE" : pw.replacingOccurrences(of: "ts", with: "s.ts") + " AND") s.deleted = 0
                 ORDER BY s.ts
                 """, pa))
+            try write("expenses.csv", try queryCSV("""
+                SELECT e.id AS expense_id, e.ts, e.tz, e.amount, e.currency, e.category,
+                       CASE WHEN t.id IS NULL THEN NULL ELSE e.trip_id END AS trip_id,
+                       CASE WHEN v.id IS NULL THEN NULL ELSE e.visit_id END AS visit_id, e.note
+                FROM expenses e
+                LEFT JOIN trips t ON t.id = e.trip_id AND t.deleted = 0
+                LEFT JOIN visits v ON v.id = e.visit_id AND v.deleted = 0
+                \(pw.isEmpty ? "WHERE" : pw.replacingOccurrences(of: "ts", with: "e.ts") + " AND") e.deleted = 0
+                ORDER BY e.ts
+                """, pa))
             try write("audit_log.csv", try queryCSV("SELECT * FROM audit_log ORDER BY id"))
             if options.includeRawPoints {
                 try write("raw_location_points.csv", try queryCSV("SELECT * FROM raw_location_points \(pw) ORDER BY ts", pa))
@@ -296,6 +307,8 @@ public final class Exporter {
         life_phases.csv      user-defined periods for comparisons
         stamps.csv           one-tap self-reports ("a stop happened around here, around now"); coarse location only;
                              visit_id = the visit inference attached it to, empty if unmatched
+        expenses.csv         costs you entered (amount + ISO 4217 currency, never converted), on a trip_id, a visit_id,
+                             or neither (a cost on that day); amount 0 = free
         audit_log.csv        every user correction (old → new)
         raw_location_points.csv, motion_activities.csv   raw sensor observations (if included)
         data.json            everything above with relationships, full fidelity

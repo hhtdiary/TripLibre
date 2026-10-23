@@ -13,6 +13,7 @@ struct TripDetailView: View {
     @State private var frequent: [TravelMode] = []
     @State private var notes = ""
     @State private var history: [AuditEntry] = []
+    @State private var costs: [Expense] = []
     @State private var confirmDelete = false
     @State private var showSplit = false
     @State private var showAllModes = false
@@ -99,6 +100,8 @@ struct TripDetailView: View {
                     ForEach(TripPurpose.allCases) { p in Text(p.label).tag(TripPurpose?.some(p)) }
                 }
             }
+
+            CostsSection(costs: costs, target: .trip(t))
 
             Section("Notes") {
                 TextField("Add a note", text: $notes, axis: .vertical)
@@ -202,6 +205,7 @@ struct TripDetailView: View {
         destination = (dv, (dv?.placeID ?? t.destinationPlaceID).flatMap { try? model.store.place($0) })
         frequent = (try? model.store.frequentModes(limit: 4)) ?? []
         history = (try? model.store.auditLog(entityID: t.id)) ?? []
+        costs = (try? model.store.expenses(tripID: t.id)) ?? []
     }
 }
 

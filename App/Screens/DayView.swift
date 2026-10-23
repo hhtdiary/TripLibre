@@ -8,12 +8,15 @@ enum DiaryItem: Identifiable {
     case trip(Trip)
     /// A self-reported stamp no visit accounts for (yet).
     case stamp(Stamp)
+    /// A cost on neither a trip nor a visit of the day.
+    case cost(Expense)
 
     var id: String {
         switch self {
         case .visit(let v, _): return "v-" + v.id
         case .trip(let t): return "t-" + t.id
         case .stamp(let s): return "s-" + s.id
+        case .cost(let e): return "c-" + e.id
         }
     }
     var start: Date {
@@ -21,6 +24,7 @@ enum DiaryItem: Identifiable {
         case .visit(let v, _): return v.arrival
         case .trip(let t): return t.departure
         case .stamp(let s): return s.timestamp
+        case .cost(let e): return e.timestamp
         }
     }
 }
@@ -34,6 +38,11 @@ struct DayData {
     /// Stamps attached to each visit, and the ones no visit on screen accounts for.
     var stampsByVisit: [String: [Stamp]] = [:]
     var unmatchedStamps: [Stamp] = []
+    /// The day's costs, and the same split by what they're on; `looseCosts` are on nothing shown that day.
+    var costs: [Expense] = []
+    var costsByTrip: [String: [Expense]] = [:]
+    var costsByVisit: [String: [Expense]] = [:]
+    var looseCosts: [Expense] = []
 
     static func load(_ store: TravelStore, day: Date) -> DayData {
         let r = DateRange.day(day)
@@ -46,8 +55,15 @@ struct DayData {
         for s in (try? store.stamps(from: r.start, to: r.end)) ?? [] {
             if let id = s.visitID, visitIDs.contains(id) { d.stampsByVisit[id, default: []].append(s) } else { d.unmatchedStamps.append(s) }
         }
+        let tripIDs = Set(d.trips.map(\.id))
+        d.costs = (try? store.expenses(from: r.start, to: r.end)) ?? []
+        for e in d.costs {
+            if let id = e.tripID, tripIDs.contains(id) { d.costsByTrip[id, default: []].append(e) }
+            else if let id = e.visitID, visitIDs.contains(id) { d.costsByVisit[id, default: []].append(e) }
+            else { d.looseCosts.append(e) }
+        }
         d.items = (d.visits.map { DiaryItem.visit($0, $0.placeID.flatMap { d.places[$0] }) } + d.trips.map { DiaryItem.trip($0) }
-                   + d.unmatchedStamps.map { DiaryItem.stamp($0) })
+                   + d.unmatchedStamps.map { DiaryItem.stamp($0) } + d.looseCosts.map { DiaryItem.cost($0) })
             .sorted { $0.start < $1.start }
         return d
     }
@@ -65,6 +81,15 @@ struct DayView: View {
     @State private var showSettings = false
     @State private var showDatePicker = false
     @State private var reviewCount = 0
+    @State private var costTarget: CostSheet?
+    @State private var showSpending = false
+
+    /// Which cost sheet is open: a new cost (for a trip, or the day) or an existing one.
+    struct CostSheet: Identifiable {
+        var target: CostTarget
+        var existing: Expense?
+        var id: String { existing?.id ?? "new" }
+    }
 
     private var isToday: Bool { Calendar.current.isDateInToday(day) }
 
@@ -83,6 +108,10 @@ struct DayView: View {
             Section {
                 MascotSays(text: mascotLine).toonRow(top: 8, bottom: 8)
                 if isToday && !fixedDay { StampButton().toonRow(top: 4, bottom: 6) }
+                if let t = costPromptTrip {
+                    CostPromptCard(trip: t, destination: destinationName(t)) { costTarget = CostSheet(target: .trip(t)) }
+                        .toonRow(top: 4, bottom: 6)
+                }
                 if !fixedDay && reviewCount > 0 {
                     reviewBanner
                         .background(NavigationLink { ReviewView() } label: { EmptyView() }.opacity(0))
@@ -94,6 +123,11 @@ struct DayView: View {
                     .toonCard(radius: 22, shadow: 5)
                     .toonRow(top: 8, bottom: 10)
                 summary.toonRow(top: 8, bottom: 8)
+                DaySpendCard(costs: data.costs, isToday: isToday && !fixedDay) { costTarget = CostSheet(target: .day(day)) }
+                    .contentShape(Rectangle())
+                    .onTapGesture { showSpending = true }
+                    .accessibilityAction(named: "See spending") { showSpending = true }
+                    .toonRow(top: 6, bottom: 8)
             }
             Section {
                 if data.items.isEmpty && pendingTail == nil {
@@ -102,12 +136,13 @@ struct DayView: View {
                     ForEach(data.items) { item in
                         switch item {
                         case .visit(let v, let p):
-                            VisitRow(visit: v, place: p, day: day, stamps: data.stampsByVisit[v.id] ?? []).contentShape(Rectangle())
+                            VisitRow(visit: v, place: p, day: day, stamps: data.stampsByVisit[v.id] ?? [],
+                                     costs: data.costsByVisit[v.id] ?? []).contentShape(Rectangle())
                                 .onTapGesture { selectedVisit = IDBox(id: v.id) }
                                 .detailRowAccessibility("visitRow", hint: "Opens the visit to correct it") { selectedVisit = IDBox(id: v.id) }
                                 .toonRow(top: 5, bottom: 5)
                         case .trip(let t):
-                            TripRow(trip: t, quickModes: quickModes, day: day) { mode in
+                            TripRow(trip: t, quickModes: quickModes, day: day, costs: data.costsByTrip[t.id] ?? []) { mode in
                                 model.perform { try model.edit.setTripMode(t.id, mode) }
                             }
                             .contentShape(Rectangle())
@@ -118,6 +153,14 @@ struct DayView: View {
                             StampRow(stamp: s)
                                 .swipeActions { Button("Remove", role: .destructive) { model.undoStamp(s) } }
                                 .contextMenu { Button("Remove stamp", systemImage: "trash", role: .destructive) { model.undoStamp(s) } }
+                                .toonRow(top: 5, bottom: 5)
+                        case .cost(let e):
+                            CostRow(cost: e)
+                                .contentShape(Rectangle())
+                                .onTapGesture { costTarget = CostSheet(target: .day(day), existing: e) }
+                                .detailRowAccessibility("costRow", hint: "Opens the cost to change it") {
+                                    costTarget = CostSheet(target: .day(day), existing: e)
+                                }
                                 .toonRow(top: 5, bottom: 5)
                         }
                     }
@@ -149,6 +192,8 @@ struct DayView: View {
         .refreshable { await model.runInference() }
         .sheet(item: $selectedTrip) { box in TripDetailView(tripID: box.id).environmentObject(model) }
         .sheet(item: $selectedVisit) { box in VisitDetailView(visitID: box.id).environmentObject(model) }
+        .sheet(item: $costTarget) { c in CostEntrySheet(target: c.target, existing: c.existing).environmentObject(model) }
+        .navigationDestination(isPresented: $showSpending) { SpendingView(period: .week) }
         .onReceive(model.$route) { r in
             guard let r, r == .settings || r == .stamp, !fixedDay else { return }
             model.route = nil
@@ -159,6 +204,8 @@ struct DayView: View {
             showDatePicker = false
             selectedTrip = nil
             selectedVisit = nil
+            costTarget = nil
+            showSpending = false
             model.stampNow()
         }
         .sheet(isPresented: $showSettings) { NavigationStack { SettingsView() }.environmentObject(model) }
@@ -179,6 +226,22 @@ struct DayView: View {
                 try? await Task.sleep(for: .seconds(60))
             }
         }
+    }
+
+    /// The day's latest finished trip by a usually-paid mode with no cost yet, unless the user waved it off.
+    /// Only for the last 7 days (like the review banner): later than that, people rarely remember a fare.
+    private var costPromptTrip: Trip? {
+        let now = Date()
+        guard !fixedDay, now.timeIntervalSince(day) < 7 * 86_400 else { return nil }
+        return data.trips.filter { t in
+            t.mode.usuallyPaid && t.arrival <= now && data.costsByTrip[t.id] == nil && !model.skippedCostPrompts.contains(t.id)
+        }
+        .max { $0.arrival < $1.arrival }
+    }
+
+    private func destinationName(_ t: Trip) -> String? {
+        let pid = t.destinationVisitID.flatMap { id in data.visits.first { $0.id == id }?.placeID } ?? t.destinationPlaceID
+        return pid.flatMap { data.places[$0] }.flatMap { $0.isNamed ? $0.displayName : nil }
     }
 
     private var summary: some View {
@@ -274,6 +337,7 @@ struct VisitRow: View {
     let place: Place?
     let day: Date
     var stamps: [Stamp] = []
+    var costs: [Expense] = []
 
     var body: some View {
         HStack(alignment: .center, spacing: 12) {
@@ -302,6 +366,7 @@ struct VisitRow: View {
                     if let p = visit.purpose ?? place?.category?.defaultPurpose { Text("· \(p.label)") }
                 }
                 .font(.toon(12, .bold)).foregroundStyle(Toon.muted)
+                if !costs.isEmpty { CostBadge(costs: costs).padding(.top, 2) }
                 if let n = visit.notes { Text(n).font(.toon(12, .semibold)).foregroundStyle(Toon.muted).lineLimit(2) }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -323,6 +388,7 @@ struct TripRow: View {
     let trip: Trip
     let quickModes: [TravelMode]
     let day: Date
+    var costs: [Expense] = []
     var onQuickMode: (TravelMode) -> Void
 
     var body: some View {
@@ -346,6 +412,7 @@ struct TripRow: View {
                         }
                         Text("\(Fmt.time(trip.departure))–\(Fmt.time(trip.arrival)) · \(Fmt.duration(trip.duration)) · \(Fmt.distance(trip.distance))")
                             .font(.toon(12, .bold)).monospacedDigit().foregroundStyle(Toon.muted)
+                        if !costs.isEmpty { CostBadge(costs: costs).padding(.top, 2) }
                     }
                 }
                 if trip.needsReview {

@@ -329,6 +329,38 @@ public struct Stamp: Identifiable, Equatable, Sendable {
     }
 }
 
+/// Money spent on a trip or during a stop (issue #17). Entered by the user; inference never reads it.
+///
+/// `tripID` / `visitID` say what the cost belongs to (at most one is set); with neither, it belongs to the day by its
+/// time. A cost of 0 records "it was free" (a pass, a lift), which is not the same as no cost entered.
+public struct Expense: Identifiable, Equatable, Sendable {
+    public var id: String
+    public var timestamp: Date
+    public var amount: Double
+    /// ISO 4217 code, e.g. "USD". Amounts in different currencies are never added together.
+    public var currency: String
+    public var category: ExpenseCategory
+    public var tripID: String?
+    public var visitID: String?
+    public var note: String?
+    public var timeZone: String?
+    public var deleted: Bool
+    public var createdAt: Date
+    public var updatedAt: Date
+
+    public init(id: String = newID(), timestamp: Date, amount: Double, currency: String, category: ExpenseCategory,
+                tripID: String? = nil, visitID: String? = nil, note: String? = nil,
+                timeZone: String? = TimeZone.current.identifier, deleted: Bool = false,
+                createdAt: Date = Date(), updatedAt: Date = Date()) {
+        self.id = id; self.timestamp = timestamp; self.amount = amount; self.currency = currency; self.category = category
+        self.tripID = tripID; self.visitID = visitID; self.note = note; self.timeZone = timeZone; self.deleted = deleted
+        self.createdAt = createdAt; self.updatedAt = updatedAt
+    }
+
+    /// The currency of the device's region, else US dollars.
+    public static var defaultCurrency: String { Locale.current.currency?.identifier ?? "USD" }
+}
+
 /// A named period of life (semester, job, city of residence) used to compare behavior.
 public struct LifePhase: Identifiable, Equatable, Sendable {
     public var id: String

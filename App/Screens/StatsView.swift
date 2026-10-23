@@ -11,6 +11,7 @@ struct StatsView: View {
     @State private var c: MobilityMetrics?
     @State private var shareBasis = 0   // 0 trips, 1 distance, 2 time
     @State private var flightStats = Analytics.FlightStats()
+    @State private var spending: SpendingSummary?
 
     var body: some View {
         ScrollView {
@@ -21,6 +22,7 @@ struct StatsView: View {
                 if let m {
                     hero(m)
                     stickers(m)
+                    if let spending { SpendingStatsCard(summary: spending, period: period) }
                     modes(m)
                     temporal(m)
                     weekdayStickers(m)
@@ -414,6 +416,8 @@ struct StatsView: View {
         m = try? Analytics.compute(store: model.store, range: period.range(first: first))
         c = compare.flatMap { try? Analytics.compute(store: model.store, range: $0.range(first: first)) }
         flightStats = Analytics.flightStats((try? model.store.flights()) ?? [])
+        // only once there's anything to show: people who don't log costs never see the card
+        spending = model.store.hasExpenses() ? try? Analytics.spending(store: model.store, range: period.range(first: first)) : nil
     }
 }
 

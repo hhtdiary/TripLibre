@@ -292,6 +292,27 @@ enum Schema {
         """
         ALTER TABLE places ADD COLUMN category_custom TEXT;
         """,
+        // v6 — costs (issue #17): money spent on a trip or during a visit, or on a day with neither set.
+        // No foreign keys, like stamps: inference may hard-delete auto records (the edit that adds a cost locks them).
+        """
+        CREATE TABLE expenses (
+            id          TEXT PRIMARY KEY,
+            ts          REAL NOT NULL,
+            amount      REAL NOT NULL,
+            currency    TEXT NOT NULL,
+            category    TEXT NOT NULL,
+            trip_id     TEXT,
+            visit_id    TEXT,
+            note        TEXT,
+            tz          TEXT,
+            deleted     INTEGER NOT NULL DEFAULT 0,
+            created_at  REAL NOT NULL,
+            updated_at  REAL NOT NULL
+        );
+        CREATE INDEX idx_expenses_ts ON expenses(ts);
+        CREATE INDEX idx_expenses_trip ON expenses(trip_id);
+        CREATE INDEX idx_expenses_visit ON expenses(visit_id);
+        """,
     ]
 
     static func migrate(_ db: SQLiteConnection) throws {

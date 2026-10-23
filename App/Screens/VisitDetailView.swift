@@ -15,6 +15,7 @@ struct VisitDetailView: View {
     @State private var notes = ""
     @State private var history: [AuditEntry] = []
     @State private var stamps: [Stamp] = []
+    @State private var costs: [Expense] = []
     @State private var showPlacePicker = false
     @State private var showSplit = false
     @State private var confirmDelete = false
@@ -104,6 +105,8 @@ struct VisitDetailView: View {
                 }
             }
 
+            CostsSection(costs: costs, target: .visit(v, place))
+
             Section("Notes") {
                 TextField("Add a note", text: $notes, axis: .vertical).onSubmit(saveNotes)
             }
@@ -173,6 +176,7 @@ struct VisitDetailView: View {
         notes = v.notes ?? ""
         history = (try? model.store.auditLog(entityID: v.id)) ?? []
         stamps = (try? model.store.stamps(visitID: v.id)) ?? []
+        costs = (try? model.store.expenses(visitID: v.id)) ?? []
     }
 }
 

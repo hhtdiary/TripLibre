@@ -493,6 +493,63 @@ public final class TravelStore: @unchecked Sendable {
                      createdAt: r.date("created_at") ?? Date(), updatedAt: r.date("updated_at") ?? Date())
     }
 
+    // MARK: - Costs (issue #17)
+
+    public func upsertExpense(_ e: Expense) throws {
+        try db.run("""
+            INSERT OR REPLACE INTO expenses(id, ts, amount, currency, category, trip_id, visit_id, note, tz, deleted,
+                created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?)
+            """, e.id, e.timestamp, e.amount, e.currency, e.category.rawValue, e.tripID, e.visitID, e.note, e.timeZone,
+            e.deleted, e.createdAt, e.updatedAt)
+    }
+
+    public func expense(_ id: String) throws -> Expense? {
+        try db.query("SELECT * FROM expenses WHERE id = ?", id).first.map(Self.expense)
+    }
+
+    /// Costs dated within [from, to], oldest first.
+    public func expenses(from: Date, to: Date) throws -> [Expense] {
+        try db.query("SELECT * FROM expenses WHERE ts >= ? AND ts <= ? AND deleted = 0 ORDER BY ts", from, to).map(Self.expense)
+    }
+
+    public func expenses(tripID: String) throws -> [Expense] {
+        try db.query("SELECT * FROM expenses WHERE trip_id = ? AND deleted = 0 ORDER BY ts", tripID).map(Self.expense)
+    }
+
+    public func expenses(visitID: String) throws -> [Expense] {
+        try db.query("SELECT * FROM expenses WHERE visit_id = ? AND deleted = 0 ORDER BY ts", visitID).map(Self.expense)
+    }
+
+    public func hasExpenses() -> Bool {
+        ((try? db.scalar("SELECT COUNT(*) FROM expenses WHERE deleted = 0").description).flatMap { Int($0) } ?? 0) > 0
+    }
+
+    /// Recent costs on trips by `mode`, or during visits at `placeID`, newest first: the amounts worth offering again.
+    public func recentExpenses(mode: TravelMode? = nil, placeID: String? = nil, limit: Int = 20) throws -> [Expense] {
+        if let mode {
+            return try db.query("""
+                SELECT e.* FROM expenses e JOIN trips t ON t.id = e.trip_id
+                WHERE e.deleted = 0 AND COALESCE(t.mode_user, t.mode_auto, 'unknown') = ?
+                ORDER BY e.ts DESC LIMIT ?
+                """, mode.rawValue, limit).map(Self.expense)
+        }
+        if let placeID {
+            return try db.query("""
+                SELECT e.* FROM expenses e JOIN visits v ON v.id = e.visit_id
+                WHERE e.deleted = 0 AND v.place_id = ? ORDER BY e.ts DESC LIMIT ?
+                """, placeID, limit).map(Self.expense)
+        }
+        return try db.query("SELECT * FROM expenses WHERE deleted = 0 ORDER BY ts DESC LIMIT ?", limit).map(Self.expense)
+    }
+
+    static func expense(_ r: Row) -> Expense {
+        Expense(id: r.string("id") ?? "", timestamp: r.date("ts") ?? Date(), amount: r.double("amount") ?? 0,
+                currency: r.string("currency") ?? Expense.defaultCurrency,
+                category: ExpenseCategory(rawValue: r.string("category") ?? "") ?? .other,
+                tripID: r.string("trip_id"), visitID: r.string("visit_id"), note: r.string("note"), timeZone: r.string("tz"),
+                deleted: r.bool("deleted"), createdAt: r.date("created_at") ?? Date(), updatedAt: r.date("updated_at") ?? Date())
+    }
+
     // MARK: - Life phases
 
     public func upsertLifePhase(_ p: LifePhase) throws {
@@ -522,7 +579,7 @@ public final class TravelStore: @unchecked Sendable {
 
     public func counts() -> [String: Int] {
         var out: [String: Int] = [:]
-        for t in ["raw_location_points", "motion_activities", "places", "visits", "trips", "trip_segments", "flights", "stamps", "audit_log"] {
+        for t in ["raw_location_points", "motion_activities", "places", "visits", "trips", "trip_segments", "flights", "stamps", "expenses", "audit_log"] {
             out[t] = (try? db.scalar("SELECT COUNT(*) FROM \(t)").description).flatMap { Int($0) } ?? 0
         }
         return out
@@ -532,7 +589,7 @@ public final class TravelStore: @unchecked Sendable {
     public func eraseAll() throws {
         try db.transaction {
             for t in ["journey_members", "trip_segments", "flights", "trips", "visits", "journeys", "places",
-                      "raw_location_points", "motion_activities", "stamps", "life_phases", "audit_log", "app_meta"] {
+                      "raw_location_points", "motion_activities", "stamps", "expenses", "life_phases", "audit_log", "app_meta"] {
                 try db.run("DELETE FROM \(t)")
             }
         }

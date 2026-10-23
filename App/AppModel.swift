@@ -222,6 +222,25 @@ final class AppModel: ObservableObject {
 
     func dismissStampConfirmation() { lastStamp = nil }
 
+    // MARK: - Costs (issue #17)
+
+    /// The currency of the last cost entered: most people pay in one currency until they travel.
+    var costCurrency: String { UserDefaults.standard.string(forKey: "costCurrency") ?? Expense.defaultCurrency }
+
+    func saveCost(_ e: Expense) {
+        perform { try edit.saveExpense(e) }
+        UserDefaults.standard.set(e.currency, forKey: "costCurrency")
+    }
+
+    /// Trips the user said not to ask about (newest last, capped): the Today prompt moves on to the next one.
+    private(set) var skippedCostPrompts: [String] = UserDefaults.standard.stringArray(forKey: "costPromptSkipped") ?? []
+
+    func skipCostPrompt(_ tripID: String) {
+        skippedCostPrompts = Array((skippedCostPrompts + [tripID]).suffix(100))
+        UserDefaults.standard.set(skippedCostPrompts, forKey: "costPromptSkipped")
+        revision += 1
+    }
+
     /// Run an edit; report errors; refresh views.
     func perform(_ body: () throws -> Void) {
         do {
