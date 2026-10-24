@@ -102,16 +102,15 @@ struct SpendingView: View {
                 .overlay(Capsule().strokeBorder(Toon.ink, lineWidth: Toon.line))
             }
             .frame(height: 18)
-            .accessibilityHidden(true)
-            // only the text is one element: the contrast audit measures an element's whole frame, and with the bar in
-            // it reads the bar's colours as the text's (issue #67). The percentages say what the bar shows.
+            .accessibilityHidden(true) // the percentages below say what the bar shows
+            // plain Text elements, not one combined element: the contrast audit measures a combined element's whole
+            // frame and failed it (issue #67)
             ToonRowStack(spacing: 8) {
                 Text("Travel \(Fmt.percent(s.travel / total))")
                 Spacer()
                 Text("At destinations \(Fmt.percent(s.atDestinations / total))")
             }
             .font(.toon(12, .heavy)).foregroundStyle(Toon.muted)
-            .accessibilityElement(children: .combine)
         }
         .padding(14)
         .toonCard(radius: 22, shadow: 4)
@@ -139,7 +138,7 @@ struct SpendingView: View {
             SectionLabel(text: "What it went on")
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(s.byCategory) { r in
-                    // the text alone is the element, as in split(_:)
+                    // plain Text elements, as in split(_:); the chip and bar repeat the text
                     ToonRowStack(spacing: 10) {
                         ToonChip(symbol: r.category.symbol, color: r.category.isTravel ? Toon.sky : Toon.bubblegum, size: 34)
                             .accessibilityHidden(true)
@@ -150,7 +149,6 @@ struct SpendingView: View {
                                 Text(money(r.total)).monospacedDigit()
                             }
                             .font(.toon(13, .black)).foregroundStyle(Toon.ink)
-                            .accessibilityElement(children: .combine)
                             bar(top > 0 ? r.total / top : 0, CostStyle.color).accessibilityHidden(true)
                         }
                     }
@@ -166,7 +164,7 @@ struct SpendingView: View {
             SectionLabel(text: "Getting around")
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(s.byMode) { r in
-                    // the text alone is the element, as in split(_:)
+                    // the text alone is the element; the icon repeats the mode's name
                     ToonRowStack(spacing: 10) {
                         ModeIcon(mode: r.mode, size: 34).accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 2) {
@@ -219,13 +217,13 @@ struct SpendingView: View {
                 let byDay = Dictionary(grouping: costs) { Calendar.current.startOfDay(for: $0.timestamp) }
                 ForEach(byDay.keys.sorted(by: >), id: \.self) { day in
                     VStack(alignment: .leading, spacing: 6) {
+                        // date and total as plain Text elements, as in split(_:)
                         ToonRowStack(spacing: 8) {
                             Text(Fmt.shortDay(day))
                             Spacer()
                             Text(Fmt.costs(byDay[day] ?? []) ?? "").monospacedDigit()
                         }
                         .font(.toon(13, .heavy)).foregroundStyle(Toon.muted)
-                        .accessibilityElement(children: .combine)
                         VStack(spacing: 0) {
                             ForEach(byDay[day] ?? []) { e in
                                 Button { editing = e } label: { row(e) }.buttonStyle(.plain)
