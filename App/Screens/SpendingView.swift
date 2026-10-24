@@ -119,6 +119,10 @@ struct SpendingView: View {
 
     private func perDay(_ s: SpendingSummary) -> some View {
         let days = s.byDay.compactMap { k, v in Fmt.parseYMD(k).map { ($0, v) } }.sorted { $0.0 < $1.0 }
+        // a tick per day for short spans, about four in all for long ones: left to itself, Charts ticks a two-day
+        // span every 12 hours, and those labels overlap
+        let span = days.count < 2 ? 0 : Calendar.current.dateComponents([.day], from: days[0].0, to: days[days.count - 1].0).day ?? 0
+        let tickDays = max(1, Int((Double(span + 1) / 4).rounded(.up)))
         return VStack(alignment: .leading, spacing: 10) {
             SectionLabel(text: "Day by day")
             Chart(days, id: \.0) { d, v in
@@ -130,9 +134,10 @@ struct SpendingView: View {
             }
             // axis labels in the app's ink-grey rather than the system grey (~3.4:1 on white; issue #67)
             .chartXAxis {
-                AxisMarks { _ in
+                AxisMarks(values: .stride(by: .day, count: tickDays)) { _ in
                     AxisGridLine()
-                    AxisValueLabel().foregroundStyle(Toon.muted).font(.caption2.weight(.bold))
+                    AxisValueLabel(format: .dateTime.month(.abbreviated).day())
+                        .foregroundStyle(Toon.muted).font(.caption2.weight(.bold))
                 }
             }
             .chartYAxis {

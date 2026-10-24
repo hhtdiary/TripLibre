@@ -20,6 +20,10 @@ never starts location collection, so runs are reproducible and never touch your 
 | `CoreFlowTests` | Every tab opens and is announced as selected; trip and visit details open from the diary and close; the day navigation buttons have labels; Map › layers menu; Settings › Create export finishes and offers Share. |
 | `AccessibilityAuditTests` | `performAccessibilityAudit(for: .all)` on Today, a day with trips, Trip detail, Visit detail, Timeline, Map, Stats, Places and Settings. |
 
+`testSpending` (Add a cost and Spending) is skipped for now: on CI (iOS 26.5) the Spending audit reports two contrast
+failures on SwiftUI-made nodes it can't name, and Dynamic Type findings on the section labels, which haven't been
+placed yet (#67). Check Spending by hand with the manual checklist below.
+
 When an audit fails, the test log has one `[a11y] <screen>: <audit type>: <description> — <element>` line per issue.
 An audit with unexpected findings runs a second time and fails only on the findings that show up in both passes: on
 a slow simulator (CI) the contrast check flags different elements from run to run on the same screen. An audit that
@@ -62,10 +66,9 @@ passing:
 
 ### CI
 
-The *UI tests + accessibility audits* job in `.github/workflows/ci.yml` runs the full `make ui-test` on every pull
-request and push to `main`, on the iPhone 17 simulator (or the newest iPhone the runner's Xcode has). When it fails,
-download the `ui-tests-xcresult` artifact from the run and open it in Xcode to see the failing step, its screenshot
-and the audit findings. Running `make ui-test` locally before pushing UI changes is still quicker than waiting on CI.
+Not in CI: the suite ran on GitHub's macOS runners for a while (#67), but there it was slow and flaky (demo inference
+timing out, audit findings that changed from run to run on unchanged screens, and an older iOS than the app is
+tuned on). Run `make ui-test` locally before merging UI changes.
 
 ## Manual checklist
 
