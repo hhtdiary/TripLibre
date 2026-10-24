@@ -12,7 +12,7 @@ const DOI = 'https://doi.org/10.5281/zenodo.23307589';
 const BRANDS = {
   org: {
     name: 'HHT Diary',
-    logo: 'assets/hhtdiary-mark.svg',
+    logo: 'assets/hhtdiary-mark.png',
     home: '',
     blurb: 'Open, local-first tools for understanding everyday travel. Free and Apache 2.0 licensed.',
     base: '© HHT Diary · Apache 2.0',
