@@ -16,6 +16,9 @@ single summary, so release notes aren't kept anywhere else in the repository.
   `/triplibre/`, docs at `/triplibre/docs/` and story at `/triplibre/story/`, in the app's coral and sun colours with
   a "by HHT Diary" line. The old paths (`/installation.html` and the other docs pages, `/docs/`, `/products/ios/`,
   `/backup/`) are gone, with no redirects (#77)
+- Website: HHT Diary has a new logo, a house whose path winds out into a "D" past mountains and a plane. The mark
+  (`docs/assets/hhtdiary-mark.png`) is the header logo and favicon on the organization pages, and the full
+  "HHT Diary · Household Travel Diary" lockup is at `docs/assets/hhtdiary-logo.png`
 - Costs: note what a trip or a stop cost. Today asks about the latest transit, taxi or flight trip ("Free" or the usual
   fare in one tap), a "Spent today" card adds costs to any day, and a Spending page (from Today or Stats) breaks totals
   down by travel vs destinations, category, mode (per trip, per km) and place. Exported as `expenses.csv` (#17)
