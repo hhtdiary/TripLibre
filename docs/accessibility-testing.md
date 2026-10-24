@@ -66,10 +66,9 @@ passing:
 
 ### CI
 
-The *UI tests + accessibility audits* job in `.github/workflows/ci.yml` runs the full `make ui-test` on every pull
-request and push to `main`, on the iPhone 17 simulator (or the newest iPhone the runner's Xcode has). When it fails,
-download the `ui-tests-xcresult` artifact from the run and open it in Xcode to see the failing step, its screenshot
-and the audit findings. Running `make ui-test` locally before pushing UI changes is still quicker than waiting on CI.
+Not in CI: the suite ran on GitHub's macOS runners for a while (#67), but there it was slow and flaky (demo inference
+timing out, audit findings that changed from run to run on unchanged screens, and an older iOS than the app is
+tuned on). Run `make ui-test` locally before merging UI changes.
 
 ## Manual checklist
 
