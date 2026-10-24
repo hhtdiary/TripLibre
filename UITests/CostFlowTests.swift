@@ -19,8 +19,7 @@ final class CostFlowTests: HHTUITestCase {
         reveal(card)
         XCTAssertTrue(text(containing: "$2.90").exists, "Spent this day total")
 
-        card.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).tap()
-        waitForNavigationTitle("Spending")
+        openSpending()
         XCTAssertTrue(text(containing: "$2.90 over 1 day").waitForExistence(timeout: 5), "spending summary")
         XCTAssertTrue(app.staticTexts["Every cost"].exists || text(containing: "Every cost").exists)
     }
@@ -31,9 +30,9 @@ final class CostFlowTests: HHTUITestCase {
         reveal(add)
         add.tap()
         enterCost("12")
-        XCTAssertTrue(element(labelContaining: "Cost $12.00").waitForExistence(timeout: 5)
-            || app.descendants(matching: .any).matching(identifier: "costRow").firstMatch.waitForExistence(timeout: 5),
-            "the new cost shows in the day")
+        // an unlinked cost is its own row in the timeline, usually below the fold
+        waitForSeededContent(app.descendants(matching: .any).matching(identifier: "costRow").firstMatch,
+                             "the new cost in the day", firstWait: 3)
     }
 
     func testPromptOffersFreeForAPaidTrip() throws {
@@ -44,7 +43,7 @@ final class CostFlowTests: HHTUITestCase {
         guard trip.waitForExistence(timeout: 5) else { throw XCTSkip("no transit trip in yesterday's demo data") }
         let before = prompts.count
         trip.buttons["Free"].tap()
-        XCTAssertTrue(element(labelContaining: "Cost Free").waitForExistence(timeout: 5), "free badge on the trip")
+        waitForSeededContent(element(labelContaining: "Cost Free"), "free badge on the trip", firstWait: 3)
         XCTAssertEqual(prompts.count, before - 1, "only the answered prompt goes away")
     }
 
@@ -53,6 +52,8 @@ final class CostFlowTests: HHTUITestCase {
         let field = app.textFields["costAmount"]
         XCTAssertTrue(field.waitForExistence(timeout: 5))
         if !field.hasFocus { field.tap() }
+        // the sheet focuses the field itself; keys typed before the keyboard is up are lost
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5), "keyboard")
         field.typeText(amount)
         app.buttons["costSave"].tap()
         XCTAssertFalse(app.navigationBars["Add a cost"].waitForExistence(timeout: 2), "sheet closes on save")

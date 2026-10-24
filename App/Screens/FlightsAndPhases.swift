@@ -28,26 +28,26 @@ struct FlightsView: View {
                 }
             }
             if !s.airports.isEmpty {
-                Section("Airports") {
+                Section {
                     ForEach(s.airports.sorted { $0.value > $1.value }.prefix(10), id: \.key) { k, v in
                         LabeledContent(k, value: "\(v)")
                     }
-                }
+                } header: { Text("Airports").toonSectionText() }
             }
-            Section("All flights") {
+            Section {
                 ForEach(flights) { f in
                     Button { editing = f } label: {
                         VStack(alignment: .leading) {
                             Text(f.routeLabel).font(.headline).foregroundStyle(.primary)
                             Text([f.date, f.airline, f.flightNumber, f.effectiveDistance.map(Fmt.distance)].compactMap { $0 }.joined(separator: " · "))
-                                .font(.caption).foregroundStyle(.secondary)
+                                .font(.caption).foregroundStyle(Toon.muted)
                         }
                     }
                 }
                 .onDelete { idx in
                     for i in idx { model.perform { try model.store.deleteFlight(flights[i].id) } }
                 }
-            }
+            } header: { Text("All flights").toonSectionText() }
         }
         .toonBackground()
         .navigationTitle("Flights")
@@ -83,13 +83,13 @@ struct FlightEditor: View {
                 TextField("Aircraft", text: $aircraft)
                 TextField("Seat", text: $seat)
                 TextField("Notes", text: $notes, axis: .vertical)
-                if !lookupNote.isEmpty { Text(lookupNote).font(.caption).foregroundStyle(.secondary) }
+                if !lookupNote.isEmpty { Text(lookupNote).font(.caption).foregroundStyle(Toon.muted) }
             }
             .navigationTitle(flight == nil ? "Add flight" : "Edit flight")
             .inlineTitle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) { Button("Save") { save() }.disabled(origin.count < 3 || destination.count < 3) }
+                ToolbarItem(placement: .confirmationAction) { Button("Save") { save() }.disabled(origin.count < 3 || destination.count < 3).confirmTint() }
             }
             .onAppear {
                 guard let f = flight else { return }
@@ -137,13 +137,14 @@ struct LifePhasesView: View {
                         VStack(alignment: .leading) {
                             Text(p.name).foregroundStyle(.primary)
                             Text("\(p.startDate) – \(p.endDate ?? "now")" + (p.kind.map { " · \($0)" } ?? ""))
-                                .font(.caption).foregroundStyle(.secondary)
+                                .font(.caption).foregroundStyle(Toon.muted)
                         }
                     }
                 }
                 .onDelete { idx in for i in idx { model.perform { try model.store.deleteLifePhase(phases[i].id) } } }
             } footer: {
                 Text("Periods like a semester, a job or a city of residence. Stats can be computed and compared per phase.")
+                    .toonSectionText()
             }
         }
         .toonBackground()
@@ -193,6 +194,7 @@ struct PhaseEditor: View {
                         dismiss()
                     }
                     .disabled(phase.name.trimmingCharacters(in: .whitespaces).isEmpty)
+                    .confirmTint()
                 }
             }
             .onAppear {
@@ -213,10 +215,10 @@ struct ReviewView: View {
 
     var body: some View {
         List {
-            if trips.isEmpty { Text("All caught up.").foregroundStyle(.secondary) }
+            if trips.isEmpty { Text("All caught up.").foregroundStyle(Toon.muted) }
             ForEach(trips) { t in
                 VStack(alignment: .leading, spacing: 2) {
-                    Text(Fmt.shortDay(t.departure)).font(.caption.weight(.semibold)).foregroundStyle(.secondary)
+                    Text(Fmt.shortDay(t.departure)).font(.caption.weight(.semibold)).foregroundStyle(Toon.muted)
                     TripRow(trip: t, quickModes: quick, day: t.departure) { m in
                         model.perform { try model.edit.setTripMode(t.id, m) }
                     }

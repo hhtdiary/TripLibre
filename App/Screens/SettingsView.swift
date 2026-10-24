@@ -36,22 +36,23 @@ struct SettingsView: View {
             exportSection
             importSection
             maintenanceSection
-            Section("Display") {
+            Section {
                 Picker("Units", selection: $units) {
                     Text("System").tag(""); Text("Metric").tag("metric"); Text("Imperial").tag("imperial")
                 }
-            }
+            } header: { Text("Display").toonSectionText() }
             Section {
                 Toggle("Diary agent", isOn: $agentEnabled)
-            } header: { Text("Experimental") } footer: {
+            } header: { Text("Experimental").toonSectionText() } footer: {
                 Text("Adds an Agent tab that recaps your day, asks about stops it can't explain, suggests mode fixes and answers simple questions. It runs on this iPhone with fixed rules: no AI model, nothing is sent anywhere. Off by default.")
+                    .toonSectionText()
             }
             aboutSection
         }
         .toonBackground()
         .navigationTitle("Settings")
         .inlineTitle()
-        .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() } } }
+        .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() }.confirmTint() } }
         .task(id: model.revision) {
             counts = model.store.counts()
             airportCount = Importer(store: model.store).airportCount()
@@ -89,8 +90,9 @@ struct SettingsView: View {
                 }
             }
             #endif
-        } header: { Text("Collection") } footer: {
+        } header: { Text("Collection").toonSectionText() } footer: {
             Text("GPS runs only while you're moving. When you stop for ~3 min it switches off and a geofence, iOS visit detection and significant-change monitoring wake the app when you leave — even after it was closed.")
+                .toonSectionText()
         }
     }
 
@@ -98,8 +100,9 @@ struct SettingsView: View {
         Section {
             Toggle("Look up addresses (Apple)", isOn: $reverseGeocoding)
                 .onChange(of: reverseGeocoding) { _, on in if on { model.geocoder.backfill() } }
-        } header: { Text("Privacy") } footer: {
+        } header: { Text("Privacy").toonSectionText() } footer: {
             Text("Everything is stored only on this iPhone. Address lookup is the only feature that sends coordinates anywhere (to Apple's geocoder, one place at a time) and is off by default. Map tiles are loaded from Apple Maps.")
+                .toonSectionText()
         }
     }
 
@@ -116,11 +119,12 @@ struct SettingsView: View {
             if !exportedFiles.isEmpty {
                 ShareLink(items: exportedFiles) { Label("Share \(exportedFiles.count) files…", systemImage: "square.and.arrow.up") }
                 if let folder = exportFolder {
-                    Text("Also saved in Files › On My iPhone › TripLibre › Exports › \(folder.lastPathComponent)").font(.caption).foregroundStyle(.secondary)
+                    Text("Also saved in Files › On My iPhone › TripLibre › Exports › \(folder.lastPathComponent)").font(.caption).foregroundStyle(Toon.muted)
                 }
             }
-        } header: { Text("Export for analysis") } footer: {
+        } header: { Text("Export for analysis").toonSectionText() } footer: {
             Text("CSV (trips, segments, visits, places, flights…), full JSON, GeoJSON and a SQLite snapshot. Stable IDs join across tables. See analysis/ in the repo for Python helpers.")
+                .toonSectionText()
         }
     }
 
@@ -134,8 +138,9 @@ struct SettingsView: View {
             } else {
                 Button { confirmAirports = true } label: { Label("Download airport list (OurAirports)", systemImage: "arrow.down.circle") }
             }
-        } header: { Text("Import") } footer: {
+        } header: { Text("Import").toonSectionText() } footer: {
             Text("Trips CSV: date,start_time,end_time,origin,destination,mode,distance_km,purpose,notes. Flights CSV: date,origin,destination,airline,flight_number,… Formats are in docs/import-formats.md.")
+                .toonSectionText()
         }
         .confirmationDialog("Download ~12 MB public-domain airport list from ourairports.com?", isPresented: $confirmAirports, titleVisibility: .visible) {
             Button("Download") { downloadAirports() }
@@ -160,8 +165,9 @@ struct SettingsView: View {
             }
             #endif
             Button("Erase all data…", role: .destructive) { confirmErase = true }
-        } header: { Text("Data") } footer: {
+        } header: { Text("Data").toonSectionText() } footer: {
             Text("Rebuilding re-runs detection on raw points; anything you corrected, confirmed, deleted or created stays as it is. A database snapshot is also saved daily (last 7 kept).")
+                .toonSectionText()
         }
         .confirmationDialog("Erase everything?", isPresented: $confirmErase, titleVisibility: .visible) {
             Button("Erase all location history", role: .destructive) { confirmErase2 = true }
@@ -173,7 +179,7 @@ struct SettingsView: View {
     }
 
     private var aboutSection: some View {
-        Section("Database") {
+        Section {
             ForEach(["raw_location_points", "motion_activities", "visits", "trips", "trip_segments", "places", "flights", "audit_log"], id: \.self) { k in
                 LabeledContent(k, value: "\(counts[k] ?? 0)")
             }
@@ -184,7 +190,7 @@ struct SettingsView: View {
                 else { Text("Never") }
             }
             LabeledContent("Stay radius / min dwell", value: "\(Int(model.engine.config.stayRadius)) m / \(Int(model.engine.config.minStayDuration / 60)) min")
-        }
+        } header: { Text("Database").toonSectionText() }
     }
 
     // MARK: actions

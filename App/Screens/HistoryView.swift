@@ -45,6 +45,7 @@ struct HistoryView: View {
                         .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Toon.ink))
                         .tilt(-2)
                         .padding(.vertical, 4)
+                        .toonSectionText()
                 }
             }
             if months.isEmpty {
@@ -147,6 +148,29 @@ struct WeekChart: View {
         }
     }
 
+    /// ‹ This week ›, or both arrows above the title when they don't fit on one line.
+    private var weekNavigation: some View {
+        let title = Text(title).font(.toon(18, .bold)).foregroundStyle(Toon.ink)
+        let previous = Button { withAnimation(.spring(duration: 0.4, bounce: 0.35)) { offset -= 1 } } label: {
+            Image(systemName: "chevron.left").fontWeight(.black)
+        }
+        .buttonStyle(ToonButtonStyle(height: 30, fontSize: 12, shadow: 2))
+        .accessibilityLabel("Previous week")
+        let next = Button { withAnimation(.spring(duration: 0.4, bounce: 0.35)) { offset += 1 } } label: {
+            Image(systemName: "chevron.right").fontWeight(.black)
+        }
+        .buttonStyle(ToonButtonStyle(fill: offset < 0 ? Toon.paper : Toon.stone, height: 30, fontSize: 12, shadow: offset < 0 ? 2 : 0))
+        .disabled(offset >= 0)
+        .accessibilityLabel("Next week")
+        return ViewThatFits(in: .horizontal) {
+            HStack(spacing: 8) { previous; title.lineLimit(1); next }
+            VStack(alignment: .leading, spacing: 6) {
+                HStack(spacing: 8) { previous; next }
+                title
+            }
+        }
+    }
+
     var body: some View {
         let w = week
         let trips = w.reduce(0) { $0 + ($1.summary?.trips ?? 0) }
@@ -154,23 +178,21 @@ struct WeekChart: View {
         let peak = max(1, w.map { $0.summary?.trips ?? 0 }.max() ?? 1)
         let busiest = w.filter { ($0.summary?.trips ?? 0) > 0 }.max { ($0.summary?.trips ?? 0) < ($1.summary?.trips ?? 0) }
 
+        let totals = Text("\(trips) trip\(trips == 1 ? "" : "s") · \(Fmt.distance(dist))")
+            .font(.toon(13, .heavy)).foregroundStyle(Toon.muted)
+
         VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
-                Button { withAnimation(.spring(duration: 0.4, bounce: 0.35)) { offset -= 1 } } label: {
-                    Image(systemName: "chevron.left").fontWeight(.black)
+            // the week's totals move under the title when they don't fit beside it
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 8) {
+                    weekNavigation
+                    Spacer(minLength: 4)
+                    totals.lineLimit(1)
                 }
-                .buttonStyle(ToonButtonStyle(height: 30, fontSize: 12, shadow: 2))
-                .accessibilityLabel("Previous week")
-                Text(title).font(.toon(18, .bold)).foregroundStyle(Toon.ink).lineLimit(1).minimumScaleFactor(0.8)
-                Button { withAnimation(.spring(duration: 0.4, bounce: 0.35)) { offset += 1 } } label: {
-                    Image(systemName: "chevron.right").fontWeight(.black)
+                VStack(alignment: .leading, spacing: 6) {
+                    weekNavigation
+                    totals
                 }
-                .buttonStyle(ToonButtonStyle(fill: offset < 0 ? Toon.paper : Toon.stone, height: 30, fontSize: 12, shadow: offset < 0 ? 2 : 0))
-                .disabled(offset >= 0)
-                .accessibilityLabel("Next week")
-                Spacer(minLength: 4)
-                Text("\(trips) trip\(trips == 1 ? "" : "s") · \(Fmt.distance(dist))")
-                    .font(.toon(13, .heavy)).foregroundStyle(Toon.muted).lineLimit(1).minimumScaleFactor(0.7)
             }
             HStack(alignment: .bottom, spacing: 8) {
                 ForEach(w, id: \.day) { d in
@@ -193,7 +215,7 @@ struct WeekChart: View {
                     .accessibilityLabel("\(d.day.formatted(.dateTime.weekday(.wide))): \(n) trips")
                 }
             }
-            .frame(height: 112, alignment: .bottom)
+            .frame(minHeight: 112, alignment: .bottom)
             if let b = busiest {
                 Text("Busiest day: \(b.day.formatted(.dateTime.weekday(.wide))), \(b.summary!.trips) trips")
                     .font(.toon(12, .heavy)).foregroundStyle(Toon.muted)
@@ -213,29 +235,29 @@ struct DayRow: View {
     private var isToday: Bool { Calendar.current.isDateInToday(summary.day) }
 
     var body: some View {
-        HStack(spacing: 12) {
+        ToonRowStack {
             VStack(spacing: 0) {
                 Text(summary.day.formatted(.dateTime.day())).font(.toon(24, .bold)).monospacedDigit()
                 Text(summary.day.formatted(.dateTime.weekday(.abbreviated)).uppercased()).font(.toon(11, .black))
             }
             .foregroundStyle(Toon.ink)
-            .frame(width: 54, height: 58)
+            .frame(minWidth: 54, minHeight: 58)
             .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(isToday ? Toon.accent : Toon.cream))
             .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Toon.ink, lineWidth: Toon.line))
             VStack(alignment: .leading, spacing: 6) {
-                HStack(spacing: 6) {
+                ToonRowStack(spacing: 6) {
                     if summary.flight { Image(systemName: "airplane").font(.system(size: 13, weight: .bold)).foregroundStyle(Toon.ink) }
                     Text(summary.places.isEmpty ? Fmt.shortDay(summary.day) : summary.places.prefix(4).joined(separator: " → "))
-                        .font(.toon(14, .heavy)).foregroundStyle(Toon.ink).lineLimit(2)
+                        .font(.toon(14, .heavy)).foregroundStyle(Toon.ink).toonLineLimit(2)
                     Spacer(minLength: 0)
                     if summary.needsReview > 0 { ToonBadge(text: "\(summary.needsReview) to check") }
                 }
-                HStack(spacing: 6) {
+                ToonRowStack(spacing: 6) {
                     HStack(spacing: 3) {
                         ForEach(summary.modes.prefix(4)) { m in ModeIcon(mode: m, size: 24) }
                     }
                     Text("\(summary.trips) trips · \(Fmt.distance(summary.distance))")
-                        .font(.toon(12, .bold)).foregroundStyle(Toon.muted).lineLimit(1).minimumScaleFactor(0.8)
+                        .font(.toon(12, .bold)).foregroundStyle(Toon.muted).toonLineLimit(1, minScale: 0.8)
                 }
             }
             Spacer(minLength: 0)
@@ -261,7 +283,7 @@ struct TripSearchView: View {
 
     var body: some View {
         List {
-            Section("Filters") {
+            Section {
                 DatePicker("From", selection: $from, displayedComponents: .date)
                 DatePicker("To", selection: $to, displayedComponents: .date)
                 Picker("Mode", selection: $mode) {
@@ -274,8 +296,8 @@ struct TripSearchView: View {
                 }
                 Stepper("Departing after \(afterHour):00", value: $afterHour, in: 0...23)
                 Toggle("Weekends only", isOn: $weekendsOnly)
-            }
-            Section("\(results.count) trips · \(Fmt.distance(results.reduce(0) { $0 + $1.distance }))") {
+            } header: { Text("Filters").toonSectionText() }
+            Section {
                 ForEach(results) { t in
                     Button { selected = IDBox(id: t.id) } label: {
                         HStack {
@@ -283,12 +305,12 @@ struct TripSearchView: View {
                             VStack(alignment: .leading) {
                                 Text("\(names[t.id] ?? "")").font(.subheadline).foregroundStyle(.primary)
                                 Text("\(Fmt.shortDay(t.departure)) \(Fmt.time(t.departure)) · \(Fmt.distance(t.distance)) · \(Fmt.duration(t.duration))")
-                                    .font(.caption).foregroundStyle(.secondary)
+                                    .font(.caption).foregroundStyle(Toon.muted)
                             }
                         }
                     }
                 }
-            }
+            } header: { Text("\(results.count) trips · \(Fmt.distance(results.reduce(0) { $0 + $1.distance }))").toonSectionText() }
         }
         .toonBackground()
         .navigationTitle("Find trips")

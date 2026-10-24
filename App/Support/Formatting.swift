@@ -132,9 +132,9 @@ struct StatPill: View {
     var body: some View {
         VStack(spacing: 2) {
             Text(value).font(.toon(17, .bold).monospacedDigit()).foregroundStyle(Toon.ink)
-                .lineLimit(1).minimumScaleFactor(0.6)
+                .toonLineLimit(1, minScale: 0.6)
             Text(label).font(.toon(11, .bold)).foregroundStyle(Toon.muted)
-                .lineLimit(2).multilineTextAlignment(.center)
+                .toonLineLimit(2).multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
     }
@@ -144,6 +144,8 @@ struct ModeIcon: View {
     let mode: TravelMode
     var size: CGFloat = 28
     var body: some View {
+        // some symbols (e.g. subway's tram.fill.tunnel) have no built-in label, and VoiceOver would read the symbol name
         ToonChip(symbol: mode.symbol, color: mode.color, size: size)
+            .accessibilityLabel(mode.label)
     }
 }

@@ -97,6 +97,8 @@ struct CostEntrySheet: View {
 
     @AppStorage("costCurrency") private var lastCurrency = Expense.defaultCurrency
     @State private var amountText = ""
+    /// Category tiles get wider as their labels grow with Dynamic Type.
+    @ScaledMetric(relativeTo: .caption2) private var categoryTileWidth: CGFloat = 96
     @State private var currency = Expense.defaultCurrency
     @State private var category: ExpenseCategory = .other
     @State private var categoryTouched = false
@@ -147,8 +149,12 @@ struct CostEntrySheet: View {
                     }
                 } header: {
                     Text(header)
+                        .toonSectionText()
                 } footer: {
-                    if !amountText.isEmpty && amount == nil { Text("Enter an amount like 2.90.").foregroundStyle(Toon.accentDeep) }
+                    Group {
+                        if !amountText.isEmpty && amount == nil { Text("Enter an amount like 2.90.").foregroundStyle(Toon.accentDeep) }
+                    }
+                    .toonSectionText()
                 }
 
                 if links.count > 1 {
@@ -160,8 +166,8 @@ struct CostEntrySheet: View {
                     }
                 }
 
-                Section("What for") {
-                    LazyVGrid(columns: [GridItem(.adaptive(minimum: 96), spacing: 8)], spacing: 8) {
+                Section {
+                    LazyVGrid(columns: [GridItem(.adaptive(minimum: categoryTileWidth), spacing: 8)], spacing: 8) {
                         ForEach(ExpenseCategory.allCases) { c in
                             Button {
                                 category = c
@@ -169,7 +175,7 @@ struct CostEntrySheet: View {
                             } label: {
                                 VStack(spacing: 4) {
                                     Image(systemName: c.symbol).font(.title3).accessibilityHidden(true)
-                                    Text(c.label).font(.caption2).lineLimit(2).multilineTextAlignment(.center)
+                                    Text(c.label).font(.caption2).toonLineLimit(2).multilineTextAlignment(.center)
                                 }
                                 .frame(maxWidth: .infinity, minHeight: 54)
                                 .background(category == c ? CostStyle.color.opacity(0.35) : Color.secondary.opacity(0.08),
@@ -181,7 +187,7 @@ struct CostEntrySheet: View {
                         }
                     }
                     .padding(.vertical, 4)
-                }
+                } header: { Text("What for").toonSectionText() }
 
                 Section {
                     TextField("Note (optional)", text: $note, axis: .vertical)
@@ -203,6 +209,7 @@ struct CostEntrySheet: View {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save", action: save).disabled(amount == nil).accessibilityIdentifier("costSave")
+                    .confirmTint()
                 }
             }
             .confirmationDialog("Remove this cost?", isPresented: $confirmDelete, titleVisibility: .visible) {
@@ -400,7 +407,7 @@ struct CostPromptCard: View {
                 .accessibilityLabel(isTrip ? "Don't ask about this trip" : "Don't ask about this visit")
             }
             .foregroundStyle(Toon.ink)
-            HStack(spacing: 6) {
+            ToonRowStack(spacing: 6) {
                 ForEach(suggestions) { s in
                     Button(Fmt.cost(s)) { quickSave(s.amount, s.currency, s.category) }
                         .buttonStyle(ToonButtonStyle(fill: CostStyle.color, height: 34, fontSize: 13, shadow: 2))
@@ -416,6 +423,7 @@ struct CostPromptCard: View {
         .padding(12)
         .toonCard(Toon.cream, radius: 18, shadow: 0, dashed: true)
         .sensoryFeedback(.success, trigger: saved)
+        .accessibilityElement(children: .contain)
         .accessibilityIdentifier("costPrompt")
         .task(id: prompt.id) {
             let recent: [Expense]
@@ -493,24 +501,37 @@ struct CostPrompt: Identifiable {
 struct DaySpendCard: View {
     let costs: [Expense]
     let isToday: Bool
+    var onOpen: () -> Void
     var onAdd: () -> Void
 
     var body: some View {
-        HStack(spacing: 12) {
-            ToonChip(symbol: CostStyle.symbol, color: CostStyle.color, size: 44)
-            VStack(alignment: .leading, spacing: 1) {
-                Text(isToday ? "Spent today" : "Spent this day").font(.toon(12)).foregroundStyle(Toon.muted)
-                if let total = Fmt.costs(costs) {
-                    Text(total).font(.toon(20, .bold)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
-                    Text("\(costs.count) cost\(costs.count == 1 ? "" : "s") · see spending")
-                        .font(.toon(11, .bold)).foregroundStyle(Toon.muted)
-                } else {
-                    Text("Nothing logged").font(.toon(17, .bold))
-                    Text("Tap to see your spending").font(.toon(11, .bold)).foregroundStyle(Toon.muted)
+        ToonRowStack {
+            // the totals open the Spending page: one element the size of the whole left part, so VoiceOver and the
+            // hit-region audit see a single target rather than each small label (issue #67)
+            HStack(spacing: 12) {
+                ToonChip(symbol: CostStyle.symbol, color: CostStyle.color, size: 44).accessibilityHidden(true)
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(isToday ? "Spent today" : "Spent this day").font(.toon(12)).foregroundStyle(Toon.muted)
+                    if let total = Fmt.costs(costs) {
+                        Text(total).font(.toon(20, .bold)).monospacedDigit().toonLineLimit(1, minScale: 0.6)
+                        Text("\(costs.count) cost\(costs.count == 1 ? "" : "s") · see spending")
+                            .font(.toon(11, .bold)).foregroundStyle(Toon.muted)
+                    } else {
+                        Text("Nothing logged").font(.toon(17, .bold))
+                        Text("Tap to see your spending").font(.toon(11, .bold)).foregroundStyle(Toon.muted)
+                    }
                 }
+                .foregroundStyle(Toon.ink)
+                Spacer(minLength: 0)
             }
-            .foregroundStyle(Toon.ink)
-            Spacer(minLength: 0)
+            .frame(minHeight: 44)
+            .contentShape(Rectangle())
+            .onTapGesture(perform: onOpen)
+            .accessibilityElement(children: .combine)
+            .accessibilityAddTraits(.isButton)
+            .accessibilityHint("Opens your spending")
+            .accessibilityAction { onOpen() }
+            .accessibilityIdentifier("daySpend")
             Button(action: onAdd) { Label("Cost", systemImage: "plus") }
                 .buttonStyle(ToonButtonStyle(fill: Toon.sun, height: 40, fontSize: 14, shadow: 3))
                 .accessibilityLabel("Add a cost")
@@ -518,7 +539,6 @@ struct DaySpendCard: View {
         }
         .padding(12)
         .toonCard(radius: 20, shadow: 3)
-        .accessibilityIdentifier("daySpend")
     }
 }
 
@@ -527,15 +547,15 @@ struct CostRow: View {
     let cost: Expense
 
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
+        ToonRowStack {
             ToonChip(symbol: cost.category.symbol, color: CostStyle.color, size: 44)
             VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
+                ToonRowStack(spacing: 6) {
                     Text(Fmt.cost(cost)).font(.toon(16, .bold)).monospacedDigit()
                     Text(cost.category.label).font(.toon(13, .bold)).foregroundStyle(Toon.muted)
                 }
                 Text(Fmt.time(cost.timestamp, tz: cost.timeZone)).font(.toon(12, .bold)).monospacedDigit().foregroundStyle(Toon.muted)
-                if let n = cost.note { Text(n).font(.toon(12, .semibold)).foregroundStyle(Toon.muted).lineLimit(2) }
+                if let n = cost.note { Text(n).font(.toon(12, .semibold)).foregroundStyle(Toon.muted).toonLineLimit(2) }
             }
             .foregroundStyle(Toon.ink)
             .frame(maxWidth: .infinity, alignment: .leading)
@@ -582,7 +602,7 @@ struct CostsSection: View {
                         Image(systemName: e.category.symbol).frame(width: 24).foregroundStyle(Toon.muted).accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 1) {
                             Text(e.category.label)
-                            if let n = e.note { Text(n).font(.caption).foregroundStyle(.secondary).lineLimit(1) }
+                            if let n = e.note { Text(n).font(.caption).foregroundStyle(Toon.muted).toonLineLimit(1) }
                         }
                         Spacer()
                         Text(Fmt.cost(e)).monospacedDigit().fontWeight(.semibold)
@@ -595,12 +615,16 @@ struct CostsSection: View {
                 .accessibilityIdentifier("detailAddCost")
         } header: {
             Text("Cost")
+                .toonSectionText()
         } footer: {
-            if costs.isEmpty {
-                Text(footer)
-            } else if costs.count > 1, let total = Fmt.costs(costs) {
-                Text("Total \(total)")
+            Group {
+                if costs.isEmpty {
+                    Text(footer)
+                } else if costs.count > 1, let total = Fmt.costs(costs) {
+                    Text("Total \(total)")
+                }
             }
+            .toonSectionText()
         }
     }
 

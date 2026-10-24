@@ -9,7 +9,7 @@ private struct InkBadge: View {
     let fill: Color
     var body: some View {
         Text(text)
-            .font(.toon(11, .black)).foregroundStyle(Toon.ink).lineLimit(1).minimumScaleFactor(0.7)
+            .font(.toonFixed(11, .black)).foregroundStyle(Toon.ink).lineLimit(1).minimumScaleFactor(0.7)
             .padding(.horizontal, 8).padding(.vertical, 2)
             .background(Capsule().fill(fill))
             .overlay(Capsule().strokeBorder(Toon.ink, lineWidth: 2))
@@ -24,8 +24,8 @@ private struct Sticker: View {
     var tilt: Double = 0
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(value).font(.toon(24, .bold)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.5)
-            Text(label).font(.toon(11, .heavy)).lineLimit(1).minimumScaleFactor(0.7)
+            Text(value).font(.toonFixed(24, .bold)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.5)
+            Text(label).font(.toonFixed(11, .heavy)).lineLimit(1).minimumScaleFactor(0.7)
         }
         .foregroundStyle(Toon.ink)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -62,21 +62,21 @@ struct StickerStatusView: View {
                 if info.tone == .good { Mascot(size: 26, bob: false) }
             }
             Spacer(minLength: 4)
-            Text(info.title).font(.toon(20, .black)).foregroundStyle(t.text)
+            Text(info.title).font(.toonFixed(20, .black)).foregroundStyle(t.text)
                 .lineLimit(2).minimumScaleFactor(0.7)
-            Text(info.detail).font(.toon(12, .bold)).foregroundStyle(t.muted)
+            Text(info.detail).font(.toonFixed(12, .bold)).foregroundStyle(t.muted)
                 .lineLimit(2).minimumScaleFactor(0.8).padding(.top, 2)
             Spacer(minLength: 6)
             if let action = info.action {
-                Text(action).font(.toon(12, .black)).foregroundStyle(Toon.ink)
+                Text(action).font(.toonFixed(12, .black)).foregroundStyle(Toon.ink)
                     .padding(.horizontal, 10).padding(.vertical, 4)
                     .toonCard(Toon.accent, radius: 12, shadow: 2)
             } else if let n = entry.snapshot?.reviewPending, n > 0 {
-                Text("\(n) trip\(n == 1 ? "" : "s") to check").font(.toon(12, .black)).foregroundStyle(Toon.ink)
+                Text("\(n) trip\(n == 1 ? "" : "s") to check").font(.toonFixed(12, .black)).foregroundStyle(Toon.ink)
                     .padding(.horizontal, 10).padding(.vertical, 4)
                     .toonCard(Toon.sun, radius: 12, shadow: 2)
             } else {
-                Text("All checked").font(.toon(12, .heavy)).foregroundStyle(t.muted)
+                Text("All checked").font(.toonFixed(12, .heavy)).foregroundStyle(t.muted)
             }
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
@@ -95,10 +95,10 @@ struct StickerTodayView: View {
         let t = WTheme(scheme)
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline) {
-                Text("Today · \(WFmt.dayTitle(entry.date))").font(.toon(16, .black)).foregroundStyle(t.text).lineLimit(1)
+                Text("Today · \(WFmt.dayTitle(entry.date))").font(.toonFixed(16, .black)).foregroundStyle(t.text).lineLimit(1)
                 Spacer(minLength: 6)
                 if let at = entry.snapshot?.diaryUpdatedAt {
-                    Text("Updated \(WFmt.ago(at, now: entry.date))").font(.toon(11, .bold)).foregroundStyle(t.muted).lineLimit(1)
+                    Text("Updated \(WFmt.ago(at, now: entry.date))").font(.toonFixed(11, .bold)).foregroundStyle(t.muted).lineLimit(1)
                 }
             }
             if let s = entry.snapshot, let d = s.today(at: entry.date) {
@@ -134,7 +134,7 @@ struct CurrentStay: View {
         HStack(spacing: 6) {
             ToonChip(symbol: cat?.symbol ?? "mappin", color: cat?.toonColor ?? Toon.paper, size: 22)
             (Text("At ") + Text(stay.name ?? (cat == .other ? nil : cat?.label) ?? "a new place") + Text(" since \(WFmt.when(stay.since, now: now))"))
-                .font(.toon(13, .heavy)).foregroundStyle(theme.text).lineLimit(1).minimumScaleFactor(0.7)
+                .font(.toonFixed(13, .heavy)).foregroundStyle(theme.text).lineLimit(1).minimumScaleFactor(0.7)
                 .privacySensitive()
         }
     }
@@ -149,7 +149,7 @@ struct EmptyDay: View {
             Text(snapshot == nil ? "Open TripLibre once and your day shows up here."
                  : snapshot?.tracking == .recording ? "A new day! It fills in as TripLibre records your trips."
                  : "Nothing recorded today. Tracking isn't running.")
-                .font(.toon(14, .heavy)).foregroundStyle(theme.text).lineLimit(3).minimumScaleFactor(0.8)
+                .font(.toonFixed(14, .heavy)).foregroundStyle(theme.text).lineLimit(3).minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
     }
@@ -168,11 +168,11 @@ struct StickerWeekView: View {
                 // past midnight the stored week ends yesterday until the app runs again: say so instead of "Last 7 days"
                 Text(entry.snapshot.map { $0.week.isCurrent(at: entry.date) ? "Last 7 days"
                         : "7 days to \($0.week.end.formatted(.dateTime.weekday(.abbreviated)))" } ?? "Last 7 days")
-                    .font(.toon(18, .black)).foregroundStyle(t.text).lineLimit(1).minimumScaleFactor(0.8)
+                    .font(.toonFixed(18, .black)).foregroundStyle(t.text).lineLimit(1).minimumScaleFactor(0.8)
                 Spacer(minLength: 6)
                 if let w = entry.snapshot?.week {
                     Text("\(w.start.formatted(.dateTime.day().month(.abbreviated))) – \(w.end.formatted(.dateTime.day().month(.abbreviated)))")
-                        .font(.toon(12, .bold)).foregroundStyle(t.muted).lineLimit(1)
+                        .font(.toonFixed(12, .bold)).foregroundStyle(t.muted).lineLimit(1)
                 }
             }
             if let s = entry.snapshot {
@@ -200,7 +200,7 @@ struct StickerWeekView: View {
                 let cat = p.category.flatMap(PlaceCategory.init(rawValue:))
                 ToonChip(symbol: cat?.symbol ?? "mappin", color: cat?.toonColor ?? Toon.paper, size: 22)
                 (Text("Most time: ") + Text(p.name ?? (cat == .other ? nil : cat?.label) ?? "an unnamed place") + Text(" · \(WFmt.hours(p.dwell))"))
-                    .font(.toon(13, .heavy)).foregroundStyle(t.text).lineLimit(1).minimumScaleFactor(0.7)
+                    .font(.toonFixed(13, .heavy)).foregroundStyle(t.text).lineLimit(1).minimumScaleFactor(0.7)
                     .privacySensitive()
             }
             Spacer(minLength: 4)
@@ -219,19 +219,19 @@ private struct TripBars: View {
         let top = max(week.tripsPerDay.max() ?? 0, 1)
         let days = (0..<week.tripsPerDay.count).map { Calendar.current.date(byAdding: .day, value: $0, to: week.start)! }
         VStack(alignment: .leading, spacing: 4) {
-            Text("Trips per day").font(.toon(11, .black)).foregroundStyle(Toon.muted)
+            Text("Trips per day").font(.toonFixed(11, .black)).foregroundStyle(Toon.muted)
             HStack(alignment: .bottom, spacing: 8) {
                 ForEach(Array(week.tripsPerDay.enumerated()), id: \.offset) { i, n in
                     VStack(spacing: 3) {
                         Spacer(minLength: 0)
-                        Text("\(n)").font(.toon(10, .black)).foregroundStyle(Toon.ink).fixedSize()
+                        Text("\(n)").font(.toonFixed(10, .black)).foregroundStyle(Toon.ink).fixedSize()
                         UnevenRoundedRectangle(topLeadingRadius: 6, bottomLeadingRadius: 2, bottomTrailingRadius: 2, topTrailingRadius: 6)
                             .fill(current && i == week.tripsPerDay.count - 1 ? Toon.accent : Toon.sun)
                             .overlay(UnevenRoundedRectangle(topLeadingRadius: 6, bottomLeadingRadius: 2, bottomTrailingRadius: 2, topTrailingRadius: 6)
                                 .strokeBorder(Toon.ink, lineWidth: 2))
                             .frame(height: max(4, 58 * CGFloat(n) / CGFloat(top)))
                         Text(current && i == week.tripsPerDay.count - 1 ? "Today" : days[i].formatted(.dateTime.weekday(.narrow)))
-                            .font(.toon(9, .black)).foregroundStyle(Toon.ink).lineLimit(1).fixedSize()
+                            .font(.toonFixed(9, .black)).foregroundStyle(Toon.ink).lineLimit(1).fixedSize()
                     }
                     .frame(maxWidth: .infinity, minHeight: 92)
                     .accessibilityElement(children: .ignore)
@@ -263,7 +263,7 @@ private struct ModeBar: View {
         let total = shares.reduce(0) { $0 + $1.distance }
         let rows = Self.rows(shares).map { ($0.0, $0.1 / max(total, 1)) }
         VStack(alignment: .leading, spacing: 5) {
-            Text("How you got around · by distance").font(.toon(11, .black)).foregroundStyle(theme.muted)
+            Text("How you got around · by distance").font(.toonFixed(11, .black)).foregroundStyle(theme.muted)
             GeometryReader { geo in
                 HStack(spacing: 0) {
                     ForEach(rows, id: \.0) { g, f in
@@ -277,7 +277,7 @@ private struct ModeBar: View {
             HStack(spacing: 10) {
                 ForEach(rows, id: \.0) { g, f in
                     Text("\(g.shortLabel) \(Int((f * 100).rounded()))%")
-                        .font(.toon(11, .heavy)).foregroundStyle(theme.text).lineLimit(1)
+                        .font(.toonFixed(11, .heavy)).foregroundStyle(theme.text).lineLimit(1)
                 }
             }
             .minimumScaleFactor(0.7)

@@ -168,12 +168,13 @@ make phone         # build, sign and install on the cable-connected iPhone (rene
 make lint          # docs JS/CSS/HTML (incl. accessibility rules), Markdown, Python, Swift; needs node, ruff, swiftlint, swiftformat
 make swift-lint    # just SwiftLint (new violations vs. .swiftlint-baseline.json) + SwiftFormat check
 make a11y          # axe-core WCAG 2.1 AA check of the rendered docs site, light + dark theme
-make ci            # what GitHub Actions runs: lint + tests + app build + export→Python contract check
+make ui-test       # XCUITest flows + accessibility audits in the simulator (also in CI)
+make ci            # what GitHub Actions runs (minus ui-test): lint + tests + app build + export→Python contract check
 ```
 
 CI (`.github/workflows/ci.yml`) runs on every push/PR on a macOS runner: Swift tests, an end-to-end check that the
-Python loader reads the app's real export (CSV and SQLite agree), a simulator build, a device build, and a check that
-`HHT.xcodeproj` matches `project.yml`.
+Python loader reads the app's real export (CSV and SQLite agree), a simulator build, a device build, a check that
+`HHT.xcodeproj` matches `project.yml`, and the XCUITest flows and accessibility audits (`make ui-test`) in the simulator.
 An Ubuntu job runs the linters, including SwiftLint (`.swiftlint.yml`: correctness and VoiceOver rules only; existing
 violations are recorded in `.swiftlint-baseline.json`, so only new ones fail) and SwiftFormat in check-only mode
 (`.swiftformat`: whitespace hygiene only). Install locally with `brew install swiftlint swiftformat`.

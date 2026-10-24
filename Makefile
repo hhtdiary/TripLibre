@@ -35,9 +35,11 @@ sim: build       ## install + launch in the simulator with demo data (SIM_NAME="
 phone: project   ## build, sign and install on the USB-connected iPhone (also renews the 7-day signature)
 	./scripts/install-phone.sh
 
-ui-test: project ## XCUITest flows + accessibility audits in the simulator (SIM_NAME="iPhone 17"; ONLY=HHTUITests/CoreFlowTests)
-	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination 'platform=iOS Simulator,name=$(SIM_NAME)' \
-		-derivedDataPath $(BUILD_DIR) CODE_SIGNING_ALLOWED=NO $(if $(ONLY),-only-testing:$(ONLY)) test
+ui-test: project ## XCUITest flows + accessibility audits in the simulator (SIM_NAME="iPhone 17" or SIM_ID=<udid>; ONLY=HHTUITests/CoreFlowTests)
+	$(if $(RESULT_BUNDLE),rm -rf $(RESULT_BUNDLE))
+	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination 'platform=iOS Simulator,$(if $(SIM_ID),id=$(SIM_ID),name=$(SIM_NAME))' \
+		-derivedDataPath $(BUILD_DIR) CODE_SIGNING_ALLOWED=NO $(if $(ONLY),-only-testing:$(ONLY)) \
+		$(if $(RESULT_BUNDLE),-resultBundlePath $(RESULT_BUNDLE)) test
 
 analysis-env:    ## create analysis/.venv with pandas etc.
 	python3 -m venv analysis/.venv
@@ -81,7 +83,7 @@ a11y: node_modules/.package-lock.json   ## axe-core WCAG 2.1 AA check of every d
 	npx playwright install chromium
 	npm run a11y
 
-ci: lint a11y test build export-check calibrate-smoke   ## everything GitHub Actions runs
+ci: lint a11y test build export-check calibrate-smoke   ## everything GitHub Actions runs except ui-test (slow; run it separately)
 
 clean:
 	rm -rf $(BUILD_DIR) Packages/HHTCore/.build

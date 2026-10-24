@@ -104,6 +104,7 @@ struct ToonTabBar: View {
     @Binding var selection: Int
     var showAgent = false
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.dynamicTypeSize) private var typeSize
 
     /// Bar height + shadow + breathing room above it.
     static let reservedHeight: CGFloat = 80
@@ -128,7 +129,9 @@ struct ToonTabBar: View {
                 } label: {
                     HStack(spacing: 6) {
                         Image(systemName: item.symbol).font(.system(size: 18, weight: .bold))
-                        if on { Text(item.title).font(.toon(14, .black)).lineLimit(1).fixedSize() }
+                        // five tabs have to fit across the screen: at accessibility text sizes the bar shows icons
+                        // only (like the system tab bar), and long-pressing a tab shows its name in the large content viewer
+                        if on && !typeSize.isAccessibilitySize { Text(item.title).font(.toon(14, .black)).lineLimit(1).fixedSize() }
                     }
                     .foregroundStyle(Toon.ink)
                     .padding(.horizontal, on ? 14 : 0)
@@ -144,11 +147,12 @@ struct ToonTabBar: View {
                 .accessibilityLabel(item.title)
                 .accessibilityAddTraits(on ? .isSelected : [])
                 .accessibilityIdentifier("tab-\(item.title)")
+                .accessibilityShowsLargeContentViewer { Label(item.title, systemImage: item.symbol) }
                 if item.tag != items.last?.tag { Spacer(minLength: 0) }
             }
         }
         .padding(.horizontal, 9)
-        .frame(height: 64)
+        .frame(minHeight: 64)
         .toonCard(radius: 32, shadow: 4)
         .padding(.horizontal, 16)
         .padding(.bottom, 2)

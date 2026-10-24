@@ -126,10 +126,8 @@ struct DayView: View {
                     .toonCard(radius: 22, shadow: 5)
                     .toonRow(top: 8, bottom: 10)
                 summary.toonRow(top: 8, bottom: 8)
-                DaySpendCard(costs: data.costs, isToday: isToday && !fixedDay) { costTarget = CostSheet(target: .day(day)) }
-                    .contentShape(Rectangle())
-                    .onTapGesture { showSpending = true }
-                    .accessibilityAction(named: "See spending") { showSpending = true }
+                DaySpendCard(costs: data.costs, isToday: isToday && !fixedDay,
+                             onOpen: { showSpending = true }, onAdd: { costTarget = CostSheet(target: .day(day)) })
                     .toonRow(top: 6, bottom: 8)
             }
             Section {
@@ -217,7 +215,7 @@ struct DayView: View {
                 DatePicker("Day", selection: $day, in: ...Date(), displayedComponents: .date)
                     .datePickerStyle(.graphical)
                     .padding()
-                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showDatePicker = false } } }
+                    .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showDatePicker = false }.confirmTint() } }
             }
             .presentationDetents([.medium])
         }
@@ -259,21 +257,17 @@ struct DayView: View {
     private var summary: some View {
         let dist = data.trips.reduce(0) { $0 + $1.distance }
         let time = data.trips.reduce(0) { $0 + $1.duration }
-        return Grid(horizontalSpacing: 14, verticalSpacing: 14) {
-            GridRow {
-                StatSticker(value: "\(data.trips.count)", label: "trips", color: Toon.sun, tilt: -2)
-                StatSticker(value: Fmt.distance(dist), label: "distance", color: Toon.lime, tilt: 1.5)
-            }
-            GridRow {
-                StatSticker(value: Fmt.duration(time), label: "travelling", color: Toon.sky, tilt: 1)
-                StatSticker(value: "\(Set(data.visits.compactMap(\.placeID)).count)", label: "places", color: Toon.bubblegum, tilt: -1.5)
-            }
+        return StickerGrid {
+            StatSticker(value: "\(data.trips.count)", label: "trips", color: Toon.sun, tilt: -2)
+            StatSticker(value: Fmt.distance(dist), label: "distance", color: Toon.lime, tilt: 1.5)
+            StatSticker(value: Fmt.duration(time), label: "travelling", color: Toon.sky, tilt: 1)
+            StatSticker(value: "\(Set(data.visits.compactMap(\.placeID)).count)", label: "places", color: Toon.bubblegum, tilt: -1.5)
         }
         .padding(.vertical, 4)
     }
 
     private var reviewBanner: some View {
-        HStack(spacing: 12) {
+        ToonRowStack {
             Image(systemName: "checklist")
                 .font(.system(size: 18, weight: .bold)).foregroundStyle(Toon.ink)
                 .frame(width: 38, height: 38)
@@ -352,14 +346,14 @@ struct VisitRow: View {
     var costs: [Expense] = []
 
     var body: some View {
-        HStack(alignment: .center, spacing: 12) {
+        ToonRowStack {
             ToonChip(symbol: place?.category?.symbol ?? "mappin", color: place?.toonColor ?? Toon.stone, size: 44)
             VStack(alignment: .leading, spacing: 2) {
-                HStack(spacing: 6) {
+                ToonRowStack(spacing: 6) {
                     Text(place?.isNamed == true ? place!.displayName : (place?.address ?? "Unnamed place"))
                         .font(.toon(18, .bold))
                         .foregroundStyle(place?.isNamed == true ? Toon.ink : Toon.muted)
-                        .lineLimit(2)
+                        .toonLineLimit(2)
                     if visit.userStatus.isLocked { Image(systemName: "checkmark.seal.fill").font(.caption).foregroundStyle(Toon.okGreen) }
                     if visit.departure == nil { ToonBadge(text: "here now", color: Toon.accent) }
                     if !stamps.isEmpty {
@@ -371,20 +365,22 @@ struct VisitRow: View {
                             .accessibilityLabel("You stamped this stop")
                     }
                 }
-                HStack(spacing: 6) {
-                    Text(timeSpan).monospacedDigit()
-                    Text("·")
-                    Text(visit.departure == nil ? "now · \(Fmt.duration(visit.duration()))" : Fmt.duration(visit.duration()))
-                    if let p = visit.purpose ?? place?.category?.defaultPurpose { Text("· \(p.label)") }
-                }
-                .font(.toon(12, .bold)).foregroundStyle(Toon.muted)
+                // one Text, so it wraps as a sentence at large text sizes
+                Text(meta).monospacedDigit()
+                    .font(.toon(12, .bold)).foregroundStyle(Toon.muted)
                 if !costs.isEmpty { CostBadge(costs: costs).padding(.top, 2) }
-                if let n = visit.notes { Text(n).font(.toon(12, .semibold)).foregroundStyle(Toon.muted).lineLimit(2) }
+                if let n = visit.notes { Text(n).font(.toon(12, .semibold)).foregroundStyle(Toon.muted).toonLineLimit(2) }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 14).padding(.vertical, 10)
             .toonCard(radius: 18, shadow: 3)
         }
+    }
+
+    private var meta: String {
+        var parts = [timeSpan, visit.departure == nil ? "now · \(Fmt.duration(visit.duration()))" : Fmt.duration(visit.duration())]
+        if let p = visit.purpose ?? place?.category?.defaultPurpose { parts.append(p.label) }
+        return parts.joined(separator: " · ")
     }
 
     private var timeSpan: String {
@@ -412,12 +408,12 @@ struct TripRow: View {
                         .frame(width: 3)
                 }
             VStack(alignment: .leading, spacing: 8) {
-                HStack(spacing: 8) {
+                ToonRowStack(spacing: 8) {
                     HStack(spacing: 4) {
                         ForEach(Array(uniqueModes.prefix(3).enumerated()), id: \.offset) { _, m in ModeIcon(mode: m, size: 30) }
                     }
                     VStack(alignment: .leading, spacing: 1) {
-                        HStack(spacing: 6) {
+                        ToonRowStack(spacing: 6) {
                             Text(modeText).font(.toon(14, .heavy)).foregroundStyle(Toon.ink)
                             if trip.needsReview { ToonBadge(text: "check") }
                             if trip.hasGap { Image(systemName: "antenna.radiowaves.left.and.right.slash").font(.caption).foregroundStyle(Toon.muted) }
@@ -429,10 +425,11 @@ struct TripRow: View {
                 }
                 if trip.needsReview {
                     Text("Did I get that right?").font(.toon(13, .heavy)).foregroundStyle(Toon.ink)
-                    // full labels when they fit, icons only on narrow screens
+                    // full labels when they fit, icons only on narrow screens, one per line at large text sizes
                     ViewThatFits(in: .horizontal) {
                         quickButtons(iconOnly: false)
                         quickButtons(iconOnly: true)
+                        quickButtons(iconOnly: false, stacked: true)
                     }
                 }
             }
@@ -444,8 +441,9 @@ struct TripRow: View {
         }
     }
 
-    private func quickButtons(iconOnly: Bool) -> some View {
-        HStack(spacing: 6) {
+    private func quickButtons(iconOnly: Bool, stacked: Bool = false) -> some View {
+        let layout = stacked ? AnyLayout(VStackLayout(alignment: .leading, spacing: 6)) : AnyLayout(HStackLayout(spacing: 6))
+        return layout {
             ForEach(quickModes.filter { $0 != trip.mode }.prefix(3)) { m in
                 Button { onQuickMode(m) } label: {
                     if iconOnly {
@@ -553,7 +551,7 @@ struct StampRow: View {
                 Text(detail).font(.toon(12, .bold)).monospacedDigit().foregroundStyle(Toon.muted)
                 Text("Not matched to a visit yet. It will be once there's location data around it.")
                     .font(.toon(12, .semibold)).foregroundStyle(Toon.muted).fixedSize(horizontal: false, vertical: true)
-                if let n = stamp.note { Text(n).font(.toon(12, .semibold)).foregroundStyle(Toon.muted).lineLimit(2) }
+                if let n = stamp.note { Text(n).font(.toon(12, .semibold)).foregroundStyle(Toon.muted).toonLineLimit(2) }
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(.horizontal, 14).padding(.vertical, 10)
@@ -692,7 +690,7 @@ struct InferenceStatusBanner: View {
             ProgressView().frame(width: 28, height: 28)
             VStack(alignment: .leading, spacing: 4) {
                 Text("Updating your diary…").font(.subheadline.weight(.semibold))
-                Text(phaseText).font(.caption).foregroundStyle(.secondary).monospacedDigit()
+                Text(phaseText).font(.caption).foregroundStyle(Toon.muted).monospacedDigit()
                 if let p = model.progress, p.phase == .resolvingVisits, p.staysTotal > 1 {
                     ProgressView(value: Double(p.staysResolved), total: Double(p.staysTotal))
                 }
@@ -710,8 +708,8 @@ struct InferenceStatusBanner: View {
             Label("Couldn't update your diary", systemImage: "exclamationmark.triangle.fill")
                 .font(.subheadline.weight(.semibold)).foregroundStyle(.red)
             Text("Your recorded data is safe; the diary just hasn't caught up with it. \(f.at, format: .relative(presentation: .named)).")
-                .font(.caption).foregroundStyle(.secondary)
-            Text(f.message).font(.caption2.monospaced()).foregroundStyle(.secondary).lineLimit(3).textSelection(.enabled)
+                .font(.caption).foregroundStyle(Toon.muted)
+            Text(f.message).font(.caption2.monospaced()).foregroundStyle(Toon.muted).toonLineLimit(3).textSelection(.enabled)
             Button { Task { await model.runInference() } } label: { Label("Try again", systemImage: "arrow.clockwise") }
                 .buttonStyle(ToonButtonStyle(height: 34, fontSize: 12, shadow: 2))
         }
@@ -763,7 +761,7 @@ struct PendingActivityRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 Text("Not in your diary yet").font(.subheadline.weight(.medium))
                 Text("Since \(Fmt.time(tail.since)) · \(tail.pointCount.formatted()) points · last fix \(Fmt.time(tail.lastPoint))")
-                    .font(.caption).monospacedDigit().foregroundStyle(.secondary)
+                    .font(.caption).monospacedDigit().foregroundStyle(Toon.muted)
                 Text(model.isProcessing ? "Being processed now…"
                      : "Recorded, not lost. It becomes a trip once you've stopped somewhere for ~5 minutes.")
                     .font(.caption).foregroundStyle(.tertiary)
@@ -791,6 +789,6 @@ struct LastInferenceLabel: View {
                 Text("Diary not built yet")
             }
         }
-        .font(.caption2).foregroundStyle(.secondary)
+        .font(.caption2).foregroundStyle(Toon.muted)
     }
 }

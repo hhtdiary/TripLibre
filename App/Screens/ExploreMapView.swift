@@ -45,7 +45,7 @@ struct PeriodPicker: View {
         Menu {
             ForEach([Period.week, .month, .year, .all]) { p in Button(p.label) { period = p } }
             if !phases.isEmpty {
-                Section("Life phases") { ForEach(phases) { ph in Button(ph.name) { period = .phase(ph) } } }
+                Section { ForEach(phases) { ph in Button(ph.name) { period = .phase(ph) } } } header: { Text("Life phases").toonSectionText() }
             }
         } label: {
             Label(period.label, systemImage: "calendar").labelStyle(.titleAndIcon)
@@ -65,6 +65,8 @@ struct ExploreMapView: View {
     @State private var routeLines: [RouteLine] = []
     @State private var metersPerPoint: Double = 16
     @State private var mapWidth: CGFloat = 390
+    /// Height of the stats card plus its bottom margin; it grows with Dynamic Type.
+    @State private var statsSpace: CGFloat = 92
     @State private var placeUse: [(Place, Int)] = []
     @State private var flights: [Flight] = []
     @State private var metrics: MobilityMetrics?
@@ -75,6 +77,14 @@ struct ExploreMapView: View {
     @State private var routeStyle: RouteStyle = .arcs
     @State private var position: MapCameraPosition = .automatic
     @Environment(\.tabBarSpace) private var tabBarSpace
+    @Environment(\.dynamicTypeSize) private var typeSize
+
+    @ViewBuilder private func statPills(_ m: MobilityMetrics) -> some View {
+        StatPill(value: Fmt.distance(m.radiusOfGyrationDwell ?? 0), label: "radius of gyration")
+        StatPill(value: String(format: "%.1f km²", (m.activitySpaceHullArea ?? 0) / 1e6), label: "hull area")
+        StatPill(value: "\(m.uniquePlaces)", label: "places")
+        StatPill(value: "\(m.trips)", label: "trips")
+    }
 
     var body: some View {
         ZStack(alignment: .bottom) {
@@ -122,18 +132,23 @@ struct ExploreMapView: View {
                 }
             }
             // keep the Apple Maps logo / Legal link clear of the stats card and tab bar
-            .safeAreaPadding(.bottom, tabBarSpace + (metrics == nil ? 0 : 92))
+            .safeAreaPadding(.bottom, tabBarSpace + (metrics == nil ? 0 : statsSpace))
 
             if let m = metrics {
-                HStack(alignment: .center, spacing: 6) {
-                    Mascot(size: 34, bob: false)
-                    StatPill(value: Fmt.distance(m.radiusOfGyrationDwell ?? 0), label: "radius of gyration")
-                    StatPill(value: String(format: "%.1f km²", (m.activitySpaceHullArea ?? 0) / 1e6), label: "hull area")
-                    StatPill(value: "\(m.uniquePlaces)", label: "places")
-                    StatPill(value: "\(m.trips)", label: "trips")
+                Group {
+                    // two by two at accessibility text sizes, where four in a row would each get a few letters
+                    if typeSize.isAccessibilitySize {
+                        StickerGrid(spacing: 10) { statPills(m) }
+                    } else {
+                        HStack(alignment: .center, spacing: 6) {
+                            Mascot(size: 34, bob: false)
+                            statPills(m)
+                        }
+                    }
                 }
                 .padding(10)
                 .toonCard(radius: 20, shadow: 4)
+                .onGeometryChange(for: CGFloat.self) { $0.size.height } action: { statsSpace = $0 + 16 }
                 .padding(.horizontal, 16).padding(.bottom, 16 + tabBarSpace)
             }
         }

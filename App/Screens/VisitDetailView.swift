@@ -30,7 +30,7 @@ struct VisitDetailView: View {
             .toonBackground()
             .navigationTitle("Visit")
             .inlineTitle()
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { saveNotes(); dismiss() } } }
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { saveNotes(); dismiss() }.confirmTint() } }
             .task(id: model.revision) { load() }
         }
     }
@@ -48,12 +48,12 @@ struct VisitDetailView: View {
                 .frame(height: 200).listRowInsets(EdgeInsets())
             }
 
-            Section("Place") {
+            Section {
                 HStack {
                     Image(systemName: place?.category?.symbol ?? "mappin")
                     VStack(alignment: .leading) {
                         Text(place?.isNamed == true ? place!.displayName : "Unnamed place").font(.headline)
-                        if let a = place?.address { Text(a).font(.caption).foregroundStyle(.secondary) }
+                        if let a = place?.address { Text(a).font(.caption).foregroundStyle(Toon.muted) }
                     }
                 }
                 Button { showPlacePicker = true } label: { Label("Wrong place? Choose or create…", systemImage: "arrow.triangle.swap") }
@@ -62,18 +62,18 @@ struct VisitDetailView: View {
                         Label(p.isNamed ? "Edit “\(p.displayName)” (all visits)" : "Name this place", systemImage: "pencil")
                     }
                 }
-            }
+            } header: { Text("Place").toonSectionText() }
 
-            Section("Purpose") {
+            Section {
                 Picker("Activity", selection: Binding(
                     get: { v.purpose },
                     set: { p in model.perform { try model.edit.setVisitPurpose(v.id, p) } })) {
                     Text(place?.category?.defaultPurpose.map { "Auto (\($0.label))" } ?? "Not set").tag(TripPurpose?.none)
                     ForEach(TripPurpose.allCases) { p in Text(p.label).tag(TripPurpose?.some(p)) }
                 }
-            }
+            } header: { Text("Purpose").toonSectionText() }
 
-            Section("Time") {
+            Section {
                 DatePicker("Arrived", selection: $arrival)
                 Toggle("Still here", isOn: $ongoing)
                 if !ongoing { DatePicker("Left", selection: $departure, in: arrival...) }
@@ -82,8 +82,8 @@ struct VisitDetailView: View {
                         model.perform { try model.edit.setVisitTimes(v.id, arrival: arrival, departure: ongoing ? nil : departure) }
                     }
                 }
-                Text(Fmt.duration((ongoing ? Date() : departure).timeIntervalSince(arrival))).foregroundStyle(.secondary)
-            }
+                Text(Fmt.duration((ongoing ? Date() : departure).timeIntervalSince(arrival))).foregroundStyle(Toon.muted)
+            } header: { Text("Time").toonSectionText() }
 
             if !stamps.isEmpty {
                 Section {
@@ -92,25 +92,27 @@ struct VisitDetailView: View {
                             Label("You stamped at \(Fmt.time(s.timestamp, tz: s.timeZone))", systemImage: StampStyle.symbol)
                             Spacer()
                             if s.coordinate != nil, let u = s.uncertainty {
-                                Text("±\(Fmt.distance(u))").font(.caption).foregroundStyle(.secondary)
+                                Text("±\(Fmt.distance(u))").font(.caption).foregroundStyle(Toon.muted)
                             }
                         }
                         .swipeActions { Button("Remove", role: .destructive) { model.undoStamp(s) } }
                     }
                 } header: {
                     Text("Self-reported")
+                        .toonSectionText()
                 } footer: {
                     Text(v.pointCount == 0
                          ? "This stop comes from your stamp alone; there was no GPS around it."
                          : "Your stamp confirms this stop. Its place and times still come from GPS, not from where you tapped.")
+                        .toonSectionText()
                 }
             }
 
             CostsSection(costs: costs, target: .visit(v, place), sheet: $costSheet)
 
-            Section("Notes") {
+            Section {
                 TextField("Add a note", text: $notes, axis: .vertical).onSubmit(saveNotes)
-            }
+            } header: { Text("Notes").toonSectionText() }
 
             Section {
                 if v.userStatus == .auto {
@@ -122,7 +124,7 @@ struct VisitDetailView: View {
                 Button(role: .destructive) { confirmDelete = true } label: { Label("This wasn't a stop", systemImage: "trash") }
             }
 
-            Section("Details") {
+            Section {
                 LabeledContent("Status", value: v.userStatus.rawValue)
                 LabeledContent("Source", value: v.source.rawValue)
                 if let c = v.autoConfidence { LabeledContent("Confidence", value: Fmt.percent(c)) }
@@ -135,7 +137,7 @@ struct VisitDetailView: View {
                         }
                     }
                 }
-            }
+            } header: { Text("Details").toonSectionText() }
         }
         .confirmationDialog("Remove this visit?", isPresented: $confirmDelete, titleVisibility: .visible) {
             Button("Remove and join the trips before/after", role: .destructive) {
@@ -199,7 +201,7 @@ struct PlacePickerView: View {
     var body: some View {
         NavigationStack {
             List {
-                Section("New place here") {
+                Section {
                     TextField("Name (e.g. Home, Penn, 30th St Station)", text: $newName)
                     PlaceCategoryPicker(selection: $newCategory, custom: $newCustom)
                     Button("Create and use") {
@@ -207,7 +209,7 @@ struct PlacePickerView: View {
                         dismiss()
                     }
                     .disabled(newName.trimmingCharacters(in: .whitespaces).isEmpty)
-                }
+                } header: { Text("New place here").toonSectionText() }
                 Section(query.isEmpty ? "Nearby" : "Matches") {
                     ForEach(filtered) { p in
                         Button {
@@ -218,7 +220,7 @@ struct PlacePickerView: View {
                                 Image(systemName: p.category?.symbol ?? "mappin").frame(width: 24)
                                 VStack(alignment: .leading) {
                                     Text(p.displayName).foregroundStyle(.primary)
-                                    Text(Fmt.distance(Geo.distance(p.coordinate, near)) + " away").font(.caption).foregroundStyle(.secondary)
+                                    Text(Fmt.distance(Geo.distance(p.coordinate, near)) + " away").font(.caption).foregroundStyle(Toon.muted)
                                 }
                             }
                         }
@@ -289,6 +291,7 @@ struct SplitVisitSheet: View {
                     }
                 } footer: {
                     Text("Creates the missing trip(s). Places must exist already — create one from any visit or in Places.")
+                        .toonSectionText()
                 }
             }
             .navigationTitle("Split visit")
@@ -304,6 +307,7 @@ struct SplitVisitSheet: View {
                         dismiss()
                     }
                     .disabled(withStop && stopPlaceID == nil)
+                    .confirmTint()
                 }
             }
             // Keep leave ≤ stop arrival ≤ stop departure ≤ back as the user drags earlier times later.
