@@ -115,6 +115,11 @@ final class AccessibilityAuditTests: HHTUITestCase {
                 if let frame = finding.frame { logScreenshot("\(screen) finding \(i + 1)", crop: frame) }
             }
         }
+        // a finding without an element can't be placed from the log (it's on a node SwiftUI synthesised, e.g. a
+        // combined element or a chart's marks), so print the screen's element tree with frames to find candidates
+        if confirmed.contains(where: { $0.frame == nil }) {
+            print("[a11y] \(screen): element tree for the findings without an element:\n\(app.debugDescription)")
+        }
         if !confirmed.isEmpty {
             XCTFail("\(screen): \(confirmed.count) accessibility issue(s):\n" + confirmed.map(\.text).joined(separator: "\n"),
                     file: file, line: line)

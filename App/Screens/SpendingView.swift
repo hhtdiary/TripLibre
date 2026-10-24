@@ -129,6 +129,9 @@ struct SpendingView: View {
                 BarMark(x: .value("Day", d, unit: .day), y: .value("Spent", v))
                     .foregroundStyle(CostStyle.color)
                     .cornerRadius(3)
+                    // the chart element below reads every day; Charts' own node per bar has no text, and the
+                    // contrast audit on iOS 26.5 measures the mint bar against white as if it were text (issue #67)
+                    .accessibilityHidden(true)
             }
             // axis labels in the app's ink-grey rather than the system grey (~3.4:1 on white; issue #67)
             .chartXAxis {
