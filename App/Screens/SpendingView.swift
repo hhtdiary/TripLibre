@@ -102,16 +102,19 @@ struct SpendingView: View {
                 .overlay(Capsule().strokeBorder(Toon.ink, lineWidth: Toon.line))
             }
             .frame(height: 18)
+            .accessibilityHidden(true)
+            // only the text is one element: the contrast audit measures an element's whole frame, and with the bar in
+            // it reads the bar's colours as the text's (issue #67). The percentages say what the bar shows.
             ToonRowStack(spacing: 8) {
                 Text("Travel \(Fmt.percent(s.travel / total))")
                 Spacer()
                 Text("At destinations \(Fmt.percent(s.atDestinations / total))")
             }
             .font(.toon(12, .heavy)).foregroundStyle(Toon.muted)
+            .accessibilityElement(children: .combine)
         }
         .padding(14)
         .toonCard(radius: 22, shadow: 4)
-        .accessibilityElement(children: .combine)
     }
 
     private func perDay(_ s: SpendingSummary) -> some View {
@@ -136,8 +139,10 @@ struct SpendingView: View {
             SectionLabel(text: "What it went on")
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(s.byCategory) { r in
+                    // the text alone is the element, as in split(_:)
                     ToonRowStack(spacing: 10) {
                         ToonChip(symbol: r.category.symbol, color: r.category.isTravel ? Toon.sky : Toon.bubblegum, size: 34)
+                            .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 3) {
                             ToonRowStack(spacing: 8) {
                                 Text(r.category.label)
@@ -145,10 +150,10 @@ struct SpendingView: View {
                                 Text(money(r.total)).monospacedDigit()
                             }
                             .font(.toon(13, .black)).foregroundStyle(Toon.ink)
-                            bar(top > 0 ? r.total / top : 0, CostStyle.color)
+                            .accessibilityElement(children: .combine)
+                            bar(top > 0 ? r.total / top : 0, CostStyle.color).accessibilityHidden(true)
                         }
                     }
-                    .accessibilityElement(children: .combine)
                 }
             }
             .padding(14)
@@ -161,8 +166,9 @@ struct SpendingView: View {
             SectionLabel(text: "Getting around")
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(s.byMode) { r in
+                    // the text alone is the element, as in split(_:)
                     ToonRowStack(spacing: 10) {
-                        ModeIcon(mode: r.mode, size: 34)
+                        ModeIcon(mode: r.mode, size: 34).accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 2) {
                             ToonRowStack(spacing: 8) {
                                 Text(r.mode.label)
@@ -175,8 +181,8 @@ struct SpendingView: View {
                                 .font(.toon(12, .bold)).foregroundStyle(Toon.muted).monospacedDigit()
                         }
                         .foregroundStyle(Toon.ink)
+                        .accessibilityElement(children: .combine)
                     }
-                    .accessibilityElement(children: .combine)
                 }
                 Text("Only trips with a cost entered (free ones included) count here.")
                     .font(.toon(11, .bold)).foregroundStyle(Toon.muted)
@@ -219,9 +225,6 @@ struct SpendingView: View {
                             Text(Fmt.costs(byDay[day] ?? []) ?? "").monospacedDigit()
                         }
                         .font(.toon(13, .heavy)).foregroundStyle(Toon.muted)
-                        // plain butter behind the text: on the dot grid the contrast audit reads the dots as the text
-                        // colour (1.3:1) and fails these labels, which are 6.6:1 against the butter itself
-                        .background(Toon.ground)
                         .accessibilityElement(children: .combine)
                         VStack(spacing: 0) {
                             ForEach(byDay[day] ?? []) { e in
