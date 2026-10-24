@@ -31,9 +31,9 @@ final class CostFlowTests: HHTUITestCase {
         reveal(add)
         add.tap()
         enterCost("12")
-        XCTAssertTrue(element(labelContaining: "Cost $12.00").waitForExistence(timeout: 5)
-            || app.descendants(matching: .any).matching(identifier: "costRow").firstMatch.waitForExistence(timeout: 5),
-            "the new cost shows in the day")
+        // an unlinked cost is its own row in the timeline, usually below the fold
+        waitForSeededContent(app.descendants(matching: .any).matching(identifier: "costRow").firstMatch,
+                             "the new cost in the day", firstWait: 3)
     }
 
     func testPromptOffersFreeForAPaidTrip() throws {
@@ -44,7 +44,7 @@ final class CostFlowTests: HHTUITestCase {
         guard trip.waitForExistence(timeout: 5) else { throw XCTSkip("no transit trip in yesterday's demo data") }
         let before = prompts.count
         trip.buttons["Free"].tap()
-        XCTAssertTrue(element(labelContaining: "Cost Free").waitForExistence(timeout: 5), "free badge on the trip")
+        waitForSeededContent(element(labelContaining: "Cost Free"), "free badge on the trip", firstWait: 3)
         XCTAssertEqual(prompts.count, before - 1, "only the answered prompt goes away")
     }
 

@@ -18,6 +18,8 @@ struct TripDetailView: View {
     @State private var confirmDelete = false
     @State private var showSplit = false
     @State private var showAllModes = false
+    /// Mode tiles get wider as their labels grow with Dynamic Type.
+    @ScaledMetric(relativeTo: .caption2) private var modeTileWidth: CGFloat = 88
     @State private var showModeChange = false
     @State private var editingSegment: IDBox?
 
@@ -28,7 +30,7 @@ struct TripDetailView: View {
             }
             .navigationTitle("Trip")
             .inlineTitle()
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { saveNotes(); dismiss() } } }
+            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { saveNotes(); dismiss() }.confirmTint() } }
             .task(id: model.revision) { load() }
         }
     }
@@ -43,11 +45,11 @@ struct TripDetailView: View {
                     Label(origin.1?.displayName ?? "Unknown origin", systemImage: "circle")
                     Label(destination.1?.displayName ?? "Unknown destination", systemImage: "mappin.circle.fill")
                     Text("\(Fmt.dateTime(t.departure)) → \(Fmt.time(t.arrival))  ·  \(Fmt.duration(t.duration))  ·  \(Fmt.distance(t.distance))")
-                        .font(.caption).foregroundStyle(.secondary)
+                        .font(.caption).foregroundStyle(Toon.muted)
                 }
             }
 
-            Section("Mode") {
+            Section {
                 modeGrid(t)
                 if t.modeUser != nil {
                     Button("Reset to automatic (\(t.modeAuto?.label ?? "unknown"))") {
@@ -55,7 +57,7 @@ struct TripDetailView: View {
                     }
                     .font(.footnote)
                 }
-            }
+            } header: { Text("Mode").toonSectionText() }
 
             Section {
                 if t.segments.count > 1 {
@@ -74,7 +76,7 @@ struct TripDetailView: View {
                                             .accessibilityLabel(s.isUserSet ? "Set by you" : "Detected automatically")
                                     }
                                     Text("\(Fmt.time(s.start))–\(Fmt.time(s.end)) · \(Fmt.duration(s.end.timeIntervalSince(s.start))) · \(Fmt.distance(s.distance))")
-                                        .font(.caption).foregroundStyle(.secondary)
+                                        .font(.caption).foregroundStyle(Toon.muted)
                                 }
                                 Spacer()
                                 Image(systemName: "chevron.right").font(.caption).foregroundStyle(.tertiary)
@@ -87,27 +89,28 @@ struct TripDetailView: View {
                 Button { showModeChange = true } label: {
                     Label("I changed mode on the way", systemImage: "arrow.triangle.branch")
                 }
-            } header: { Text("Segments") } footer: {
+            } header: { Text("Segments").toonSectionText() } footer: {
                 Text(t.segments.count > 1
                      ? "Tap a segment to change its mode or times, or remove it. Segments you set are kept when the day is reprocessed."
                      : "Add a segment for each part of the trip, e.g. subway, then walk.")
+                    .toonSectionText()
             }
 
-            Section("Purpose (activity at destination)") {
+            Section {
                 Picker("Purpose", selection: Binding(
                     get: { t.purpose },
                     set: { p in model.perform { try model.edit.setTripPurpose(t.id, p) } })) {
                     Text(destinationDefaultPurpose.map { "Auto (\($0.label))" } ?? "Not set").tag(TripPurpose?.none)
                     ForEach(TripPurpose.allCases) { p in Text(p.label).tag(TripPurpose?.some(p)) }
                 }
-            }
+            } header: { Text("Purpose (activity at destination)").toonSectionText() }
 
             CostsSection(costs: costs, target: .trip(t), sheet: $costSheet)
 
-            Section("Notes") {
+            Section {
                 TextField("Add a note", text: $notes, axis: .vertical)
                     .onSubmit(saveNotes)
-            }
+            } header: { Text("Notes").toonSectionText() }
 
             Section {
                 if t.userStatus == .auto {
@@ -121,7 +124,7 @@ struct TripDetailView: View {
                 }
             }
 
-            Section("Details") {
+            Section {
                 LabeledContent("Automatic mode", value: "\(t.modeAuto?.label ?? "–") (\(Fmt.percent(t.modeConfidence)))")
                 LabeledContent("Status", value: t.userStatus.rawValue)
                 LabeledContent("Source", value: t.source.rawValue)
@@ -133,12 +136,12 @@ struct TripDetailView: View {
                             VStack(alignment: .leading) {
                                 Text("\(h.action) \(h.field ?? "")").font(.caption.weight(.medium))
                                 Text("\(h.oldValue ?? "∅") → \(h.newValue ?? "∅") · \(Fmt.dateTime(h.timestamp))")
-                                    .font(.caption2).foregroundStyle(.secondary)
+                                    .font(.caption2).foregroundStyle(Toon.muted)
                             }
                         }
                     }
                 }
-            }
+            } header: { Text("Details").toonSectionText() }
         }
         .groupedList()
         .confirmationDialog("Remove this trip?", isPresented: $confirmDelete, titleVisibility: .visible) {
@@ -172,12 +175,12 @@ struct TripDetailView: View {
         }()
         let all = showAllModes ? primary + TravelMode.allCases.filter { !primary.contains($0) } : primary
         return VStack(alignment: .leading) {
-            LazyVGrid(columns: [GridItem(.adaptive(minimum: 88), spacing: 8)], spacing: 8) {
+            LazyVGrid(columns: [GridItem(.adaptive(minimum: modeTileWidth), spacing: 8)], spacing: 8) {
                 ForEach(all) { m in
                     Button { model.perform { try model.edit.setTripMode(t.id, m) } } label: {
                         VStack(spacing: 4) {
                             Image(systemName: m.symbol).font(.title3)
-                            Text(m.label).font(.caption2).lineLimit(2).multilineTextAlignment(.center)
+                            Text(m.label).font(.caption2).toonLineLimit(2).multilineTextAlignment(.center)
                         }
                         .frame(maxWidth: .infinity, minHeight: 54)
                         .background(t.mode == m ? m.color.opacity(0.25) : Color.secondary.opacity(0.08),
@@ -261,15 +264,16 @@ struct SplitTripSheet: View {
                 Section {
                     DatePicker("Arrived at stop", selection: $start, in: .ordered(trip.departure, trip.arrival), displayedComponents: [.hourAndMinute])
                     DatePicker("Left stop", selection: $end, in: .ordered(start, trip.arrival), displayedComponents: [.hourAndMinute])
-                } footer: { Text("The trip becomes two trips with a visit in between.") }
+                } footer: { Text("The trip becomes two trips with a visit in between.").toonSectionText() }
                 Section {
                     stopMap.frame(height: 260).listRowInsets(EdgeInsets())
                     Picker("Place", selection: $placeID) {
                         Text(pin == nil ? "Guess from GPS (new place)" : "Pin on map (new place)").tag(String?.none)
                         ForEach(places) { p in Text(p.displayName).tag(String?.some(p.id)) }
                     }
-                } header: { Text("Where") } footer: {
+                } header: { Text("Where").toonSectionText() } footer: {
                     Text("Tap the map where you stopped. Without a pin the stop goes where GPS last saw you, which can be far off if the trip has a GPS gap.")
+                        .toonSectionText()
                 }
             }
             .navigationTitle("Add stop")
@@ -283,6 +287,7 @@ struct SplitTripSheet: View {
                                                                        placeID: placeID, at: pin) }
                         dismiss()
                     }
+                    .confirmTint()
                 }
             }
             .onChange(of: start) { _, v in end = max(end, v) }
@@ -341,6 +346,7 @@ struct ModeChangeSheet: View {
                     Picker("After", selection: $after) { modeOptions }
                 } footer: {
                     Text("\(Fmt.time(trip.departure))–\(Fmt.time(trip.arrival)). The trip stays one trip with two segments; both are kept when the day is reprocessed.")
+                        .toonSectionText()
                 }
             }
             .navigationTitle("Change of mode")
@@ -358,6 +364,7 @@ struct ModeChangeSheet: View {
                         }
                         dismiss()
                     }
+                    .confirmTint()
                 }
             }
         }
@@ -406,11 +413,13 @@ struct SegmentEditSheet: View {
                     Text(segment.isUserSet
                          ? "Set by you; kept when the day is reprocessed."
                          : "Detected automatically (\(Fmt.percent(segment.modeConfidence))). Saving marks it as set by you.")
+                        .toonSectionText()
                 }
                 Section {
                     Button(role: .destructive) { confirmRemove = true } label: { Label("Remove this segment", systemImage: "trash") }
                 } footer: {
                     Text(index > 0 ? "Its time joins the segment before it." : "Its time joins the segment after it.")
+                        .toonSectionText()
                 }
             }
             .navigationTitle("Segment \(index + 1) of \(trip.segments.count)")
@@ -428,6 +437,7 @@ struct SegmentEditSheet: View {
                         }
                         dismiss()
                     }
+                    .confirmTint()
                 }
             }
             .confirmationDialog("Remove this segment?", isPresented: $confirmRemove, titleVisibility: .visible) {

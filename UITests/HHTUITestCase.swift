@@ -26,13 +26,25 @@ class HHTUITestCase: XCTestCase {
         let previous = app.buttons["Previous day"]
         XCTAssertTrue(previous.waitForExistence(timeout: 10))
         previous.tap()
-        XCTAssertTrue(tripRows.firstMatch.waitForExistence(timeout: 60), "demo inference produced no trips")
+        waitForSeededContent(tripRows.firstMatch, "yesterday's trips")
     }
 
     /// Screens show their title at once but fill in only after the launch-time inference run turns the demo points
     /// into trips, visits and places. Wait for something that only exists afterwards, so audits see populated screens.
-    func waitForSeededContent(_ element: XCUIElement, _ what: String, file: StaticString = #filePath, line: UInt = #line) {
-        XCTAssertTrue(element.waitForExistence(timeout: 60), "\(what) never appeared; demo inference unfinished?", file: file, line: line)
+    /// If it's still missing once inference has had time, scroll down to look for it (on the day screen the rows sit
+    /// below the cost prompt, banner and map, and a List only builds the rows near the screen), then back to the top,
+    /// so the audit and the next step start there.
+    func waitForSeededContent(_ element: XCUIElement, _ what: String, firstWait: TimeInterval = 20,
+                              file: StaticString = #filePath, line: UInt = #line) {
+        var found = element.waitForExistence(timeout: firstWait)
+        var scrolled = 0
+        while !found && scrolled < 12 {
+            scrollDown()
+            scrolled += 1
+            found = element.waitForExistence(timeout: 3)
+        }
+        XCTAssertTrue(found, "\(what) never appeared; demo inference unfinished?", file: file, line: line)
+        for _ in 0..<scrolled { scrollUp() }
     }
 
     func text(containing s: String) -> XCUIElement {
@@ -49,15 +61,31 @@ class HHTUITestCase: XCTestCase {
     /// Scrolls until `element` sits fully above the floating tab bar (or the bottom of a sheet). XCUITest's own
     /// "scroll to visible" stops as soon as the element's centre is on screen, where the tab bar would take the tap.
     func reveal(_ element: XCUIElement, file: StaticString = #filePath, line: UInt = #line) {
-        let window = app.windows.firstMatch
-        let tabBar = app.buttons["tab-Today"]
-        let limit = (tabBar.exists && tabBar.isHittable ? tabBar.frame.minY - 12 : window.frame.maxY) - 24
-        // drag in the left margin: the middle of the day screen is a map, which would pan instead of scrolling
-        let start = window.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: 8, dy: limit - 20))
+        let limit = visibleBottom
         for _ in 0..<10 where !element.exists || element.frame.maxY > limit {
-            start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 0, dy: -250)))
+            scrollDown()
         }
         XCTAssertTrue(element.exists && element.frame.maxY <= limit, "couldn't scroll \(element) into view", file: file, line: line)
+    }
+
+    /// Bottom of the area not covered by the floating tab bar (or of a sheet).
+    private var visibleBottom: CGFloat {
+        let tabBar = app.buttons["tab-Today"]
+        return (tabBar.exists && tabBar.isHittable ? tabBar.frame.minY - 12 : app.windows.firstMatch.frame.maxY) - 24
+    }
+
+    /// Drags the content up by 250 pt, in the left margin: the middle of the day screen is a map, which would pan
+    /// instead of scrolling. Holding at the end stops it there, so it doesn't fling on under the next tap.
+    private func scrollDown() {
+        let start = app.windows.firstMatch.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: 8, dy: visibleBottom - 20))
+        start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 0, dy: -250)), withVelocity: .slow,
+                    thenHoldForDuration: 0.2)
+    }
+
+    private func scrollUp() {
+        let start = app.windows.firstMatch.coordinate(withNormalizedOffset: .zero).withOffset(CGVector(dx: 8, dy: visibleBottom - 270))
+        start.press(forDuration: 0.05, thenDragTo: start.withOffset(CGVector(dx: 0, dy: 250)), withVelocity: .slow,
+                    thenHoldForDuration: 0.2)
     }
 
     func dismissSheet(_ button: String = "Done") {

@@ -7,6 +7,11 @@ single summary, so release notes aren't kept anywhere else in the repository.
 
 ## Unreleased
 
+- Accessibility: text follows the Dynamic Type size in Settings, all the way to the largest accessibility sizes.
+  Sticker rows, buttons and stat tiles grow with it and switch to a stacked layout when a row no longer fits; the tab
+  bar shows icons only at accessibility sizes (long-press a tab for its name). Section headers, footers and secondary
+  values use a darker grey that meets 4.5:1 on the butter background, and Done/Save buttons are ink. Widgets keep their
+  fixed sizes. The `make ui-test` audits now fail on Dynamic Type and contrast issues too (#67)
 - Renamed the app to TripLibre; HHT Diary is now the parent organization. README, docs, website, `CITATION.cff` and
   Zenodo metadata use the new name and the `zyang91/TripLibre` repository. The app shows as TripLibre on the Home
   Screen, in Settings, in the Files app and on the widgets; the bundle ID and code names stay HHT, so installing

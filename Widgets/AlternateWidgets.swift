@@ -26,26 +26,26 @@ struct SimpleStatusView: View {
                 }
                 .frame(width: 26, height: 26)
                 Text(info.tone == .good ? "Recording" : info.badge.capitalized)
-                    .font(.toon(12, .heavy)).foregroundStyle(tone.fg).lineLimit(1).minimumScaleFactor(0.7)
+                    .font(.toonFixed(12, .heavy)).foregroundStyle(tone.fg).lineLimit(1).minimumScaleFactor(0.7)
             }
             Spacer(minLength: 4)
             if let last = entry.snapshot?.lastPointAt, entry.snapshot?.tracking == .recording {
-                Text("Last location").font(.toon(11, .bold)).foregroundStyle(t.muted)
-                Text(lastValue(last)).font(.toon(24, .black)).foregroundStyle(t.text).lineLimit(1).minimumScaleFactor(0.6)
+                Text("Last location").font(.toonFixed(11, .bold)).foregroundStyle(t.muted)
+                Text(lastValue(last)).font(.toonFixed(24, .black)).foregroundStyle(t.text).lineLimit(1).minimumScaleFactor(0.6)
             } else {
-                Text(info.title).font(.toon(17, .black)).foregroundStyle(t.text).lineLimit(2).minimumScaleFactor(0.7)
-                Text(info.detail).font(.toon(11, .bold)).foregroundStyle(t.muted).lineLimit(2).minimumScaleFactor(0.8)
+                Text(info.title).font(.toonFixed(17, .black)).foregroundStyle(t.text).lineLimit(2).minimumScaleFactor(0.7)
+                Text(info.detail).font(.toonFixed(11, .bold)).foregroundStyle(t.muted).lineLimit(2).minimumScaleFactor(0.8)
             }
             Spacer(minLength: 6)
             Rectangle().fill(t.hairline).frame(height: 1.5)
             HStack {
                 if let action = info.action {
-                    Text(action).font(.toon(12, .heavy)).foregroundStyle(Toon.accentDeep)
+                    Text(action).font(.toonFixed(12, .heavy)).foregroundStyle(Toon.accentDeep)
                 } else {
-                    Text("Trips to check").font(.toon(12, .heavy)).foregroundStyle(t.text)
+                    Text("Trips to check").font(.toonFixed(12, .heavy)).foregroundStyle(t.text)
                     Spacer()
                     let n = entry.snapshot?.reviewPending ?? 0
-                    Text("\(n)").font(.toon(12, .black)).foregroundStyle(Toon.ink)
+                    Text("\(n)").font(.toonFixed(12, .black)).foregroundStyle(Toon.ink)
                         .frame(minWidth: 20, minHeight: 20)
                         .background(Capsule().fill(n > 0 ? Toon.accent : t.hairline))
                 }
@@ -73,12 +73,12 @@ struct TimelineTodayView: View {
         let t = WTheme(scheme)
         VStack(alignment: .leading, spacing: 10) {
             HStack(alignment: .firstTextBaseline) {
-                Text("Today").font(.toon(18, .black)).foregroundStyle(t.text)
+                Text("Today").font(.toonFixed(18, .black)).foregroundStyle(t.text)
                 Spacer(minLength: 6)
                 if let s = entry.snapshot, let d = s.today(at: entry.date) {
                     let dist = WFmt.distance(d.distance, metric: s.usesMetric)
                     Text("\(WFmt.plural(d.trips, "trip")) · \(WFmt.plural(d.places, "place")) · \(dist.value) \(dist.unit)")
-                        .font(.toon(12, .heavy)).foregroundStyle(t.text).lineLimit(1).minimumScaleFactor(0.7)
+                        .font(.toonFixed(12, .heavy)).foregroundStyle(t.text).lineLimit(1).minimumScaleFactor(0.7)
                 }
             }
             if let s = entry.snapshot, let d = s.today(at: entry.date) {
@@ -89,7 +89,7 @@ struct TimelineTodayView: View {
                     legend(Toon.paper, dashed: true, "Guess", t)
                     Spacer(minLength: 4)
                     if let at = s.diaryUpdatedAt {
-                        Text("Updated \(WFmt.ago(at, now: entry.date))").font(.toon(11, .bold)).foregroundStyle(t.muted).lineLimit(1)
+                        Text("Updated \(WFmt.ago(at, now: entry.date))").font(.toonFixed(11, .bold)).foregroundStyle(t.muted).lineLimit(1)
                     }
                 }
             } else {
@@ -105,7 +105,7 @@ struct TimelineTodayView: View {
             RoundedRectangle(cornerRadius: 3).fill(c)
                 .overlay(RoundedRectangle(cornerRadius: 3).strokeBorder(Toon.ink, style: StrokeStyle(lineWidth: 1.5, dash: dashed ? [3, 2] : [])))
                 .frame(width: 12, height: 12)
-            Text(label).font(.toon(11, .heavy)).foregroundStyle(t.text)
+            Text(label).font(.toonFixed(11, .heavy)).foregroundStyle(t.text)
         }
     }
 }
@@ -146,7 +146,7 @@ private struct DayStrip: View {
                 ForEach(Array([0, 6, 12, 18, 24].enumerated()), id: \.offset) { i, hour in
                     if i > 0 { Spacer(minLength: 0) }
                     Text(Calendar.current.date(bySettingHour: hour % 24, minute: 0, second: 0, of: day.start)!.formatted(.dateTime.hour()))
-                        .font(.toon(9, .heavy)).foregroundStyle(theme.muted)
+                        .font(.toonFixed(9, .heavy)).foregroundStyle(theme.muted)
                 }
             }
         }

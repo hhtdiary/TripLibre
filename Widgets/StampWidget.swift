@@ -27,9 +27,9 @@ struct StampWidgetView: View {
             ToonChip(symbol: "hand.tap.fill", color: Toon.sun, size: 44)
                 .accessibilityHidden(true)
             Spacer(minLength: 6)
-            Text("Stamp this moment").font(.toon(18, .black)).foregroundStyle(t.text)
+            Text("Stamp this moment").font(.toonFixed(18, .black)).foregroundStyle(t.text)
                 .lineLimit(2).minimumScaleFactor(0.7)
-            Text(footer).font(.toon(12, .bold)).foregroundStyle(t.muted)
+            Text(footer).font(.toonFixed(12, .bold)).foregroundStyle(t.muted)
                 .lineLimit(2).minimumScaleFactor(0.8).padding(.top, 2)
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)

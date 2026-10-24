@@ -23,8 +23,12 @@ struct PlacesView: View {
     @State private var sort: Sort = .time
     @State private var namedOnly = false
     @State private var pendingDelete: Place?
+    @Environment(\.dynamicTypeSize) private var typeSize
 
-    private let columns = [GridItem(.flexible(), spacing: 16), GridItem(.flexible(), spacing: 16)]
+    /// Two tiles to a row, one at accessibility text sizes.
+    private var columns: [GridItem] {
+        Array(repeating: GridItem(.flexible(), spacing: 16), count: typeSize.isAccessibilitySize ? 1 : 2)
+    }
     private let tilts: [Double] = [-1.5, 1.5, 1, -1, -1, 1.5]
 
     var body: some View {
@@ -33,13 +37,11 @@ struct PlacesView: View {
                 Text("\(places.count) spot\(places.count == 1 ? "" : "s") on your map")
                     .font(.toon(15, .heavy)).foregroundStyle(Toon.muted)
                 searchField
-                ScrollView(.horizontal, showsIndicators: false) {
-                    HStack(spacing: 8) {
-                        ForEach(Sort.allCases) { s in pill(s.title, on: sort == s) { sort = s } }
-                        pill("Named", on: namedOnly, icon: namedOnly ? "checkmark" : nil) { namedOnly.toggle() }
-                    }
-                    .padding(.vertical, 4).padding(.trailing, 4)
+                ToonFlow {
+                    ForEach(Sort.allCases) { s in pill(s.title, on: sort == s) { sort = s } }
+                    pill("Named", on: namedOnly, icon: namedOnly ? "checkmark" : nil) { namedOnly.toggle() }
                 }
+                .padding(.vertical, 4).padding(.trailing, 4)
 
                 let named = shown.filter(\.isNamed)
                 let unnamed = shown.filter { !$0.isNamed }
@@ -112,7 +114,7 @@ struct PlacesView: View {
             }
         }
         .padding(.horizontal, 14)
-        .frame(height: 50)
+        .frame(minHeight: 50)
         .toonCard(radius: 25, shadow: 3)
     }
 
@@ -154,7 +156,7 @@ struct PlaceTile: View {
             ToonChip(symbol: place.category?.symbol ?? "mappin", color: place.toonColor, size: 52)
             Text(place.displayName)
                 .font(.toon(18, .bold)).foregroundStyle(Toon.ink)
-                .lineLimit(2).multilineTextAlignment(.leading)
+                .toonLineLimit(2).multilineTextAlignment(.leading)
             Text("\(stats?.visitCount ?? 0) visits · \(Fmt.hours(stats?.totalDwell ?? 0))"
                  + (stats?.lastVisit.map { "\nlast \(Fmt.shortDay($0))" } ?? ""))
                 .font(.toon(12, .bold)).foregroundStyle(Toon.muted)
@@ -183,10 +185,10 @@ struct UnnamedPlaceRow: View {
     let stats: TravelStore.PlaceStats?
 
     var body: some View {
-        HStack(spacing: 12) {
+        ToonRowStack {
             ToonChip(symbol: place.category?.symbol ?? "mappin", color: Toon.stone, size: 46)
             VStack(alignment: .leading, spacing: 2) {
-                Text(place.address ?? "Unnamed place").font(.toon(15, .heavy)).foregroundStyle(Toon.ink).lineLimit(2)
+                Text(place.address ?? "Unnamed place").font(.toon(15, .heavy)).foregroundStyle(Toon.ink).toonLineLimit(2)
                 Text("\(stats?.visitCount ?? 0) visits · \(Fmt.hours(stats?.totalDwell ?? 0))"
                      + (stats?.lastVisit.map { " · last \(Fmt.shortDay($0))" } ?? ""))
                     .font(.toon(12, .bold)).foregroundStyle(Toon.muted)
@@ -194,7 +196,7 @@ struct UnnamedPlaceRow: View {
             Spacer(minLength: 0)
             Text("Name it")
                 .font(.toon(13, .black)).foregroundStyle(Toon.ink)
-                .padding(.horizontal, 14).frame(height: 38)
+                .padding(.horizontal, 14).frame(minHeight: 38)
                 .toonCard(Toon.accent, radius: 19, shadow: 2)
         }
         .padding(14)
@@ -230,7 +232,7 @@ struct PlaceDetailView: View {
                     }
                     .frame(height: 200).listRowInsets(EdgeInsets())
                 }
-                Section("Place") {
+                Section {
                     TextField("Name", text: Binding(get: { draft?.name ?? "" }, set: { draft?.name = $0.isEmpty ? nil : $0 }))
                     PlaceCategoryPicker(selection: Binding(get: { draft?.category }, set: { draft?.category = $0 }),
                                         custom: Binding(get: { draft?.customCategory }, set: { draft?.customCategory = $0 }))
@@ -242,14 +244,14 @@ struct PlaceDetailView: View {
                         Text("\(Int(p.radius)) m").monospacedDigit().frame(width: 64, alignment: .trailing)
                     }
                     Toggle("Favorite", isOn: Binding(get: { draft?.favorite ?? false }, set: { draft?.favorite = $0 }))
-                }
-                Section("Location info") {
+                } header: { Text("Place").toonSectionText() }
+                Section {
                     TextField("Address", text: Binding(get: { draft?.address ?? "" }, set: { draft?.address = $0.isEmpty ? nil : $0 }))
                     TextField("City", text: Binding(get: { draft?.city ?? "" }, set: { draft?.city = $0.isEmpty ? nil : $0 }))
                     TextField("Region / state", text: Binding(get: { draft?.region ?? "" }, set: { draft?.region = $0.isEmpty ? nil : $0 }))
                     TextField("Country", text: Binding(get: { draft?.country ?? "" }, set: { draft?.country = $0.isEmpty ? nil : $0 }))
                     TextField("Notes", text: Binding(get: { draft?.notes ?? "" }, set: { draft?.notes = $0.isEmpty ? nil : $0 }), axis: .vertical)
-                }
+                } header: { Text("Location info").toonSectionText() }
                 if draft != place {
                     Section {
                         Button("Save changes") { model.perform { try model.edit.updatePlace(draft!) } }
@@ -258,23 +260,23 @@ struct PlaceDetailView: View {
                 }
                 Section {
                     Button { showMerge = true } label: { Label("Merge into another place…", systemImage: "arrow.triangle.merge") }
-                } footer: { Text("Use when the same real place was detected twice. All visits move; nothing is lost.") }
+                } footer: { Text("Use when the same real place was detected twice. All visits move; nothing is lost.").toonSectionText() }
                 Section {
                     Button(role: .destructive) { confirmDelete = true } label: { Label("This isn't a real place", systemImage: "trash") }
-                } footer: { Text("Deletes the place and its \(visitWord(visits.count)); trips around them are joined.") }
+                } footer: { Text("Deletes the place and its \(visitWord(visits.count)); trips around them are joined.").toonSectionText() }
 
-                Section("\(visits.count) visits") {
+                Section {
                     ForEach(visits.prefix(100)) { v in
                         NavigationLink { DayView(day: Calendar.current.startOfDay(for: v.arrival), fixedDay: true) } label: {
                             HStack {
                                 Text(Fmt.shortDay(v.arrival))
                                 Spacer()
                                 Text("\(Fmt.time(v.arrival))–\(v.departure.map { Fmt.time($0) } ?? "now") · \(Fmt.duration(v.duration()))")
-                                    .font(.caption).foregroundStyle(.secondary).monospacedDigit()
+                                    .font(.caption).foregroundStyle(Toon.muted).monospacedDigit()
                             }
                         }
                     }
-                }
+                } header: { Text("\(visits.count) visits").toonSectionText() }
             } else {
                 Text("This place no longer exists (it may have been merged or deleted).")
             }
@@ -304,7 +306,7 @@ struct PlaceDetailView: View {
                     } label: {
                         VStack(alignment: .leading) {
                             Text(c.displayName)
-                            if let p = place { Text(Fmt.distance(Geo.distance(p.coordinate, c.coordinate)) + " away").font(.caption).foregroundStyle(.secondary) }
+                            if let p = place { Text(Fmt.distance(Geo.distance(p.coordinate, c.coordinate)) + " away").font(.caption).foregroundStyle(Toon.muted) }
                         }
                     }
                 }
@@ -348,7 +350,7 @@ struct PlaceCategoryPicker: View {
                 Text("Category")
                 Spacer()
                 if let c = selection { Image(systemName: c.symbol).foregroundStyle(Toon.accent) }
-                Text(label).foregroundStyle(.secondary).lineLimit(1)
+                Text(label).foregroundStyle(Toon.muted).toonLineLimit(1)
             }
         }
     }
@@ -375,7 +377,7 @@ private struct PlaceCategoryList: View {
             if query.isEmpty {
                 Section { row(nil) }
                 if !used.isEmpty {
-                    Section("Your categories") { ForEach(used) { row($0) } }
+                    Section { ForEach(used) { row($0) } } header: { Text("Your categories").toonSectionText() }
                 }
             }
             ForEach(PlaceCategoryGroup.allCases) { g in
@@ -415,8 +417,12 @@ private struct PlaceCategoryList: View {
             }
         } header: {
             Text("Your own types")
+                .toonSectionText()
         } footer: {
-            if query.isEmpty { Text("Saved as \u{201C}Other\u{201D} with your name for it, so it exports and analyses like Other.") }
+            Group {
+                if query.isEmpty { Text("Saved as \u{201C}Other\u{201D} with your name for it, so it exports and analyses like Other.") }
+            }
+            .toonSectionText()
         }
     }
 

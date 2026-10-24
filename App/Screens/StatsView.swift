@@ -4,6 +4,7 @@ import HHTCore
 
 struct StatsView: View {
     @EnvironmentObject var model: AppModel
+    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var period: Period = .month
     @State private var compare: Period?
     @State private var phases: [LifePhase] = []
@@ -50,12 +51,13 @@ struct StatsView: View {
 
     private var periodBar: some View {
         VStack(alignment: .leading, spacing: 10) {
-            HStack(spacing: 8) {
-                ForEach([Period.week, .month, .year, .all]) { p in
-                    pill(p == .all ? "All" : p.label, on: period == p) { period = p }
-                }
+            // equal-width pills, or wrapping ones at accessibility text sizes
+            if typeSize.isAccessibilitySize {
+                ToonFlow { periodPills(equalWidth: false) }
+            } else {
+                HStack(spacing: 8) { periodPills(equalWidth: true) }
             }
-            HStack(spacing: 8) {
+            ToonRowStack(spacing: 8) {
                 if !phases.isEmpty {
                     Menu {
                         ForEach(phases) { ph in Button(ph.name) { period = .phase(ph) } }
@@ -76,8 +78,14 @@ struct StatsView: View {
 
     private var isPhase: Bool { if case .phase = period { return true } else { return false } }
 
-    private func pill(_ title: String, on: Bool, action: @escaping () -> Void) -> some View {
-        Button(action: action) { Text(title).frame(maxWidth: .infinity) }
+    @ViewBuilder private func periodPills(equalWidth: Bool) -> some View {
+        ForEach([Period.week, .month, .year, .all]) { p in
+            pill(p == .all ? "All" : p.label, on: period == p, equalWidth: equalWidth) { period = p }
+        }
+    }
+
+    private func pill(_ title: String, on: Bool, equalWidth: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) { Text(title).frame(maxWidth: equalWidth ? .infinity : nil) }
             .buttonStyle(ToonButtonStyle(fill: on ? Toon.ink : Toon.paper, height: 38, fontSize: 13,
                                          shadow: on ? 0 : 2, text: on ? .white : Toon.ink))
             .accessibilityAddTraits(on ? .isSelected : [])
@@ -85,8 +93,8 @@ struct StatsView: View {
 
     private func menuLabel(_ title: String, symbol: String, on: Bool) -> some View {
         Label(title, systemImage: symbol)
-            .font(.toon(13)).foregroundStyle(Toon.ink).lineLimit(1)
-            .padding(.horizontal, 12).frame(height: 36)
+            .font(.toon(13)).foregroundStyle(Toon.ink).toonLineLimit(1)
+            .padding(.horizontal, 12).frame(minHeight: 36)
             .toonCard(on ? Toon.sun : Toon.paper, radius: 18, shadow: 2)
     }
 
@@ -100,27 +108,23 @@ struct StatsView: View {
     }
 
     private func stickers(_ m: MobilityMetrics) -> some View {
-        Grid(horizontalSpacing: 14, verticalSpacing: 14) {
-            GridRow {
-                sticker(String(format: "%.1f", m.tripsPerDay), "trips / day", Toon.sun, -1.5,
-                        delta(m.tripsPerDay, c?.tripsPerDay) { String(format: "%.1f", $0) })
-                sticker(Fmt.distance(m.distancePerDay), "distance / day", Toon.lime, 1.5,
-                        delta(m.distancePerDay, c?.distancePerDay, Fmt.distance))
-            }
-            GridRow {
-                sticker(Fmt.duration(m.travelTimePerDay), "travel time / day", Toon.sky, 1,
-                        delta(m.travelTimePerDay, c?.travelTimePerDay, Fmt.duration))
-                sticker(Fmt.distance(m.meanTripDistance), "mean trip", Toon.bubblegum, -1,
-                        delta(m.meanTripDistance, c?.meanTripDistance, Fmt.distance))
-            }
+        StickerGrid {
+            sticker(String(format: "%.1f", m.tripsPerDay), "trips / day", Toon.sun, -1.5,
+                    delta(m.tripsPerDay, c?.tripsPerDay) { String(format: "%.1f", $0) })
+            sticker(Fmt.distance(m.distancePerDay), "distance / day", Toon.lime, 1.5,
+                    delta(m.distancePerDay, c?.distancePerDay, Fmt.distance))
+            sticker(Fmt.duration(m.travelTimePerDay), "travel time / day", Toon.sky, 1,
+                    delta(m.travelTimePerDay, c?.travelTimePerDay, Fmt.duration))
+            sticker(Fmt.distance(m.meanTripDistance), "mean trip", Toon.bubblegum, -1,
+                    delta(m.meanTripDistance, c?.meanTripDistance, Fmt.distance))
         }
     }
 
     private func sticker(_ value: String, _ label: String, _ color: Color, _ tilt: Double, _ sub: String?) -> some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text(value).font(.toon(26, .bold)).monospacedDigit().lineLimit(1).minimumScaleFactor(0.6)
-            Text(label).font(.toon(12)).lineLimit(1).minimumScaleFactor(0.8)
-            if let sub { Text(sub).font(.toon(11, .heavy)).lineLimit(1).minimumScaleFactor(0.7).padding(.top, 4) }
+            Text(value).font(.toon(26, .bold)).monospacedDigit().toonLineLimit(1, minScale: 0.6)
+            Text(label).font(.toon(12)).toonLineLimit(1, minScale: 0.8)
+            if let sub { Text(sub).font(.toon(11, .heavy)).toonLineLimit(1, minScale: 0.7).padding(.top, 4) }
         }
         .foregroundStyle(Toon.ink)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -142,7 +146,7 @@ struct StatsView: View {
         let rows = m.modeShare.sorted { value($0) > value($1) }
         let top = rows.first.map { total > 0 ? value($0) / total : 0 } ?? 0
         return VStack(alignment: .leading, spacing: 10) {
-            HStack {
+            ToonRowStack(spacing: 8) {
                 SectionLabel(text: "How you got around")
                 Spacer()
                 Menu {
@@ -165,7 +169,7 @@ struct StatsView: View {
                 }
                 ForEach(rows) { r in
                     let share = total > 0 ? value(r) / total : 0
-                    HStack(spacing: 10) {
+                    ToonRowStack(spacing: 10) {
                         ModeIcon(mode: r.mode, size: 34)
                         VStack(alignment: .leading, spacing: 3) {
                             HStack {
@@ -258,13 +262,11 @@ struct StatsView: View {
     private func weekdayStickers(_ m: MobilityMetrics) -> some View {
         VStack(alignment: .leading, spacing: 10) {
             SectionLabel(text: "Weekday vs weekend")
-            Grid(horizontalSpacing: 14) {
-                GridRow {
-                    sticker(m.weekdayTripsPerDay.map { String(format: "%.1f", $0) } ?? "–", "trips on weekdays", Toon.paper, -1,
-                            c.flatMap { cc in compare.map { "\($0.label): " + (cc.weekdayTripsPerDay.map { String(format: "%.1f", $0) } ?? "–") } })
-                    sticker(m.weekendTripsPerDay.map { String(format: "%.1f", $0) } ?? "–", "trips on weekends", Toon.paper, 1,
-                            c.flatMap { cc in compare.map { "\($0.label): " + (cc.weekendTripsPerDay.map { String(format: "%.1f", $0) } ?? "–") } })
-                }
+            StickerGrid {
+                sticker(m.weekdayTripsPerDay.map { String(format: "%.1f", $0) } ?? "–", "trips on weekdays", Toon.paper, -1,
+                        c.flatMap { cc in compare.map { "\($0.label): " + (cc.weekdayTripsPerDay.map { String(format: "%.1f", $0) } ?? "–") } })
+                sticker(m.weekendTripsPerDay.map { String(format: "%.1f", $0) } ?? "–", "trips on weekends", Toon.paper, 1,
+                        c.flatMap { cc in compare.map { "\($0.label): " + (cc.weekendTripsPerDay.map { String(format: "%.1f", $0) } ?? "–") } })
             }
         }
     }
@@ -307,9 +309,9 @@ struct StatsView: View {
                     c?.destinationEntropy.map { String(format: "%.2f", $0) })
                 row("Repeat OD share", Fmt.percent(m.repeatODShare), c.map { Fmt.percent($0.repeatODShare) })
                 ForEach(m.topPlaces.prefix(6)) { p in
-                    HStack {
+                    ToonRowStack(spacing: 8) {
                         Image(systemName: p.category?.symbol ?? "mappin").frame(width: 22).foregroundStyle(Toon.muted)
-                        Text(p.name).lineLimit(1)
+                        Text(p.name).toonLineLimit(1)
                         Spacer()
                         Text("\(p.visits)× · \(Fmt.hours(p.dwell))").font(.toon(12, .bold)).foregroundStyle(Toon.muted).monospacedDigit()
                     }
@@ -318,8 +320,8 @@ struct StatsView: View {
                 if !m.topODPairs.isEmpty {
                     DisclosureGroup("Top origin–destination pairs") {
                         ForEach(m.topODPairs) { od in
-                            HStack {
-                                Text("\(od.originName) → \(od.destinationName)").lineLimit(1)
+                            ToonRowStack(spacing: 8) {
+                                Text("\(od.originName) → \(od.destinationName)").toonLineLimit(1)
                                 Spacer()
                                 Text("\(od.trips)").monospacedDigit()
                             }
@@ -332,7 +334,7 @@ struct StatsView: View {
                 if !cats.isEmpty {
                     DisclosureGroup("Time by place category") {
                         ForEach(Array(cats), id: \.key) { k, v in
-                            HStack {
+                            ToonRowStack(spacing: 8) {
                                 Text(PlaceCategory(rawValue: k)?.label ?? "Uncategorized")
                                 Spacer()
                                 Text(Fmt.hours(v)).monospacedDigit()
@@ -381,7 +383,7 @@ struct StatsView: View {
 
     private func card<C: View>(_ title: String, footer: String? = nil, @ViewBuilder _ content: () -> C) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            HStack {
+            ToonRowStack(spacing: 8) {
                 Text(title).font(.toon(16, .heavy)).foregroundStyle(Toon.ink)
                 if let compare {
                     Spacer()
@@ -397,8 +399,9 @@ struct StatsView: View {
         }
     }
 
+    /// Label and value(s) on one line, or the values under the label at accessibility text sizes.
     private func row(_ label: String, _ value: String, _ other: String? = nil) -> some View {
-        HStack(alignment: .firstTextBaseline) {
+        ToonRowStack(alignment: .firstTextBaseline, spacing: 8) {
             Text(label).font(.toon(14, .bold))
             Spacer()
             Text(value).font(.toon(14, .heavy)).monospacedDigit()
@@ -481,7 +484,7 @@ struct MetricsHelpView: View {
     private func item(_ t: String, _ d: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(t).font(.headline)
-            Text(d).font(.callout).foregroundStyle(.secondary)
+            Text(d).font(.callout).foregroundStyle(Toon.muted)
         }
         .padding(.vertical, 4)
     }

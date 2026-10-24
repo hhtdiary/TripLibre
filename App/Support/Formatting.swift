@@ -132,9 +132,9 @@ struct StatPill: View {
     var body: some View {
         VStack(spacing: 2) {
             Text(value).font(.toon(17, .bold).monospacedDigit()).foregroundStyle(Toon.ink)
-                .lineLimit(1).minimumScaleFactor(0.6)
+                .toonLineLimit(1, minScale: 0.6)
             Text(label).font(.toon(11, .bold)).foregroundStyle(Toon.muted)
-                .lineLimit(2).multilineTextAlignment(.center)
+                .toonLineLimit(2).multilineTextAlignment(.center)
         }
         .frame(maxWidth: .infinity)
     }

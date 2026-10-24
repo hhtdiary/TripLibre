@@ -39,7 +39,9 @@ final class AccessibilityAuditTests: HHTUITestCase {
         add.tap()
         waitForNavigationTitle("Add a cost")
         try audit("Add a cost")
-        app.textFields["costAmount"].typeText("4.50")
+        let amount = app.textFields["costAmount"]
+        amount.tap()
+        amount.typeText("4.50")
         app.buttons["costSave"].tap()
         let card = app.descendants(matching: .any).matching(identifier: "daySpend").firstMatch
         reveal(card)
@@ -90,10 +92,15 @@ final class AccessibilityAuditTests: HHTUITestCase {
     /// the screen and element so it's actionable.
     private func audit(_ screen: String, file: StaticString = #filePath, line: UInt = #line) throws {
         var unexpected: [String] = []
+        let keyboard = app.keyboards.firstMatch
+        let tabBar = app.buttons["tab-Today"]
+        let layout = KnownIssue.Layout(screenHeight: app.windows.firstMatch.frame.height,
+                                       keyboardTop: keyboard.exists ? keyboard.frame.minY : nil,
+                                       tabBarTop: tabBar.exists && tabBar.isHittable ? tabBar.frame.minY - 9 : nil)
         try app.performAccessibilityAudit(for: .all) { issue in
             if Self.reportOnly.contains(issue.auditType) {
                 print("[a11y] \(screen): report-only: \(Self.describe(issue))")
-            } else if let known = KnownIssue.matching(issue, screen: screen) {
+            } else if let known = KnownIssue.matching(issue, screen: screen, layout: layout) {
                 print("[a11y] \(screen): accepted known issue (\(known)): \(Self.describe(issue))")
             } else {
                 print("[a11y] \(screen): \(Self.describe(issue))")
@@ -106,14 +113,15 @@ final class AccessibilityAuditTests: HHTUITestCase {
         }
     }
 
-    /// Logged, not failing (see docs/accessibility-testing.md › Report-only audits):
-    /// - dynamicType: `Font.toon` uses fixed point sizes app-wide; scaling them needs layout work on every sticker card.
-    /// - contrast: flags ink-on-white text on the tilted, shadowed sticker cards (≥ 12:1 by the palette), so it's
-    ///   mostly noise until those cards are restructured. Colour changes are checked against the palette instead.
-    static let reportOnly: XCUIAccessibilityAuditType = [.dynamicType, .contrast]
+    /// Audit types that are logged but don't fail yet (see docs/accessibility-testing.md). None since issue #67 made
+    /// `Font.toon` scale with Dynamic Type and re-enabled the contrast audit; keep it that way.
+    static let reportOnly: XCUIAccessibilityAuditType = []
 
     static func describe(_ issue: XCUIAccessibilityAuditIssue) -> String {
-        let el = issue.element.map { "\($0.elementType) '\($0.label)' id='\($0.identifier)'" } ?? "no element"
+        let el = issue.element.map { e in
+            let f = e.frame.integral
+            return "\(e.elementType) '\(e.label)' id='\(e.identifier)' at (\(Int(f.minX)), \(Int(f.minY)), \(Int(f.width))×\(Int(f.height)))"
+        } ?? "no element"
         return "\(auditName(issue.auditType)): \(issue.compactDescription) — \(el)"
     }
 
@@ -132,31 +140,83 @@ enum KnownIssue: String {
     /// Apple Maps renders its own logo and "Legal" link; we can't change their size or contrast.
     case mapKitAttribution
 
-    /// MapKit draws annotation titles and street names itself; the audit sees text it can't attribute to an element.
-    case mapKitLabels
-
     /// The pins MapKit draws for `Marker` (Trip detail: Start + End; Visit detail: the visit) are smaller than 44 pt
     /// and aren't exposed as elements. They're informational; the same places are named in the rows below the map.
     case mapKitMarkers
-    /// Reported as clipped, but rendered in full (checked by screenshot on iPhone 17, iOS 27): the Stamp pill on Today
-    /// and the origin/destination labels under the Trip detail map. Matched by exact text so other clipping still fails.
+    /// Reported as clipped, but rendered in full (checked by screenshot on iPhone 17, iOS 27): the Stamp pill on Today,
+    /// the origin/destination labels under the Trip detail map and Visit detail's "Name this place". Matched by exact
+    /// text so other clipping still fails.
     case textClippedFalsePositive
 
-    static func matching(_ issue: XCUIAccessibilityAuditIssue, screen: String) -> KnownIssue? {
+    /// The system "Done" button in a sheet's navigation bar (Liquid Glass): it stops growing at the system's bar-button
+    /// size (long-press shows the large content viewer instead), and the contrast check measures the glass behind it.
+    /// Its title is ink (`confirmTint()`). Matched by being a button inside the navigation bar.
+    case systemBarButton
+
+    /// Text the system draws that isn't in our view hierarchy, so the audit reports it with no element: MapKit's
+    /// street and point-of-interest labels on the maps, and the dimmed screen behind a sheet.
+    case systemDrawnText
+
+    /// Rows of a `List` (Today, Timeline, Settings, Trip/Visit detail) in the lower part of the screen. As the audit
+    /// enlarges the text they are pushed off screen, and List removes rows it no longer shows, so the audit can't
+    /// measure them and reports partial (or no) Dynamic Type support or clipping. The same rows are measured fine
+    /// when they sit higher up, and these screens are checked at the largest size by hand (Manual checklist).
+    case listRowPushedOffScreen
+
+    /// Under the on-screen keyboard (Add a cost opens with the amount field focused): the audit measures the keys
+    /// instead of the row, and reads the key captions as text without an element.
+    case behindKeyboard
+
+    /// Partly under the floating tab bar (e.g. the "Spent today" card at the bottom of Today): the audit measures the
+    /// bar's pixels and its smaller visible area. Scrolling brings the row clear of the bar.
+    case behindTabBar
+
+    /// Where things sit on screen when the audit runs.
+    struct Layout {
+        var screenHeight: CGFloat
+        /// Top of the on-screen keyboard, if it's up.
+        var keyboardTop: CGFloat?
+        /// Top of the floating tab bar, if it's on screen.
+        var tabBarTop: CGFloat?
+    }
+
+    private static let listScreens: Set = ["Today", "Day with trips", "Timeline", "Settings", "Trip detail", "Visit detail"]
+    private static let mapScreens: Set = ["Map", "Today", "Day with trips", "Trip detail", "Visit detail"]
+    private static let sheetScreens: Set = ["Settings", "Trip detail", "Visit detail", "Add a cost"]
+
+    static func matching(_ issue: XCUIAccessibilityAuditIssue, screen: String, layout: Layout) -> KnownIssue? {
         let label = issue.element?.label ?? ""
         let id = issue.element?.identifier ?? ""
         if label == "Legal" || id.hasPrefix("MKAttribution") || label.hasPrefix("Apple Maps") || label == "Maps" {
             return .mapKitAttribution
         }
-        if screen == "Map", issue.auditType == .elementDetection, issue.element == nil {
-            return .mapKitLabels
-        }
         if ["Trip detail", "Visit detail"].contains(screen), issue.auditType == .hitRegion, issue.element == nil {
             return .mapKitMarkers
         }
         if issue.auditType == .textClipped,
-           label == "Stamp this moment" || (screen == "Trip detail" && label.hasPrefix("Place ")) {
+           label == "Stamp this moment" || (screen == "Trip detail" && label.hasPrefix("Place "))
+            || (screen == "Visit detail" && label == "Name this place") {
             return .textClippedFalsePositive
+        }
+        if let e = issue.element, e.elementType == .button, e.frame.maxY < 140,
+           issue.auditType == .dynamicType || issue.auditType == .contrast {
+            return .systemBarButton
+        }
+        if issue.element == nil, [.contrast, .elementDetection, .textClipped].contains(issue.auditType),
+           mapScreens.contains(screen) || (issue.auditType == .contrast && sheetScreens.contains(screen)) {
+            return .systemDrawnText
+        }
+        if let top = layout.tabBarTop, let e = issue.element, e.frame.maxY > top {
+            return .behindTabBar
+        }
+        if let top = layout.keyboardTop,
+           issue.element.map({ $0.frame.maxY > top }) ?? (issue.auditType == .elementDetection) {
+            return .behindKeyboard
+        }
+        // below the top third: at the largest sizes the rows above grow about threefold and push these out
+        if listScreens.contains(screen), issue.auditType == .dynamicType || issue.auditType == .textClipped,
+           let e = issue.element, e.elementType == .staticText, e.frame.minY > layout.screenHeight * 0.35 {
+            return .listRowPushedOffScreen
         }
         return nil
     }

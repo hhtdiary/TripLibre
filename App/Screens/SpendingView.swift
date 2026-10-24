@@ -6,6 +6,7 @@ import HHTCore
 /// Opened from Today's "Spent today" card and from the Spending card in Stats.
 struct SpendingView: View {
     @EnvironmentObject var model: AppModel
+    @Environment(\.dynamicTypeSize) private var typeSize
     @State private var period: Period
     @State private var s: SpendingSummary?
     @State private var costs: [Expense] = []
@@ -20,13 +21,11 @@ struct SpendingView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                HStack(spacing: 8) {
-                    ForEach([Period.week, .month, .year, .all]) { p in
-                        Button { period = p } label: { Text(p == .all ? "All" : p.label).frame(maxWidth: .infinity) }
-                            .buttonStyle(ToonButtonStyle(fill: period == p ? Toon.ink : Toon.paper, height: 38, fontSize: 13,
-                                                         shadow: period == p ? 0 : 2, text: period == p ? .white : Toon.ink))
-                            .accessibilityAddTraits(period == p ? .isSelected : [])
-                    }
+                // equal-width pills, or wrapping ones at accessibility text sizes
+                if typeSize.isAccessibilitySize {
+                    ToonFlow { periodPills(equalWidth: false) }
+                } else {
+                    HStack(spacing: 8) { periodPills(equalWidth: true) }
                 }
                 if let s {
                     MascotSays(text: line(s))
@@ -71,18 +70,23 @@ struct SpendingView: View {
         return lead + "."
     }
 
+    @ViewBuilder private func periodPills(equalWidth: Bool) -> some View {
+        ForEach([Period.week, .month, .year, .all]) { p in
+            Button { period = p } label: { Text(p == .all ? "All" : p.label).frame(maxWidth: equalWidth ? .infinity : nil) }
+                .buttonStyle(ToonButtonStyle(fill: period == p ? Toon.ink : Toon.paper, height: 38, fontSize: 13,
+                                             shadow: period == p ? 0 : 2, text: period == p ? .white : Toon.ink))
+                .accessibilityAddTraits(period == p ? .isSelected : [])
+        }
+    }
+
     // MARK: sections
 
     private func stickers(_ s: SpendingSummary) -> some View {
-        Grid(horizontalSpacing: 14, verticalSpacing: 14) {
-            GridRow {
-                StatSticker(value: money(s.total), label: "spent", color: Toon.sun, tilt: -1.5)
-                StatSticker(value: money(s.perDay), label: "per day with costs", color: Toon.lime, tilt: 1.5)
-            }
-            GridRow {
-                StatSticker(value: money(s.travel), label: "getting around", color: Toon.sky, tilt: 1)
-                StatSticker(value: money(s.atDestinations), label: "at destinations", color: Toon.bubblegum, tilt: -1)
-            }
+        StickerGrid {
+            StatSticker(value: money(s.total), label: "spent", color: Toon.sun, tilt: -1.5)
+            StatSticker(value: money(s.perDay), label: "per day with costs", color: Toon.lime, tilt: 1.5)
+            StatSticker(value: money(s.travel), label: "getting around", color: Toon.sky, tilt: 1)
+            StatSticker(value: money(s.atDestinations), label: "at destinations", color: Toon.bubblegum, tilt: -1)
         }
     }
 
@@ -98,7 +102,7 @@ struct SpendingView: View {
                 .overlay(Capsule().strokeBorder(Toon.ink, lineWidth: Toon.line))
             }
             .frame(height: 18)
-            HStack {
+            ToonRowStack(spacing: 8) {
                 Text("Travel \(Fmt.percent(s.travel / total))")
                 Spacer()
                 Text("At destinations \(Fmt.percent(s.atDestinations / total))")
@@ -132,10 +136,10 @@ struct SpendingView: View {
             SectionLabel(text: "What it went on")
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(s.byCategory) { r in
-                    HStack(spacing: 10) {
+                    ToonRowStack(spacing: 10) {
                         ToonChip(symbol: r.category.symbol, color: r.category.isTravel ? Toon.sky : Toon.bubblegum, size: 34)
                         VStack(alignment: .leading, spacing: 3) {
-                            HStack {
+                            ToonRowStack(spacing: 8) {
                                 Text(r.category.label)
                                 Spacer()
                                 Text(money(r.total)).monospacedDigit()
@@ -144,6 +148,7 @@ struct SpendingView: View {
                             bar(top > 0 ? r.total / top : 0, CostStyle.color)
                         }
                     }
+                    .accessibilityElement(children: .combine)
                 }
             }
             .padding(14)
@@ -156,10 +161,10 @@ struct SpendingView: View {
             SectionLabel(text: "Getting around")
             VStack(alignment: .leading, spacing: 12) {
                 ForEach(s.byMode) { r in
-                    HStack(spacing: 10) {
+                    ToonRowStack(spacing: 10) {
                         ModeIcon(mode: r.mode, size: 34)
                         VStack(alignment: .leading, spacing: 2) {
-                            HStack {
+                            ToonRowStack(spacing: 8) {
                                 Text(r.mode.label)
                                 Spacer()
                                 Text(money(r.total)).monospacedDigit()
@@ -171,6 +176,7 @@ struct SpendingView: View {
                         }
                         .foregroundStyle(Toon.ink)
                     }
+                    .accessibilityElement(children: .combine)
                 }
                 Text("Only trips with a cost entered (free ones included) count here.")
                     .font(.toon(11, .bold)).foregroundStyle(Toon.muted)
@@ -185,13 +191,14 @@ struct SpendingView: View {
             SectionLabel(text: "Where you spent")
             VStack(alignment: .leading, spacing: 10) {
                 ForEach(s.byPlace.prefix(6)) { p in
-                    HStack {
+                    ToonRowStack(spacing: 8) {
                         Image(systemName: p.category?.symbol ?? "mappin").frame(width: 22).foregroundStyle(Toon.muted).accessibilityHidden(true)
-                        Text(p.name).lineLimit(1)
+                        Text(p.name).toonLineLimit(1)
                         Spacer()
                         Text("\(p.count)× · \(money(p.total))").monospacedDigit()
                     }
                     .font(.toon(14, .bold)).foregroundStyle(Toon.ink)
+                    .accessibilityElement(children: .combine)
                 }
             }
             .padding(14)
@@ -206,12 +213,13 @@ struct SpendingView: View {
                 let byDay = Dictionary(grouping: costs) { Calendar.current.startOfDay(for: $0.timestamp) }
                 ForEach(byDay.keys.sorted(by: >), id: \.self) { day in
                     VStack(alignment: .leading, spacing: 6) {
-                        HStack {
+                        ToonRowStack(spacing: 8) {
                             Text(Fmt.shortDay(day))
                             Spacer()
                             Text(Fmt.costs(byDay[day] ?? []) ?? "").monospacedDigit()
                         }
                         .font(.toon(13, .heavy)).foregroundStyle(Toon.muted)
+                        .accessibilityElement(children: .combine)
                         VStack(spacing: 0) {
                             ForEach(byDay[day] ?? []) { e in
                                 Button { editing = e } label: { row(e) }.buttonStyle(.plain)
@@ -233,12 +241,12 @@ struct SpendingView: View {
     }
 
     private func row(_ e: Expense) -> some View {
-        HStack(spacing: 10) {
+        ToonRowStack(spacing: 10) {
             Image(systemName: e.category.symbol).frame(width: 24).foregroundStyle(Toon.muted).accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 1) {
-                Text(what(e)).font(.toon(14, .bold)).lineLimit(1)
+                Text(what(e)).font(.toon(14, .bold)).toonLineLimit(1)
                 Text([Fmt.time(e.timestamp, tz: e.timeZone), e.category.label, e.note].compactMap { $0 }.joined(separator: " · "))
-                    .font(.toon(12, .bold)).foregroundStyle(Toon.muted).lineLimit(1)
+                    .font(.toon(12, .bold)).foregroundStyle(Toon.muted).toonLineLimit(1)
             }
             Spacer()
             Text(Fmt.cost(e)).font(.toon(15, .heavy)).monospacedDigit()
@@ -304,7 +312,7 @@ struct SpendingStatsCard: View {
                             Text(Fmt.money(summary.total, summary.currency)).font(.toon(22, .bold)).monospacedDigit()
                             Text("\(Fmt.money(summary.travel, summary.currency)) getting around · "
                                  + "\(Fmt.money(summary.atDestinations, summary.currency)) at destinations")
-                                .font(.toon(12, .bold)).foregroundStyle(Toon.muted).lineLimit(2)
+                                .font(.toon(12, .bold)).foregroundStyle(Toon.muted).toonLineLimit(2)
                         } else {
                             Text("No costs in \(period.label)").font(.toon(16, .bold))
                             Text("Log fares and other costs from Today or any trip.").font(.toon(12, .bold)).foregroundStyle(Toon.muted)
