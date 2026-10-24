@@ -113,6 +113,11 @@ class HHTUITestCase: XCTestCase {
         XCTAssertTrue(done.waitForNonExistence(timeout: 5), "sheet closes")
     }
 
+    /// For sheets that close themselves (e.g. Add a cost on Save); see dismissSheet for why it matters.
+    func waitForSheetToClose(_ title: String, file: StaticString = #filePath, line: UInt = #line) {
+        XCTAssertTrue(app.navigationBars[title].waitForNonExistence(timeout: 5), "\(title) closes", file: file, line: line)
+    }
+
     func waitForNavigationTitle(_ title: String, timeout: TimeInterval = 10) {
         XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: timeout), "screen \(title)")
     }

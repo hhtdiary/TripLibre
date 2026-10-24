@@ -125,8 +125,23 @@ struct SpendingView: View {
                 BarMark(x: .value("Day", d, unit: .day), y: .value("Spent", v))
                     .foregroundStyle(CostStyle.color)
                     .cornerRadius(3)
+                    .accessibilityLabel(Fmt.shortDay(d))
+                    .accessibilityValue(money(v))
             }
-            .chartYAxis { AxisMarks { v in AxisGridLine(); AxisValueLabel { if let x = v.as(Double.self) { Text(money(x)) } } } }
+            // axis labels in the app's ink-grey rather than the system grey (~3.4:1 on white; issue #67)
+            .chartXAxis {
+                AxisMarks { _ in
+                    AxisGridLine()
+                    AxisValueLabel().foregroundStyle(Toon.muted).font(.caption2.weight(.bold))
+                }
+            }
+            .chartYAxis {
+                AxisMarks { v in
+                    AxisGridLine()
+                    AxisValueLabel { if let x = v.as(Double.self) { Text(money(x)) } }
+                        .foregroundStyle(Toon.muted).font(.caption2.weight(.bold))
+                }
+            }
             .frame(height: 140)
             .padding(14)
             .toonCard(radius: 22, shadow: 4)

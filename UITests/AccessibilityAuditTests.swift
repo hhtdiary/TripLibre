@@ -43,8 +43,19 @@ final class AccessibilityAuditTests: HHTUITestCase {
         amount.tap()
         amount.typeText("4.50")
         app.buttons["costSave"].tap()
+        // a second cost on another day, so Spending draws its day-by-day chart as it does on any real diary
+        waitForSheetToClose("Add a cost")
+        app.buttons["Previous day"].tap()
+        reveal(add)
+        add.tap()
+        waitForNavigationTitle("Add a cost")
+        amount.tap()
+        amount.typeText("3")
+        app.buttons["costSave"].tap()
+        waitForSheetToClose("Add a cost")
         openSpending()
-        waitForSeededContent(text(containing: "$4.50"), "the cost just added")
+        waitForSeededContent(text(containing: "$7.50"), "the two costs just added")
+        XCTAssertTrue(app.staticTexts["Day by day"].exists, "Spending shows the day-by-day chart")
         try audit("Spending")
     }
 
@@ -196,8 +207,9 @@ enum KnownIssue: String {
     /// street and point-of-interest labels on the maps, and the dimmed screen behind a sheet.
     case systemDrawnText
 
-    /// Text and button rows of a `List` (Today, Timeline, Settings, Trip/Visit detail) in the lower part of the screen
-    /// (e.g. Settings' "Open iOS Settings" button, shown while location access isn't "Always"). As the audit
+    /// Text and button rows of a `List` (Today, Timeline, Settings, Trip/Visit detail, the Add a cost form) in the
+    /// lower part of the screen (e.g. Settings' "Open iOS Settings" button, shown while location access isn't
+    /// "Always"). As the audit
     /// enlarges the text they are pushed off screen, and List removes rows it no longer shows, so the audit can't
     /// measure them and reports partial (or no) Dynamic Type support or clipping. The same rows are measured fine
     /// when they sit higher up, and these screens are checked at the largest size by hand (Manual checklist).
@@ -230,7 +242,8 @@ enum KnownIssue: String {
         var tabBarTop: CGFloat?
     }
 
-    private static let listScreens: Set = ["Today", "Day with trips", "Timeline", "Settings", "Trip detail", "Visit detail"]
+    private static let listScreens: Set = ["Today", "Day with trips", "Timeline", "Settings", "Trip detail", "Visit detail",
+                                           "Add a cost"]
     private static let mapScreens: Set = ["Map", "Today", "Day with trips", "Trip detail", "Visit detail"]
     private static let sheetScreens: Set = ["Settings", "Trip detail", "Visit detail", "Add a cost"]
 
