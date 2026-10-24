@@ -35,9 +35,9 @@ sim: build       ## install + launch in the simulator with demo data (SIM_NAME="
 phone: project   ## build, sign and install on the USB-connected iPhone (also renews the 7-day signature)
 	./scripts/install-phone.sh
 
-ui-test: project ## XCUITest flows + accessibility audits in the simulator (SIM_NAME="iPhone 17"; ONLY=HHTUITests/CoreFlowTests)
+ui-test: project ## XCUITest flows + accessibility audits in the simulator (SIM_NAME="iPhone 17" or SIM_ID=<udid>; ONLY=HHTUITests/CoreFlowTests)
 	$(if $(RESULT_BUNDLE),rm -rf $(RESULT_BUNDLE))
-	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination 'platform=iOS Simulator,name=$(SIM_NAME)' \
+	xcodebuild -project $(PROJECT) -scheme $(SCHEME) -destination 'platform=iOS Simulator,$(if $(SIM_ID),id=$(SIM_ID),name=$(SIM_NAME))' \
 		-derivedDataPath $(BUILD_DIR) CODE_SIGNING_ALLOWED=NO $(if $(ONLY),-only-testing:$(ONLY)) \
 		$(if $(RESULT_BUNDLE),-resultBundlePath $(RESULT_BUNDLE)) test
 

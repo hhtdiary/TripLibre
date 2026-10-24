@@ -121,7 +121,8 @@ jobs:
 
   ui-test:
     name: UI tests + accessibility audits (simulator)
-    runs-on: macos-15
+    # The audits are tuned on iOS 27 (Xcode 27), which needs a macOS 26 runner; macos-15 tops out at Xcode 26.
+    runs-on: macos-26
     timeout-minutes: 45
     steps:
       - uses: actions/checkout@v7
@@ -130,22 +131,25 @@ jobs:
           xcode-version: latest-stable
       - name: Install XcodeGen
         run: brew install xcodegen
-      # iPhone 17 is what the audits were tuned on; fall back to the newest available iPhone if this Xcode lacks it.
+      # iPhone 17 on the newest iOS runtime (what the audits were tuned on); else the newest iPhone on that runtime.
       - name: Pick and boot a simulator
         run: |
           set -euo pipefail
-          devices=$(xcrun simctl list devices available -j)
-          name=$(jq -r '[.devices | to_entries[] | select(.key | contains("iOS")) | .value[] | .name]
-                        | if index("iPhone 17") then "iPhone 17" else (map(select(startswith("iPhone"))) | last) end' <<<"$devices")
-          [ -n "$name" ] && [ "$name" != null ] || { echo "::error::no iPhone simulator available"; exit 1; }
-          echo "Using simulator: $name"
-          echo "SIM_NAME=$name" >> "$GITHUB_ENV"
-          xcrun simctl boot "$name" || true
-          xcrun simctl bootstatus "$name" -b
+          xcodebuild -version
+          sim=$(xcrun simctl list devices available -j | jq -r '
+            [.devices | to_entries[] | select(.key | test("SimRuntime\\.iOS-"))
+              | {v: (.key | capture("iOS-(?<v>[0-9-]+)").v | split("-") | map(tonumber)),
+                 d: (.value | map(select(.name | startswith("iPhone"))))}
+              | select(.d | length > 0)]
+            | max_by(.v) | .d
+            | ((map(select(.name == "iPhone 17")) + [last]) | first) | "\(.udid) \(.name)"')
+          [ -n "$sim" ] && [ "$sim" != "null null" ] || { echo "::error::no iPhone simulator available"; exit 1; }
+          echo "Using simulator: $sim"
+          echo "SIM_ID=${sim%% *}" >> "$GITHUB_ENV"
+          xcrun simctl boot "${sim%% *}" || true
+          xcrun simctl bootstatus "${sim%% *}" -b
       - name: make ui-test
-        run: |
-          set -o pipefail
-          make ui-test SIM_NAME="$SIM_NAME" RESULT_BUNDLE=.build-xcode/ui-tests.xcresult
+        run: make ui-test SIM_ID="$SIM_ID" RESULT_BUNDLE=.build-xcode/ui-tests.xcresult
       - name: Upload test results
         if: failure()
         uses: actions/upload-artifact@v4
