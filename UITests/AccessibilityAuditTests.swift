@@ -95,7 +95,8 @@ final class AccessibilityAuditTests: HHTUITestCase {
         var unexpectedFrames: [CGRect] = []
         let keyboard = app.keyboards.firstMatch
         let tabBar = app.buttons["tab-Today"]
-        let layout = KnownIssue.Layout(screenHeight: app.windows.firstMatch.frame.height,
+        let layout = KnownIssue.Layout(screenWidth: app.windows.firstMatch.frame.width,
+                                       screenHeight: app.windows.firstMatch.frame.height,
                                        keyboardTop: keyboard.exists ? keyboard.frame.minY : nil,
                                        tabBarTop: tabBar.exists && tabBar.isHittable ? tabBar.frame.minY - 9 : nil)
         try app.performAccessibilityAudit(for: .all) { issue in
@@ -169,16 +170,26 @@ enum KnownIssue: String {
     /// when they sit higher up, and these screens are checked at the largest size by hand (Manual checklist).
     case listRowPushedOffScreen
 
-    /// Under the on-screen keyboard (Add a cost opens with the amount field focused): the audit measures the keys
-    /// instead of the row, and reads the key captions as text without an element.
+    /// Under the on-screen keyboard (Add a cost opens with the amount field focused), or just above it, where the
+    /// glass keyboard's edge blurs the row: the audit measures the keys instead of the row, and reads the key captions
+    /// as text without an element.
     case behindKeyboard
 
     /// Partly under the floating tab bar (e.g. the "Spent today" card at the bottom of Today): the audit measures the
-    /// bar's pixels and its smaller visible area. Scrolling brings the row clear of the bar.
+    /// bar's pixels and its smaller visible area. Scrolling brings the row clear of the bar. Text the bar cuts off is
+    /// reported as clipped with no element.
     case behindTabBar
+
+    /// Contrast on text whose element is a whole `List`/`Form` row: section headers, which sit on the dot grid, and
+    /// Pip's speech bubble on Today, which a List row reports with the mascot's frame. The audit samples the row, not
+    /// the glyphs, and takes the dots or the mascot for the text colour (the dots alone are 1.3:1 on butter), so the
+    /// findings come and go between runs. The text is `Toon.muted` on butter (6.6:1, 5.2:1 even on a dot) or `Toon.ink`
+    /// on white. Smaller text elements are still checked.
+    case fullWidthRowContrast
 
     /// Where things sit on screen when the audit runs.
     struct Layout {
+        var screenWidth: CGFloat
         var screenHeight: CGFloat
         /// Top of the on-screen keyboard, if it's up.
         var keyboardTop: CGFloat?
@@ -212,12 +223,17 @@ enum KnownIssue: String {
            mapScreens.contains(screen) || (issue.auditType == .contrast && sheetScreens.contains(screen)) {
             return .systemDrawnText
         }
-        if let top = layout.tabBarTop, let e = issue.element, e.frame.maxY > top {
+        if let top = layout.tabBarTop,
+           issue.element.map({ $0.frame.maxY > top }) ?? (issue.auditType == .textClipped) {
             return .behindTabBar
         }
         if let top = layout.keyboardTop,
-           issue.element.map({ $0.frame.maxY > top }) ?? (issue.auditType == .elementDetection) {
+           issue.element.map({ $0.frame.maxY > top - 24 }) ?? (issue.auditType == .elementDetection) {
             return .behindKeyboard
+        }
+        if issue.auditType == .contrast, let e = issue.element, e.elementType == .staticText,
+           e.frame.width >= layout.screenWidth - 40 {
+            return .fullWidthRowContrast
         }
         // below the top third: at the largest sizes the rows above grow about threefold and push these out
         if listScreens.contains(screen), issue.auditType == .dynamicType || issue.auditType == .textClipped,

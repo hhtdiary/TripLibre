@@ -69,10 +69,11 @@ class HHTUITestCase: XCTestCase {
         XCTAssertTrue(element.exists && element.frame.maxY <= limit, "couldn't scroll \(element) into view", file: file, line: line)
     }
 
-    /// Bottom of the area not covered by the floating tab bar (or of a sheet).
+    /// Bottom of the area not covered by the floating tab bar (or of a sheet). Not `isHittable`: right after a sheet
+    /// closes the bar can read as not hittable, and `reveal` then left rows under it, where a tap hits a tab.
     private var visibleBottom: CGFloat {
         let tabBar = app.buttons["tab-Today"]
-        return (tabBar.exists && tabBar.isHittable ? tabBar.frame.minY - 12 : app.windows.firstMatch.frame.maxY) - 24
+        return (tabBar.exists ? tabBar.frame.minY - 12 : app.windows.firstMatch.frame.maxY) - 24
     }
 
     /// Drags the content up by 250 pt, in the left margin: the middle of the day screen is a map, which would pan
