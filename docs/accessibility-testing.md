@@ -20,6 +20,10 @@ never starts location collection, so runs are reproducible and never touch your 
 | `CoreFlowTests` | Every tab opens and is announced as selected; trip and visit details open from the diary and close; the day navigation buttons have labels; Map › layers menu; Settings › Create export finishes and offers Share. |
 | `AccessibilityAuditTests` | `performAccessibilityAudit(for: .all)` on Today, a day with trips, Trip detail, Visit detail, Timeline, Map, Stats, Places and Settings. |
 
+`testSpending` (Add a cost and Spending) is skipped for now: on CI (iOS 26.5) the Spending audit reports two contrast
+failures on SwiftUI-made nodes it can't name, and Dynamic Type findings on the section labels, which haven't been
+placed yet (#67). Check Spending by hand with the manual checklist below.
+
 When an audit fails, the test log has one `[a11y] <screen>: <audit type>: <description> — <element>` line per issue.
 An audit with unexpected findings runs a second time and fails only on the findings that show up in both passes: on
 a slow simulator (CI) the contrast check flags different elements from run to run on the same screen. An audit that
