@@ -21,6 +21,9 @@ never starts location collection, so runs are reproducible and never touch your 
 | `AccessibilityAuditTests` | `performAccessibilityAudit(for: .all)` on Today, a day with trips, Trip detail, Visit detail, Timeline, Map, Stats, Places and Settings. |
 
 When an audit fails, the test log has one `[a11y] <screen>: <audit type>: <description> — <element>` line per issue.
+An audit with unexpected findings runs a second time and fails only on the findings that show up in both passes: on
+a slow simulator (CI) the contrast check flags different elements from run to run on the same screen. An audit that
+times out is also run again once.
 Xcode's test report also attaches a screenshot with the element highlighted.
 
 ### Known exceptions

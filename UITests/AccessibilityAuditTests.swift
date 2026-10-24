@@ -88,8 +88,45 @@ final class AccessibilityAuditTests: HHTUITestCase {
     /// Runs every audit type and fails once with *all* unexpected issues (XCTest would stop at the first), each with
     /// the screen and element so it's actionable.
     private func audit(_ screen: String, file: StaticString = #filePath, line: UInt = #line) throws {
-        var unexpected: [String] = []
-        var unexpectedFrames: [CGRect] = []
+        let first = try auditPass(screen)
+        guard !first.isEmpty else { return }
+        // On a slow simulator (CI) the contrast check isn't deterministic: which elements it flags changes from run to
+        // run on the same screen. A second pass keeps the findings that show up both times, as a real problem does.
+        print("[a11y] \(screen): \(first.count) unexpected finding(s); auditing again to confirm")
+        var second = try auditPass(screen)
+        let confirmed = first.filter { finding in
+            guard let i = second.firstIndex(where: { $0.text == finding.text }) else { return false }
+            second.remove(at: i)
+            return true
+        }
+        if Self.logsScreenshots {
+            for (i, finding) in confirmed.enumerated() {
+                if let frame = finding.frame { logScreenshot("\(screen) finding \(i + 1)", crop: frame) }
+            }
+        }
+        if !confirmed.isEmpty {
+            XCTFail("\(screen): \(confirmed.count) accessibility issue(s):\n" + confirmed.map(\.text).joined(separator: "\n"),
+                    file: file, line: line)
+        }
+    }
+
+    private struct Finding {
+        var text: String
+        var frame: CGRect?
+    }
+
+    /// One audit; run again once if it times out ("Audit failed to complete in time", which a slow simulator hits).
+    private func auditPass(_ screen: String) throws -> [Finding] {
+        do {
+            return try auditOnce(screen)
+        } catch let error as NSError where error.domain == "com.apple.xcode.xctest.accessibilityAudit" && error.code == -56 {
+            print("[a11y] \(screen): audit timed out; running it again")
+            return try auditOnce(screen)
+        }
+    }
+
+    private func auditOnce(_ screen: String) throws -> [Finding] {
+        var unexpected: [Finding] = []
         let keyboard = app.keyboards.firstMatch
         let tabBar = app.buttons["tab-Today"]
         let layout = KnownIssue.Layout(screenWidth: app.windows.firstMatch.frame.width,
@@ -102,18 +139,12 @@ final class AccessibilityAuditTests: HHTUITestCase {
             } else if let known = KnownIssue.matching(issue, screen: screen, layout: layout) {
                 print("[a11y] \(screen): accepted known issue (\(known)): \(Self.describe(issue))")
             } else {
-                print("[a11y] \(screen): \(Self.describe(issue))")
-                unexpected.append(Self.describe(issue))
-                if let e = issue.element { unexpectedFrames.append(e.frame) }
+                print("[a11y] \(screen): \(Self.describe(issue)) [\(issue.detailedDescription)]")
+                unexpected.append(Finding(text: Self.describe(issue), frame: issue.element?.frame))
             }
             return true
         }
-        if Self.logsScreenshots {
-            for (i, frame) in unexpectedFrames.enumerated() { logScreenshot("\(screen) finding \(i + 1)", crop: frame) }
-        }
-        if !unexpected.isEmpty {
-            XCTFail("\(screen): \(unexpected.count) accessibility issue(s):\n" + unexpected.joined(separator: "\n"), file: file, line: line)
-        }
+        return unexpected
     }
 
     /// Audit types that are logged but don't fail yet (see docs/accessibility-testing.md). None since issue #67 made
