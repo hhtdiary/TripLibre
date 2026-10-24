@@ -19,8 +19,7 @@ final class CostFlowTests: HHTUITestCase {
         reveal(card)
         XCTAssertTrue(text(containing: "$2.90").exists, "Spent this day total")
 
-        card.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).tap()
-        waitForNavigationTitle("Spending")
+        openSpending()
         XCTAssertTrue(text(containing: "$2.90 over 1 day").waitForExistence(timeout: 5), "spending summary")
         XCTAssertTrue(app.staticTexts["Every cost"].exists || text(containing: "Every cost").exists)
     }

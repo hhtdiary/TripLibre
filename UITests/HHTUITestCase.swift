@@ -90,6 +90,20 @@ class HHTUITestCase: XCTestCase {
                     thenHoldForDuration: 0.2)
     }
 
+    /// Taps the day's spend card and waits for Spending. Right after a cost is saved the day list can reload and jump
+    /// back to the top between `reveal` and the tap, which then lands on the tab bar; so reveal and tap again.
+    func openSpending(file: StaticString = #filePath, line: UInt = #line) {
+        let card = app.descendants(matching: .any).matching(identifier: "daySpend").firstMatch
+        let spending = app.navigationBars["Spending"]
+        for attempt in 1...3 {
+            reveal(card)
+            card.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).tap()
+            if spending.waitForExistence(timeout: 5) { return }
+            if Self.logsScreenshots { logScreenshot("tap \(attempt) on the spend card didn't open Spending") }
+        }
+        XCTFail("screen Spending", file: file, line: line)
+    }
+
     func dismissSheet(_ button: String = "Done") {
         let done = app.navigationBars.buttons[button].firstMatch
         XCTAssertTrue(done.waitForExistence(timeout: 5), "\(button) button")

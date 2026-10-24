@@ -43,10 +43,7 @@ final class AccessibilityAuditTests: HHTUITestCase {
         amount.tap()
         amount.typeText("4.50")
         app.buttons["costSave"].tap()
-        let card = app.descendants(matching: .any).matching(identifier: "daySpend").firstMatch
-        reveal(card)
-        card.coordinate(withNormalizedOffset: CGVector(dx: 0.3, dy: 0.5)).tap()
-        waitForNavigationTitle("Spending")
+        openSpending()
         waitForSeededContent(text(containing: "$4.50"), "the cost just added")
         try audit("Spending")
     }
@@ -106,8 +103,6 @@ final class AccessibilityAuditTests: HHTUITestCase {
                 print("[a11y] \(screen): accepted known issue (\(known)): \(Self.describe(issue))")
             } else {
                 print("[a11y] \(screen): \(Self.describe(issue))")
-                // the screen as the audit saw it (e.g. at the text size it was testing), not as it is afterwards
-                if Self.logsScreenshots { self.logScreenshot("\(screen) during finding \(unexpected.count + 1)") }
                 unexpected.append(Self.describe(issue))
                 if let e = issue.element { unexpectedFrames.append(e.frame) }
             }
