@@ -424,11 +424,13 @@ struct StatSticker: View {
             Text(label).font(.toon(12)).toonLineLimit(1, minScale: 0.8)
         }
         .foregroundStyle(Toon.ink)
+        // "$4.50, spent", not a bare number. Combined before the card is added, so the element's frame is the text:
+        // the contrast audit measures the whole frame and would read the outline and shadow as the text's colour.
+        .accessibilityElement(children: .combine)
         .frame(maxWidth: .infinity, alignment: .leading)
         .padding(.horizontal, 12).padding(.vertical, 10)
         .toonCard(color, radius: 18, shadow: 4)
         .tilt(tilt)
-        .accessibilityElement(children: .combine)   // "$4.50, spent", not a bare number
     }
 }
 
