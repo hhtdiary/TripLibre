@@ -219,6 +219,9 @@ struct SpendingView: View {
                             Text(Fmt.costs(byDay[day] ?? []) ?? "").monospacedDigit()
                         }
                         .font(.toon(13, .heavy)).foregroundStyle(Toon.muted)
+                        // plain butter behind the text: on the dot grid the contrast audit reads the dots as the text
+                        // colour (1.3:1) and fails these labels, which are 6.6:1 against the butter itself
+                        .background(Toon.ground)
                         .accessibilityElement(children: .combine)
                         VStack(spacing: 0) {
                             ForEach(byDay[day] ?? []) { e in

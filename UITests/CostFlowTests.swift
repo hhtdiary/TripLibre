@@ -52,6 +52,8 @@ final class CostFlowTests: HHTUITestCase {
         let field = app.textFields["costAmount"]
         XCTAssertTrue(field.waitForExistence(timeout: 5))
         if !field.hasFocus { field.tap() }
+        // the sheet focuses the field itself; keys typed before the keyboard is up are lost
+        XCTAssertTrue(app.keyboards.firstMatch.waitForExistence(timeout: 5), "keyboard")
         field.typeText(amount)
         app.buttons["costSave"].tap()
         XCTAssertFalse(app.navigationBars["Add a cost"].waitForExistence(timeout: 2), "sheet closes on save")
