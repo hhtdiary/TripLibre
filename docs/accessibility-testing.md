@@ -57,9 +57,10 @@ passing:
 
 ### CI
 
-Not in CI yet: macOS runners cost ~10× Linux minutes and simulator UI tests are slower and flakier than the rest of
-the pipeline. Run `make ui-test` locally before merging UI changes. Revisit with a small smoke subset
-(`ONLY=HHTUITests/CoreFlowTests`) on a schedule once the suite has been stable for a while.
+The *UI tests + accessibility audits* job in `.github/workflows/ci.yml` runs the full `make ui-test` on every pull
+request and push to `main`, on the iPhone 17 simulator (or the newest iPhone the runner's Xcode has). When it fails,
+download the `ui-tests-xcresult` artifact from the run and open it in Xcode to see the failing step, its screenshot
+and the audit findings. Running `make ui-test` locally before pushing UI changes is still quicker than waiting on CI.
 
 ## Manual checklist
 
