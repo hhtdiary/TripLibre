@@ -156,6 +156,11 @@ enum KnownIssue: String {
     /// Its title is ink (`confirmTint()`). Matched by being a button inside the navigation bar.
     case systemBarButton
 
+    /// Contrast on elements whose top edge is still under the navigation bar (Spending's period pills, right under the
+    /// inline title): iOS 26 blurs and fades content there (the scroll edge effect) and the audit samples that strip.
+    /// The pills are ink on white or white on ink; the same pills under Stats' large title pass.
+    case underNavigationBar
+
     /// Text the system draws that isn't in our view hierarchy, so the audit reports it with no element: MapKit's
     /// street and point-of-interest labels on the maps, and the dimmed screen behind a sheet.
     case systemDrawnText
@@ -215,6 +220,9 @@ enum KnownIssue: String {
         if let e = issue.element, e.elementType == .button, e.frame.maxY < 140,
            issue.auditType == .dynamicType || issue.auditType == .contrast {
             return .systemBarButton
+        }
+        if issue.auditType == .contrast, let e = issue.element, e.frame.minY < 124 {
+            return .underNavigationBar
         }
         if issue.element == nil, [.contrast, .elementDetection, .textClipped].contains(issue.auditType),
            mapScreens.contains(screen) || (issue.auditType == .contrast && sheetScreens.contains(screen)) {
