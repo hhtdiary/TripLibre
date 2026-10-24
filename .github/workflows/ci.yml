@@ -150,6 +150,9 @@ jobs:
           xcrun simctl boot "${sim%% *}" || true
           xcrun simctl bootstatus "${sim%% *}" -b
       - name: make ui-test
+        # failures also print a screenshot to the log (see HHTUITestCase.logScreenshot)
+        env:
+          TEST_RUNNER_HHT_LOG_SCREENSHOTS: "1"
         run: make ui-test SIM_ID="$SIM_ID" RESULT_BUNDLE=.build-xcode/ui-tests.xcresult
       - name: Upload test results
         if: failure()

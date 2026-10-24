@@ -1,3 +1,4 @@
+import UIKit
 import XCTest
 
 /// Launches the app on a fresh demo database (`-hhtUITest`, see AppModel.isUITest): three days of synthetic
@@ -96,5 +97,32 @@ class HHTUITestCase: XCTestCase {
 
     func waitForNavigationTitle(_ title: String, timeout: TimeInterval = 10) {
         XCTAssertTrue(app.navigationBars[title].waitForExistence(timeout: timeout), "screen \(title)")
+    }
+
+    // MARK: screenshots in the log
+
+    /// CI sets `TEST_RUNNER_HHT_LOG_SCREENSHOTS=1` (xcodebuild hands it to the tests without the prefix): each failure
+    /// then also prints a screenshot to the log, base64-encoded, for when the .xcresult bundle isn't at hand.
+    static let logsScreenshots = ProcessInfo.processInfo.environment["HHT_LOG_SCREENSHOTS"] == "1"
+
+    override func record(_ issue: XCTIssue) {
+        if Self.logsScreenshots { logScreenshot("failure") }
+        super.record(issue)
+    }
+
+    /// Prints the screen (at 1x, JPEG) or, given a frame in points, that part of it (at 2x, PNG, so colours are exact)
+    /// as one `[screenshot <name>] <base64>` line.
+    func logScreenshot(_ name: String, crop: CGRect? = nil) {
+        let shot = XCUIScreen.main.screenshot().image
+        let bounds = CGRect(origin: .zero, size: shot.size)
+        let rect = crop.map { $0.insetBy(dx: -8, dy: -8).intersection(bounds) } ?? bounds
+        guard !rect.isEmpty else { return }
+        let format = UIGraphicsImageRendererFormat()
+        format.scale = crop == nil ? 1 : 2
+        let image = UIGraphicsImageRenderer(size: rect.size, format: format).image { _ in
+            shot.draw(at: CGPoint(x: -rect.minX, y: -rect.minY))
+        }
+        guard let data = crop == nil ? image.jpegData(compressionQuality: 0.6) : image.pngData() else { return }
+        print("[screenshot \(name)] \(data.base64EncodedString())")
     }
 }

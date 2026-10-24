@@ -92,6 +92,7 @@ final class AccessibilityAuditTests: HHTUITestCase {
     /// the screen and element so it's actionable.
     private func audit(_ screen: String, file: StaticString = #filePath, line: UInt = #line) throws {
         var unexpected: [String] = []
+        var unexpectedFrames: [CGRect] = []
         let keyboard = app.keyboards.firstMatch
         let tabBar = app.buttons["tab-Today"]
         let layout = KnownIssue.Layout(screenHeight: app.windows.firstMatch.frame.height,
@@ -105,8 +106,12 @@ final class AccessibilityAuditTests: HHTUITestCase {
             } else {
                 print("[a11y] \(screen): \(Self.describe(issue))")
                 unexpected.append(Self.describe(issue))
+                if let e = issue.element { unexpectedFrames.append(e.frame) }
             }
             return true
+        }
+        if Self.logsScreenshots {
+            for (i, frame) in unexpectedFrames.enumerated() { logScreenshot("\(screen) finding \(i + 1)", crop: frame) }
         }
         if !unexpected.isEmpty {
             XCTFail("\(screen): \(unexpected.count) accessibility issue(s):\n" + unexpected.joined(separator: "\n"), file: file, line: line)
