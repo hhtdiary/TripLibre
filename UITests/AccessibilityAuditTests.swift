@@ -157,7 +157,8 @@ enum KnownIssue: String {
     /// street and point-of-interest labels on the maps, and the dimmed screen behind a sheet.
     case systemDrawnText
 
-    /// Rows of a `List` (Today, Timeline, Settings, Trip/Visit detail) in the lower part of the screen. As the audit
+    /// Text and button rows of a `List` (Today, Timeline, Settings, Trip/Visit detail) in the lower part of the screen
+    /// (e.g. Settings' "Open iOS Settings" button, shown while location access isn't "Always"). As the audit
     /// enlarges the text they are pushed off screen, and List removes rows it no longer shows, so the audit can't
     /// measure them and reports partial (or no) Dynamic Type support or clipping. The same rows are measured fine
     /// when they sit higher up, and these screens are checked at the largest size by hand (Manual checklist).
@@ -215,7 +216,7 @@ enum KnownIssue: String {
         }
         // below the top third: at the largest sizes the rows above grow about threefold and push these out
         if listScreens.contains(screen), issue.auditType == .dynamicType || issue.auditType == .textClipped,
-           let e = issue.element, e.elementType == .staticText, e.frame.minY > layout.screenHeight * 0.35 {
+           let e = issue.element, [.staticText, .button].contains(e.elementType), e.frame.minY > layout.screenHeight * 0.35 {
             return .listRowPushedOffScreen
         }
         return nil

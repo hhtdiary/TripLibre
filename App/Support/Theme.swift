@@ -339,9 +339,15 @@ struct ToonFlow: Layout {
     func sizeThatFits(proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) -> CGSize {
         let width = proposal.width ?? .infinity
         let rows = rows(subviews, width: width)
-        let heights = rows.map { $0.map(\.size.height).max() ?? 0 }
-        let widest = rows.map { r in r.map(\.size.width).reduce(0, +) + spacing * CGFloat(max(0, r.count - 1)) }.max() ?? 0
-        return CGSize(width: min(width, widest), height: heights.reduce(0, +) + spacing * CGFloat(max(0, rows.count - 1)))
+        let heights: [CGFloat] = rows.map { $0.map(\.size.height).max() ?? 0 }
+        // split up: as one expression this times out the type checker on slower machines (CI)
+        let widths: [CGFloat] = rows.map { r -> CGFloat in
+            let items: CGFloat = r.map(\.size.width).reduce(0, +)
+            return items + spacing * CGFloat(max(0, r.count - 1))
+        }
+        let widest: CGFloat = widths.max() ?? 0
+        let height: CGFloat = heights.reduce(0, +) + spacing * CGFloat(max(0, rows.count - 1))
+        return CGSize(width: min(width, widest), height: height)
     }
 
     func placeSubviews(in bounds: CGRect, proposal: ProposedViewSize, subviews: Subviews, cache: inout ()) {

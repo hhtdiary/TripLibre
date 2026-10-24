@@ -37,7 +37,7 @@ Accepted findings live in `KnownIssue` in `UITests/AccessibilityAuditTests.swift
 | `systemDrawnText` | Map, Today, Trip/Visit detail; sheets | Text the system draws outside our view hierarchy, reported with no element: MapKit's street and place labels, and the dimmed screen behind a sheet. |
 | `behindKeyboard` | Add a cost | Rows under the on-screen keyboard (the sheet opens with the amount field focused): the audit measures the keys, and reads their captions as text with no element. |
 | `behindTabBar` | Today and other tab screens | Elements partly under the floating tab bar: the audit measures the bar's pixels and the smaller visible area. Matched by the element's frame reaching under the bar. |
-| `listRowPushedOffScreen` | Today, Timeline, Settings, Trip/Visit detail | Dynamic Type / clipping findings on `List` rows below the top third of the screen: as the audit enlarges the text they're pushed off screen and List removes them, so they can't be measured. The same rows pass when they sit higher up; these screens are checked at the largest size by hand (below). |
+| `listRowPushedOffScreen` | Today, Timeline, Settings, Trip/Visit detail | Dynamic Type / clipping findings on `List` text and button rows below the top third of the screen: as the audit enlarges the text they're pushed off screen and List removes them, so they can't be measured. The same rows pass when they sit higher up; these screens are checked at the largest size by hand (below). |
 
 ### Dynamic Type and contrast
 

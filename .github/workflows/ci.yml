@@ -121,7 +121,8 @@ jobs:
 
   ui-test:
     name: UI tests + accessibility audits (simulator)
-    # The audits are tuned on iOS 27 (Xcode 27), which needs a macOS 26 runner; macos-15 tops out at Xcode 26.
+    # macos-26 has the newest Xcode and iOS simulator GitHub offers (Xcode 26.6 / iOS 26.5 as of Oct 2026);
+    # macos-15 tops out at Xcode 26.3 / iOS 26.2.
     runs-on: macos-26
     timeout-minutes: 45
     steps:
