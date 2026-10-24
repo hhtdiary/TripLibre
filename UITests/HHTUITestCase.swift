@@ -94,6 +94,9 @@ class HHTUITestCase: XCTestCase {
         let done = app.navigationBars.buttons[button].firstMatch
         XCTAssertTrue(done.waitForExistence(timeout: 5), "\(button) button")
         done.tap()
+        // until the sheet has gone, the screen under it (and its tab bar) isn't in the accessibility tree, and reveal()
+        // would measure against the window's bottom and leave rows under the tab bar
+        XCTAssertTrue(done.waitForNonExistence(timeout: 5), "sheet closes")
     }
 
     func waitForNavigationTitle(_ title: String, timeout: TimeInterval = 10) {

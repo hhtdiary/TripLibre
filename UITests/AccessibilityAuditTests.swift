@@ -106,6 +106,8 @@ final class AccessibilityAuditTests: HHTUITestCase {
                 print("[a11y] \(screen): accepted known issue (\(known)): \(Self.describe(issue))")
             } else {
                 print("[a11y] \(screen): \(Self.describe(issue))")
+                // the screen as the audit saw it (e.g. at the text size it was testing), not as it is afterwards
+                if Self.logsScreenshots { logScreenshot("\(screen) during finding \(unexpected.count + 1)") }
                 unexpected.append(Self.describe(issue))
                 if let e = issue.element { unexpectedFrames.append(e.frame) }
             }
