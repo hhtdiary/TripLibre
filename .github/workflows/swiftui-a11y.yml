@@ -1,0 +1,42 @@
+name: SwiftUI accessibility (a11y-check)
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: swiftui-a11y-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  static-accessibility:
+    name: a11y-check (SwiftUI source)
+    runs-on: macos-15
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+      # Source-level checks only: no iOS simulator, XCUITest, or runtime accessibility audit.
+      - name: Install a11y-check
+        run: |
+          brew tap cvs-health/ios-swiftui-accessibility-techniques https://github.com/cvs-health/ios-swiftui-accessibility-techniques.git
+          env -u SDKROOT brew install --HEAD cvs-health/ios-swiftui-accessibility-techniques/a11y-check
+          a11y-check --version
+      - name: Analyze SwiftUI application source
+        run: |
+          a11y-check App --per-view --no-trend
+      - name: Generate report
+        if: always()
+        run: |
+          a11y-check App --format html --no-trend > swiftui-accessibility.html
+      - name: Upload report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: swiftui-accessibility-report
+          path: swiftui-accessibility.html
+          if-no-files-found: warn
