@@ -43,19 +43,9 @@ final class AccessibilityAuditTests: HHTUITestCase {
         amount.tap()
         amount.typeText("4.50")
         app.buttons["costSave"].tap()
-        // a second cost on another day, so Spending draws its day-by-day chart as it does on any real diary
-        waitForSheetToClose("Add a cost")
-        app.buttons["Previous day"].tap()
-        reveal(add)
-        add.tap()
-        waitForNavigationTitle("Add a cost")
-        amount.tap()
-        amount.typeText("3")
-        app.buttons["costSave"].tap()
         waitForSheetToClose("Add a cost")
         openSpending()
-        waitForSeededContent(text(containing: "$7.50"), "the two costs just added")
-        XCTAssertTrue(app.staticTexts["Day by day"].exists, "Spending shows the day-by-day chart")
+        waitForSeededContent(text(containing: "$4.50"), "the cost just added")
         try audit("Spending")
     }
 

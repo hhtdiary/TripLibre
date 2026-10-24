@@ -1,5 +1,4 @@
 import SwiftUI
-import Charts
 import HHTCore
 
 /// Where the money went (issue #17): totals, travel vs at destinations, categories, modes, places, and every cost.
@@ -32,7 +31,6 @@ struct SpendingView: View {
                     if !s.isEmpty {
                         stickers(s)
                         split(s)
-                        if s.byDay.count > 1 { perDay(s) }
                         categories(s)
                         if !s.byMode.isEmpty { modes(s) }
                         if !s.byPlace.isEmpty { placesCard(s) }
@@ -115,47 +113,6 @@ struct SpendingView: View {
         }
         .padding(14)
         .toonCard(radius: 22, shadow: 4)
-    }
-
-    private func perDay(_ s: SpendingSummary) -> some View {
-        let days = s.byDay.compactMap { k, v in Fmt.parseYMD(k).map { ($0, v) } }.sorted { $0.0 < $1.0 }
-        // a tick per day for short spans, about four in all for long ones: left to itself, Charts ticks a two-day
-        // span every 12 hours, and those labels overlap
-        let span = days.count < 2 ? 0 : Calendar.current.dateComponents([.day], from: days[0].0, to: days[days.count - 1].0).day ?? 0
-        let tickDays = max(1, Int((Double(span + 1) / 4).rounded(.up)))
-        return VStack(alignment: .leading, spacing: 10) {
-            SectionLabel(text: "Day by day")
-            Chart(days, id: \.0) { d, v in
-                BarMark(x: .value("Day", d, unit: .day), y: .value("Spent", v))
-                    .foregroundStyle(CostStyle.color)
-                    .cornerRadius(3)
-                    // the chart element below reads every day; Charts' own node per bar has no text, and the
-                    // contrast audit on iOS 26.5 measures the mint bar against white as if it were text (issue #67)
-                    .accessibilityHidden(true)
-            }
-            // axis labels in the app's ink-grey rather than the system grey (~3.4:1 on white; issue #67)
-            .chartXAxis {
-                AxisMarks(values: .stride(by: .day, count: tickDays)) { _ in
-                    AxisGridLine()
-                    AxisValueLabel(format: .dateTime.month(.abbreviated).day())
-                        .foregroundStyle(Toon.muted).font(.caption2.weight(.bold))
-                }
-            }
-            .chartYAxis {
-                AxisMarks { v in
-                    AxisGridLine()
-                    AxisValueLabel { if let x = v.as(Double.self) { Text(money(x)) } }
-                        .foregroundStyle(Toon.muted).font(.caption2.weight(.bold))
-                }
-            }
-            .frame(height: 140)
-            // one element that reads out every day: the axis labels are drawn text the audit can't otherwise place
-            .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Spent per day")
-            .accessibilityValue(days.map { "\(Fmt.shortDay($0.0)), \(money($0.1))" }.joined(separator: "; "))
-            .padding(14)
-            .toonCard(radius: 22, shadow: 4)
-        }
     }
 
     private func categories(_ s: SpendingSummary) -> some View {

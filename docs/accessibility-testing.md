@@ -103,8 +103,8 @@ Xcode › Open Developer Tool › Accessibility Inspector).
 
 - **Dark mode**: the app forces the light appearance (`preferredColorScheme(.light)` in RootView) because the sticker
   palette has no dark variant yet; contrast is checked in light only.
-- **Dynamic Type in charts and on the map**: chart axis labels, the week chart's day letters and the Map's stats card
-  grow with the text but share their space with the drawing, so at the largest sizes they get tight. The widgets keep
+- **Dynamic Type in charts and on the map**: the week chart's day letters, the hour chart's axis and the Map's stats
+  card grow with the text but share their space with the drawing, so at the largest sizes they get tight. The widgets keep
   fixed sizes. Track regressions found with the checklist above as separate issues.
 - **Map gestures**: panning/zooming the map has no non-gesture equivalent; the information it shows (places, visit
   counts, trip totals) is available in Places, Stats and the day lists.
