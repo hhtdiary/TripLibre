@@ -47,9 +47,11 @@ targets:
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
-        NSLocationWhenInUseUsageDescription: "TripLibre records where you go to build your private travel diary. Data never leaves your iPhone."
-        NSLocationAlwaysAndWhenInUseUsageDescription: "Allow “Always” so TripLibre can log trips in the background. GPS is used only while you are moving; data stays on your iPhone."
-        NSMotionUsageDescription: "Motion activity (walking, cycling, in a vehicle) helps TripLibre tell travel modes apart. It stays on your iPhone."
+        # Keep these in line with release/app-privacy-details.md: no absolute "never leaves" claims, since optional
+        # address lookup and map tiles go to Apple (#41).
+        NSLocationWhenInUseUsageDescription: "TripLibre uses your location to build your travel diary of visits and trips. Your diary is saved only on this iPhone; TripLibre has no account or server."
+        NSLocationAlwaysAndWhenInUseUsageDescription: "Allow “Always” so TripLibre can log trips while it’s in the background. GPS runs only while you’re moving, and your diary is saved only on this iPhone."
+        NSMotionUsageDescription: "Motion activity (walking, cycling, in a vehicle) helps TripLibre tell travel modes apart. It’s used only on this iPhone."
         UIBackgroundModes: [location, fetch]
         BGTaskSchedulerPermittedIdentifiers: [com.zyang91.hht.refresh]
         UIFileSharingEnabled: true
