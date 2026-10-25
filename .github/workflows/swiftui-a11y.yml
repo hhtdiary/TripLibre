@@ -35,7 +35,7 @@ jobs:
           a11y-check App --format html --no-trend > swiftui-accessibility.html
       - name: Upload report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: swiftui-accessibility-report
           path: swiftui-accessibility.html
