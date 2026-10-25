@@ -31,9 +31,9 @@ Things found while preparing this kit. None of them are fixed in this folder.
 
 1. ~~Privacy manifest is missing.~~ **Done:** `App/Support/PrivacyInfo.xcprivacy` and `Widgets/PrivacyInfo.xcprivacy`
    (details in `app-privacy-details.md`).
-2. **Version number.** `project.yml` still says `MARKETING_VERSION: "1.2.0"`, but `CHANGELOG.md` already has a 1.3.0
-   release. Set the version you want on the store (e.g. `1.4.0` or `2.0.0`) and bump `CURRENT_PROJECT_VERSION` for
-   every upload.
+2. ~~Version number.~~ **Done:** `MARKETING_VERSION` is `2.1.0`, matching the latest GitHub release (v2.1.0,
+   2026-10-25); `CURRENT_PROJECT_VERSION` is `1` for the first upload. Bump `CURRENT_PROJECT_VERSION` for every
+   further upload of 2.1.0, and `MARKETING_VERSION` with the next GitHub release.
 3. **Paid Apple Developer Program membership** and an App Store Connect app record for bundle ID `com.zyang91.hht`
    (the App Group `group.com.zyang91.hht` must be registered on the same team). Free personal teams can't upload.
 4. **Release build + archive.** `xcodebuild archive` with the Release configuration, then upload through Xcode
