@@ -2,6 +2,10 @@ import WidgetKit
 import SwiftUI
 import HHTCore
 
+// Widgets draw on a fixed canvas that doesn't grow with the text size (see Font.toonFixed), so their type is
+// fixed and long lines shrink to fit instead of wrapping.
+// a11y-check:disable-file fixed-font-size, line-limit-1
+
 // The chosen "Sticker" style (issue #47 design A): small status, medium today, large last 7 days.
 
 private struct InkBadge: View {

@@ -61,7 +61,7 @@ struct PlacesView: View {
                                 PlaceTile(place: p, stats: stats[p.id]).tilt(tilts[i % tilts.count])
                             }
                             .buttonStyle(.plain)
-                            .contextMenu { deleteButton(p) }
+                            .contextMenu { deleteButton(p) } // a11y-check:disable sheet-focus-return (iOS puts VoiceOver focus back on the trigger when it closes)
                         }
                     }
                     .padding(.vertical, 4)
@@ -73,7 +73,7 @@ struct PlacesView: View {
                             UnnamedPlaceRow(place: p, stats: stats[p.id])
                         }
                         .buttonStyle(.plain)
-                        .contextMenu { deleteButton(p) }
+                        .contextMenu { deleteButton(p) } // a11y-check:disable sheet-focus-return (iOS puts VoiceOver focus back on the trigger when it closes)
                     }
                 }
             }
@@ -83,10 +83,10 @@ struct PlacesView: View {
         .scrollDismissesKeyboard(.immediately)
         .background(ToonBackground())
         .navigationTitle("Places")
-        .confirmationDialog("Delete \(pendingDelete.flatMap { $0.isNamed ? $0.displayName : nil } ?? "this place")?",
+        .confirmationDialog("Delete \(pendingDelete.flatMap { $0.isNamed ? $0.displayName : nil } ?? "this place")?", // a11y-check:disable sheet-focus-return (iOS puts VoiceOver focus back on the trigger when it closes)
                             isPresented: Binding(get: { pendingDelete != nil }, set: { if !$0 { pendingDelete = nil } }),
                             titleVisibility: .visible, presenting: pendingDelete) { p in
-            Button("Delete place and its \(visitWord(stats[p.id]?.visitCount ?? 0))", role: .destructive) {
+            Button("Delete place and its \(visitWord(stats[p.id]?.visitCount ?? 0))", role: .destructive) { // a11y-check:disable duplicate-button-label (each one is in a different sheet or screen)
                 model.perform { try model.edit.deletePlace(p.id) }
             }
         } message: { _ in Text(PlaceDeletion.explanation) }
@@ -102,8 +102,10 @@ struct PlacesView: View {
 
     private var searchField: some View {
         HStack(spacing: 10) {
-            Image(systemName: "magnifyingglass").font(.system(size: 17, weight: .bold)).foregroundStyle(Toon.ink)
-            TextField("Search places", text: $query)
+            // fixed: a magnifier that grows takes the width the search text needs (Apple's audit reports it clipped)
+            Image(systemName: "magnifyingglass").font(.system(size: 17, weight: .bold)) // a11y-check:disable fixed-font-size
+                .foregroundStyle(Toon.ink).accessibilityHidden(true)
+            TextField("Search places", text: $query) // a11y-check:disable textfield-missing-label (the magnifier is its visible label)
                 .font(.toon(15, .bold)).foregroundStyle(Toon.ink)
                 .autocorrectionDisabled()
                 .submitLabel(.search)
@@ -121,7 +123,7 @@ struct PlacesView: View {
     private func pill(_ title: String, on: Bool, icon: String? = nil, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             HStack(spacing: 4) {
-                if let icon { Image(systemName: icon).fontWeight(.black) }
+                if let icon { Image(systemName: icon).fontWeight(.black).accessibilityHidden(true) }
                 Text(title)
             }
         }
@@ -148,12 +150,14 @@ struct PlacesView: View {
 
 /// Named place as a square sticker in the two-column grid.
 struct PlaceTile: View {
+    /// grows with the icon inside it
+    @ScaledMetric(relativeTo: .subheadline) private var badge: CGFloat = 30
     let place: Place
     let stats: TravelStore.PlaceStats?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            ToonChip(symbol: place.category?.symbol ?? "mappin", color: place.toonColor, size: 52)
+            ToonChip(symbol: place.category?.symbol ?? "mappin", color: place.toonColor, size: 52, label: place.category?.label)
             Text(place.displayName)
                 .font(.toon(18, .bold)).foregroundStyle(Toon.ink)
                 .toonLineLimit(2).multilineTextAlignment(.leading)
@@ -168,8 +172,8 @@ struct PlaceTile: View {
         .toonCard(radius: 22, shadow: 4)
         .overlay(alignment: .topTrailing) {
             if place.favorite {
-                Image(systemName: "star.fill").font(.system(size: 14, weight: .bold)).foregroundStyle(Toon.ink)
-                    .frame(width: 30, height: 30)
+                Image(systemName: "star.fill").font(.toon(14, .bold)).foregroundStyle(Toon.ink)
+                    .frame(width: badge, height: badge)
                     .background(Circle().fill(Toon.sun))
                     .overlay(Circle().strokeBorder(Toon.ink, lineWidth: 2))
                     .offset(x: 8, y: -8)
@@ -186,7 +190,7 @@ struct UnnamedPlaceRow: View {
 
     var body: some View {
         ToonRowStack {
-            ToonChip(symbol: place.category?.symbol ?? "mappin", color: Toon.stone, size: 46)
+            ToonChip(symbol: place.category?.symbol ?? "mappin", color: Toon.stone, size: 46, label: place.category?.label)
             VStack(alignment: .leading, spacing: 2) {
                 Text(place.address ?? "Unnamed place").font(.toon(15, .heavy)).foregroundStyle(Toon.ink).toonLineLimit(2)
                 Text("\(stats?.visitCount ?? 0) visits · \(Fmt.hours(stats?.totalDwell ?? 0))"
@@ -233,25 +237,45 @@ struct PlaceDetailView: View {
                     .frame(height: 200).listRowInsets(EdgeInsets())
                 }
                 Section {
-                    TextField("Name", text: Binding(get: { draft?.name ?? "" }, set: { draft?.name = $0.isEmpty ? nil : $0 }))
+                    LabeledContent("Name") { TextField("Name", text: Binding(get: { draft?.name ?? "" }, set: { draft?.name = $0.isEmpty ? nil : $0 })) }
                     PlaceCategoryPicker(selection: Binding(get: { draft?.category }, set: { draft?.category = $0 }),
                                         custom: Binding(get: { draft?.customCategory }, set: { draft?.customCategory = $0 }))
-                    TextField("Code (IATA, station…)", text: Binding(get: { draft?.code ?? "" }, set: { draft?.code = $0.isEmpty ? nil : $0.uppercased() }))
-                        .capsKeyboard()
+                    LabeledContent("Code") {
+                        TextField("Code", text: Binding(get: { draft?.code ?? "" }, set: { draft?.code = $0.isEmpty ? nil : $0.uppercased() }),
+                                  prompt: Text("IATA, station…"))
+                            .capsKeyboard()
+                    }
                     HStack {
                         Text("Radius")
                         Slider(value: Binding(get: { draft?.radius ?? 80 }, set: { draft?.radius = $0.rounded() }), in: 30...2000, step: 10)
+                            .accessibilityLabel("Radius")
+                            .accessibilityValue("\(Int(p.radius)) metres")
                         Text("\(Int(p.radius)) m").monospacedDigit().frame(width: 64, alignment: .trailing)
                     }
                     Toggle("Favorite", isOn: Binding(get: { draft?.favorite ?? false }, set: { draft?.favorite = $0 }))
                 } header: { Text("Place").toonSectionText() }
                 Section {
-                    TextField("Address", text: Binding(get: { draft?.address ?? "" }, set: { draft?.address = $0.isEmpty ? nil : $0 }))
-                    TextField("City", text: Binding(get: { draft?.city ?? "" }, set: { draft?.city = $0.isEmpty ? nil : $0 }))
-                    TextField("Region / state", text: Binding(get: { draft?.region ?? "" }, set: { draft?.region = $0.isEmpty ? nil : $0 }))
-                    TextField("Country", text: Binding(get: { draft?.country ?? "" }, set: { draft?.country = $0.isEmpty ? nil : $0 }))
-                    TextField("Notes", text: Binding(get: { draft?.notes ?? "" }, set: { draft?.notes = $0.isEmpty ? nil : $0 }), axis: .vertical)
+                    LabeledContent("Address") {
+                        TextField("Address", text: Binding(get: { draft?.address ?? "" }, set: { draft?.address = $0.isEmpty ? nil : $0 }))
+                            .textContentType(.fullStreetAddress)
+                    }
+                    LabeledContent("City") {
+                        TextField("City", text: Binding(get: { draft?.city ?? "" }, set: { draft?.city = $0.isEmpty ? nil : $0 }))
+                            .textContentType(.addressCity)
+                    }
+                    LabeledContent("Region / state") {
+                        TextField("Region / state", text: Binding(get: { draft?.region ?? "" }, set: { draft?.region = $0.isEmpty ? nil : $0 }))
+                            .textContentType(.addressState)
+                    }
+                    LabeledContent("Country") {
+                        TextField("Country", text: Binding(get: { draft?.country ?? "" }, set: { draft?.country = $0.isEmpty ? nil : $0 }))
+                            .textContentType(.countryName)
+                    }
                 } header: { Text("Location info").toonSectionText() }
+                Section {
+                    TextField("Notes", text: Binding(get: { draft?.notes ?? "" }, set: { draft?.notes = $0.isEmpty ? nil : $0 }), axis: .vertical)
+                        .accessibilityLabel("Notes")
+                } header: { Text("Notes").toonSectionText() }
                 if draft != place {
                     Section {
                         Button("Save changes") { model.perform { try model.edit.updatePlace(draft!) } }
@@ -290,8 +314,8 @@ struct PlaceDetailView: View {
             loadedRevision = model.revision
             load()
         }
-        .confirmationDialog("Delete this place?", isPresented: $confirmDelete, titleVisibility: .visible) {
-            Button("Delete place and its \(visitWord(visits.count))", role: .destructive) {
+        .confirmationDialog("Delete this place?", isPresented: $confirmDelete, titleVisibility: .visible) { // a11y-check:disable sheet-focus-return (iOS puts VoiceOver focus back on the trigger when it closes)
+            Button("Delete place and its \(visitWord(visits.count))", role: .destructive) { // a11y-check:disable duplicate-button-label (each one is in a different sheet or screen)
                 model.perform { try model.edit.deletePlace(placeID) }
                 dismiss()
             }
@@ -401,7 +425,7 @@ private struct PlaceCategoryList: View {
             ForEach(names, id: \.self) { customRow($0) }
             if query.isEmpty {
                 HStack {
-                    TextField("New type, e.g. Volunteering", text: $newCustom)
+                    LabeledContent("New type") { TextField("New type", text: $newCustom, prompt: Text("e.g. Volunteering")) }
                         .submitLabel(.done)
                         .onSubmit { useCustom(newCustom) }
                     Button("Use") { useCustom(newCustom) }

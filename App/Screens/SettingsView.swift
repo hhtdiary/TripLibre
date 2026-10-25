@@ -63,7 +63,7 @@ struct SettingsView: View {
             importKind = nil
             if case .success(let url) = result, let kind { runImport(kind, url) }
         }
-        .alert("Done", isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) {
+        .alert("Done", isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) { // a11y-check:disable sheet-focus-return (iOS puts VoiceOver focus back on the trigger when it closes)
             Button("OK", role: .cancel) {}
         } message: { Text(message ?? "") }
     }
@@ -142,7 +142,7 @@ struct SettingsView: View {
             Text("Trips CSV: date,start_time,end_time,origin,destination,mode,distance_km,purpose,notes. Flights CSV: date,origin,destination,airline,flight_number,… Formats are in docs/import-formats.md.")
                 .toonSectionText()
         }
-        .confirmationDialog("Download ~12 MB public-domain airport list from ourairports.com?", isPresented: $confirmAirports, titleVisibility: .visible) {
+        .confirmationDialog("Download ~12 MB public-domain airport list from ourairports.com?", isPresented: $confirmAirports, titleVisibility: .visible) { // a11y-check:disable sheet-focus-return (iOS puts VoiceOver focus back on the trigger when it closes)
             Button("Download") { downloadAirports() }
         } message: { Text("Only the list is downloaded; nothing about you is sent.") }
     }
@@ -169,10 +169,10 @@ struct SettingsView: View {
             Text("Rebuilding re-runs detection on raw points; anything you corrected, confirmed, deleted or created stays as it is. A database snapshot is also saved daily (last 7 kept).")
                 .toonSectionText()
         }
-        .confirmationDialog("Erase everything?", isPresented: $confirmErase, titleVisibility: .visible) {
+        .confirmationDialog("Erase everything?", isPresented: $confirmErase, titleVisibility: .visible) { // a11y-check:disable sheet-focus-return (iOS puts VoiceOver focus back on the trigger when it closes)
             Button("Erase all location history", role: .destructive) { confirmErase2 = true }
         } message: { Text("Raw points, visits, trips, places, flights and edits will be permanently deleted from this iPhone. Backups in Files are not touched.") }
-        .alert("Really erase?", isPresented: $confirmErase2) {
+        .alert("Really erase?", isPresented: $confirmErase2) { // a11y-check:disable sheet-focus-return (iOS puts VoiceOver focus back on the trigger when it closes)
             Button("Erase", role: .destructive) { model.perform { try model.store.eraseAll() } }
             Button("Cancel", role: .cancel) {}
         }

@@ -109,6 +109,7 @@ struct TripDetailView: View {
 
             Section {
                 TextField("Add a note", text: $notes, axis: .vertical)
+                    .accessibilityLabel("Notes") // the section header is the visible label
                     .onSubmit(saveNotes)
             } header: { Text("Notes").toonSectionText() }
 
@@ -144,7 +145,7 @@ struct TripDetailView: View {
             } header: { Text("Details").toonSectionText() }
         }
         .groupedList()
-        .confirmationDialog("Remove this trip?", isPresented: $confirmDelete, titleVisibility: .visible) {
+        .confirmationDialog("Remove this trip?", isPresented: $confirmDelete, titleVisibility: .visible) { // a11y-check:disable sheet-focus-return (iOS puts VoiceOver focus back on the trigger when it closes)
             Button("Remove and join the visits before/after", role: .destructive) {
                 model.perform { try model.edit.deleteTrip(t.id) }
                 dismiss()
@@ -279,7 +280,7 @@ struct SplitTripSheet: View {
             .navigationTitle("Add stop")
             .inlineTitle()
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } // a11y-check:disable duplicate-button-label (each one is in a different sheet or screen)
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Split") {
                         let stop = SplitTimes.tripStop(start: start, end: end, arrival: trip.arrival)
@@ -308,7 +309,8 @@ struct SplitTripSheet: View {
                 if let p = pin { Marker("Stop", systemImage: "mappin", coordinate: p.cl).tint(.orange) }
             }
             .mapStyle(.standard(pointsOfInterest: .including([.publicTransport, .store, .restaurant, .cafe])))
-            .onTapGesture { point in
+            // tapping drops a pin, it isn't a button; the Place picker under the map is the non-pointer way to choose
+            .onTapGesture { point in // a11y-check:disable tap-gesture-missing-button-trait
                 guard let c = proxy.convert(point, from: .local) else { return }
                 pin = Coordinate(c.latitude, c.longitude)
                 placeID = nil
@@ -352,9 +354,9 @@ struct ModeChangeSheet: View {
             .navigationTitle("Change of mode")
             .inlineTitle()
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } // a11y-check:disable duplicate-button-label (each one is in a different sheet or screen)
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button("Save") { // a11y-check:disable duplicate-button-label (each one is in a different sheet or screen)
                         let at = time, mode = before
                         model.perform {
                             try model.edit.addModeChange(tripID: trip.id, at: at, mode: after)
@@ -425,9 +427,9 @@ struct SegmentEditSheet: View {
             .navigationTitle("Segment \(index + 1) of \(trip.segments.count)")
             .inlineTitle()
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } // a11y-check:disable duplicate-button-label (each one is in a different sheet or screen)
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button("Save") { // a11y-check:disable duplicate-button-label (each one is in a different sheet or screen)
                         let id = segment.id, newMode = mode, newEnd = end
                         let modeChanged = newMode != segment.mode || !segment.isUserSet
                         let endChanged = next != nil && abs(newEnd.timeIntervalSince(segment.end)) >= 1
@@ -440,7 +442,7 @@ struct SegmentEditSheet: View {
                     .confirmTint()
                 }
             }
-            .confirmationDialog("Remove this segment?", isPresented: $confirmRemove, titleVisibility: .visible) {
+            .confirmationDialog("Remove this segment?", isPresented: $confirmRemove, titleVisibility: .visible) { // a11y-check:disable sheet-focus-return (iOS puts VoiceOver focus back on the trigger when it closes)
                 Button("Remove", role: .destructive) {
                     let id = segment.id
                     model.perform { try model.edit.removeSegment(id) }

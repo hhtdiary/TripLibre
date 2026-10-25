@@ -41,6 +41,10 @@ private typealias A = AgentTheme
 /// The diary agent: recaps the day, asks about stops it can't explain, proposes mode fixes,
 /// and answers questions about the diary. All of it runs on this iPhone (see `DiaryAgent`).
 struct AgentView: View {
+    // icon tiles and buttons grow with the icons inside them
+    @ScaledMetric(relativeTo: .body) private var headerTile: CGFloat = 40
+    @ScaledMetric(relativeTo: .body) private var dayButton: CGFloat = 44
+    @ScaledMetric(relativeTo: .body) private var sendButton: CGFloat = 46
     @EnvironmentObject var model: AppModel
     @Environment(\.tabBarSpace) private var tabBarSpace
     @State private var day = Calendar.current.startOfDay(for: Date())
@@ -51,6 +55,7 @@ struct AgentView: View {
     @State private var turns: [Exchange] = []
     @State private var question = ""
     @FocusState private var inputFocused: Bool
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     struct Recalled: Identifiable { let id: String; let stop: String; let purpose: TripPurpose }
     struct Exchange: Identifiable { let id = UUID(); let question: String; let answer: DiaryAgent.Answer? }
@@ -63,7 +68,7 @@ struct AgentView: View {
             ScrollViewReader { proxy in
                 ScrollView {
                     VStack(alignment: .leading, spacing: 16) {
-                        Text(dateLine).font(.system(size: 11, design: .monospaced)).tracking(0.6)
+                        Text(dateLine).font(.scaled(11, design: .monospaced)).tracking(0.6)
                             .foregroundStyle(A.muted).frame(maxWidth: .infinity)
                         summary
                         ForEach(answered) { r in
@@ -86,13 +91,14 @@ struct AgentView: View {
                 }
                 .contentMargins(.bottom, 0, for: .scrollContent)
                 .scrollDismissesKeyboard(.interactively)
-                .onChange(of: turns.count) { withAnimation { proxy.scrollTo("bottom", anchor: .bottom) } }
+                .onChange(of: turns.count) { withAnimation(reduceMotion ? nil : .default) { proxy.scrollTo("bottom", anchor: .bottom) } }
             }
             inputBar
         }
         .background(A.ground.ignoresSafeArea())
         .foregroundStyle(A.ink)
         .fontDesign(.default)
+        .navigationTitle("Diary agent")
         .toolbar(.hidden, for: .navigationBar)
         .task(id: model.revision) { load() }
     }
@@ -102,21 +108,21 @@ struct AgentView: View {
     private var header: some View {
         HStack(spacing: 12) {
             Image(systemName: "point.topleft.down.to.point.bottomright.curvepath")
-                .font(.system(size: 18, weight: .semibold)).foregroundStyle(A.amber)
-                .frame(width: 40, height: 40)
+                .font(.scaled(18, .semibold)).foregroundStyle(A.amber)
+                .frame(width: headerTile, height: headerTile)
                 .background(RoundedRectangle(cornerRadius: 12).fill(Color(hex: 0x0F1F3A)))
                 .accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 2) {
-                Text("Diary agent").font(.system(size: 17, weight: .semibold))
+                Text("Diary agent").font(.scaled(17, .semibold))
                 HStack(spacing: 6) {
                     Circle().fill(A.green).frame(width: 7, height: 7)
-                    Text("On-device · nothing leaves your phone").font(.system(size: 12)).foregroundStyle(A.muted)
+                    Text("On-device · nothing leaves your phone").font(.scaled(12)).foregroundStyle(A.muted)
                 }
             }
             Spacer(minLength: 0)
             NavigationLink { DayView(day: day, fixedDay: true) } label: {
-                Image(systemName: "calendar").font(.system(size: 18, weight: .medium))
-                    .frame(width: 44, height: 44)
+                Image(systemName: "calendar").font(.scaled(18, .medium))
+                    .frame(width: dayButton, height: dayButton)
                     .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(A.hairline))
             }
             .foregroundStyle(A.ink)
@@ -147,9 +153,9 @@ struct AgentView: View {
                     + Text(open == 0 ? "Everything is reviewed." : "\(open == 1 ? "One thing needs" : "\(open) things need") a quick look.")
                 VStack(alignment: .leading, spacing: 10) {
                     HStack(alignment: .firstTextBaseline) {
-                        Text(isToday ? "Today's chain" : "The day's chain").font(.system(size: 13, weight: .semibold))
+                        Text(isToday ? "Today's chain" : "The day's chain").font(.scaled(13, .semibold))
                         Spacer()
-                        Text(Fmt.distance(s.distance)).font(.system(size: 11, design: .monospaced)).foregroundStyle(A.muted)
+                        Text(Fmt.distance(s.distance)).font(.scaled(11, design: .monospaced)).foregroundStyle(A.muted)
                     }
                     FlowLayout(spacing: 6) {
                         ForEach(Array(s.chain.enumerated()), id: \.offset) { _, step in chainStep(step) }
@@ -165,7 +171,7 @@ struct AgentView: View {
     @ViewBuilder private func chainStep(_ step: DiaryAgent.ChainStep) -> some View {
         switch step {
         case .stop(let label, let asking):
-            Text(label).font(.system(size: 12)).lineLimit(1)
+            Text(label).font(.scaled(12)).toonLineLimit(1)
                 .padding(.horizontal, 8).padding(.vertical, 4)
                 .foregroundStyle(asking == nil ? A.ink : A.amberText)
                 .background {
@@ -177,7 +183,7 @@ struct AgentView: View {
                     }
                 }
         case .leg(let mode):
-            Text(mode.label.lowercased()).font(.system(size: 12)).foregroundStyle(A.green).padding(.vertical, 4)
+            Text(mode.label.lowercased()).font(.scaled(12)).foregroundStyle(A.green).padding(.vertical, 4)
         }
     }
 
@@ -193,7 +199,7 @@ struct AgentView: View {
                 }
             }
             Button("Skip this stop") { model.perform { try model.edit.confirm(visitID: v.id) } }
-                .font(.system(size: 14)).foregroundStyle(A.muted).frame(minHeight: 44)
+                .font(.scaled(14)).foregroundStyle(A.muted).frame(minHeight: 44)
         }
     }
 
@@ -207,14 +213,14 @@ struct AgentView: View {
                 Text("I couldn't tell how you made the \(when) trip.")
             }
             if proposals.count > 1 {
-                Text("\(proposals.count - 1) more after this one.").font(.system(size: 13)).foregroundStyle(A.muted)
+                Text("\(proposals.count - 1) more after this one.").font(.scaled(13)).foregroundStyle(A.muted)
             }
             NavigationLink { AgentCorrectionView(proposal: p) } label: {
                 HStack(spacing: 8) {
                     Text(p.proposed == nil ? "Pick the mode" : "Review the change")
                     Image(systemName: "arrow.right")
                 }
-                .font(.system(size: 14, weight: .medium))
+                .font(.scaled(14, .medium))
                 .padding(.horizontal, 16).frame(minHeight: 44)
                 .background(RoundedRectangle(cornerRadius: 12).fill(A.surface))
                 .overlay(RoundedRectangle(cornerRadius: 12).strokeBorder(A.border))
@@ -237,19 +243,19 @@ struct AgentView: View {
     private var inputBar: some View {
         HStack(spacing: 10) {
             TextField("Ask about your trips, modes or places", text: $question)
-                .font(.system(size: 15))
+                .font(.scaled(15))
                 .submitLabel(.send)
                 .focused($inputFocused)
                 .onSubmit { ask(question) }
                 .padding(.horizontal, 18)
-                .frame(height: 46)
+                .frame(minHeight: 46)
                 .background(Capsule().fill(A.field))
                 .overlay(Capsule().strokeBorder(A.chipBorder))
                 .accessibilityLabel("Ask your diary")
             Button { ask(question) } label: {
-                Image(systemName: "arrow.up").font(.system(size: 18, weight: .bold))
+                Image(systemName: "arrow.up").font(.scaled(18, .bold))
                     .foregroundStyle(A.onAmber)
-                    .frame(width: 46, height: 46)
+                    .frame(width: sendButton, height: sendButton)
                     .background(Circle().fill(A.amber))
             }
             .accessibilityLabel("Send")
@@ -347,7 +353,7 @@ struct AgentAnswerView: View {
             step("Compared with the \(a.days) days before · \(a.previous.trips) trips")
             step(what)
         }
-        .font(.system(size: 11, design: .monospaced))
+        .font(.scaled(11, design: .monospaced))
         .foregroundStyle(A.muted)
         .padding(.horizontal, 12).padding(.vertical, 10)
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -358,7 +364,7 @@ struct AgentAnswerView: View {
 
     private func step(_ s: String) -> some View {
         HStack(spacing: 8) {
-            Image(systemName: "checkmark").font(.system(size: 10, weight: .bold)).foregroundStyle(A.green)
+            Image(systemName: "checkmark").font(.scaled(10, .bold)).foregroundStyle(A.green)
                 .accessibilityHidden(true)
             Text(s)
         }
@@ -387,9 +393,9 @@ struct AgentAnswerView: View {
                 card(title: "Most time, last \(a.days) days") {
                     ForEach(Array(top)) { p in
                         HStack {
-                            Text(p.name).font(.system(size: 14)).lineLimit(1)
+                            Text(p.name).font(.scaled(14)).toonLineLimit(1)
                             Spacer()
-                            Text(Fmt.hours(p.dwell)).font(.system(size: 12, design: .monospaced)).foregroundStyle(A.muted)
+                            Text(Fmt.hours(p.dwell)).font(.scaled(12, design: .monospaced)).foregroundStyle(A.muted)
                         }
                     }
                 }
@@ -411,7 +417,7 @@ struct AgentAnswerView: View {
                 ForEach(ModeGroup.allCases.filter { (cur[$0] ?? 0) + (prev[$0] ?? 0) > 0 }, id: \.self) { g in
                     HStack(spacing: 6) {
                         RoundedRectangle(cornerRadius: 2).fill(g.color).frame(width: 10, height: 10)
-                        Text(g.label).font(.system(size: 12)).foregroundStyle(A.body)
+                        Text(g.label).font(.scaled(12)).foregroundStyle(A.body)
                     }
                 }
             }
@@ -421,9 +427,9 @@ struct AgentAnswerView: View {
     private func shareBar(_ label: String, _ share: [ModeGroup: Double], pct: @escaping (Double) -> String) -> some View {
         let parts = ModeGroup.allCases.compactMap { g in share[g].flatMap { $0 > 0 ? (g, $0) : nil } }
         return VStack(alignment: .leading, spacing: 4) {
-            Text(label).font(.system(size: 11, design: .monospaced)).foregroundStyle(A.muted)
+            Text(label).font(.scaled(11, design: .monospaced)).foregroundStyle(A.muted)
             if parts.isEmpty {
-                Text("no trips").font(.system(size: 12)).foregroundStyle(A.muted)
+                Text("no trips").font(.scaled(12)).foregroundStyle(A.muted)
             } else {
                 GeometryReader { geo in
                     HStack(spacing: 2) {
@@ -445,12 +451,12 @@ struct AgentAnswerView: View {
         return card(title: "Last 30 days vs the 30 before") {
             ForEach([("PREV", prev, A.chipBorder), ("LAST", cur, A.amber)], id: \.0) { name, v, color in
                 HStack(spacing: 10) {
-                    Text(name).font(.system(size: 11, design: .monospaced)).foregroundStyle(A.muted).frame(width: 40, alignment: .leading)
+                    Text(name).font(.scaled(11, design: .monospaced)).foregroundStyle(A.muted).frame(width: 40, alignment: .leading)
                     GeometryReader { geo in
                         RoundedRectangle(cornerRadius: 4).fill(color).frame(width: max(2, geo.size.width * v / top))
                     }
                     .frame(height: 14)
-                    Text(label(v)).font(.system(size: 12, design: .monospaced)).frame(minWidth: 56, alignment: .trailing)
+                    Text(label(v)).font(.scaled(12, design: .monospaced)).frame(minWidth: 56, alignment: .trailing)
                 }
                 .accessibilityElement(children: .ignore)
                 .accessibilityLabel("\(name == "PREV" ? "Previous 30 days" : "Last 30 days"): \(label(v))")
@@ -460,7 +466,7 @@ struct AgentAnswerView: View {
 
     private func card<C: View>(title: String, @ViewBuilder _ content: () -> C) -> some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text(title).font(.system(size: 13, weight: .semibold))
+            Text(title).font(.scaled(13, .semibold))
             content()
         }
         .padding(14)
@@ -492,7 +498,7 @@ struct AgentCorrectionView: View {
                         .clipShape(RoundedRectangle(cornerRadius: 16))
                         .overlay(RoundedRectangle(cornerRadius: 16).strokeBorder(A.hairline))
                     Text("\(origin?.displayName ?? "Unknown origin") → \(destination?.displayName ?? "Unknown destination") · \(Fmt.distance(t.distance))")
-                        .font(.system(size: 13)).foregroundStyle(A.muted)
+                        .font(.scaled(13)).foregroundStyle(A.muted)
                 }
                 Group {
                     if let m = proposal.proposed {
@@ -501,20 +507,20 @@ struct AgentCorrectionView: View {
                         Text("I recorded this as **\(proposal.current.label.lowercased())**, but I'm not sure:")
                     }
                 }
-                .font(.system(size: 15)).lineSpacing(3)
+                .font(.scaled(15)).lineSpacing(3)
                 VStack(alignment: .leading, spacing: 8) {
                     ForEach(Array(proposal.reasons.enumerated()), id: \.offset) { i, r in
                         HStack(alignment: .firstTextBaseline, spacing: 10) {
-                            Text(String(format: "%02d", i + 1)).font(.system(size: 12, design: .monospaced))
+                            Text(String(format: "%02d", i + 1)).font(.scaled(12, design: .monospaced))
                                 .foregroundStyle(A.green).frame(width: 22, alignment: .leading)
-                            Text(Self.text(r)).font(.system(size: 14)).foregroundStyle(A.body)
+                            Text(Self.text(r)).font(.scaled(14)).foregroundStyle(A.body)
                         }
                     }
                 }
                 changeCard
                 if let result {
                     Label(result, systemImage: "checkmark")
-                        .font(.system(size: 14)).foregroundStyle(A.successText)
+                        .font(.scaled(14)).foregroundStyle(A.successText)
                         .padding(.horizontal, 14).padding(.vertical, 12)
                         .frame(maxWidth: .infinity, alignment: .leading)
                         .background(RoundedRectangle(cornerRadius: 12).fill(A.successWash))
@@ -534,20 +540,20 @@ struct AgentCorrectionView: View {
 
     private var changeCard: some View {
         VStack(alignment: .leading, spacing: 0) {
-            Text("CHANGE").font(.system(size: 11, design: .monospaced)).tracking(0.6).foregroundStyle(A.muted)
+            Text("CHANGE").font(.scaled(11, design: .monospaced)).tracking(0.6).foregroundStyle(A.muted)
                 .padding(.horizontal, 14).padding(.vertical, 10)
             A.border.frame(height: 1)
             HStack(spacing: 0) {
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Now").font(.system(size: 12)).foregroundStyle(A.muted)
-                    Text(proposal.current.label).font(.system(size: 17, weight: .semibold)).strikethrough(proposal.proposed != nil)
+                    Text("Now").font(.scaled(12)).foregroundStyle(A.muted)
+                    Text(proposal.current.label).font(.scaled(17, .semibold)).strikethrough(proposal.proposed != nil)
                         .foregroundStyle(proposal.proposed != nil ? A.muted : A.ink)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading).padding(14)
                 A.border.frame(width: 1)
                 VStack(alignment: .leading, spacing: 4) {
-                    Text("Proposed").font(.system(size: 12)).foregroundStyle(A.muted)
-                    Text(proposal.proposed?.label ?? "Your pick").font(.system(size: 17, weight: .semibold))
+                    Text("Proposed").font(.scaled(12)).foregroundStyle(A.muted)
+                    Text(proposal.proposed?.label ?? "Your pick").font(.scaled(17, .semibold))
                         .foregroundStyle(proposal.proposed == nil ? A.muted : A.green)
                 }
                 .frame(maxWidth: .infinity, alignment: .leading).padding(14)
@@ -563,7 +569,7 @@ struct AgentCorrectionView: View {
         VStack(spacing: 10) {
             if let m = proposal.proposed {
                 Button { setMode(m) } label: {
-                    Text("Accept and lock").font(.system(size: 16, weight: .semibold)).frame(maxWidth: .infinity, minHeight: 50)
+                    Text("Accept and lock").font(.scaled(16, .semibold)).frame(maxWidth: .infinity, minHeight: 50)
                         .foregroundStyle(A.onStrong).background(RoundedRectangle(cornerRadius: 14).fill(A.strong))
                 }
             }
@@ -588,7 +594,7 @@ struct AgentCorrectionView: View {
     }
 
     private func secondary(_ title: String) -> some View {
-        Text(title).font(.system(size: 15)).lineLimit(1).minimumScaleFactor(0.8)
+        Text(title).font(.scaled(15)).toonLineLimit(1, minScale: 0.8)
             .frame(maxWidth: .infinity, minHeight: 46)
             .foregroundStyle(A.ink)
             .overlay(RoundedRectangle(cornerRadius: 14).strokeBorder(A.chipBorder))
@@ -630,7 +636,7 @@ private struct AgentSays<C: View>: View {
     @ViewBuilder var content: C
     var body: some View {
         VStack(alignment: .leading, spacing: 10) { content }
-            .font(.system(size: 15))
+            .font(.scaled(15))
             .lineSpacing(3)
             .frame(maxWidth: 340, alignment: .leading)
     }
@@ -640,7 +646,7 @@ private struct UserBubble: View {
     let text: String
     var body: some View {
         Text(text)
-            .font(.system(size: 15, weight: .medium))
+            .font(.scaled(15, .medium))
             .foregroundStyle(A.onStrong)
             .padding(.horizontal, 14).padding(.vertical, 10)
             .background(UnevenRoundedRectangle(topLeadingRadius: 18, bottomLeadingRadius: 18,
@@ -653,7 +659,7 @@ private struct UserBubble: View {
 struct AgentChipStyle: ButtonStyle {
     func makeBody(configuration: Configuration) -> some View {
         configuration.label
-            .font(.system(size: 14))
+            .font(.scaled(14))
             .foregroundStyle(configuration.isPressed ? A.onAmber : A.ink)
             .padding(.horizontal, 14)
             .frame(minHeight: 44)

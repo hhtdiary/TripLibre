@@ -63,8 +63,14 @@ struct ToonFont {
     var size: CGFloat
     var weight: Font.Weight = .heavy
     var monospaced = false
+    var design: Font.Design = .rounded
 
     static func toon(_ size: CGFloat, _ weight: Font.Weight = .heavy) -> ToonFont { ToonFont(size: size, weight: weight) }
+
+    /// The same scaling in another design, for screens that don't use the rounded sticker type (the diary agent).
+    static func scaled(_ size: CGFloat, _ weight: Font.Weight = .regular, design: Font.Design = .default) -> ToonFont {
+        ToonFont(size: size, weight: weight, design: design)
+    }
 
     func monospacedDigit() -> ToonFont {
         var font = self
@@ -99,7 +105,7 @@ private struct ToonFontModifier: ViewModifier {
     }
 
     func body(content: Content) -> some View {
-        let system = Font.system(size: size, weight: font.weight, design: .rounded)
+        let system = Font.system(size: size, weight: font.weight, design: font.design)
         content.font(font.monospaced ? system.monospacedDigit() : system)
     }
 }
@@ -305,9 +311,13 @@ struct ToonChip: View {
     let symbol: String
     var color: Color
     var size: CGFloat = 40
+    /// What the icon says that the text beside it doesn't (a mode, a place category). Without one it's decorative.
+    var label: String?
 
     var body: some View {
         Image(systemName: symbol)
+            .accessibilityLabel(label ?? "")
+            .accessibilityHidden(label == nil)
             .font(.system(size: size * 0.46, weight: .bold))
             .foregroundStyle(Toon.ink)
             .frame(width: size, height: size)

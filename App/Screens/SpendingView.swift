@@ -345,7 +345,7 @@ struct SpendingStatsCard: View {
                         }
                     }
                     Spacer(minLength: 0)
-                    Image(systemName: "chevron.right").font(.system(size: 14, weight: .black)).foregroundStyle(Toon.muted)
+                    Image(systemName: "chevron.right").font(.toon(14, .black)).foregroundStyle(Toon.muted)
                         .accessibilityHidden(true)
                 }
                 .foregroundStyle(Toon.ink)
