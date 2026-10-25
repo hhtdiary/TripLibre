@@ -8,7 +8,7 @@ options:
 settings:
   base:
     SWIFT_VERSION: "5.0"
-    MARKETING_VERSION: "1.2.0"
+    MARKETING_VERSION: "2.1.0"
     CURRENT_PROJECT_VERSION: "1"
     # Set your Apple ID team here (Xcode › Settings › Accounts), or pick it in Signing & Capabilities.
     DEVELOPMENT_TEAM: 8HRS3Q2SF3

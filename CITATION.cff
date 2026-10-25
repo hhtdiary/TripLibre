@@ -23,8 +23,8 @@ authors:
     given-names: Zhanchao
     affiliation: "Weitzman School of Design, University of Pennsylvania"
     orcid: "https://orcid.org/0000-0001-6356-8865"
-version: 1.3.0
-date-released: 2026-10-19
+version: 2.1.0
+date-released: 2026-10-24
 doi: 10.5281/zenodo.23307589
 license: Apache-2.0
 repository-code: "https://github.com/zyang91/TripLibre"

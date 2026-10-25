@@ -7,8 +7,24 @@ single summary, so release notes aren't kept anywhere else in the repository.
 
 ## Unreleased
 
+- App Store: release kit in `release/` (listing text, privacy policy, App Privacy answers, review notes, accessibility
+  labels and disclaimer, button checklist, 6.9" screenshots, a sample GPX day for App Review) (#41)
+- Privacy manifests for the app and the widget extension: no tracking, no collected data, `UserDefaults` declared for
+  the app's own settings (#41)
+- Location and motion permission prompts say the diary is saved only on this iPhone, instead of claiming that nothing
+  ever leaves it (#41)
+- The app's version now follows the GitHub release: 2.1.0 (#41)
+
+## 2.1.0 — 2026-10-24
+
 - Brand: the TripLibre app icon, README, product website and docs now share the colourful infinity-route T logo.
-  The original artwork, crop details and asset usage are documented in `docs/branding.md`.
+  The original artwork, crop details and asset usage are documented in `docs/branding.md` (#85)
+- Accessibility: a static `a11y-check` job on the SwiftUI source replaces the runtime audits in CI (#83). Its
+  findings are fixed by hand (score 21.3 → 98.0): the diary agent scales with Dynamic Type, form fields show visible
+  labels, decorative icons are hidden from VoiceOver, every row that opens on tap is announced as a button, and
+  History's week arrows respect Reduce Motion (#67, #84)
+
+## 2.0.0 — 2026-10-24
 
 - Accessibility: text follows the Dynamic Type size in Settings, all the way to the largest accessibility sizes.
   Sticker rows, buttons and stat tiles grow with it and switch to a stacked layout when a row no longer fits; the tab
