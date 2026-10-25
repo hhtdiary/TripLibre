@@ -145,7 +145,6 @@ struct ModeIcon: View {
     var size: CGFloat = 28
     var body: some View {
         // some symbols (e.g. subway's tram.fill.tunnel) have no built-in label, and VoiceOver would read the symbol name
-        ToonChip(symbol: mode.symbol, color: mode.color, size: size)
-            .accessibilityLabel(mode.label)
+        ToonChip(symbol: mode.symbol, color: mode.color, size: size, label: mode.label)
     }
 }

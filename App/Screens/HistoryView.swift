@@ -74,7 +74,7 @@ struct HistoryView: View {
                     .frame(minWidth: 24, minHeight: 24)
                     .background(Capsule().fill(Toon.ink))
             }
-            Image(systemName: "chevron.right").font(.system(size: 14, weight: .heavy)).foregroundStyle(Toon.ink)
+            Image(systemName: "chevron.right").font(.toon(14, .heavy)).foregroundStyle(Toon.ink).accessibilityHidden(true)
         }
         .padding(.horizontal, 12).padding(.vertical, 10)
         .toonCard(radius: 18, shadow: 3)
@@ -125,6 +125,7 @@ struct HistoryView: View {
 struct WeekChart: View {
     let days: [DaySummary]
     @Binding var offset: Int   // 0 = this week, -1 = last week…
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     private var cal: Calendar { Calendar.current }
 
@@ -151,19 +152,19 @@ struct WeekChart: View {
     /// ‹ This week ›, or both arrows above the title when they don't fit on one line.
     private var weekNavigation: some View {
         let title = Text(title).font(.toon(18, .bold)).foregroundStyle(Toon.ink)
-        let previous = Button { withAnimation(.spring(duration: 0.4, bounce: 0.35)) { offset -= 1 } } label: {
+        let previous = Button { withAnimation(reduceMotion ? nil : .spring(duration: 0.4, bounce: 0.35)) { offset -= 1 } } label: {
             Image(systemName: "chevron.left").fontWeight(.black)
         }
         .buttonStyle(ToonButtonStyle(height: 30, fontSize: 12, shadow: 2))
         .accessibilityLabel("Previous week")
-        let next = Button { withAnimation(.spring(duration: 0.4, bounce: 0.35)) { offset += 1 } } label: {
+        let next = Button { withAnimation(reduceMotion ? nil : .spring(duration: 0.4, bounce: 0.35)) { offset += 1 } } label: {
             Image(systemName: "chevron.right").fontWeight(.black)
         }
         .buttonStyle(ToonButtonStyle(fill: offset < 0 ? Toon.paper : Toon.stone, height: 30, fontSize: 12, shadow: offset < 0 ? 2 : 0))
         .disabled(offset >= 0)
         .accessibilityLabel("Next week")
         return ViewThatFits(in: .horizontal) {
-            HStack(spacing: 8) { previous; title.lineLimit(1); next }
+            HStack(spacing: 8) { previous; title; next }
             VStack(alignment: .leading, spacing: 6) {
                 HStack(spacing: 8) { previous; next }
                 title
@@ -187,7 +188,7 @@ struct WeekChart: View {
                 HStack(spacing: 8) {
                     weekNavigation
                     Spacer(minLength: 4)
-                    totals.lineLimit(1)
+                    totals
                 }
                 VStack(alignment: .leading, spacing: 6) {
                     weekNavigation
@@ -246,7 +247,7 @@ struct DayRow: View {
             .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Toon.ink, lineWidth: Toon.line))
             VStack(alignment: .leading, spacing: 6) {
                 ToonRowStack(spacing: 6) {
-                    if summary.flight { Image(systemName: "airplane").font(.system(size: 13, weight: .bold)).foregroundStyle(Toon.ink) }
+                    if summary.flight { Image(systemName: "airplane").font(.toon(13, .bold)).foregroundStyle(Toon.ink).accessibilityLabel("Flight") }
                     Text(summary.places.isEmpty ? Fmt.shortDay(summary.day) : summary.places.prefix(4).joined(separator: " → "))
                         .font(.toon(14, .heavy)).foregroundStyle(Toon.ink).toonLineLimit(2)
                     Spacer(minLength: 0)

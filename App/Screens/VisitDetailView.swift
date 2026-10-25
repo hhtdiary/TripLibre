@@ -50,9 +50,9 @@ struct VisitDetailView: View {
 
             Section {
                 HStack {
-                    Image(systemName: place?.category?.symbol ?? "mappin")
+                    Image(systemName: place?.category?.symbol ?? "mappin").accessibilityHidden(true)
                     VStack(alignment: .leading) {
-                        Text(place?.isNamed == true ? place!.displayName : "Unnamed place").font(.headline)
+                        Text(place.flatMap { $0.isNamed ? $0.displayName : nil } ?? "Unnamed place").font(.headline).accessibilityAddTraits(.isHeader)
                         if let a = place?.address { Text(a).font(.caption).foregroundStyle(Toon.muted) }
                     }
                 }
@@ -95,7 +95,7 @@ struct VisitDetailView: View {
                                 Text("±\(Fmt.distance(u))").font(.caption).foregroundStyle(Toon.muted)
                             }
                         }
-                        .swipeActions { Button("Remove", role: .destructive) { model.undoStamp(s) } }
+                        .swipeActions { Button("Remove", role: .destructive) { model.undoStamp(s) } } // a11y-check:disable duplicate-button-label (a row action: VoiceOver offers it on its own row)
                     }
                 } header: {
                     Text("Self-reported")
@@ -112,6 +112,7 @@ struct VisitDetailView: View {
 
             Section {
                 TextField("Add a note", text: $notes, axis: .vertical).onSubmit(saveNotes)
+                    .accessibilityLabel("Notes") // the section header is the visible label
             } header: { Text("Notes").toonSectionText() }
 
             Section {
@@ -139,7 +140,7 @@ struct VisitDetailView: View {
                 }
             } header: { Text("Details").toonSectionText() }
         }
-        .confirmationDialog("Remove this visit?", isPresented: $confirmDelete, titleVisibility: .visible) {
+        .confirmationDialog("Remove this visit?", isPresented: $confirmDelete, titleVisibility: .visible) { // a11y-check:disable sheet-focus-return (iOS puts VoiceOver focus back on the trigger when it closes)
             Button("Remove and join the trips before/after", role: .destructive) {
                 model.perform { try model.edit.deleteVisit(v.id) }
                 dismiss()
@@ -155,7 +156,8 @@ struct VisitDetailView: View {
             }
             .environmentObject(model)
         }
-        .sheet(item: $editPlace) { box in NavigationStack { PlaceDetailView(placeID: box.id) }.environmentObject(model) }
+        // PlaceDetailView sets its own title
+        .sheet(item: $editPlace) { box in NavigationStack { PlaceDetailView(placeID: box.id) }.environmentObject(model) } // a11y-check:disable missing-navigation-title
         .sheet(item: $costSheet) { c in CostEntrySheet(target: c.target, existing: c.existing).environmentObject(model) }
         .sheet(isPresented: $showSplit) { SplitVisitSheet(visit: v).environmentObject(model) }
     }
@@ -202,7 +204,7 @@ struct PlacePickerView: View {
         NavigationStack {
             List {
                 Section {
-                    TextField("Name (e.g. Home, Penn, 30th St Station)", text: $newName)
+                    LabeledContent("Name") { TextField("Name", text: $newName, prompt: Text("e.g. Home, Penn, 30th St Station")) }
                     PlaceCategoryPicker(selection: $newCategory, custom: $newCustom)
                     Button("Create and use") {
                         onPick(.new(newName.trimmingCharacters(in: .whitespaces), newCategory, newCustom))
@@ -230,7 +232,7 @@ struct PlacePickerView: View {
             .searchable(text: $query, prompt: "Search your places")
             .navigationTitle("Choose place")
             .inlineTitle()
-            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } }
+            .toolbar { ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } } // a11y-check:disable duplicate-button-label (each one is in a different sheet or screen)
             .onAppear {
                 places = ((try? model.store.places()) ?? []).sorted { Geo.distance($0.coordinate, near) < Geo.distance($1.coordinate, near) }
             }
@@ -297,7 +299,7 @@ struct SplitVisitSheet: View {
             .navigationTitle("Split visit")
             .inlineTitle()
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } // a11y-check:disable duplicate-button-label (each one is in a different sheet or screen)
                 ToolbarItem(placement: .confirmationAction) {
                     Button("Save") {
                         model.perform {

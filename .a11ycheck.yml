@@ -1,0 +1,6 @@
+# a11y-check (SwiftUI accessibility; .github/workflows/swiftui-a11y.yml). Lets `a11y-check .` score only this
+# checkout: other worktrees under .claude/ hold their own copies of the app.
+exclude_paths:
+  - ".claude/**"
+  - ".build-xcode/**"
+  - "node_modules/**"

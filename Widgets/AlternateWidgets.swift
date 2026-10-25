@@ -2,6 +2,10 @@ import WidgetKit
 import SwiftUI
 import HHTCore
 
+// Widgets draw on a fixed canvas that doesn't grow with the text size (see Font.toonFixed), so their type is
+// fixed and long lines shrink to fit instead of wrapping.
+// a11y-check:disable-file fixed-font-size, line-limit-1
+
 // Alternatives kept from the design round (issue #47): B's plain status card and C's trip-chain timeline.
 
 // MARK: - Small, simple: tracking status
@@ -22,7 +26,7 @@ struct SimpleStatusView: View {
                 ZStack {
                     Circle().fill(tone.bg)
                     if info.tone == .good { Circle().fill(tone.fg).frame(width: 10, height: 10) }
-                    else { Image(systemName: info.tone == .warn ? "clock" : "pause.fill").font(.system(size: 12, weight: .bold)).foregroundStyle(tone.fg) }
+                    else { Image(systemName: info.tone == .warn ? "clock" : "pause.fill").accessibilityHidden(true).font(.system(size: 12, weight: .bold)).foregroundStyle(tone.fg) }
                 }
                 .frame(width: 26, height: 26)
                 Text(info.tone == .good ? "Recording" : info.badge.capitalized)

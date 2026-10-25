@@ -76,20 +76,23 @@ struct FlightEditor: View {
         NavigationStack {
             Form {
                 DatePicker("Date", selection: $date, displayedComponents: .date)
-                TextField("From (IATA, e.g. PHL)", text: $origin).capsKeyboard()
-                TextField("To (IATA, e.g. SLC)", text: $destination).capsKeyboard()
-                TextField("Airline", text: $airline)
-                TextField("Flight number", text: $number)
-                TextField("Aircraft", text: $aircraft)
-                TextField("Seat", text: $seat)
-                TextField("Notes", text: $notes, axis: .vertical)
+                // a visible label on every field: a filled-in form has no placeholders left to say which is which
+                LabeledContent("From") { TextField("From", text: $origin, prompt: Text("IATA, e.g. PHL")).capsKeyboard() }
+                LabeledContent("To") { TextField("To", text: $destination, prompt: Text("IATA, e.g. SLC")).capsKeyboard() }
+                LabeledContent("Airline") { TextField("Airline", text: $airline) }
+                LabeledContent("Flight number") { TextField("Flight number", text: $number) }
+                LabeledContent("Aircraft") { TextField("Aircraft", text: $aircraft) }
+                LabeledContent("Seat") { TextField("Seat", text: $seat) }
                 if !lookupNote.isEmpty { Text(lookupNote).font(.caption).foregroundStyle(Toon.muted) }
+                Section {
+                    TextField("Notes", text: $notes, axis: .vertical).accessibilityLabel("Notes")
+                } header: { Text("Notes").toonSectionText() }
             }
             .navigationTitle(flight == nil ? "Add flight" : "Edit flight")
             .inlineTitle()
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) { Button("Save") { save() }.disabled(origin.count < 3 || destination.count < 3).confirmTint() }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } // a11y-check:disable duplicate-button-label (each one is in a different sheet or screen)
+                ToolbarItem(placement: .confirmationAction) { Button("Save") { save() }.disabled(origin.count < 3 || destination.count < 3).confirmTint() } // a11y-check:disable duplicate-button-label (each one is in a different sheet or screen)
             }
             .onAppear {
                 guard let f = flight else { return }
@@ -172,7 +175,7 @@ struct PhaseEditor: View {
     var body: some View {
         NavigationStack {
             Form {
-                TextField("Name (e.g. Fall 2026, PhD Year 1)", text: $phase.name)
+                LabeledContent("Name") { TextField("Name", text: $phase.name, prompt: Text("e.g. Fall 2026, PhD Year 1")) }
                 Picker("Kind", selection: Binding(get: { phase.kind }, set: { phase.kind = $0 })) {
                     Text("–").tag(String?.none)
                     ForEach(Self.kinds, id: \.self) { Text($0.replacingOccurrences(of: "_", with: " ")).tag(String?.some($0)) }
@@ -180,14 +183,17 @@ struct PhaseEditor: View {
                 DatePicker("Start", selection: $start, displayedComponents: .date)
                 Toggle("Ongoing", isOn: $ongoing)
                 if !ongoing { DatePicker("End", selection: $end, in: start..., displayedComponents: .date) }
-                TextField("Notes", text: Binding(get: { phase.notes ?? "" }, set: { phase.notes = $0.isEmpty ? nil : $0 }), axis: .vertical)
+                Section {
+                    TextField("Notes", text: Binding(get: { phase.notes ?? "" }, set: { phase.notes = $0.isEmpty ? nil : $0 }), axis: .vertical)
+                        .accessibilityLabel("Notes")
+                } header: { Text("Notes").toonSectionText() }
             }
             .navigationTitle("Life phase")
             .inlineTitle()
             .toolbar {
-                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
+                ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } } // a11y-check:disable duplicate-button-label (each one is in a different sheet or screen)
                 ToolbarItem(placement: .confirmationAction) {
-                    Button("Save") {
+                    Button("Save") { // a11y-check:disable duplicate-button-label (each one is in a different sheet or screen)
                         phase.startDate = Fmt.ymd(start)
                         phase.endDate = ongoing ? nil : Fmt.ymd(end)
                         model.perform { try model.store.upsertLifePhase(phase) }
@@ -223,8 +229,7 @@ struct ReviewView: View {
                         model.perform { try model.edit.setTripMode(t.id, m) }
                     }
                 }
-                .contentShape(Rectangle())
-                .onTapGesture { selected = IDBox(id: t.id) }
+                .detailRow("tripRow", hint: "Opens the trip to correct it") { selected = IDBox(id: t.id) }
             }
         }
         .toonBackground()

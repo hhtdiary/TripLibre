@@ -190,7 +190,7 @@ struct CostEntrySheet: View {
                 } header: { Text("What for").toonSectionText() }
 
                 Section {
-                    TextField("Note (optional)", text: $note, axis: .vertical)
+                    LabeledContent("Note") { TextField("Note", text: $note, prompt: Text("Optional"), axis: .vertical) }
                     if link == .none {
                         DatePicker("When", selection: $time, in: ...Date())
                     }
@@ -212,7 +212,7 @@ struct CostEntrySheet: View {
                     .confirmTint()
                 }
             }
-            .confirmationDialog("Remove this cost?", isPresented: $confirmDelete, titleVisibility: .visible) {
+            .confirmationDialog("Remove this cost?", isPresented: $confirmDelete, titleVisibility: .visible) { // a11y-check:disable sheet-focus-return (iOS puts VoiceOver focus back on the trigger when it closes)
                 Button("Remove", role: .destructive) {
                     if let e = existing { model.perform { try model.edit.deleteExpense(e.id) } }
                     dismiss()
@@ -249,7 +249,7 @@ struct CostEntrySheet: View {
         } label: {
             HStack(spacing: 3) {
                 Text(currency)
-                Image(systemName: "chevron.down").font(.system(size: 10, weight: .black))
+                Image(systemName: "chevron.down").font(.toon(10, .black))
             }
             .font(.toon(15, .heavy)).foregroundStyle(Toon.ink)
             .padding(.horizontal, 10).frame(minHeight: 40)
@@ -384,6 +384,8 @@ struct CostEntrySheet: View {
 /// Pip asks about one trip or stay that usually costs something and has no cost yet: one tap for the usual amount,
 /// "Free" / "Nothing", or more. Today shows one card for each (issue #75).
 struct CostPromptCard: View {
+    /// grows with the icon inside it
+    @ScaledMetric(relativeTo: .footnote) private var closeTarget: CGFloat = 32
     @EnvironmentObject var model: AppModel
     let prompt: CostPrompt
     var onMore: () -> Void
@@ -400,8 +402,8 @@ struct CostPromptCard: View {
                 }
                 Spacer(minLength: 0)
                 Button { model.skipCostPrompt(prompt.id) } label: {
-                    Image(systemName: "xmark").font(.system(size: 13, weight: .black)).foregroundStyle(Toon.muted)
-                        .frame(width: 32, height: 32).contentShape(Rectangle())
+                    Image(systemName: "xmark").font(.toon(13, .black)).foregroundStyle(Toon.muted)
+                        .frame(width: closeTarget, height: closeTarget).contentShape(Rectangle())
                 }
                 .buttonStyle(.borderless)
                 .accessibilityLabel(isTrip ? "Don't ask about this trip" : "Don't ask about this visit")
@@ -442,7 +444,7 @@ struct CostPromptCard: View {
     @ViewBuilder private var icon: some View {
         switch prompt.target {
         case .trip(let t): ModeIcon(mode: t.mode, size: 34)
-        case .visit(_, let p): ToonChip(symbol: p?.category?.symbol ?? "mappin", color: CostStyle.color, size: 34)
+        case .visit(_, let p): ToonChip(symbol: p?.category?.symbol ?? "mappin", color: CostStyle.color, size: 34, label: p?.category?.label)
         case .day: EmptyView()
         }
     }
@@ -571,11 +573,11 @@ struct CostBadge: View {
     var body: some View {
         if let text = Fmt.costs(costs) {
             HStack(spacing: 4) {
-                Image(systemName: CostStyle.symbol).font(.system(size: 10, weight: .bold))
+                Image(systemName: CostStyle.symbol).font(.toon(10, .bold))
                 Text(text).font(.toon(11, .black)).monospacedDigit()
             }
             .foregroundStyle(Toon.ink)
-            .lineLimit(1).fixedSize()
+            .fixedSize()
             .padding(.horizontal, 7).padding(.vertical, 2)
             .background(Capsule().fill(CostStyle.color))
             .overlay(Capsule().strokeBorder(Toon.ink, lineWidth: 2))

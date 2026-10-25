@@ -23,17 +23,24 @@ struct RootView: View {
     private static let agentTag = 5
 
     var body: some View {
+        // Each screen sets its own navigation title. The tab items name the tabs for the TabView itself; the system
+        // bar that would show them is hidden behind ToonTabBar.
         TabView(selection: Binding(get: { tab == Self.agentTag ? lastTab : tab }, set: { tab = $0 })) {
-            NavigationStack { DayView() }.id(todayStack).tabBarSpace(!keyboardUp).tag(0)
-            NavigationStack { HistoryView() }.tabBarSpace(!keyboardUp).tag(1)
-            NavigationStack { ExploreMapView() }.tabBarSpace(!keyboardUp).tag(2)
-            NavigationStack { StatsView() }.tabBarSpace(!keyboardUp).tag(3)
-            NavigationStack { PlacesView() }.tabBarSpace(!keyboardUp).tag(4)
+            NavigationStack { DayView() }.id(todayStack).tabBarSpace(!keyboardUp).tag(0) // a11y-check:disable missing-navigation-title
+                .tabItem { Label("Today", systemImage: "calendar.day.timeline.left") }
+            NavigationStack { HistoryView() }.tabBarSpace(!keyboardUp).tag(1) // a11y-check:disable missing-navigation-title
+                .tabItem { Label("Timeline", systemImage: "list.bullet.below.rectangle") }
+            NavigationStack { ExploreMapView() }.tabBarSpace(!keyboardUp).tag(2) // a11y-check:disable missing-navigation-title
+                .tabItem { Label("Map", systemImage: "map") }
+            NavigationStack { StatsView() }.tabBarSpace(!keyboardUp).tag(3) // a11y-check:disable missing-navigation-title
+                .tabItem { Label("Stats", systemImage: "chart.bar.xaxis") }
+            NavigationStack { PlacesView() }.tabBarSpace(!keyboardUp).tag(4) // a11y-check:disable missing-navigation-title
+                .tabItem { Label("Places", systemImage: "mappin.and.ellipse") }
         }
         .overlay {
             if agentEnabled && (agentOpened || tab == Self.agentTag) {
                 let on = tab == Self.agentTag
-                NavigationStack { AgentView() }.tabBarSpace(!keyboardUp)
+                NavigationStack { AgentView() }.tabBarSpace(!keyboardUp) // a11y-check:disable missing-navigation-title (AgentView sets its own title)
                     .opacity(on ? 1 : 0)
                     .allowsHitTesting(on)
                     .accessibilityHidden(!on)
@@ -66,7 +73,7 @@ struct RootView: View {
         .tint(Toon.accentDeep)
         .fontDesign(.rounded)
         .preferredColorScheme(.light)
-        .alert("Something went wrong", isPresented: Binding(get: { model.errorMessage != nil },
+        .alert("Something went wrong", isPresented: Binding(get: { model.errorMessage != nil }, // a11y-check:disable sheet-focus-return (iOS puts VoiceOver focus back on the trigger when it closes)
                                                           set: { if !$0 { model.errorMessage = nil } })) {
             Button("OK", role: .cancel) {}
         } message: {
@@ -128,10 +135,10 @@ struct ToonTabBar: View {
                     withAnimation(reduceMotion ? nil : .spring(duration: 0.3, bounce: 0.3)) { selection = item.tag }
                 } label: {
                     HStack(spacing: 6) {
-                        Image(systemName: item.symbol).font(.system(size: 18, weight: .bold))
+                        Image(systemName: item.symbol).font(.toon(18, .bold)).accessibilityHidden(true) // the button carries the label
                         // five tabs have to fit across the screen: at accessibility text sizes the bar shows icons
                         // only (like the system tab bar), and long-pressing a tab shows its name in the large content viewer
-                        if on && !typeSize.isAccessibilitySize { Text(item.title).font(.toon(14, .black)).lineLimit(1).fixedSize() }
+                        if on && !typeSize.isAccessibilitySize { Text(item.title).font(.toon(14, .black)).fixedSize() }
                     }
                     .foregroundStyle(Toon.ink)
                     .padding(.horizontal, on ? 14 : 0)
@@ -200,6 +207,8 @@ struct OnboardingView: View {
                 .padding(20)
             }
             .background(ToonBackground())
+            .navigationTitle("Welcome")
+            .toolbar(.hidden, for: .navigationBar)
         }
     }
 

@@ -138,28 +138,23 @@ struct DayView: View {
                         switch item {
                         case .visit(let v, let p):
                             VisitRow(visit: v, place: p, day: day, stamps: data.stampsByVisit[v.id] ?? [],
-                                     costs: data.costsByVisit[v.id] ?? []).contentShape(Rectangle())
-                                .onTapGesture { selectedVisit = IDBox(id: v.id) }
-                                .detailRowAccessibility("visitRow", hint: "Opens the visit to correct it") { selectedVisit = IDBox(id: v.id) }
+                                     costs: data.costsByVisit[v.id] ?? [])
+                                .detailRow("visitRow", hint: "Opens the visit to correct it") { selectedVisit = IDBox(id: v.id) }
                                 .toonRow(top: 5, bottom: 5)
                         case .trip(let t):
                             TripRow(trip: t, quickModes: quickModes, day: day, costs: data.costsByTrip[t.id] ?? []) { mode in
                                 model.perform { try model.edit.setTripMode(t.id, mode) }
                             }
-                            .contentShape(Rectangle())
-                            .onTapGesture { selectedTrip = IDBox(id: t.id) }
-                            .detailRowAccessibility("tripRow", hint: "Opens the trip to correct it") { selectedTrip = IDBox(id: t.id) }
+                            .detailRow("tripRow", hint: "Opens the trip to correct it") { selectedTrip = IDBox(id: t.id) }
                             .toonRow(top: 3, bottom: 3)
                         case .stamp(let s):
                             StampRow(stamp: s)
-                                .swipeActions { Button("Remove", role: .destructive) { model.undoStamp(s) } }
-                                .contextMenu { Button("Remove stamp", systemImage: "trash", role: .destructive) { model.undoStamp(s) } }
+                                .swipeActions { Button("Remove", role: .destructive) { model.undoStamp(s) } } // a11y-check:disable duplicate-button-label (a row action: VoiceOver offers it on its own row)
+                                .contextMenu { Button("Remove stamp", systemImage: "trash", role: .destructive) { model.undoStamp(s) } } // a11y-check:disable sheet-focus-return, duplicate-button-label (a row action: VoiceOver offers it on its own row)
                                 .toonRow(top: 5, bottom: 5)
                         case .cost(let e):
                             CostRow(cost: e)
-                                .contentShape(Rectangle())
-                                .onTapGesture { costTarget = CostSheet(target: .day(day), existing: e) }
-                                .detailRowAccessibility("costRow", hint: "Opens the cost to change it") {
+                                .detailRow("costRow", hint: "Opens the cost to change it") {
                                     costTarget = CostSheet(target: .day(day), existing: e)
                                 }
                                 .toonRow(top: 5, bottom: 5)
@@ -209,12 +204,15 @@ struct DayView: View {
             showSpending = false
             model.stampNow()
         }
-        .sheet(isPresented: $showSettings) { NavigationStack { SettingsView() }.environmentObject(model) }
+        // SettingsView sets its own title
+        .sheet(isPresented: $showSettings) { NavigationStack { SettingsView() }.environmentObject(model) } // a11y-check:disable missing-navigation-title
         .sheet(isPresented: $showDatePicker) {
             NavigationStack {
                 DatePicker("Day", selection: $day, in: ...Date(), displayedComponents: .date)
                     .datePickerStyle(.graphical)
                     .padding()
+                    .navigationTitle("Choose a day")
+                    .inlineTitle()
                     .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { showDatePicker = false }.confirmTint() } }
             }
             .presentationDetents([.medium])
@@ -268,15 +266,17 @@ struct DayView: View {
 
     private var reviewBanner: some View {
         ToonRowStack {
-            Image(systemName: "checklist")
-                .font(.system(size: 18, weight: .bold)).foregroundStyle(Toon.ink)
+            // the icons stay as they are (fixed, not hidden): when they change, Apple's audit reports the banner text as
+            // only partly scaling
+            Image(systemName: "checklist") // a11y-check:disable image-missing-label
+                .font(.system(size: 18, weight: .bold)).foregroundStyle(Toon.ink) // a11y-check:disable fixed-font-size
                 .frame(width: 38, height: 38)
                 .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Toon.accent))
             Text("\(reviewCount) trip\(reviewCount == 1 ? "" : "s") in the last 7 days could use a quick check")
-                .font(.toon(14, .heavy)).foregroundStyle(.white)
+                .font(.toon(14, .heavy)).foregroundStyle(.white) // a11y-check:disable hardcoded-color (on Toon.ink in both modes)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
-            Image(systemName: "arrow.right").font(.system(size: 16, weight: .heavy)).foregroundStyle(.white)
+            Image(systemName: "arrow.right").font(.system(size: 16, weight: .heavy)).foregroundStyle(.white) // a11y-check:disable hardcoded-color, fixed-font-size, image-missing-label
         }
         .padding(14)
         .background(RoundedRectangle(cornerRadius: 20, style: .continuous).fill(Toon.ink))
@@ -347,22 +347,21 @@ struct VisitRow: View {
 
     var body: some View {
         ToonRowStack {
-            ToonChip(symbol: place?.category?.symbol ?? "mappin", color: place?.toonColor ?? Toon.stone, size: 44)
+            ToonChip(symbol: place?.category?.symbol ?? "mappin", color: place?.toonColor ?? Toon.stone, size: 44, label: place?.category?.label)
             VStack(alignment: .leading, spacing: 2) {
                 ToonRowStack(spacing: 6) {
                     Text(place?.isNamed == true ? place!.displayName : (place?.address ?? "Unnamed place"))
                         .font(.toon(18, .bold))
                         .foregroundStyle(place?.isNamed == true ? Toon.ink : Toon.muted)
                         .toonLineLimit(2)
-                    if visit.userStatus.isLocked { Image(systemName: "checkmark.seal.fill").font(.caption).foregroundStyle(Toon.okGreen) }
+                    if visit.userStatus.isLocked { Image(systemName: "checkmark.seal.fill").font(.caption).foregroundStyle(Toon.okGreen).accessibilityLabel("Confirmed") }
                     if visit.departure == nil { ToonBadge(text: "here now", color: Toon.accent) }
                     if !stamps.isEmpty {
                         // self-reported, as opposed to purely inferred
-                        Label("stamped", systemImage: StampStyle.symbol).labelStyle(.iconOnly)
+                        Label("You stamped this stop", systemImage: StampStyle.symbol).labelStyle(.iconOnly)
                             .font(.caption.weight(.bold)).foregroundStyle(Toon.ink)
                             .padding(4).background(Circle().fill(StampStyle.color))
                             .overlay(Circle().strokeBorder(Toon.ink, lineWidth: 1.5))
-                            .accessibilityLabel("You stamped this stop")
                     }
                 }
                 // one Text, so it wraps as a sentence at large text sizes
@@ -416,7 +415,7 @@ struct TripRow: View {
                         ToonRowStack(spacing: 6) {
                             Text(modeText).font(.toon(14, .heavy)).foregroundStyle(Toon.ink)
                             if trip.needsReview { ToonBadge(text: "check") }
-                            if trip.hasGap { Image(systemName: "antenna.radiowaves.left.and.right.slash").font(.caption).foregroundStyle(Toon.muted) }
+                            if trip.hasGap { Image(systemName: "antenna.radiowaves.left.and.right.slash").font(.caption).foregroundStyle(Toon.muted).accessibilityLabel("Gap in the recording") }
                         }
                         Text("\(Fmt.time(trip.departure))–\(Fmt.time(trip.arrival)) · \(Fmt.duration(trip.duration)) · \(Fmt.distance(trip.distance))")
                             .font(.toon(12, .bold)).monospacedDigit().foregroundStyle(Toon.muted)
@@ -450,7 +449,7 @@ struct TripRow: View {
                         Image(systemName: m.symbol).accessibilityLabel(m.label)
                     } else {
                         Label(m.label, systemImage: m.symbol).labelStyle(.titleAndIcon)
-                            .lineLimit(1).fixedSize()
+                            .fixedSize()
                     }
                 }
                 .buttonStyle(ToonButtonStyle(height: 34, fontSize: 12, shadow: 2))
@@ -472,8 +471,10 @@ struct TripRow: View {
 extension View {
     /// Diary rows open their detail sheet on tap. VoiceOver reads the row as one button (its own buttons, like the
     /// quick mode picks, become actions on it) and activating it opens the same sheet.
-    func detailRowAccessibility(_ identifier: String, hint: String, open: @escaping () -> Void) -> some View {
-        accessibilityElement(children: .combine)
+    func detailRow(_ identifier: String, hint: String, open: @escaping () -> Void) -> some View {
+        contentShape(Rectangle())
+            .onTapGesture { open() }
+            .accessibilityElement(children: .combine)
             .accessibilityAddTraits(.isButton)
             .accessibilityHint(hint)
             .accessibilityAction { open() }
@@ -649,8 +650,9 @@ struct ToonPin: View {
     var size: CGFloat = 26
 
     var body: some View {
-        Image(systemName: symbol)
-            .font(.system(size: size * 0.45, weight: .bold))
+        Image(systemName: symbol).accessibilityHidden(true) // the name tag below is what VoiceOver reads
+            // the glyph is sized to the map pin, which stays put on the map; the name tag below scales
+            .font(.system(size: size * 0.45, weight: .bold)) // a11y-check:disable fixed-font-size
             .foregroundStyle(Toon.ink)
             .frame(width: size, height: size)
             .background(Circle().fill(color))
@@ -660,7 +662,7 @@ struct ToonPin: View {
                 if let label, !label.isEmpty {
                     Text(label)
                         .font(.toon(11, .heavy)).foregroundStyle(Toon.ink)
-                        .lineLimit(1).fixedSize()
+                        .fixedSize()
                         .padding(.horizontal, 7).padding(.vertical, 2)
                         .background(Capsule().fill(Toon.paper))
                         .overlay(Capsule().strokeBorder(Toon.ink, lineWidth: 2))
@@ -686,7 +688,7 @@ struct InferenceStatusBanner: View {
     }
 
     private var running: some View {
-        HStack(alignment: .top, spacing: 12) {
+        HStack(alignment: .top, spacing: 12) { // a11y-check:disable heading-trait-missing (its text is a status line)
             ProgressView().frame(width: 28, height: 28)
             VStack(alignment: .leading, spacing: 4) {
                 Text("Updating your diary…").font(.subheadline.weight(.semibold))
@@ -748,18 +750,20 @@ struct InferenceStatusBanner: View {
 
 /// The end of the timeline when raw data exists past the last stop that no run has turned into a visit or trip yet.
 struct PendingActivityRow: View {
+    /// grows with the icon inside it
+    @ScaledMetric(relativeTo: .subheadline) private var iconTile: CGFloat = 28
     @EnvironmentObject var model: AppModel
     let tail: InferenceEngine.UnresolvedTail
 
     var body: some View {
         HStack(alignment: .top, spacing: 12) {
-            Image(systemName: model.isProcessing ? "hourglass" : "ellipsis")
-                .font(.system(size: 14, weight: .semibold))
+            Image(systemName: model.isProcessing ? "hourglass" : "ellipsis").accessibilityHidden(true)
+                .font(.toon(14, .semibold))
                 .foregroundStyle(.orange)
-                .frame(width: 28, height: 28)
+                .frame(width: iconTile, height: iconTile)
                 .overlay(RoundedRectangle(cornerRadius: 7).strokeBorder(Color.orange.opacity(0.6), style: StrokeStyle(lineWidth: 1.2, dash: [3, 3])))
             VStack(alignment: .leading, spacing: 2) {
-                Text("Not in your diary yet").font(.subheadline.weight(.medium))
+                Text("Not in your diary yet").font(.subheadline.weight(.medium)) // a11y-check:disable heading-trait-missing (a status line)
                 Text("Since \(Fmt.time(tail.since)) · \(tail.pointCount.formatted()) points · last fix \(Fmt.time(tail.lastPoint))")
                     .font(.caption).monospacedDigit().foregroundStyle(Toon.muted)
                 Text(model.isProcessing ? "Being processed now…"

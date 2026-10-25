@@ -156,7 +156,7 @@ struct StatsView: View {
                 } label: {
                     HStack(spacing: 3) {
                         Text(["by trips", "by distance", "by time"][shareBasis])
-                        Image(systemName: "chevron.down").font(.system(size: 10, weight: .black))
+                        Image(systemName: "chevron.down").font(.toon(10, .black))
                     }
                     .font(.toon(13, .heavy)).foregroundStyle(Toon.muted)
                     .frame(minHeight: 44).contentShape(Rectangle())
@@ -310,7 +310,7 @@ struct StatsView: View {
                 row("Repeat OD share", Fmt.percent(m.repeatODShare), c.map { Fmt.percent($0.repeatODShare) })
                 ForEach(m.topPlaces.prefix(6)) { p in
                     ToonRowStack(spacing: 8) {
-                        Image(systemName: p.category?.symbol ?? "mappin").frame(width: 22).foregroundStyle(Toon.muted)
+                        Image(systemName: p.category?.symbol ?? "mappin").frame(width: 22).foregroundStyle(Toon.muted).accessibilityHidden(true)
                         Text(p.name).toonLineLimit(1)
                         Spacer()
                         Text("\(p.visits)× · \(Fmt.hours(p.dwell))").font(.toon(12, .bold)).foregroundStyle(Toon.muted).monospacedDigit()
@@ -483,7 +483,7 @@ struct MetricsHelpView: View {
 
     private func item(_ t: String, _ d: String) -> some View {
         VStack(alignment: .leading, spacing: 4) {
-            Text(t).font(.headline)
+            Text(t).font(.headline).accessibilityAddTraits(.isHeader)
             Text(d).font(.callout).foregroundStyle(Toon.muted)
         }
         .padding(.vertical, 4)
