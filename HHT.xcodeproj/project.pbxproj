@@ -24,6 +24,7 @@
 		608839344CE1FBFF228B6C6C /* PlacesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 71589A2C32BC9B00D1D61EF9 /* PlacesView.swift */; };
 		6561E87B6D8005D77F20B401 /* AlternateWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 112A11944067E24BC2270F2F /* AlternateWidgets.swift */; };
 		6ABAFE59B6830A8E38200443 /* WidgetBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E23C8B44EDF9AA4C6622630 /* WidgetBridge.swift */; };
+		6BD073D09855F2791AF45F4C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = CC3AFD9620A413F56467D52B /* PrivacyInfo.xcprivacy */; };
 		74E2B631F9A5FD7625C00B52 /* VisitDetailView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E68982A3B90AB6A7DF1B6D0 /* VisitDetailView.swift */; };
 		74FB04FC8AA4C43D6D7D7EEB /* AccessibilityAuditTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = D9F2B6FFF7499E8A3D17B2D8 /* AccessibilityAuditTests.swift */; };
 		817BD9DC493B9F2A9440FBC2 /* FlightsAndPhases.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2C7C175AD8BE3FB6B2F54954 /* FlightsAndPhases.swift */; };
@@ -35,6 +36,7 @@
 		A84AA621B7A18071537A041C /* HHTWidgets.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FD10D5E29E78AF295BA325C7 /* HHTWidgets.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		A8ECBAC83B3027AA138D6365 /* CoreFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2F723BF25119810CD3AE5ADD /* CoreFlowTests.swift */; };
 		A979E72D33DE197157B22D97 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E0C39A4527CD2B9F02BADE42 /* WidgetKit.framework */; };
+		B47A24F2783191BBF089F3EC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 4DF2686F19AD7155DB77ED08 /* PrivacyInfo.xcprivacy */; };
 		B52499FB561C4152A8896C8E /* AgentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2505117CDE49BA7C2886CAA /* AgentView.swift */; };
 		B784B030DD84BF95953E593A /* StickerWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 547562DE9D36DA87638056CF /* StickerWidgets.swift */; };
 		C9FAB60FD36BB8AED3D23251 /* SpendingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F12A1CD63317F38D0A600D /* SpendingView.swift */; };
@@ -94,6 +96,7 @@
 		469EC6E7B715E8BA0E40B491 /* LocationCollector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationCollector.swift; sourceTree = "<group>"; };
 		495655A63CE92A5F9CAE8DE3 /* RootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RootView.swift; sourceTree = "<group>"; };
 		49D161A218F9AA3F473ED9CA /* AppModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppModel.swift; sourceTree = "<group>"; };
+		4DF2686F19AD7155DB77ED08 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		4E23C8B44EDF9AA4C6622630 /* WidgetBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetBridge.swift; sourceTree = "<group>"; };
 		4E68982A3B90AB6A7DF1B6D0 /* VisitDetailView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VisitDetailView.swift; sourceTree = "<group>"; };
 		547562DE9D36DA87638056CF /* StickerWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StickerWidgets.swift; sourceTree = "<group>"; };
@@ -114,6 +117,7 @@
 		B4814A8D13202E2D6B7DC35A /* WidgetStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WidgetStyle.swift; sourceTree = "<group>"; };
 		B5CCE27794644139AEC80139 /* Formatting.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Formatting.swift; sourceTree = "<group>"; };
 		C2505117CDE49BA7C2886CAA /* AgentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AgentView.swift; sourceTree = "<group>"; };
+		CC3AFD9620A413F56467D52B /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		CCC58B1632AE47AEB7B304CF /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		D048DB21BB959E102A1984B4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		D441C842E8E1B09C700BCBEC /* Provider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Provider.swift; sourceTree = "<group>"; };
@@ -174,6 +178,7 @@
 				347CADD18533359EC7F11C5D /* HHTWidgets.entitlements */,
 				43EBF07D957183369057AFE5 /* HHTWidgets.swift */,
 				D048DB21BB959E102A1984B4 /* Info.plist */,
+				4DF2686F19AD7155DB77ED08 /* PrivacyInfo.xcprivacy */,
 				D441C842E8E1B09C700BCBEC /* Provider.swift */,
 				924438A46711FDE6A66AFB7A /* StampWidget.swift */,
 				547562DE9D36DA87638056CF /* StickerWidgets.swift */,
@@ -199,6 +204,7 @@
 				B5CCE27794644139AEC80139 /* Formatting.swift */,
 				EB63ACBA673D5D6BC0CD8A3F /* HHT.entitlements */,
 				D6E22BF26DE4774473381CFC /* Info.plist */,
+				CC3AFD9620A413F56467D52B /* PrivacyInfo.xcprivacy */,
 				62BE89ABB92216C4CD6D3BB7 /* Theme.swift */,
 				4E23C8B44EDF9AA4C6622630 /* WidgetBridge.swift */,
 			);
@@ -276,6 +282,7 @@
 			buildConfigurationList = 72293678E6547DD702A2E5E3 /* Build configuration list for PBXNativeTarget "HHTWidgets" */;
 			buildPhases = (
 				BCC75C7AD3A8042FAE3BD4CF /* Sources */,
+				FBE9446E2741858D9F023043 /* Resources */,
 				B98F1244D7D2753444EBA887 /* Frameworks */,
 			);
 			buildRules = (
@@ -384,6 +391,15 @@
 			buildActionMask = 2147483647;
 			files = (
 				F1AEA5C8F845A8BDBFA25B8B /* Assets.xcassets in Resources */,
+				6BD073D09855F2791AF45F4C /* PrivacyInfo.xcprivacy in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FBE9446E2741858D9F023043 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B47A24F2783191BBF089F3EC /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

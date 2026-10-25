@@ -40,11 +40,11 @@
 	<key>LSSupportsOpeningDocumentsInPlace</key>
 	<true/>
 	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
-	<string>Allow “Always” so TripLibre can log trips in the background. GPS is used only while you are moving; data stays on your iPhone.</string>
+	<string>Allow “Always” so TripLibre can log trips while it’s in the background. GPS runs only while you’re moving, and your diary is saved only on this iPhone.</string>
 	<key>NSLocationWhenInUseUsageDescription</key>
-	<string>TripLibre records where you go to build your private travel diary. Data never leaves your iPhone.</string>
+	<string>TripLibre uses your location to build your travel diary of visits and trips. Your diary is saved only on this iPhone; TripLibre has no account or server.</string>
 	<key>NSMotionUsageDescription</key>
-	<string>Motion activity (walking, cycling, in a vehicle) helps TripLibre tell travel modes apart. It stays on your iPhone.</string>
+	<string>Motion activity (walking, cycling, in a vehicle) helps TripLibre tell travel modes apart. It’s used only on this iPhone.</string>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>location</string>
