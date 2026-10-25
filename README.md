@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/triplibre-logo.png" width="112" height="112" alt="TripLibre logo: a route joining four stops on a dark map grid">
+  <img src="docs/assets/triplibre-logo.png" width="112" height="112" alt="TripLibre logo: a colourful infinity route forming a T, with home, city and travel symbols">
 </p>
 
 <h1 align="center">TripLibre — personal travel diary</h1>
@@ -189,6 +189,8 @@ synthetic Philadelphia days. Neither exists in device builds.
 Design priorities follow the brief: data integrity → collection reliability → correct reconstruction → fast correction →
 exportability → analytics → polish. Raw observations are never modified; inference can be re-run at any time without
 touching anything you corrected.
+
+Logo assets and usage: [TripLibre brand guide](docs/branding.md).
 
 ## Contributing
 
