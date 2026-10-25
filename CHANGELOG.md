@@ -7,6 +7,9 @@ single summary, so release notes aren't kept anywhere else in the repository.
 
 ## Unreleased
 
+- Brand: the TripLibre app icon, README, product website and docs now share the colourful infinity-route T logo.
+  The original artwork, crop details and asset usage are documented in `docs/branding.md`.
+
 - Accessibility: text follows the Dynamic Type size in Settings, all the way to the largest accessibility sizes.
   Sticker rows, buttons and stat tiles grow with it and switch to a stacked layout when a row no longer fits; the tab
   bar shows icons only at accessibility sizes (long-press a tab for its name). Section headers, footers and secondary
