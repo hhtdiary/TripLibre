@@ -15,3 +15,5 @@ __pycache__/
 .env*
 calibration-data/
 node_modules/
+release/review-demo/.Rhistory
+.a11y-scores.json
