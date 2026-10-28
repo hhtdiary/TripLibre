@@ -1,12 +1,12 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-brand="triplibre">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>HHT Diary · Every trip tells a story</title>
-<meta name="description" content="HHT Diary is an open-source organization building local-first tools that turn everyday movement into travel data people can understand, correct and own. Its first product is TripLibre, a travel diary for iPhone.">
-<link rel="canonical" href="https://hhtdiary.org/">
-<link rel="icon" href="assets/hhtdiary-mark.png">
+<title>TripLibre · A travel diary that writes itself</title>
+<meta name="description" content="TripLibre for iOS is a free, open-source, local-first travel diary. It rebuilds each day into visits, trips and travel modes, keeps the data on the phone, and exports it for analysis.">
+<link rel="canonical" href="https://triplibre.hhtdiary.org/">
+<link rel="icon" href="assets/triplibre-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -17,112 +17,125 @@
 <body>
 <main id="main">
 
-<section class="s-hero center" aria-labelledby="hero-title">
-  <svg class="route-line" viewBox="0 0 1200 140" preserveAspectRatio="none" aria-hidden="true">
-    <path d="M0 120 L260 120 L340 70 L520 82 L640 30 L860 52 L1000 18 L1200 18"/>
-    <circle cx="340" cy="70" r="5"/><circle cx="520" cy="82" r="5"/><circle cx="640" cy="30" r="5"/><circle cx="1000" cy="18" r="5"/>
-  </svg>
+<section class="s-hero center" aria-labelledby="page-title">
   <div class="wrap">
-    <p class="eyebrow">HHT Diary · open mobility tools</p>
-    <h1 class="display" id="hero-title">Every trip tells <span class="grad">a story.</span></h1>
-    <p class="lede">HHT Diary is an open-source organization building local-first tools that turn everyday movement into
-    travel data people can understand, correct and own, and that researchers can check line by line.</p>
+    <p class="eyebrow">TripLibre for iOS · by HHT Diary</p>
+    <h1 class="title" id="page-title">A travel diary that <span class="grad">writes itself.</span></h1>
+    <p class="lede">TripLibre records where you go, rebuilds each day into visits, trips and travel modes, and keeps all of it
+    on your iPhone. Think of it as a household travel survey that fills itself in, with a sample size of one.</p>
     <div class="actions">
-      <a class="btn primary" href="vision/">Read the vision <span class="arr" aria-hidden="true">→</span></a>
-      <a class="btn" href="triplibre/">Meet TripLibre, our first product</a>
+      <a class="btn primary" href="#install">Install <span class="arr" aria-hidden="true">→</span></a>
+      <a class="btn" href="docs/using-the-app.html">Read the user guide</a>
     </div>
-    <p class="note">Led by <a href="about/">Zhanchao Yang</a> · Apache 2.0 · <a href="https://github.com/hhtdiary">github.com/hhtdiary</a></p>
+    <ul class="strip">
+      <li>iOS 17+</li><li>Free · Apache 2.0</li><li>No account</li><li>No server</li><li>CSV · JSON · GeoJSON · SQLite</li>
+    </ul>
+    <div class="phones" role="group" aria-label="Screenshots of TripLibre for iOS">
+      <figure class="phone"><img src="assets/screens/map.jpg" width="600" height="1304" alt="The Map screen: the day's trips drawn over Philadelphia with radius of gyration, hull area, places and trip counts"><figcaption>Map</figcaption></figure>
+      <figure class="phone"><img src="assets/screens/diary.jpg" width="600" height="1304" alt="The Diary screen: the day's visits and trips in order, with a trip asking 'Did I get that right?'"><figcaption>Diary</figcaption></figure>
+      <figure class="phone"><img src="assets/screens/trip.jpg" width="600" height="1304" alt="A trip's detail sheet: the route on a map, start and end, and a grid of travel modes to correct it" loading="lazy"><figcaption>Trip</figcaption></figure>
+    </div>
   </div>
 </section>
 
-<section class="section" aria-labelledby="mission-title">
+<section class="section" id="features" aria-labelledby="features-title">
   <div class="wrap">
     <div class="section-head">
-      <p class="eyebrow">Who we are</p>
-      <h2 class="h2" id="mission-title">Travel data that people can see, check and own.</h2>
-      <p class="lede">Where we go says a great deal about our lives, yet the tools that record it usually keep the data on
-      someone else's server, and the tools researchers use to study travel are expensive and closed. HHT Diary is an
-      open-source effort to make travel-behaviour data collection more accessible, transparent, affordable and
-      user-controlled, for everyday people and for the researchers who plan our cities.</p>
-    </div>
-    <div class="grid four">
-      <div class="card"><h3>Free</h3><p>No subscription, paid tier, ads or data resale.</p></div>
-      <div class="card"><h3>Local-first</h3><p>Data stays on the person's device until they choose to export it.</p></div>
-      <div class="card"><h3>Transparent</h3><p>Open code, documented rules, and accuracy measured in public.</p></div>
-      <div class="card"><h3>Honest</h3><p>Every page separates what exists today from what is only planned.</p></div>
-    </div>
-    <p class="mt"><a class="link" href="vision/#principles">All eight principles →</a></p>
-  </div>
-</section>
-
-<section class="section" aria-labelledby="build-title">
-  <div class="wrap">
-    <div class="section-head">
-      <p class="eyebrow">What we build</p>
-      <h2 class="h2" id="build-title">Products, and the open engine they share.</h2>
-      <p class="lede">The organization sets the principles and the shared data model; each product is something you
-      install and run. There is one product today.</p>
+      <p class="eyebrow">What it does today</p>
+      <h2 class="h2" id="features-title">From raw GPS to a diary you can trust.</h2>
     </div>
     <div class="grid three">
-      <a class="card" href="triplibre/">
-        <p class="k">Product</p>
-        <h3>TripLibre</h3>
-        <p>A free, open-source travel diary for iPhone. It rebuilds each day into visits, trips and modes, keeps the
-        data on the phone, and exports it for analysis.</p>
-        <p><span class="status available">Available · build from source</span></p>
-        <span class="go">Visit TripLibre →</span></a>
-      <a class="card" href="triplibre/docs/architecture.html">
-        <p class="k">Shared foundation</p>
-        <h3>HHTCore</h3>
-        <p>The Swift package behind TripLibre: collection, inference, corrections and export. Any future HHT Diary tool
-        would reuse it, so that data from all of them can be analysed the same way.</p>
-        <p><span class="status available">Available</span></p>
-        <span class="go">Read the architecture →</span></a>
-      <a class="card" href="roadmap/">
-        <p class="k">Next</p>
-        <h3>A research edition</h3>
-        <p>A study-ready edition with consent, fixed settings and a controlled hand-over, kept apart from the personal
-        app. Not built, and not promised.</p>
-        <p><span class="status exploratory">Exploratory</span></p>
-        <span class="go">See the roadmap →</span></a>
+      <div class="card"><p class="k">01 · collect</p><h3>Background recording</h3><p>GPS runs only while you are moving. When you stop, the app switches to a geofence to save battery. Motion data sharpens mode detection.</p></div>
+      <div class="card"><p class="k">02 · reconstruct</p><h3>Visits, trips and modes</h3><p>A deterministic engine turns raw fixes into stays, trips, mode segments and named places. The same input always gives the same diary.</p></div>
+      <div class="card"><p class="k">03 · correct</p><h3>One-tap fixes</h3><p>Change a mode, rename a place, set a purpose, split or merge. Corrections are locked, logged and survive rebuilds.</p></div>
+      <div class="card"><p class="k">04 · stamp</p><h3>Self-reported stops</h3><p>One tap records a stop too short for GPS to notice, like dropping someone off.</p></div>
+      <div class="card"><p class="k">05 · analyse</p><h3>Stats and widgets</h3><p>Mode share, radius of gyration, tours, flights, period comparisons, and Home Screen widgets for today and the last 7 days.</p></div>
+      <div class="card"><p class="k">06 · export</p><h3>Survey-shaped export</h3><p>Trips follow household-travel-survey conventions and export to CSV, JSON, GeoJSON and SQLite, with a Python loader.</p></div>
     </div>
   </div>
 </section>
 
-<section class="section" aria-labelledby="explore-title">
+<section class="section" aria-labelledby="screens-title">
   <div class="wrap">
     <div class="section-head">
-      <p class="eyebrow">Explore</p>
-      <h2 class="h2" id="explore-title">Where to go from here.</h2>
+      <p class="eyebrow">Screens</p>
+      <h2 class="h2" id="screens-title">Playful on the surface, rigorous underneath.</h2>
+      <p class="lede">The app uses a bright "sticker" style and a map-pin mascot that sums up your day. Every screen is
+      annotated in the <a class="link" href="docs/ui-guide.html">UI guide</a>.</p>
     </div>
-    <div class="grid four">
-      <a class="card" href="products/">
-        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="2.5" width="12" height="19" rx="3"/><path d="M10.5 18.5h3"/></svg></div>
-        <h3>Products</h3><p>What you can use today, and how the products relate.</p><span class="go">Browse products →</span></a>
-      <a class="card" href="vision/">
-        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r=".6" fill="currentColor"/></svg></div>
-        <h3>Vision</h3><p>Why we exist, the principles we hold, and what we are not.</p><span class="go">Read the vision →</span></a>
-      <a class="card" href="roadmap/">
-        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 18l6-7 4 3 8-9"/><circle cx="9" cy="11" r="1.6"/><circle cx="13" cy="14" r="1.6"/></svg></div>
-        <h3>Roadmap</h3><p>Three workstreams, with honest Now, Next and Exploratory labels.</p><span class="go">See the roadmap →</span></a>
-      <a class="card" href="about/">
-        <div class="ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg></div>
-        <h3>About</h3><p>Who leads HHT Diary, how to get in touch, and where the code lives.</p><span class="go">About us →</span></a>
+    <div class="gallery">
+      <figure><img src="assets/screens/today.jpg" width="600" height="1304" loading="lazy" alt="The Today screen: a mascot speech bubble, the day's routes on a map, and four colourful stat tiles"><figcaption><b>Today</b>The day at a glance.</figcaption></figure>
+      <figure><img src="assets/screens/timeline.jpg" width="600" height="1304" loading="lazy" alt="The Timeline screen: the day as a vertical sequence of stays and trips"><figcaption><b>Timeline</b>Stays and trips in order.</figcaption></figure>
+      <figure><img src="assets/screens/stats.jpg" width="600" height="1304" loading="lazy" alt="The Stats screen: trips per day, distance, travel time and mode share bars"><figcaption><b>Stats</b>Trips, distance and mode share.</figcaption></figure>
+      <figure><img src="assets/screens/places.jpg" width="600" height="1304" loading="lazy" alt="The Places screen: places sorted by time spent, with unnamed places waiting for a name"><figcaption><b>Places</b>Where you spend your time, ready to name.</figcaption></figure>
+    </div>
+    <figure class="wide-shot"><img src="assets/screens/widgets.jpg" width="1100" height="1180" loading="lazy" alt="Tracking, Today and Last 7 days Home Screen widgets in the sticker style"><figcaption>Home Screen widgets: Tracking, Today and Last 7 days. They are read-only.</figcaption></figure>
+  </div>
+</section>
+
+<section class="section" id="privacy" aria-labelledby="privacy-title">
+  <div class="wrap">
+    <div class="grid two">
+      <div>
+        <p class="eyebrow">Privacy</p>
+        <h2 class="h2" id="privacy-title">Your location history stays on your phone.</h2>
+        <p class="lede">No account, no server, no analytics SDK, no sync. The database is one SQLite file in the app's
+        sandbox. Data leaves the phone only when you export it.</p>
+      </div>
+      <div class="prose">
+        <p>Keeping data on the device removes the server, not every risk. A trace of where someone sleeps and works can
+        re-identify them, the phone can be backed up to iCloud, and an export can be forwarded. The
+        <a href="docs/privacy.html">Privacy</a> page lists the few network requests the app makes, what an export
+        contains, and how to erase everything.</p>
+        <p>Accuracy has been measured on a small personal sample, not benchmarked across many people. See
+        <a href="docs/validation.html">Validation</a> and <a href="docs/research.html">Research uses &amp; limitations</a>
+        before using TripLibre data in a study.</p>
+      </div>
     </div>
   </div>
 </section>
 
-<section class="section" aria-labelledby="open-title">
+<section class="section" id="install" aria-labelledby="install-title">
   <div class="wrap">
-    <div class="cta">
-      <p class="eyebrow">Built in the open</p>
-      <h2 class="h2" id="open-title">Read every line that touches your data.</h2>
-      <p>Everything HHT Diary makes is Apache 2.0 licensed. Ideas start as GitHub issues, and accuracy is
-      <a class="link" href="triplibre/docs/validation.html">measured in public</a> (on a small sample so far).</p>
-      <div class="actions">
-        <a class="btn primary" href="https://github.com/hhtdiary">HHT Diary on GitHub <span class="arr" aria-hidden="true">→</span></a>
-        <a class="btn" href="triplibre/docs/contributing.html">Contribute to TripLibre</a>
+    <div class="section-head">
+      <p class="eyebrow">Install</p>
+      <h2 class="h2" id="install-title">Get TripLibre on your iPhone.</h2>
+      <p class="lede">TripLibre is not on the App Store yet. Today you build it from source on a Mac and install it on your
+      own phone; the <a class="link" href="docs/installation.html">installation guide</a> walks through every step.</p>
+    </div>
+    <div class="grid two">
+      <div class="card">
+        <p class="k"><span class="status available">Available</span></p>
+        <h3>Build from source</h3>
+        <p>Needs a Mac with Xcode, XcodeGen, a free Apple ID and an iPhone on iOS 17 or later. With a free Apple ID the
+        install lasts 7 days and you renew it with one command; your data is kept between installs.</p>
+        <pre class="term"><span class="p">$ </span>git clone https://github.com/zyang91/TripLibre.git
+<span class="p">$ </span>cd TripLibre &amp;&amp; make phone</pre>
       </div>
+      <div class="card">
+        <p class="k"><span class="status progress">In progress</span></p>
+        <h3>App Store</h3>
+        <p>An App Store release of the same personal diary is in progress, so installing will no longer need Xcode. The
+        target is around November 2026, it depends on App Review, and it may move. It adds no research features.</p>
+        <p><a href="https://hhtdiary.org/roadmap/">Follow it on the roadmap</a></p>
+      </div>
+    </div>
+    <div class="callout"><div class="ic" aria-hidden="true">i</div>
+      <p>No phone? <code>make sim</code> builds the app and launches it in the iOS Simulator with three synthetic days of
+      demo data. See <a href="docs/installation.html#try-it-in-the-simulator">Try it in the Simulator</a>.</p></div>
+  </div>
+</section>
+
+<section class="section" aria-labelledby="learn-title">
+  <div class="wrap">
+    <div class="section-head">
+      <p class="eyebrow">Documentation</p>
+      <h2 class="h2" id="learn-title">Go deeper.</h2>
+    </div>
+    <div class="grid three">
+      <a class="card" href="docs/using-the-app.html"><h3>Using the app</h3><p>The daily routine, corrections and export.</p><span class="go">User guide →</span></a>
+      <a class="card" href="docs/inference.html"><h3>How inference works</h3><p>Every rule that turns GPS into stays, trips and modes.</p><span class="go">Inference →</span></a>
+      <a class="card" href="docs/data-dictionary.html"><h3>Data dictionary</h3><p>Every exported table and field, with units and codes.</p><span class="go">Reference →</span></a>
     </div>
   </div>
 </section>

@@ -17,9 +17,9 @@ Character limits are App Store Connect's. Counts are for the text as written.
 | Price | Free, no in-app purchases |
 | Availability | All territories (no account or server, so no regional data residency concerns) |
 | Copyright | © 2026 Zhanchao Yang |
-| Privacy Policy URL | `https://hhtdiary.org/triplibre/docs/privacy.html` (or the new page from `privacy-policy.md`) |
-| Support URL | `https://hhtdiary.org/triplibre/docs/` |
-| Marketing URL | `https://hhtdiary.org/triplibre/` |
+| Privacy Policy URL | `https://triplibre.hhtdiary.org/docs/privacy.html` (or the new page from `privacy-policy.md`) |
+| Support URL | `https://triplibre.hhtdiary.org/docs/` |
+| Marketing URL | `https://triplibre.hhtdiary.org/` |
 | Devices | iPhone only (`TARGETED_DEVICE_FAMILY = 1`), iOS 17+ |
 
 ## Promotional text (≤ 170)
@@ -67,7 +67,7 @@ BATTERY-AWARE
 • GPS runs only while you're moving. When you stop, TripLibre switches it off and lets iOS wake it when you leave.
 
 PRIVACY
-TripLibre has no server, so the developer never receives your data. Optional address lookup (off by default) sends one place coordinate at a time to Apple. Maps load tiles from Apple Maps. Read the full policy at hhtdiary.org.
+TripLibre has no server, so the developer never receives your data. Optional address lookup (off by default) sends one place coordinate at a time to Apple. Maps load tiles from Apple Maps. Read the full policy at triplibre.hhtdiary.org.
 
 Note: continued use of GPS running in the background can decrease battery life. TripLibre is a personal diary, not a navigation or safety tool; inferred trips and modes can be wrong, so check anything you rely on.
 ```

@@ -28,7 +28,7 @@ date-released: 2026-10-24
 doi: 10.5281/zenodo.23307589
 license: Apache-2.0
 repository-code: "https://github.com/zyang91/TripLibre"
-url: "https://hhtdiary.org/triplibre/"
+url: "https://triplibre.hhtdiary.org/"
 keywords:
   - household travel survey
   - travel diary

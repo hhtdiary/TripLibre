@@ -7,6 +7,11 @@ single summary, so release notes aren't kept anywhere else in the repository.
 
 ## Unreleased
 
+- Website: TripLibre now has its own site at triplibre.hhtdiary.org, published from `docs/`: overview at `/`, docs at
+  `/docs/`, story at `/story/`. The HHT Diary organization pages (home, Products, Vision, Roadmap, About) moved to
+  [hhtdiary/hhtdiary.github.io](https://github.com/hhtdiary/hhtdiary.github.io) and stay at hhtdiary.org, where the
+  old `/triplibre/...` URLs redirect to the new site
+
 - App Store: release kit in `release/` (listing text, privacy policy, App Privacy answers, review notes, accessibility
   labels and disclaimer, button checklist, 6.9" screenshots, a sample GPX day for App Review) (#41)
 - Privacy manifests for the app and the widget extension: no tracking, no collected data, `UserDefaults` declared for

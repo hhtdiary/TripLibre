@@ -151,7 +151,7 @@ Key/value: `last_inference_at`.
 ## Export files
 
 The researcher-facing reference for every exported file and column (units, missing values, synthetic examples) is the
-[Data dictionary](https://hhtdiary.org/triplibre/docs/data-dictionary.html) ([`data-dictionary.html`](triplibre/docs/data-dictionary.html)).
+[Data dictionary](https://triplibre.hhtdiary.org/docs/data-dictionary.html) ([`data-dictionary.html`](docs/data-dictionary.html)).
 Note that `travel.sqlite` in an export is always the complete database, whatever the range and raw-points options.
 
 `trips.csv` is the canonical HHTS-style table: `person_day_id` (local date of departure), `trip_seq` (order within

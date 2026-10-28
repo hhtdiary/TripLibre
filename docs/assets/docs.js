@@ -1,11 +1,12 @@
 // TripLibre documentation — shared chrome. Every page is just <main> content; the header, sidebar,
 // "On this page" outline and prev/next links are built here from NAV, so adding a page means
 // adding one entry below. Hrefs are relative to the site root (the folder above this script); the docs
-// live in /triplibre/docs/, and the TripLibre and HHT Diary groups link out to the product and the organization.
+// live in /docs/, and the HHT Diary group links out to the organization's own site.
 
 const ROOT = new URL('..', document.currentScript.src).href;
 
-const D = 'triplibre/docs/';
+const D = 'docs/';
+const ORG = 'https://hhtdiary.org/';
 const NAV = [
   { group: 'Get started', items: [
     { href: D, title: 'Overview' },
@@ -32,14 +33,14 @@ const NAV = [
     { href: D + 'developer.html', title: 'Meet the developer' },
   ] },
   { group: 'TripLibre', items: [
-    { href: 'triplibre/', title: 'Product overview', ext: true },
-    { href: 'triplibre/story/', title: 'Project story', ext: true },
+    { href: '', title: 'Product overview', ext: true },
+    { href: 'story/', title: 'Project story', ext: true },
     { href: 'https://github.com/zyang91/TripLibre', title: 'GitHub', ext: true },
   ] },
   { group: 'HHT Diary', items: [
-    { href: '', title: 'Home', ext: true },
-    { href: 'vision/', title: 'Vision', ext: true },
-    { href: 'roadmap/', title: 'Roadmap', ext: true },
+    { href: ORG, title: 'Home', ext: true },
+    { href: ORG + 'vision/', title: 'Vision', ext: true },
+    { href: ORG + 'roadmap/', title: 'Roadmap', ext: true },
   ] },
 ];
 
@@ -54,7 +55,7 @@ const ICONS = {
 
 const url = href => (/^https?:/.test(href) ? href : ROOT + href);
 
-// The page's NAV key: "triplibre/docs/installation.html", or "triplibre/docs/" for the docs index.
+// The page's NAV key: "docs/installation.html", or "docs/" for the docs index.
 // Hosts that serve /installation without the extension get it added back.
 function currentFile() {
   const here = location.href.split(/[?#]/)[0];
@@ -72,11 +73,11 @@ function buildHeader() {
   h.innerHTML = `
     <button class="icon-btn menu-btn" aria-label="Open navigation">${ICONS.menu}</button>
     <a class="dx-brand" href="${url(D)}"><img src="${url('assets/triplibre-logo.png')}" alt="">TripLibre <span class="tag">docs</span></a>
-    <span class="dx-by hide-sm">by <a href="${url('')}">HHT Diary</a></span>
+    <span class="dx-by hide-sm">by <a href="${ORG}">HHT Diary</a></span>
     <nav>
-      <a class="hide-sm" href="${url('triplibre/')}">Overview</a>
+      <a class="hide-sm" href="${url('')}">Overview</a>
       <a class="hide-sm" href="${url(D + 'installation.html')}">Install</a>
-      <a class="hide-sm" href="${url('triplibre/story/')}">Story</a>
+      <a class="hide-sm" href="${url('story/')}">Story</a>
       <a class="icon-btn" href="${REPO}" aria-label="GitHub repository">${ICONS.github}</a>
       <button class="icon-btn theme-btn" aria-label="Toggle dark mode">${ICONS.moon}${ICONS.sun}</button>
     </nav>`;
@@ -151,8 +152,8 @@ function buildPager(content) {
 
   const foot = document.createElement('footer');
   foot.className = 'dx-foot';
-  foot.innerHTML = `<span>TripLibre, a product of <a href="${url('')}">HHT Diary</a> · Apache 2.0</span>
-    <span><a href="${url('triplibre/')}">Overview</a> · <a href="${url('roadmap/')}">Roadmap</a> ·
+  foot.innerHTML = `<span>TripLibre, a product of <a href="${ORG}">HHT Diary</a> · Apache 2.0</span>
+    <span><a href="${url('')}">Overview</a> · <a href="${ORG}roadmap/">Roadmap</a> ·
     <a href="https://doi.org/10.5281/zenodo.23307589">Cite</a> ·
     <a href="${REPO}/edit/main/docs/${currentFile().replace(/\/$/, '/index.html')}">Edit this page on GitHub</a></span>`;
   content.append(foot);

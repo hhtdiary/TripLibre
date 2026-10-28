@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Contributing · TripLibre Docs</title>
 <meta name="description" content="How to set up TripLibre for development, run the tests, and contribute changes.">
-<link rel="icon" href="../../assets/triplibre-logo.png">
+<link rel="icon" href="../assets/triplibre-logo.png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../../assets/docs.css?v=10">
+<link rel="stylesheet" href="../assets/docs.css?v=10">
 <script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
-<script src="../../assets/docs.js?v=2" defer></script>
+<script src="../assets/docs.js?v=2" defer></script>
 </head>
 <body>
 <main class="dx-main"><article class="dx-content">
@@ -49,7 +49,7 @@ dark theme, and runs axe-core's WCAG 2.1 AA rules against the finished page, inc
   <tr><td>Change background collection</td><td><code>App/Location/LocationCollector.swift</code>; test on a real device, the simulator can't reproduce it</td></tr>
   <tr><td>Change a Home Screen widget</td><td>Views in <code>Widgets/</code>; data in <code>Widget/WidgetSnapshot.swift</code> (bump <code>currentVersion</code> if its shape changes, and extend <code>WidgetSnapshotTests</code>)</td></tr>
   <tr><td>Change the UI</td><td><code>App/Screens/</code>, styling in <code>App/Support/Theme.swift</code></td></tr>
-  <tr><td>Edit these docs</td><td><code>docs/triplibre/docs/*.html</code>; navigation is in <code>docs/assets/docs.js</code>. See <a href="#documentation">Documentation</a> below</td></tr>
+  <tr><td>Edit these docs</td><td><code>docs/docs/*.html</code>; navigation is in <code>docs/assets/docs.js</code>. See <a href="#documentation">Documentation</a> below</td></tr>
 </table></div>
 
 <h2>Ground rules</h2>
@@ -88,9 +88,10 @@ Accuracy measurements on real data are summarised in aggregate only; see <a href
 <h2 id="documentation">Documentation</h2>
 <ul>
   <li><b>The site is plain HTML.</b> Everything in <code>docs/</code> is published as-is at
-    <a href="https://hhtdiary.org/">hhtdiary.org</a>. The organization's pages (home, products, vision, roadmap, about)
-    sit at the top and use <code>assets/site.js</code>; TripLibre's overview is <code>docs/triplibre/</code> (the same
-    script with <code>data-brand="triplibre"</code>) and these docs are <code>docs/triplibre/docs/</code>. There is no
+    <a href="https://triplibre.hhtdiary.org/">triplibre.hhtdiary.org</a>. TripLibre's overview is <code>docs/index.html</code>
+    (it uses <code>assets/site.js</code> with <code>data-brand="triplibre"</code>) and these docs are <code>docs/docs/</code>.
+    The organization's pages (<a href="https://hhtdiary.org/">hhtdiary.org</a>: home, products, vision, roadmap, about) live in
+    <a href="https://github.com/hhtdiary/hhtdiary.github.io">hhtdiary/hhtdiary.github.io</a>. There is no
     Markdown build: a <code>.md</code> file in <code>docs/</code> is visible on GitHub but not on the site. To add a doc
     page, copy an existing one and add it to <code>NAV</code> in <code>docs/assets/docs.js</code>.</li>
   <li><b>Say what is true today.</b> Label anything that isn't built yet with a status: <span class="status available">Available</span>
