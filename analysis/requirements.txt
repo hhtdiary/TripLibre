@@ -1,4 +1,4 @@
-pandas>=3.0.6
+pandas>=3.1.0
 numpy
 matplotlib
 # optional, for GIS work
