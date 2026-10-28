@@ -1,7 +1,7 @@
 {
   "name": "hht-app-tooling",
   "private": true,
-  "description": "Lint tooling for the docs site (hhtdiary.org) and repo Markdown. The app itself is Swift; see Makefile.",
+  "description": "Lint tooling for the docs site (triplibre.hhtdiary.org) and repo Markdown. The app itself is Swift; see Makefile.",
   "license": "Apache-2.0",
   "type": "module",
   "scripts": {

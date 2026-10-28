@@ -19,7 +19,7 @@ Stats, adding a cost, and creating an export.
 | **Captions / Audio Descriptions** | — Not applicable | No video or audio content |
 
 Accessibility URL (optional): link to the accessibility section of the docs once it exists, e.g.
-`https://hhtdiary.org/triplibre/docs/ui-guide.html`.
+`https://triplibre.hhtdiary.org/docs/ui-guide.html`.
 
 ## Disclaimer text
 

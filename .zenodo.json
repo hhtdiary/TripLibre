@@ -1,7 +1,7 @@
 {
   "title": "TripLibre: An Open-Source, Privacy-First Travel Diary for Mobility Research",
   "upload_type": "software",
-  "description": "<p>TripLibre is an open-source, local-first iOS application designed for personal mobility tracking and travel behavior research. It records location data in the background, reconstructs daily travel activities into visits, trips, transportation modes, and trip chains. It allows users to review and correct inferred travel records. The application supports exporting structured mobility datasets in CSV, JSON, GeoJSON, and SQLite formats, with a Python loader for further analysis. By combining automated GPS-based travel detection with user-controlled data management, TripLibre aims to lower the technical and financial barriers to collecting travel behavior data. Its broader vision is to provide researchers, educational institutions, and resource-constrained communities with an accessible and adaptable alternative to proprietary travel survey technologies, while preserving individual control over sensitive location information.</p><p>Documentation: <a href=\"https://hhtdiary.org/triplibre/docs/\">https://hhtdiary.org/triplibre/docs/</a></p>",
+  "description": "<p>TripLibre is an open-source, local-first iOS application designed for personal mobility tracking and travel behavior research. It records location data in the background, reconstructs daily travel activities into visits, trips, transportation modes, and trip chains. It allows users to review and correct inferred travel records. The application supports exporting structured mobility datasets in CSV, JSON, GeoJSON, and SQLite formats, with a Python loader for further analysis. By combining automated GPS-based travel detection with user-controlled data management, TripLibre aims to lower the technical and financial barriers to collecting travel behavior data. Its broader vision is to provide researchers, educational institutions, and resource-constrained communities with an accessible and adaptable alternative to proprietary travel survey technologies, while preserving individual control over sensitive location information.</p><p>Documentation: <a href=\"https://triplibre.hhtdiary.org/docs/\">https://triplibre.hhtdiary.org/docs/</a></p>",
   "creators": [
     {
       "name": "Yang, Zhanchao",
@@ -27,7 +27,7 @@
       "resource_type": "software"
     },
     {
-      "identifier": "https://hhtdiary.org/triplibre/",
+      "identifier": "https://triplibre.hhtdiary.org/",
       "relation": "isDocumentedBy",
       "resource_type": "publication-other"
     }

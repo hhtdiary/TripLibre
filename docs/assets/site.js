@@ -1,88 +1,52 @@
-// HHT Diary — shared header and footer for the organization and TripLibre pages. Pages sit at different
-// depths (/, /vision/, /products/ios/), so every link is resolved against the site root,
-// which is the folder above this script.
+// TripLibre — shared header and footer for the product pages (/, /story/). Pages sit at different depths,
+// so every link is resolved against the site root, which is the folder above this script. The organization,
+// HHT Diary, has its own site at hhtdiary.org (github.com/hhtdiary/hhtdiary.github.io); its links are absolute.
 
 const ROOT = new URL('..', document.currentScript.src).href;
-// Two brands share this chrome: the organization (HHT Diary) and its product (TripLibre). A page picks one
-// with <html data-brand="triplibre">; anything else is an organization page.
-const ORG_GITHUB = 'https://github.com/hhtdiary';
+const ORG = 'https://hhtdiary.org/';
 const REPO = 'https://github.com/zyang91/TripLibre';
 const DOI = 'https://doi.org/10.5281/zenodo.23307589';
 
-const BRANDS = {
-  org: {
-    name: 'HHT Diary',
-    logo: 'assets/hhtdiary-mark.png',
-    home: '',
-    blurb: 'Open, local-first tools for understanding everyday travel. Free and Apache 2.0 licensed.',
-    base: '© HHT Diary · Apache 2.0',
-    nav: [
-      { href: 'products/', title: 'Products', prefix: true },
-      { href: 'vision/', title: 'Vision', prefix: true },
-      { href: 'roadmap/', title: 'Roadmap', prefix: true },
-      { href: 'about/', title: 'About', prefix: true },
-      { href: ORG_GITHUB, title: 'GitHub' },
-    ],
-    footer: [
-      { group: 'Organization', items: [
-        { href: '', title: 'Home' },
-        { href: 'vision/', title: 'Vision' },
-        { href: 'roadmap/', title: 'Roadmap' },
-        { href: 'about/', title: 'About' },
-      ] },
-      { group: 'Products', items: [
-        { href: 'products/', title: 'All products' },
-        { href: 'triplibre/', title: 'TripLibre' },
-      ] },
-      { group: 'Community', items: [
-        { href: ORG_GITHUB, title: 'GitHub' },
-        { href: 'triplibre/docs/contributing.html', title: 'Contributing' },
-        { href: 'mailto:zhanchao@upenn.edu', title: 'Contact' },
-      ] },
-    ],
-  },
-  triplibre: {
-    name: 'TripLibre',
-    logo: 'assets/triplibre-logo.png',
-    home: 'triplibre/',
-    byline: true,
-    blurb: 'A free, open-source, local-first travel diary for iPhone. A product of HHT Diary.',
-    base: '© HHT Diary · TripLibre is Apache 2.0 licensed',
-    nav: [
-      { href: 'triplibre/', title: 'Overview' },
-      { href: 'triplibre/docs/installation.html', title: 'Install' },
-      { href: 'triplibre/docs/', title: 'Docs', prefix: true },
-      { href: 'triplibre/story/', title: 'Story', prefix: true },
+const BRAND = {
+  name: 'TripLibre',
+  logo: 'assets/triplibre-logo.png',
+  home: '',
+  byline: true,
+  blurb: 'A free, open-source, local-first travel diary for iPhone. A product of HHT Diary.',
+  base: '© HHT Diary · TripLibre is Apache 2.0 licensed',
+  nav: [
+    { href: '', title: 'Overview' },
+    { href: 'docs/installation.html', title: 'Install' },
+    { href: 'docs/', title: 'Docs', prefix: true },
+    { href: 'story/', title: 'Story', prefix: true },
+    { href: REPO, title: 'GitHub' },
+  ],
+  footer: [
+    { group: 'TripLibre', items: [
+      { href: '', title: 'Overview' },
+      { href: 'docs/installation.html', title: 'Install' },
+      { href: 'docs/privacy.html', title: 'Privacy' },
+      { href: 'story/', title: 'Story' },
+    ] },
+    { group: 'Docs', items: [
+      { href: 'docs/', title: 'Overview' },
+      { href: 'docs/using-the-app.html', title: 'Using the app' },
+      { href: 'docs/architecture.html', title: 'Architecture' },
+      { href: 'docs/contributing.html', title: 'Contributing' },
+    ] },
+    { group: 'Code', items: [
       { href: REPO, title: 'GitHub' },
-    ],
-    footer: [
-      { group: 'TripLibre', items: [
-        { href: 'triplibre/', title: 'Overview' },
-        { href: 'triplibre/docs/installation.html', title: 'Install' },
-        { href: 'triplibre/docs/privacy.html', title: 'Privacy' },
-        { href: 'triplibre/story/', title: 'Story' },
-      ] },
-      { group: 'Docs', items: [
-        { href: 'triplibre/docs/', title: 'Overview' },
-        { href: 'triplibre/docs/using-the-app.html', title: 'Using the app' },
-        { href: 'triplibre/docs/architecture.html', title: 'Architecture' },
-        { href: 'triplibre/docs/contributing.html', title: 'Contributing' },
-      ] },
-      { group: 'Code', items: [
-        { href: REPO, title: 'GitHub' },
-        { href: `${REPO}/issues`, title: 'Issues' },
-        { href: DOI, title: 'Cite' },
-      ] },
-      { group: 'HHT Diary', items: [
-        { href: '', title: 'Home' },
-        { href: 'vision/', title: 'Vision' },
-        { href: 'roadmap/', title: 'Roadmap' },
-        { href: 'about/', title: 'About' },
-      ] },
-    ],
-  },
+      { href: `${REPO}/issues`, title: 'Issues' },
+      { href: DOI, title: 'Cite' },
+    ] },
+    { group: 'HHT Diary', items: [
+      { href: ORG, title: 'Home' },
+      { href: ORG + 'vision/', title: 'Vision' },
+      { href: ORG + 'roadmap/', title: 'Roadmap' },
+      { href: ORG + 'about/', title: 'About' },
+    ] },
+  ],
 };
-const BRAND = BRANDS[document.documentElement.dataset.brand] || BRANDS.org;
 
 const ICONS = {
   menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M4 7h16M4 12h16M4 17h16"/></svg>',
@@ -93,7 +57,7 @@ const ICONS = {
 // Absolute URLs (https:, mailto: …) pass through; everything else is relative to the site root.
 const url = href => (/^[a-z][a-z0-9+.-]*:/i.test(href) ? href : ROOT + href);
 
-// "vision/" for /vision/ and /vision/index.html alike.
+// "story/" for /story/ and /story/index.html alike.
 function currentPath() {
   const here = location.href.split(/[?#]/)[0];
   return here.startsWith(ROOT) ? here.slice(ROOT.length).replace(/index\.html$/, '') : '';
@@ -101,7 +65,7 @@ function currentPath() {
 
 // The product's pages carry an "by HHT Diary" endorsement that links back to the organization.
 function brandLink() {
-  const by = BRAND.byline ? `<small class="by">by <a href="${url('')}">HHT Diary</a></small>` : '';
+  const by = BRAND.byline ? `<small class="by">by <a href="${ORG}">HHT Diary</a></small>` : '';
   return `<span class="s-brand"><a href="${url(BRAND.home)}"><img src="${url(BRAND.logo)}" alt="" width="28" height="28">${BRAND.name}</a>${by}</span>`;
 }
 

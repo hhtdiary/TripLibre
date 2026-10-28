@@ -6,7 +6,7 @@ target **2026-11-02**). Everything to paste into App Store Connect is in this fo
 | File | Paste into / use for |
 |---|---|
 | [`app-store-listing.md`](app-store-listing.md) | App Information, Pricing, Version page: name, subtitle, description, keywords, URLs, category, age rating |
-| [`privacy-policy.md`](privacy-policy.md) | Privacy Policy URL (publish on hhtdiary.org) |
+| [`privacy-policy.md`](privacy-policy.md) | Privacy Policy URL (publish on triplibre.hhtdiary.org) |
 | [`app-privacy-details.md`](app-privacy-details.md) | App Privacy section ("nutrition label") + the privacy manifest the build still needs |
 | [`app-review-notes.md`](app-review-notes.md) | App Review Information › Notes, and answers for likely review questions |
 | [`accessibility-and-disclaimer.md`](accessibility-and-disclaimer.md) | Accessibility Nutrition Labels + disclaimer text for the listing, website and app |
@@ -39,8 +39,8 @@ Things found while preparing this kit. None of them are fixed in this folder.
 4. **Release build + archive.** `xcodebuild archive` with the Release configuration, then upload through Xcode
    Organizer or `xcrun altool` / Transporter. Check that demo data and `-hhtUITest` stay simulator-only (they are
    behind `#if targetEnvironment(simulator)`).
-5. **Publish the privacy policy** at a stable URL (suggested `https://hhtdiary.org/triplibre/privacy/`), or point
-   App Store Connect at the existing docs page `https://hhtdiary.org/triplibre/docs/privacy.html` after updating its
+5. **Publish the privacy policy** at a stable URL (suggested `https://triplibre.hhtdiary.org/privacy/`), or point
+   App Store Connect at the existing docs page `https://triplibre.hhtdiary.org/docs/privacy.html` after updating its
    "App Store privacy details" box.
 6. **`SECURITY.md` is still GitHub's template** (it lists versions 4.0–5.1 that don't exist). Replace it with a real
    contact before linking it from the listing.

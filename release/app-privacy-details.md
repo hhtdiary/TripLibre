@@ -26,7 +26,7 @@ Also answer:
 
 - **Tracking (ATT)**: No. The app doesn't track users across apps or websites, so no `NSUserTrackingUsageDescription`.
 - **Privacy Policy URL**: see `app-store-listing.md`.
-- **User Privacy Choices URL** (optional): `https://hhtdiary.org/triplibre/docs/privacy.html#youre-in-control` (check
+- **User Privacy Choices URL** (optional): `https://triplibre.hhtdiary.org/docs/privacy.html#youre-in-control` (check
   the anchor exists after publishing).
 
 If any of these change (cloud sync, analytics, a crash SDK, a server-side agent), re-answer the questionnaire before

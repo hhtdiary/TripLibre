@@ -1,6 +1,6 @@
 name: PR Preview (Vercel)
 
-# Deploys the docs/ site (hhtdiary.org) to a Vercel preview URL for each PR.
+# Deploys the docs/ site (triplibre.hhtdiary.org) to a Vercel preview URL for each PR.
 # Production stays on GitHub Pages; Vercel is only used for previews.
 on:
   pull_request:
@@ -70,16 +70,12 @@ jobs:
             const url = process.env.PREVIEW_URL;
             const sha = context.payload.pull_request.head.sha.slice(0, 7);
             const pages = [
-              ['HHT Diary home', '/index.html'],
-              ['About', '/about/'],
-              ['Vision', '/vision/'],
-              ['Roadmap', '/roadmap/'],
-              ['TripLibre overview', '/triplibre/'],
-              ['TripLibre docs', '/triplibre/docs/'],
-              ['Project story', '/triplibre/story/'],
-              ['Installation', '/triplibre/docs/installation.html'],
-              ['Privacy', '/triplibre/docs/privacy.html'],
-              ['Data dictionary', '/triplibre/docs/data-dictionary.html'],
+              ['TripLibre overview', '/index.html'],
+              ['TripLibre docs', '/docs/'],
+              ['Project story', '/story/'],
+              ['Installation', '/docs/installation.html'],
+              ['Privacy', '/docs/privacy.html'],
+              ['Data dictionary', '/docs/data-dictionary.html'],
             ];
             const list = pages
               .map(([name, path]) => `- [${name}](${url}${path})`)
