@@ -65,8 +65,8 @@ function currentPath() {
 
 // The product's pages carry an "by HHT Diary" endorsement that links back to the organization.
 function brandLink() {
-  const by = BRAND.byline ? `<small class="by">by <a href="${ORG}">HHT Diary</a></small>` : '';
-  return `<span class="s-brand"><a href="${url(BRAND.home)}"><img src="${url(BRAND.logo)}" alt="" width="28" height="28">${BRAND.name}</a>${by}</span>`;
+  const by = BRAND.byline ? `<span class="by">by <a href="${ORG}">HHT Diary</a></span>` : '';
+  return `<a class="brand" href="${url(BRAND.home)}"><img src="${url(BRAND.logo)}" alt="" width="42" height="42">${BRAND.name}</a>${by}`;
 }
 
 function buildHeader() {
@@ -75,18 +75,16 @@ function buildHeader() {
   const local = BRAND.nav.filter(n => !/^https?:/.test(n.href));
   const current = local.find(n => n.href === here) || local.find(n => n.prefix && here.startsWith(n.href));
   const h = document.createElement('header');
-  h.className = 's-header';
+  h.className = 'nav';
   h.innerHTML = `
     <a class="skip" href="#main">Skip to content</a>
-    <div class="wrap">
-      ${brandLink()}
-      <nav class="s-nav" id="site-nav" aria-label="Main">
-        ${BRAND.nav.map(n => `<a href="${url(n.href)}"${n === current ? ' aria-current="page"' : ''}>${n.title}</a>`).join('')}
-      </nav>
-      <div class="s-tools">
-        <button class="icon-btn theme-btn" type="button" aria-label="Toggle dark mode">${ICONS.moon}${ICONS.sun}</button>
-        <button class="icon-btn menu-btn" type="button" aria-label="Open navigation" aria-controls="site-nav" aria-expanded="false">${ICONS.menu}</button>
-      </div>
+    ${brandLink()}
+    <nav class="nav-links" id="site-nav" aria-label="Main">
+      ${BRAND.nav.map(n => `<a href="${url(n.href)}"${n === current ? ' aria-current="page"' : ''}>${n.title}</a>`).join('')}
+    </nav>
+    <div class="tools">
+      <button class="icon-btn theme-btn" type="button" aria-label="Toggle dark mode">${ICONS.moon}${ICONS.sun}</button>
+      <button class="icon-btn menu-btn" type="button" aria-label="Open navigation" aria-controls="site-nav" aria-expanded="false">${ICONS.menu}</button>
     </div>`;
   document.body.prepend(h);
 
@@ -109,8 +107,9 @@ function buildFooter() {
   const f = document.createElement('footer');
   f.className = 's-footer';
   f.innerHTML = `
-    <div class="wrap">
-      <div class="cols" style="--n: ${BRAND.footer.length}">
+    <div class="in">
+      <div class="mega" aria-hidden="true">${BRAND.name}</div>
+      <div class="fcols" style="--n: ${BRAND.footer.length}">
         <div class="about">
           ${brandLink()}
           <p>${BRAND.blurb}</p>
@@ -120,7 +119,7 @@ function buildFooter() {
             ${g.items.map(i => `<li><a href="${url(i.href)}">${i.title}</a></li>`).join('')}
           </ul></div>`).join('')}
       </div>
-      <div class="base"><span>${BRAND.base}</span><span>Every trip tells a story.</span></div>
+      <div class="fbase"><span>${BRAND.base}</span><span>Every trip tells a story.</span></div>
     </div>`;
   document.body.append(f);
 }
