@@ -1,12 +1,12 @@
 <p align="center">
-  <img src="docs/assets/triplibre-logo.png" width="112" height="112" alt="TripLibre logo: a colourful infinity route forming a T, with home, city and travel symbols">
+  <img src="docs/assets/triplibre-logo.png" width="112" height="112" alt="TripLibre logo: a colorful infinity route forming a T, with home, city and travel symbols">
 </p>
 
 <h1 align="center">TripLibre — personal travel diary</h1>
 
 <p align="center">
   <em>From a travel survey of one to travel surveys within reach.</em><br>
-  A free, open-source, local-first iOS travel diary that rebuilds each day into visits, trips and modes.
+  A free, open-source, local-first iOS travel diary that rebuilds each day into visits, trips, and modes.
 </p>
 
 <p align="center">
