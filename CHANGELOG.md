@@ -7,6 +7,10 @@ single summary, so release notes aren't kept anywhere else in the repository.
 
 ## Unreleased
 
+- Languages: the app is available in English, Chinese (Simplified and Traditional), French, German, Spanish,
+  Portuguese, Russian, Arabic (right to left), Japanese and Korean. Settings › Language picks one or follows the
+  iPhone; dates, units and plurals follow it, and the permission prompts are translated too. Exports and stored codes
+  stay English. The experimental diary agent and the Home Screen widgets are English for now (#90)
 - Website: TripLibre now has its own site at triplibre.hhtdiary.org, published from `docs/`: overview at `/`, docs at
   `/docs/`, story at `/story/`. The HHT Diary organization pages (home, Products, Vision, Roadmap, About) moved to
   [hhtdiary/hhtdiary.github.io](https://github.com/hhtdiary/hhtdiary.github.io) and stay at hhtdiary.org, where the

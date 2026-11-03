@@ -70,6 +70,7 @@ node_modules/.package-lock.json: package-lock.json
 lint: node_modules/.package-lock.json swift-lint   ## docs JS/CSS/HTML (incl. accessibility rules), Markdown, Python, Swift (needs node, ruff, swiftlint, swiftformat)
 	npm run lint
 	ruff check
+	python3 scripts/check_localizations.py
 
 # Same versions CI pins (.github/workflows/ci.yml). `brew install swiftlint swiftformat` gets you close enough.
 swift-lint:      ## SwiftLint (new violations only) + SwiftFormat check; CI pins SwiftLint 0.65.1, SwiftFormat 0.63.1

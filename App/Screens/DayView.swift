@@ -170,7 +170,7 @@ struct DayView: View {
         }
         .listSectionSpacing(.compact)
         .groupedList()
-        .navigationTitle(isToday && !fixedDay ? "Today" : Fmt.shortDay(day))
+        .navigationTitle(isToday && !fixedDay ? L("Today") : Fmt.shortDay(day))
         .inlineTitle()
         .toolbar {
             if !fixedDay {
@@ -256,10 +256,10 @@ struct DayView: View {
         let dist = data.trips.reduce(0) { $0 + $1.distance }
         let time = data.trips.reduce(0) { $0 + $1.duration }
         return StickerGrid {
-            StatSticker(value: "\(data.trips.count)", label: "trips", color: Toon.sun, tilt: -2)
+            StatSticker(value: data.trips.count.formatted(), label: "trips", color: Toon.sun, tilt: -2)
             StatSticker(value: Fmt.distance(dist), label: "distance", color: Toon.lime, tilt: 1.5)
             StatSticker(value: Fmt.duration(time), label: "travelling", color: Toon.sky, tilt: 1)
-            StatSticker(value: "\(Set(data.visits.compactMap(\.placeID)).count)", label: "places", color: Toon.bubblegum, tilt: -1.5)
+            StatSticker(value: Set(data.visits.compactMap(\.placeID)).count.formatted(), label: "places", color: Toon.bubblegum, tilt: -1.5)
         }
         .padding(.vertical, 4)
     }
@@ -272,7 +272,7 @@ struct DayView: View {
                 .font(.system(size: 18, weight: .bold)).foregroundStyle(Toon.ink) // a11y-check:disable fixed-font-size
                 .frame(width: 38, height: 38)
                 .background(RoundedRectangle(cornerRadius: 12, style: .continuous).fill(Toon.accent))
-            Text("\(reviewCount) trip\(reviewCount == 1 ? "" : "s") in the last 7 days could use a quick check")
+            Text(L("%lld trips in the last 7 days could use a quick check", reviewCount))
                 .font(.toon(14, .heavy)).foregroundStyle(.white) // a11y-check:disable hardcoded-color (on Toon.ink in both modes)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
@@ -286,18 +286,18 @@ struct DayView: View {
     /// What Pip says above the map.
     private var mascotLine: String {
         guard !data.trips.isEmpty else {
-            return isToday && !fixedDay ? "No trips yet today. I'm keeping an eye out!" : "A quiet day. Nothing recorded here."
+            return isToday && !fixedDay ? L("No trips yet today. I'm keeping an eye out!") : L("A quiet day. Nothing recorded here.")
         }
         let dist = Fmt.distance(data.trips.reduce(0) { $0 + $1.distance })
         let n = data.trips.count
-        let lead = "\(n) trip\(n == 1 ? "" : "s") and \(dist)\(isToday && !fixedDay ? " so far" : "")."
+        let lead = isToday && !fixedDay ? L("%@ and %@ so far.", L("%lld trips", n), dist) : L("%@ and %@.", L("%lld trips", n), dist)
         var byGroup: [ModeGroup: Double] = [:]
         for t in data.trips { byGroup[t.mode.group, default: 0] += t.duration }
         switch byGroup.max(by: { $0.value < $1.value })?.key {
-        case .active: return lead + " Your feet did most of the work!"
-        case .transit: return lead + " Transit pro, nice."
-        case .car: return lead + " Mostly on wheels today."
-        case .longDistance: return lead + " Big journey day!"
+        case .active: return lead + " " + L("Your feet did most of the work!")
+        case .transit: return lead + " " + L("Transit pro, nice.")
+        case .car: return lead + " " + L("Mostly on wheels today.")
+        case .longDistance: return lead + " " + L("Big journey day!")
         default: return lead
         }
     }
@@ -347,10 +347,10 @@ struct VisitRow: View {
 
     var body: some View {
         ToonRowStack {
-            ToonChip(symbol: place?.category?.symbol ?? "mappin", color: place?.toonColor ?? Toon.stone, size: 44, label: place?.category?.label)
+            ToonChip(symbol: place?.category?.symbol ?? "mappin", color: place?.toonColor ?? Toon.stone, size: 44, label: place?.category?.localizedLabel)
             VStack(alignment: .leading, spacing: 2) {
                 ToonRowStack(spacing: 6) {
-                    Text(place?.isNamed == true ? place!.displayName : (place?.address ?? "Unnamed place"))
+                    Text(place.flatMap { $0.isNamed ? $0.displayName : nil } ?? place?.address ?? L("Unnamed place"))
                         .font(.toon(18, .bold))
                         .foregroundStyle(place?.isNamed == true ? Toon.ink : Toon.muted)
                         .toonLineLimit(2)
@@ -377,8 +377,8 @@ struct VisitRow: View {
     }
 
     private var meta: String {
-        var parts = [timeSpan, visit.departure == nil ? "now · \(Fmt.duration(visit.duration()))" : Fmt.duration(visit.duration())]
-        if let p = visit.purpose ?? place?.category?.defaultPurpose { parts.append(p.label) }
+        var parts = [timeSpan, visit.departure == nil ? L("now · %@", Fmt.duration(visit.duration())) : Fmt.duration(visit.duration())]
+        if let p = visit.purpose ?? place?.category?.defaultPurpose { parts.append(p.localizedLabel) }
         return parts.joined(separator: " · ")
     }
 
@@ -446,9 +446,9 @@ struct TripRow: View {
             ForEach(quickModes.filter { $0 != trip.mode }.prefix(3)) { m in
                 Button { onQuickMode(m) } label: {
                     if iconOnly {
-                        Image(systemName: m.symbol).accessibilityLabel(m.label)
+                        Image(systemName: m.symbol).accessibilityLabel(m.localizedLabel)
                     } else {
-                        Label(m.label, systemImage: m.symbol).labelStyle(.titleAndIcon)
+                        Label(m.localizedLabel, systemImage: m.symbol).labelStyle(.titleAndIcon)
                             .fixedSize()
                     }
                 }
@@ -457,7 +457,7 @@ struct TripRow: View {
             if trip.modeAuto != nil && trip.modeAuto != .unknown {
                 Button { onQuickMode(trip.mode) } label: { Image(systemName: "checkmark").fontWeight(.black) }
                     .buttonStyle(ToonButtonStyle(fill: Toon.lime, height: 34, fontSize: 13, shadow: 2))
-                    .accessibilityLabel("Confirm \(trip.mode.label)")
+                    .accessibilityLabel(L("Confirm %@", trip.mode.localizedLabel))
             }
         }
         .padding(.trailing, 2)
@@ -465,13 +465,13 @@ struct TripRow: View {
 
     private var uniqueModes: [TravelMode] { trip.displayModes }
 
-    private var modeText: String { trip.displayModes.map(\.label).joined(separator: " + ") }
+    private var modeText: String { trip.displayModes.map(\.localizedLabel).joined(separator: " + ") }
 }
 
 extension View {
     /// Diary rows open their detail sheet on tap. VoiceOver reads the row as one button (its own buttons, like the
     /// quick mode picks, become actions on it) and activating it opens the same sheet.
-    func detailRow(_ identifier: String, hint: String, open: @escaping () -> Void) -> some View {
+    func detailRow(_ identifier: String, hint: LocalizedStringKey, open: @escaping () -> Void) -> some View {
         contentShape(Rectangle())
             .onTapGesture { open() }
             .accessibilityElement(children: .combine)
@@ -519,8 +519,8 @@ struct StampButton: View {
 
             if let s = model.lastStamp {
                 HStack(spacing: 8) {
-                    Text(model.lastStampRepeated ? "Already stamped at \(Fmt.time(s.timestamp)), so I kept just one."
-                         : "Stamped at \(Fmt.time(s.timestamp)). I'll fit it into your day.")
+                    Text(model.lastStampRepeated ? L("Already stamped at %@, so I kept just one.", Fmt.time(s.timestamp))
+                         : L("Stamped at %@. I'll fit it into your day.", Fmt.time(s.timestamp)))
                         .font(.toon(12, .bold)).foregroundStyle(Toon.muted)
                     Spacer(minLength: 0)
                     Button("Undo") { model.undoStamp(s) }
@@ -563,8 +563,8 @@ struct StampRow: View {
 
     private var detail: String {
         let t = Fmt.time(stamp.timestamp, tz: stamp.timeZone)
-        guard stamp.coordinate != nil, let u = stamp.uncertainty else { return "\(t) · no location" }
-        return "\(t) · within ~\(Fmt.distance(u))"
+        guard stamp.coordinate != nil, let u = stamp.uncertainty else { return L("%@ · no location", t) }
+        return L("%@ · within ~%@", t, Fmt.distance(u))
     }
 }
 
@@ -719,16 +719,16 @@ struct InferenceStatusBanner: View {
     }
 
     private var phaseText: String {
-        let points = model.progress.map { " · \($0.report.pointsConsidered.formatted()) points" } ?? ""
+        let points = model.progress.map { " · " + L("%@ points", $0.report.pointsConsidered.formatted()) } ?? ""
         switch model.phase {
-        case .syncingMotion, nil: return "Syncing motion activity"
-        case .engine(.loadingPoints): return "Loading location points"
-        case .engine(.detectingStays): return "Detecting stays" + points
+        case .syncingMotion, nil: return L("Syncing motion activity")
+        case .engine(.loadingPoints): return L("Loading location points")
+        case .engine(.detectingStays): return L("Detecting stays") + points
         case .engine(.resolvingVisits):
             let p = model.progress
-            return "Matching visits" + (p.map { $0.staysTotal > 0 ? " (\($0.staysResolved) of \($0.staysTotal))" : "" } ?? "") + points
-        case .engine(.buildingTrips): return "Building trips" + points
-        case .engine(.finalizing): return "Saving"
+            return L("Matching visits") + (p.map { $0.staysTotal > 0 ? " " + L("(%lld of %lld)", $0.staysResolved, $0.staysTotal) : "" } ?? "") + points
+        case .engine(.buildingTrips): return L("Building trips") + points
+        case .engine(.finalizing): return L("Saving")
         }
     }
 
@@ -736,14 +736,14 @@ struct InferenceStatusBanner: View {
         var parts: [String] = []
         if let r = model.progress?.report {
             let visits = r.visitsCreated + r.visitsUpdated
-            if visits > 0 { parts.append("\(visits) visit\(visits == 1 ? "" : "s") so far") }
-            if r.tripsCreated > 0 { parts.append("\(r.tripsCreated) trip\(r.tripsCreated == 1 ? "" : "s")") }
+            if visits > 0 { parts.append(L("%lld visits so far", visits)) }
+            if r.tripsCreated > 0 { parts.append(L("%lld trips", r.tripsCreated)) }
         }
         if let s = model.runStartedAt {
             let e = Int(max(0, now.timeIntervalSince(s)))
-            parts.append(String(format: "%d:%02d elapsed", e / 60, e % 60))
+            parts.append(L("%@ elapsed", String(format: "%d:%02d", e / 60, e % 60)))
         }
-        if model.rerunRequested { parts.append("another update queued") }
+        if model.rerunRequested { parts.append(L("another update queued")) }
         return parts.joined(separator: " · ")
     }
 }

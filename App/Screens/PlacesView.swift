@@ -9,10 +9,10 @@ struct PlacesView: View {
         var id: String { rawValue }
         var title: String {
             switch self {
-            case .time: return "Most time"
-            case .visits: return "Visits"
-            case .recent: return "Recent"
-            case .name: return "A–Z"
+            case .time: return L("Most time")
+            case .visits: return L("Visits")
+            case .recent: return L("Recent")
+            case .name: return L("A–Z")
             }
         }
     }
@@ -34,12 +34,12 @@ struct PlacesView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 16) {
-                Text("\(places.count) spot\(places.count == 1 ? "" : "s") on your map")
+                Text(L("%lld spots on your map", places.count))
                     .font(.toon(15, .heavy)).foregroundStyle(Toon.muted)
                 searchField
                 ToonFlow {
                     ForEach(Sort.allCases) { s in pill(s.title, on: sort == s) { sort = s } }
-                    pill("Named", on: namedOnly, icon: namedOnly ? "checkmark" : nil) { namedOnly.toggle() }
+                    pill(L("Named"), on: namedOnly, icon: namedOnly ? "checkmark" : nil) { namedOnly.toggle() }
                 }
                 .padding(.vertical, 4).padding(.trailing, 4)
 
@@ -48,8 +48,8 @@ struct PlacesView: View {
                 if shown.isEmpty {
                     HStack(spacing: 12) {
                         Mascot(size: 44)
-                        Text(query.isEmpty ? "No places yet. They appear once you've stayed somewhere a few minutes."
-                                           : "No places match “\(query)”.")
+                        Text(query.isEmpty ? L("No places yet. They appear once you've stayed somewhere a few minutes.")
+                                           : L("No places match “%@”.", query))
                             .font(.toon(14, .bold)).foregroundStyle(Toon.muted)
                     }
                     .padding(.top, 8)
@@ -83,13 +83,13 @@ struct PlacesView: View {
         .scrollDismissesKeyboard(.immediately)
         .background(ToonBackground())
         .navigationTitle("Places")
-        .confirmationDialog("Delete \(pendingDelete.flatMap { $0.isNamed ? $0.displayName : nil } ?? "this place")?", // a11y-check:disable sheet-focus-return (iOS puts VoiceOver focus back on the trigger when it closes)
+        .confirmationDialog(pendingDelete.flatMap { $0.isNamed ? L("Delete %@?", $0.displayName) : nil } ?? L("Delete this place?"), // a11y-check:disable sheet-focus-return (iOS puts VoiceOver focus back on the trigger when it closes)
                             isPresented: Binding(get: { pendingDelete != nil }, set: { if !$0 { pendingDelete = nil } }),
                             titleVisibility: .visible, presenting: pendingDelete) { p in
-            Button("Delete place and its \(visitWord(stats[p.id]?.visitCount ?? 0))", role: .destructive) { // a11y-check:disable duplicate-button-label (each one is in a different sheet or screen)
+            Button(L("Delete place and its %lld visits", stats[p.id]?.visitCount ?? 0), role: .destructive) { // a11y-check:disable duplicate-button-label (each one is in a different sheet or screen)
                 model.perform { try model.edit.deletePlace(p.id) }
             }
-        } message: { _ in Text(PlaceDeletion.explanation) }
+        } message: { _ in Text(L(PlaceDeletion.explanation)) }
         .task(id: model.revision) {
             places = (try? model.store.places()) ?? []
             stats = (try? model.store.placeStats()) ?? [:]
@@ -157,12 +157,12 @@ struct PlaceTile: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            ToonChip(symbol: place.category?.symbol ?? "mappin", color: place.toonColor, size: 52, label: place.category?.label)
+            ToonChip(symbol: place.category?.symbol ?? "mappin", color: place.toonColor, size: 52, label: place.category?.localizedLabel)
             Text(place.displayName)
                 .font(.toon(18, .bold)).foregroundStyle(Toon.ink)
                 .toonLineLimit(2).multilineTextAlignment(.leading)
-            Text("\(stats?.visitCount ?? 0) visits · \(Fmt.hours(stats?.totalDwell ?? 0))"
-                 + (stats?.lastVisit.map { "\nlast \(Fmt.shortDay($0))" } ?? ""))
+            Text(L("%lld visits", stats?.visitCount ?? 0) + " · " + Fmt.hours(stats?.totalDwell ?? 0)
+                 + (stats?.lastVisit.map { "\n" + L("last %@", Fmt.shortDay($0)) } ?? ""))
                 .font(.toon(12, .bold)).foregroundStyle(Toon.muted)
                 .lineLimit(2).fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
@@ -190,11 +190,11 @@ struct UnnamedPlaceRow: View {
 
     var body: some View {
         ToonRowStack {
-            ToonChip(symbol: place.category?.symbol ?? "mappin", color: Toon.stone, size: 46, label: place.category?.label)
+            ToonChip(symbol: place.category?.symbol ?? "mappin", color: Toon.stone, size: 46, label: place.category?.localizedLabel)
             VStack(alignment: .leading, spacing: 2) {
-                Text(place.address ?? "Unnamed place").font(.toon(15, .heavy)).foregroundStyle(Toon.ink).toonLineLimit(2)
-                Text("\(stats?.visitCount ?? 0) visits · \(Fmt.hours(stats?.totalDwell ?? 0))"
-                     + (stats?.lastVisit.map { " · last \(Fmt.shortDay($0))" } ?? ""))
+                Text(place.address ?? L("Unnamed place")).font(.toon(15, .heavy)).foregroundStyle(Toon.ink).toonLineLimit(2)
+                Text(L("%lld visits", stats?.visitCount ?? 0) + " · " + Fmt.hours(stats?.totalDwell ?? 0)
+                     + (stats?.lastVisit.map { " · " + L("last %@", Fmt.shortDay($0)) } ?? ""))
                     .font(.toon(12, .bold)).foregroundStyle(Toon.muted)
             }
             Spacer(minLength: 0)
@@ -249,8 +249,8 @@ struct PlaceDetailView: View {
                         Text("Radius")
                         Slider(value: Binding(get: { draft?.radius ?? 80 }, set: { draft?.radius = $0.rounded() }), in: 30...2000, step: 10)
                             .accessibilityLabel("Radius")
-                            .accessibilityValue("\(Int(p.radius)) metres")
-                        Text("\(Int(p.radius)) m").monospacedDigit().frame(width: 64, alignment: .trailing)
+                            .accessibilityValue(Fmt.distance(p.radius))
+                        Text(L("%lld m", Int(p.radius))).monospacedDigit().frame(width: 64, alignment: .trailing)
                     }
                     Toggle("Favorite", isOn: Binding(get: { draft?.favorite ?? false }, set: { draft?.favorite = $0 }))
                 } header: { Text("Place").toonSectionText() }
@@ -287,7 +287,7 @@ struct PlaceDetailView: View {
                 } footer: { Text("Use when the same real place was detected twice. All visits move; nothing is lost.").toonSectionText() }
                 Section {
                     Button(role: .destructive) { confirmDelete = true } label: { Label("This isn't a real place", systemImage: "trash") }
-                } footer: { Text("Deletes the place and its \(visitWord(visits.count)); trips around them are joined.").toonSectionText() }
+                } footer: { Text(L("Deletes the place and its %lld visits; trips around them are joined.", visits.count)).toonSectionText() }
 
                 Section {
                     ForEach(visits.prefix(100)) { v in
@@ -295,18 +295,18 @@ struct PlaceDetailView: View {
                             HStack {
                                 Text(Fmt.shortDay(v.arrival))
                                 Spacer()
-                                Text("\(Fmt.time(v.arrival))–\(v.departure.map { Fmt.time($0) } ?? "now") · \(Fmt.duration(v.duration()))")
+                                Text("\(Fmt.time(v.arrival))–\(v.departure.map { Fmt.time($0) } ?? L("now")) · \(Fmt.duration(v.duration()))")
                                     .font(.caption).foregroundStyle(Toon.muted).monospacedDigit()
                             }
                         }
                     }
-                } header: { Text("\(visits.count) visits").toonSectionText() }
+                } header: { Text(L("%lld visits", visits.count)).toonSectionText() }
             } else {
                 Text("This place no longer exists (it may have been merged or deleted).")
             }
         }
         .toonBackground()
-        .navigationTitle(place?.displayName ?? "Place")
+        .navigationTitle(place?.displayName ?? L("Place"))
         .inlineTitle()
         .task(id: model.revision) {
             // .task also re-runs when a pushed screen (e.g. the category list) pops; keep unsaved edits then.
@@ -315,11 +315,11 @@ struct PlaceDetailView: View {
             load()
         }
         .confirmationDialog("Delete this place?", isPresented: $confirmDelete, titleVisibility: .visible) { // a11y-check:disable sheet-focus-return (iOS puts VoiceOver focus back on the trigger when it closes)
-            Button("Delete place and its \(visitWord(visits.count))", role: .destructive) { // a11y-check:disable duplicate-button-label (each one is in a different sheet or screen)
+            Button(L("Delete place and its %lld visits", visits.count), role: .destructive) { // a11y-check:disable duplicate-button-label (each one is in a different sheet or screen)
                 model.perform { try model.edit.deletePlace(placeID) }
                 dismiss()
             }
-        } message: { Text(PlaceDeletion.explanation) }
+        } message: { Text(L(PlaceDeletion.explanation)) }
         .sheet(isPresented: $showMerge) {
             NavigationStack {
                 List(mergeCandidates) { c in
@@ -330,7 +330,7 @@ struct PlaceDetailView: View {
                     } label: {
                         VStack(alignment: .leading) {
                             Text(c.displayName)
-                            if let p = place { Text(Fmt.distance(Geo.distance(p.coordinate, c.coordinate)) + " away").font(.caption).foregroundStyle(Toon.muted) }
+                            if let p = place { Text(L("%@ away", Fmt.distance(Geo.distance(p.coordinate, c.coordinate)))).font(.caption).foregroundStyle(Toon.muted) }
                         }
                     }
                 }
@@ -358,8 +358,6 @@ enum PlaceDeletion {
         + "Visits there leave your diary and the trips before/after are joined. If it is the same place as another one, merge instead."
 }
 
-private func visitWord(_ n: Int) -> String { n == 1 ? "1 visit" : "\(n) visits" }
-
 /// Form row that opens a grouped, searchable list of place categories (issue #56).
 /// Categories already used by your places are listed first. "Other" can carry a custom type name.
 struct PlaceCategoryPicker: View {
@@ -380,9 +378,9 @@ struct PlaceCategoryPicker: View {
     }
 
     private var label: String {
-        guard let c = selection else { return "None" }
+        guard let c = selection else { return L("None") }
         if c == .other, let name = Place.cleanCustom(custom) { return name }
-        return c.label
+        return c.localizedLabel
     }
 }
 
@@ -405,8 +403,8 @@ private struct PlaceCategoryList: View {
                 }
             }
             ForEach(PlaceCategoryGroup.allCases) { g in
-                let cats = g.categories.filter { $0.matches(query) }
-                if !cats.isEmpty { Section(g.label) { ForEach(cats) { row($0) } } }
+                let cats = g.categories.filter { $0.matches(query) || Self.matches($0.localizedLabel, query) || Self.matches(g.localizedLabel, query) }
+                if !cats.isEmpty { Section(g.localizedLabel) { ForEach(cats) { row($0) } } }
             }
             customSection
         }
@@ -450,13 +448,19 @@ private struct PlaceCategoryList: View {
         }
     }
 
+    /// Search in the app language too (`PlaceCategory.matches` knows the English names and keywords).
+    private static func matches(_ text: String, _ query: String) -> Bool {
+        let q = query.trimmingCharacters(in: .whitespaces)
+        return !q.isEmpty && text.range(of: q, options: [.caseInsensitive, .diacriticInsensitive]) != nil
+    }
+
     private func matchesQuery(_ name: String) -> Bool {
         let q = query.trimmingCharacters(in: .whitespaces)
         return q.isEmpty || name.range(of: q, options: [.caseInsensitive, .diacriticInsensitive]) != nil
     }
 
     private func row(_ c: PlaceCategory?) -> some View {
-        choiceRow(c?.label ?? "None", symbol: c?.symbol ?? "circle.dashed",
+        choiceRow(c?.localizedLabel ?? L("None"), symbol: c?.symbol ?? "circle.dashed",
                   selected: selection == c && (c != .other || Place.cleanCustom(custom) == nil)) {
             selection = c
             custom = nil
@@ -507,7 +511,7 @@ private struct PlaceCategoryList: View {
         }
         // a name chosen but not saved yet (e.g. while creating a place) is still offered
         if selection == .other, let n = Place.cleanCustom(custom), names[n] == nil { names[n] = 0 }
-        used = counts.sorted { $0.value != $1.value ? $0.value > $1.value : $0.key.label < $1.key.label }.prefix(5).map(\.key)
+        used = counts.sorted { $0.value != $1.value ? $0.value > $1.value : $0.key.localizedLabel < $1.key.localizedLabel }.prefix(5).map(\.key)
         customNames = names.sorted { $0.value != $1.value ? $0.value > $1.value : $0.key < $1.key }.map(\.key)
     }
 }

@@ -11,16 +11,16 @@ enum CostStyle {
 extension Fmt {
     /// "$2.90", "€14", "¥800": the currency's own symbol and decimals.
     static func money(_ amount: Double, _ currency: String) -> String {
-        amount.formatted(.currency(code: currency).presentation(.narrow))
+        amount.formatted(.currency(code: currency).presentation(.narrow).locale(Lang.locale))
     }
 
     /// One cost as shown on a badge: "Free" for a zero.
-    static func cost(_ e: Expense) -> String { e.amount == 0 ? "Free" : money(e.amount, e.currency) }
+    static func cost(_ e: Expense) -> String { e.amount == 0 ? L("Free") : money(e.amount, e.currency) }
 
     /// Several costs: summed per currency, largest first ("$5.80 + €3").
     static func costs(_ es: [Expense]) -> String? {
         guard !es.isEmpty else { return nil }
-        if es.allSatisfy({ $0.amount == 0 }) { return "Free" }
+        if es.allSatisfy({ $0.amount == 0 }) { return L("Free") }
         var by: [String: Double] = [:]
         for e in es { by[e.currency, default: 0] += e.amount }
         return by.filter { $0.value > 0 }.sorted { $0.value > $1.value }.map { money($0.value, $0.key) }.joined(separator: " + ")
@@ -80,7 +80,7 @@ private struct CostLink: Hashable, Identifiable {
     var title: String
     var symbol: String
     var id: String { tripID.map { "t-" + $0 } ?? visitID.map { "v-" + $0 } ?? "day" }
-    static let none = CostLink(title: "Nothing specific (just this day)", symbol: "calendar")
+    static var none: CostLink { CostLink(title: L("Nothing specific (just this day)"), symbol: "calendar") }
 }
 
 // MARK: - Entry sheet
@@ -175,7 +175,7 @@ struct CostEntrySheet: View {
                             } label: {
                                 VStack(spacing: 4) {
                                     Image(systemName: c.symbol).font(.title3).accessibilityHidden(true)
-                                    Text(c.label).font(.caption2).toonLineLimit(2).multilineTextAlignment(.center)
+                                    Text(c.localizedLabel).font(.caption2).toonLineLimit(2).multilineTextAlignment(.center)
                                 }
                                 .frame(maxWidth: .infinity, minHeight: 54)
                                 .background(category == c ? CostStyle.color.opacity(0.35) : Color.secondary.opacity(0.08),
@@ -203,7 +203,7 @@ struct CostEntrySheet: View {
                 }
             }
             .groupedList()
-            .navigationTitle(existing == nil ? "Add a cost" : "Edit cost")
+            .navigationTitle(existing == nil ? L("Add a cost") : L("Edit cost"))
             .inlineTitle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("Cancel") { dismiss() } }
@@ -228,12 +228,12 @@ struct CostEntrySheet: View {
 
     private var header: String {
         if let id = link.tripID, let t = trips[id] {
-            return "\(t.displayModes.map(\.label).joined(separator: " + ")) · \(Fmt.time(t.departure))–\(Fmt.time(t.arrival))"
+            return "\(t.displayModes.map(\.localizedLabel).joined(separator: " + ")) · \(Fmt.time(t.departure))–\(Fmt.time(t.arrival))"
         }
         if let id = link.visitID, let (v, p) = visits[id] {
-            return "At \(Self.name(p) ?? "an unnamed place") · from \(Fmt.time(v.arrival))"
+            return L("At %@ · from %@", Self.name(p) ?? L("an unnamed place"), Fmt.time(v.arrival))
         }
-        return "Spent on \(Fmt.shortDay(time))"
+        return L("Spent on %@", Fmt.shortDay(time))
     }
 
     private var currencyMenu: some View {
@@ -255,11 +255,11 @@ struct CostEntrySheet: View {
             .padding(.horizontal, 10).frame(minHeight: 40)
             .toonCard(CostStyle.color, radius: 12, shadow: 2)
         }
-        .accessibilityLabel("Currency: \(currency)")
+        .accessibilityLabel(L("Currency: %@", currencyName(currency)))
     }
 
     private func currencyName(_ code: String) -> String {
-        Locale.current.localizedString(forCurrencyCode: code).map { "\(code) · \($0)" } ?? code
+        Lang.locale.localizedString(forCurrencyCode: code).map { "\(code) · \($0)" } ?? code
     }
 
     private func setUp() {
@@ -369,12 +369,12 @@ struct CostEntrySheet: View {
     private static func name(_ p: Place?) -> String? { p.flatMap { $0.isNamed ? $0.displayName : nil } }
 
     private static func link(_ t: Trip) -> CostLink {
-        CostLink(tripID: t.id, title: "\(t.displayModes.map(\.label).joined(separator: " + ")) · \(Fmt.time(t.departure))",
+        CostLink(tripID: t.id, title: "\(t.displayModes.map(\.localizedLabel).joined(separator: " + ")) · \(Fmt.time(t.departure))",
                  symbol: t.mode.symbol)
     }
 
     private static func link(_ v: Visit, _ p: Place?) -> CostLink {
-        CostLink(visitID: v.id, title: "\(name(p) ?? "Unnamed place") · \(Fmt.time(v.arrival))",
+        CostLink(visitID: v.id, title: "\(name(p) ?? L("Unnamed place")) · \(Fmt.time(v.arrival))",
                  symbol: p?.category?.symbol ?? "mappin")
     }
 }
@@ -406,7 +406,7 @@ struct CostPromptCard: View {
                         .frame(width: closeTarget, height: closeTarget).contentShape(Rectangle())
                 }
                 .buttonStyle(.borderless)
-                .accessibilityLabel(isTrip ? "Don't ask about this trip" : "Don't ask about this visit")
+                .accessibilityLabel(isTrip ? L("Don't ask about this trip") : L("Don't ask about this visit"))
             }
             .foregroundStyle(Toon.ink)
             ToonRowStack(spacing: 6) {
@@ -414,10 +414,10 @@ struct CostPromptCard: View {
                     Button(Fmt.cost(s)) { quickSave(s.amount, s.currency, s.category) }
                         .buttonStyle(ToonButtonStyle(fill: CostStyle.color, height: 34, fontSize: 13, shadow: 2))
                 }
-                Button(isTrip ? "Free" : "Nothing") { quickSave(0, model.costCurrency, category) }
+                Button(isTrip ? L("Free") : L("Nothing")) { quickSave(0, model.costCurrency, category) }
                     .buttonStyle(ToonButtonStyle(height: 34, fontSize: 13, shadow: 2))
-                    .accessibilityHint(isTrip ? "Records that this trip cost nothing, e.g. with a pass" : "Records that you spent nothing here")
-                Button { onMore() } label: { Label(suggestions.isEmpty ? "Enter amount" : "Other", systemImage: "plus") }
+                    .accessibilityHint(isTrip ? L("Records that this trip cost nothing, e.g. with a pass") : L("Records that you spent nothing here"))
+                Button { onMore() } label: { Label(suggestions.isEmpty ? L("Enter amount") : L("Other"), systemImage: "plus") }
                     .buttonStyle(ToonButtonStyle(height: 34, fontSize: 13, shadow: 2))
                     .accessibilityIdentifier("costPromptMore")
             }
@@ -444,23 +444,23 @@ struct CostPromptCard: View {
     @ViewBuilder private var icon: some View {
         switch prompt.target {
         case .trip(let t): ModeIcon(mode: t.mode, size: 34)
-        case .visit(_, let p): ToonChip(symbol: p?.category?.symbol ?? "mappin", color: CostStyle.color, size: 34, label: p?.category?.label)
+        case .visit(_, let p): ToonChip(symbol: p?.category?.symbol ?? "mappin", color: CostStyle.color, size: 34, label: p?.category?.localizedLabel)
         case .day: EmptyView()
         }
     }
 
     private var title: String {
         switch prompt.target {
-        case .trip(let t): return "What did that \(t.mode.label.lowercased()) trip cost?"
-        case .visit(_, let p): return "What did you spend at \(p.flatMap { $0.isNamed ? $0.displayName : nil } ?? "this stop")?"
+        case .trip(let t): return L("What did that %@ trip cost?", Fmt.inSentence(t.mode.localizedLabel))
+        case .visit(_, let p): return p.flatMap { $0.isNamed ? L("What did you spend at %@?", $0.displayName) : nil } ?? L("What did you spend at this stop?")
         case .day: return ""
         }
     }
 
     private var subtitle: String {
         switch prompt.target {
-        case .trip(let t): return "\(Fmt.time(t.departure))–\(Fmt.time(t.arrival))" + (prompt.destination.map { " · to \($0)" } ?? "")
-        case .visit(let v, _): return v.departure.map { "\(Fmt.time(v.arrival))–\(Fmt.time($0))" } ?? "Since \(Fmt.time(v.arrival))"
+        case .trip(let t): return "\(Fmt.time(t.departure))–\(Fmt.time(t.arrival))" + (prompt.destination.map { " · " + L("to %@", $0) } ?? "")
+        case .visit(let v, _): return v.departure.map { "\(Fmt.time(v.arrival))–\(Fmt.time($0))" } ?? L("Since %@", Fmt.time(v.arrival))
         case .day: return ""
         }
     }
@@ -513,10 +513,10 @@ struct DaySpendCard: View {
             HStack(spacing: 12) {
                 ToonChip(symbol: CostStyle.symbol, color: CostStyle.color, size: 44).accessibilityHidden(true)
                 VStack(alignment: .leading, spacing: 1) {
-                    Text(isToday ? "Spent today" : "Spent this day").font(.toon(12)).foregroundStyle(Toon.muted)
+                    Text(isToday ? L("Spent today") : L("Spent this day")).font(.toon(12)).foregroundStyle(Toon.muted)
                     if let total = Fmt.costs(costs) {
                         Text(total).font(.toon(20, .bold)).monospacedDigit().toonLineLimit(1, minScale: 0.6)
-                        Text("\(costs.count) cost\(costs.count == 1 ? "" : "s") · see spending")
+                        Text(L("%lld costs", costs.count) + " · " + L("see spending"))
                             .font(.toon(11, .bold)).foregroundStyle(Toon.muted)
                     } else {
                         Text("Nothing logged").font(.toon(17, .bold))
@@ -554,7 +554,7 @@ struct CostRow: View {
             VStack(alignment: .leading, spacing: 2) {
                 ToonRowStack(spacing: 6) {
                     Text(Fmt.cost(cost)).font(.toon(16, .bold)).monospacedDigit()
-                    Text(cost.category.label).font(.toon(13, .bold)).foregroundStyle(Toon.muted)
+                    Text(cost.category.localizedLabel).font(.toon(13, .bold)).foregroundStyle(Toon.muted)
                 }
                 Text(Fmt.time(cost.timestamp, tz: cost.timeZone)).font(.toon(12, .bold)).monospacedDigit().foregroundStyle(Toon.muted)
                 if let n = cost.note { Text(n).font(.toon(12, .semibold)).foregroundStyle(Toon.muted).toonLineLimit(2) }
@@ -582,7 +582,7 @@ struct CostBadge: View {
             .background(Capsule().fill(CostStyle.color))
             .overlay(Capsule().strokeBorder(Toon.ink, lineWidth: 2))
             .accessibilityElement(children: .ignore)
-            .accessibilityLabel("Cost \(text)")
+            .accessibilityLabel(L("Cost %@", text))
         }
     }
 }
@@ -603,7 +603,7 @@ struct CostsSection: View {
                     HStack {
                         Image(systemName: e.category.symbol).frame(width: 24).foregroundStyle(Toon.muted).accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 1) {
-                            Text(e.category.label)
+                            Text(e.category.localizedLabel)
                             if let n = e.note { Text(n).font(.caption).foregroundStyle(Toon.muted).toonLineLimit(1) }
                         }
                         Spacer()
@@ -613,7 +613,7 @@ struct CostsSection: View {
                 }
                 .buttonStyle(.plain)
             }
-            Button { sheet = CostSheet(target: target) } label: { Label(costs.isEmpty ? "Add a cost" : "Add another cost", systemImage: "plus.circle") }
+            Button { sheet = CostSheet(target: target) } label: { Label(costs.isEmpty ? L("Add a cost") : L("Add another cost"), systemImage: "plus.circle") }
                 .accessibilityIdentifier("detailAddCost")
         } header: {
             Text("Cost")
@@ -623,7 +623,7 @@ struct CostsSection: View {
                 if costs.isEmpty {
                     Text(footer)
                 } else if costs.count > 1, let total = Fmt.costs(costs) {
-                    Text("Total \(total)")
+                    Text(L("Total %@", total))
                 }
             }
             .toonSectionText()
@@ -631,7 +631,7 @@ struct CostsSection: View {
     }
 
     private var footer: String {
-        if case .trip = target { return "Fares, tickets, a taxi, parking: what getting there cost. Saving a cost keeps this trip as it is when the day is reprocessed." }
-        return "Meals, tickets, shopping: what you spent while here. Saving a cost keeps this visit as it is when the day is reprocessed."
+        if case .trip = target { return L("Fares, tickets, a taxi, parking: what getting there cost. Saving a cost keeps this trip as it is when the day is reprocessed.") }
+        return L("Meals, tickets, shopping: what you spent while here. Saving a cost keeps this visit as it is when the day is reprocessed.")
     }
 }

@@ -64,7 +64,8 @@ The original product brief is in [`design/`](design/personal_travel_tracker_clau
 | Prompted recall and study configuration for research | 📋 Planned |
 | Formal accuracy benchmark | 📋 Planned |
 | Research edition beside the personal app, sharing the same engine | 🔭 Exploratory |
-| Android, multilingual, self-hosted (incl. for cities with limited capacity) | 🔭 Exploratory |
+| App in 11 languages (English, Chinese Simplified/Traditional, French, German, Spanish, Portuguese, Russian, Arabic, Japanese, Korean), switchable in Settings | ✅ Available |
+| Android, self-hosted (incl. for cities with limited capacity) | 🔭 Exploratory |
 
 Screenshots of every screen are in the [UI guide](https://triplibre.hhtdiary.org/docs/ui-guide.html).
 

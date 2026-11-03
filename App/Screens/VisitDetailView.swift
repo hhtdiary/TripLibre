@@ -42,7 +42,7 @@ struct VisitDetailView: View {
                     if let p = place {
                         MapCircle(center: p.coordinate.cl, radius: p.radius).foregroundStyle(.blue.opacity(0.15)).stroke(.blue, lineWidth: 1)
                     }
-                    Marker(place?.displayName ?? "Visit", coordinate: v.coordinate.cl)
+                    Marker(place?.displayName ?? L("Visit"), coordinate: v.coordinate.cl)
                 }
                 .mapStyle(.standard(pointsOfInterest: .including([.restaurant, .cafe, .university, .airport, .publicTransport, .store, .hospital, .park])))
                 .frame(height: 200).listRowInsets(EdgeInsets())
@@ -52,14 +52,14 @@ struct VisitDetailView: View {
                 HStack {
                     Image(systemName: place?.category?.symbol ?? "mappin").accessibilityHidden(true)
                     VStack(alignment: .leading) {
-                        Text(place.flatMap { $0.isNamed ? $0.displayName : nil } ?? "Unnamed place").font(.headline).accessibilityAddTraits(.isHeader)
+                        Text(place.flatMap { $0.isNamed ? $0.displayName : nil } ?? L("Unnamed place")).font(.headline).accessibilityAddTraits(.isHeader)
                         if let a = place?.address { Text(a).font(.caption).foregroundStyle(Toon.muted) }
                     }
                 }
                 Button { showPlacePicker = true } label: { Label("Wrong place? Choose or create…", systemImage: "arrow.triangle.swap") }
                 if let p = place {
                     Button { editPlace = IDBox(id: p.id) } label: {
-                        Label(p.isNamed ? "Edit “\(p.displayName)” (all visits)" : "Name this place", systemImage: "pencil")
+                        Label(p.isNamed ? L("Edit “%@” (all visits)", p.displayName) : L("Name this place"), systemImage: "pencil")
                     }
                 }
             } header: { Text("Place").toonSectionText() }
@@ -68,8 +68,8 @@ struct VisitDetailView: View {
                 Picker("Activity", selection: Binding(
                     get: { v.purpose },
                     set: { p in model.perform { try model.edit.setVisitPurpose(v.id, p) } })) {
-                    Text(place?.category?.defaultPurpose.map { "Auto (\($0.label))" } ?? "Not set").tag(TripPurpose?.none)
-                    ForEach(TripPurpose.allCases) { p in Text(p.label).tag(TripPurpose?.some(p)) }
+                    Text(place?.category?.defaultPurpose.map { L("Auto (%@)", $0.localizedLabel) } ?? L("Not set")).tag(TripPurpose?.none)
+                    ForEach(TripPurpose.allCases) { p in Text(p.localizedLabel).tag(TripPurpose?.some(p)) }
                 }
             } header: { Text("Purpose").toonSectionText() }
 
@@ -126,13 +126,13 @@ struct VisitDetailView: View {
             }
 
             Section {
-                LabeledContent("Status", value: v.userStatus.rawValue)
-                LabeledContent("Source", value: v.source.rawValue)
+                LabeledContent("Status", value: L(v.userStatus.rawValue))
+                LabeledContent("Source", value: L(v.source.rawValue))
                 if let c = v.autoConfidence { LabeledContent("Confidence", value: Fmt.percent(c)) }
-                if let n = v.pointCount { LabeledContent("GPS fixes", value: "\(n)") }
+                if let n = v.pointCount { LabeledContent("GPS fixes", value: n.formatted()) }
                 LabeledContent("Visit ID", value: String(v.id.prefix(8)))
                 if !history.isEmpty {
-                    DisclosureGroup("Edit history (\(history.count))") {
+                    DisclosureGroup(L("Edit history (%lld)", history.count)) {
                         ForEach(Array(history.enumerated()), id: \.offset) { _, h in
                             Text("\(h.action) \(h.field ?? ""): \(h.oldValue ?? "∅") → \(h.newValue ?? "∅")").font(.caption2)
                         }
@@ -212,7 +212,7 @@ struct PlacePickerView: View {
                     }
                     .disabled(newName.trimmingCharacters(in: .whitespaces).isEmpty)
                 } header: { Text("New place here").toonSectionText() }
-                Section(query.isEmpty ? "Nearby" : "Matches") {
+                Section(query.isEmpty ? L("Nearby") : L("Matches")) {
                     ForEach(filtered) { p in
                         Button {
                             onPick(.existing(p.id))
@@ -222,7 +222,7 @@ struct PlacePickerView: View {
                                 Image(systemName: p.category?.symbol ?? "mappin").frame(width: 24)
                                 VStack(alignment: .leading) {
                                     Text(p.displayName).foregroundStyle(.primary)
-                                    Text(Fmt.distance(Geo.distance(p.coordinate, near)) + " away").font(.caption).foregroundStyle(Toon.muted)
+                                    Text(L("%@ away", Fmt.distance(Geo.distance(p.coordinate, near)))).font(.caption).foregroundStyle(Toon.muted)
                                 }
                             }
                         }
@@ -278,7 +278,7 @@ struct SplitVisitSheet: View {
                     DatePicker("Left", selection: $leave, in: .ordered(visit.arrival, upper))
                     DatePicker("Came back", selection: $back, in: .ordered(leave, upper))
                     Picker("Mode", selection: $mode) {
-                        ForEach(TravelMode.allCases) { m in Label(m.label, systemImage: m.symbol).tag(m) }
+                        ForEach(TravelMode.allCases) { m in Label(m.localizedLabel, systemImage: m.symbol).tag(m) }
                     }
                 }
                 Section {

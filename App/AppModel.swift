@@ -206,7 +206,7 @@ final class AppModel: ObservableObject {
             lastStampRepeated = !r.isNew
             guard r.isNew else { return }
         } catch {
-            errorMessage = "Couldn't save the stamp: \(error)"
+            errorMessage = L("Couldn't save the stamp: %@", "\(error)")
             return
         }
         revision += 1
@@ -274,6 +274,7 @@ final class AppModel: ObservableObject {
         let dir = Self.backupsDirectory
         try FileManager.default.createDirectory(at: dir, withIntermediateDirectories: true)
         let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")   // a file name: ASCII digits whatever the app language
         f.dateFormat = "yyyyMMdd-HHmmss"
         let url = dir.appendingPathComponent("travel-\(f.string(from: Date())).sqlite")
         try store.backup(to: url)

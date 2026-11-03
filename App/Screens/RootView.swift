@@ -138,7 +138,7 @@ struct ToonTabBar: View {
                         Image(systemName: item.symbol).font(.toon(18, .bold)).accessibilityHidden(true) // the button carries the label
                         // five tabs have to fit across the screen: at accessibility text sizes the bar shows icons
                         // only (like the system tab bar), and long-pressing a tab shows its name in the large content viewer
-                        if on && !typeSize.isAccessibilitySize { Text(item.title).font(.toon(14, .black)).fixedSize() }
+                        if on && !typeSize.isAccessibilitySize { Text(L(item.title)).font(.toon(14, .black)).fixedSize() }
                     }
                     .foregroundStyle(Toon.ink)
                     .padding(.horizontal, on ? 14 : 0)
@@ -151,10 +151,10 @@ struct ToonTabBar: View {
                     .contentShape(Capsule())
                 }
                 .buttonStyle(.plain)
-                .accessibilityLabel(item.title)
+                .accessibilityLabel(L(item.title))
                 .accessibilityAddTraits(on ? .isSelected : [])
                 .accessibilityIdentifier("tab-\(item.title)")
-                .accessibilityShowsLargeContentViewer { Label(item.title, systemImage: item.symbol) }
+                .accessibilityShowsLargeContentViewer { Label(L(item.title), systemImage: item.symbol) }
                 if item.tag != items.last?.tag { Spacer(minLength: 0) }
             }
         }
@@ -212,7 +212,7 @@ struct OnboardingView: View {
         }
     }
 
-    private func feature(_ symbol: String, _ color: Color, _ text: String, _ tilt: Double) -> some View {
+    private func feature(_ symbol: String, _ color: Color, _ text: LocalizedStringKey, _ tilt: Double) -> some View {
         HStack(spacing: 12) {
             ToonChip(symbol: symbol, color: color, size: 44)
             Text(text).font(.toon(14, .bold)).fixedSize(horizontal: false, vertical: true)

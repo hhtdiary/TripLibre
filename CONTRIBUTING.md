@@ -12,7 +12,12 @@ Thanks for helping. The full guide is on the docs site: **<https://triplibre.hht
    map screenshot to a public issue. Describe what happened and what TripLibre recorded (durations, distances, speeds,
    silences), so it can be rebuilt as a synthetic test fixture. See
    [proposing an inference test case](https://triplibre.hhtdiary.org/docs/contributing.html#proposing-an-inference-test-case).
-5. **Docs** are plain HTML in `docs/` (no Markdown build); label anything not built yet as
+5. **Translations** live in `App/Localizable.xcstrings` (keys are the English text) and `App/InfoPlist.xcstrings`
+   (permission prompts). Text in a SwiftUI literal (`Text("…")`, `Button("…")`) is looked up automatically; text
+   built as a `String` goes through `L("…")`. A new string needs all 10 translations, with the same `%@` / `%lld`
+   specifiers, and plural forms for counts: `python3 scripts/check_localizations.py` (part of `make lint`) checks.
+   Exports, CSV headers and stored codes stay English.
+6. **Docs** are plain HTML in `docs/` (no Markdown build); label anything not built yet as
    Planned or Exploratory, and check field names against the code.
 
 Use the [issue templates](https://github.com/zyang91/TripLibre/issues/new/choose) for bugs and feature requests, and

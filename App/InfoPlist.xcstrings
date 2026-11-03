@@ -1,0 +1,222 @@
+{
+  "sourceLanguage" : "en",
+  "strings" : {
+    "NSLocationAlwaysAndWhenInUseUsageDescription" : {
+      "comment" : "Info.plist permission prompt; keep in line with project.yml and release/app-privacy-details.md",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اسمح «دائمًا» ليتمكن TripLibre من تسجيل الرحلات في الخلفية. يعمل GPS فقط أثناء تحرّكك، وتُحفظ يومياتك على هذا الـ iPhone فقط."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Erlaube „Immer“, damit TripLibre Fahrten im Hintergrund aufzeichnen kann. GPS läuft nur, während du dich bewegst, und dein Tagebuch wird nur auf diesem iPhone gespeichert."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Allow “Always” so TripLibre can log trips while it’s in the background. GPS runs only while you’re moving, and your diary is saved only on this iPhone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permite «Siempre» para que TripLibre registre viajes en segundo plano. El GPS solo funciona mientras te mueves y tu diario se guarda solo en este iPhone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autorisez « Toujours » pour que TripLibre enregistre vos trajets en arrière-plan. Le GPS ne fonctionne que pendant vos déplacements, et votre journal est enregistré uniquement sur cet iPhone."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre がバックグラウンドで移動を記録できるよう「常に」を許可してください。GPS は移動中だけ動作し、日記はこの iPhone にのみ保存されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre가 백그라운드에서 이동을 기록할 수 있도록 ‘항상’을 허용하세요. GPS는 이동 중에만 작동하며, 일기는 이 iPhone에만 저장됩니다."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permita “Sempre” para o TripLibre registrar viagens em segundo plano. O GPS só funciona enquanto você se move, e seu diário fica salvo só neste iPhone."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешите «Всегда», чтобы TripLibre записывал поездки в фоне. GPS работает, только пока вы движетесь, а дневник хранится только на этом iPhone."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "请允许“始终”，以便 TripLibre 在后台记录行程。GPS 只在你移动时运行，日记只保存在这台 iPhone 上。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "請允許「永遠」，以便 TripLibre 在背景記錄行程。GPS 只在你移動時運作，日記只儲存在這台 iPhone 上。"
+          }
+        }
+      }
+    },
+    "NSLocationWhenInUseUsageDescription" : {
+      "comment" : "Info.plist permission prompt; keep in line with project.yml and release/app-privacy-details.md",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يستخدم TripLibre موقعك لبناء يوميات تنقّلك من زيارات ورحلات. تُحفظ يومياتك على هذا الـ iPhone فقط؛ ولا يوجد لدى TripLibre حساب أو خادم."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre nutzt deinen Standort, um dein Reisetagebuch mit Aufenthalten und Fahrten zu erstellen. Dein Tagebuch wird nur auf diesem iPhone gespeichert; TripLibre hat kein Konto und keinen Server."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre uses your location to build your travel diary of visits and trips. Your diary is saved only on this iPhone; TripLibre has no account or server."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre usa tu ubicación para crear tu diario de visitas y viajes. Tu diario se guarda solo en este iPhone; TripLibre no tiene cuenta ni servidor."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre utilise votre position pour construire votre journal de visites et de trajets. Votre journal est enregistré uniquement sur cet iPhone ; TripLibre n’a ni compte ni serveur."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre は位置情報を使って、滞在と移動の日記を作成します。日記はこの iPhone にのみ保存され、TripLibre にはアカウントもサーバーもありません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre는 위치를 사용해 방문과 이동으로 된 이동 일기를 만듭니다. 일기는 이 iPhone에만 저장되며, TripLibre에는 계정도 서버도 없습니다."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O TripLibre usa sua localização para montar seu diário de visitas e viagens. Seu diário fica salvo só neste iPhone; o TripLibre não tem conta nem servidor."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre использует ваше местоположение, чтобы вести дневник визитов и поездок. Дневник хранится только на этом iPhone; у TripLibre нет аккаунта и сервера."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre 使用你的位置来生成包含停留和行程的出行日记。日记只保存在这台 iPhone 上；TripLibre 没有账户，也没有服务器。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre 使用你的位置來產生包含停留和行程的出行日記。日記只儲存在這台 iPhone 上；TripLibre 沒有帳號，也沒有伺服器。"
+          }
+        }
+      }
+    },
+    "NSMotionUsageDescription" : {
+      "comment" : "Info.plist permission prompt; keep in line with project.yml and release/app-privacy-details.md",
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يساعد نشاط الحركة (المشي، ركوب الدراجة، في مركبة) TripLibre على التمييز بين وسائل التنقّل. يُستخدم على هذا الـ iPhone فقط."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bewegungsaktivität (Gehen, Radfahren, im Fahrzeug) hilft TripLibre, Verkehrsmittel zu unterscheiden. Sie wird nur auf diesem iPhone verwendet."
+          }
+        },
+        "en" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motion activity (walking, cycling, in a vehicle) helps TripLibre tell travel modes apart. It’s used only on this iPhone."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La actividad de movimiento (a pie, en bici, en vehículo) ayuda a TripLibre a distinguir los modos de transporte. Solo se usa en este iPhone."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’activité (marche, vélo, véhicule) aide TripLibre à distinguer les modes de déplacement. Elle n’est utilisée que sur cet iPhone."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "モーションアクティビティ（徒歩、自転車、乗り物）は、TripLibre が交通手段を見分けるのに役立ちます。この iPhone でのみ使用されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "동작 활동(걷기, 자전거, 차량 탑승)은 TripLibre가 이동 수단을 구분하는 데 도움이 됩니다. 이 iPhone에서만 사용됩니다."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A atividade de movimento (caminhada, bicicleta, em veículo) ajuda o TripLibre a diferenciar os modos de transporte. Ela só é usada neste iPhone."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Данные о движении (ходьба, велосипед, транспорт) помогают TripLibre различать способы передвижения. Они используются только на этом iPhone."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "运动活动（步行、骑行、乘车）有助于 TripLibre 区分出行方式。这些数据只在这台 iPhone 上使用。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "動作活動（步行、騎車、搭車）有助於 TripLibre 區分交通方式。這些資料只在這台 iPhone 上使用。"
+          }
+        }
+      }
+    }
+  },
+  "version" : "1.0"
+}
