@@ -11,7 +11,6 @@ Keys are the English text, so English needs no entry except for plural forms.
 import json
 import re
 import sys
-from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
@@ -27,23 +26,35 @@ PLURALS = {
 SPEC = re.compile(r"%(?:(\d+)\$)?(@|lld|d|(?:\.\d+)?f)")
 
 
-def specs(s: str) -> Counter:
-    return Counter(m.group(2) for m in SPEC.finditer(s.replace("%%", "")))
+def specs(s: str) -> tuple[dict[int, str], bool]:
+    """Conversion type by argument position (plain specifiers count up from 1, `%2$@` names its position), and
+    whether the string mixes plain and numbered specifiers."""
+    by_position: dict[int, str] = {}
+    plain = numbered = 0
+    for m in SPEC.finditer(s.replace("%%", "")):
+        if m.group(1):
+            numbered += 1
+            position = int(m.group(1))
+        else:
+            plain += 1
+            position = plain
+        by_position[position] = m.group(2)
+    return by_position, bool(plain and numbered)
 
 
 def check_value(key: str, lang: str, value: str, plural_form: str | None, errors: list[str]) -> None:
-    want, got = specs(key), specs(value)
-    numbered = [m.group(1) for m in SPEC.finditer(value) if m.group(1)]
-    if numbered and len(numbered) != sum(got.values()):
-        errors.append(f"{lang}: mixes numbered and plain specifiers: {key!r}")
-    if numbered and sorted(int(n) for n in numbered) != list(range(1, len(numbered) + 1)):
-        errors.append(f"{lang}: numbered specifiers must be %1$…%{len(numbered)}$: {key!r}")
-    # a plural form other than "other" may spell its number out ("one visit"), so it may drop the count
-    if plural_form not in (None, "other"):
-        if got - want:
-            errors.append(f"{lang}/{plural_form}: specifiers {dict(got)} not in key: {key!r}")
-    elif got != want:
-        errors.append(f"{lang}{'/' + plural_form if plural_form else ''}: specifiers {dict(got)} != {dict(want)}: {key!r}")
+    where = f"{lang}{'/' + plural_form if plural_form else ''}"
+    if not value.strip():
+        errors.append(f"{where}: empty translation: {key!r}")
+        return
+    (want, _), (got, mixed) = specs(key), specs(value)
+    if mixed:
+        errors.append(f"{where}: mixes numbered and plain specifiers: {key!r}")
+    # a plural form other than "other" may spell its number out ("one visit"), so it may drop the count; whatever it
+    # keeps must still have the key's type at each position
+    partial = plural_form not in (None, "other")
+    if (partial and any(want.get(p) != t for p, t in got.items())) or (not partial and got != want):
+        errors.append(f"{where}: specifiers by position {got} != {want}: {key!r}")
 
 
 def check_catalog(path: Path, errors: list[str]) -> set[str]:

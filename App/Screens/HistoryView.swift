@@ -297,7 +297,8 @@ struct TripSearchView: View {
                     Text("Any").tag(String?.none)
                     ForEach(places) { p in Text(p.displayName).tag(String?.some(p.id)) }
                 }
-                Stepper(L("Departing after %@", String(format: "%02d:00", afterHour)), value: $afterHour, in: 0...23)
+                // a literal title (key "Departing after %@"): the a11y check reads it as the Stepper's label
+                Stepper("Departing after \(String(format: "%02d:00", afterHour))", value: $afterHour, in: 0...23)
                 Toggle("Weekends only", isOn: $weekendsOnly)
             } header: { Text("Filters").toonSectionText() }
             Section {

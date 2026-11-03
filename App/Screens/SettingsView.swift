@@ -90,10 +90,13 @@ struct SettingsView: View {
             .pickerStyle(.navigationLink)
             .accessibilityIdentifier("languagePicker")
         } header: { Text("Language").toonSectionText() } footer: {
-            Text(language == Lang.selected
-                 ? L("System default follows your iPhone's language list. Exports and data codes stay in English so analysis scripts keep working.")
-                 : L("TripLibre switches to the new language when you close Settings. Location permission prompts follow after the next launch."))
-                .toonSectionText()
+            if language != Lang.selected {
+                Text("TripLibre switches to the new language when you close Settings. Location permission prompts follow after the next launch.")
+                    .toonSectionText()
+            } else if language == .system {
+                Text("System default follows your iPhone's language list. Exports and data codes stay in English so analysis scripts keep working.")
+                    .toonSectionText()
+            }
         }
     }
 
