@@ -145,6 +145,10 @@ h2 { font: 800 clamp(2.8rem, 6.4vw, 6.4rem)/.93 var(--f); letter-spacing: -.05em
 .b6 h3 { margin: 0; }
 .b6 .k { margin: 0; }
 .b6 .txt { grid-column: 2; }
+.b7 { grid-column: span 6; background: var(--sky); }
+.b7 > p:not(.k) { max-width: 46em; }
+.langs { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; padding: 0; margin: 20px 0 0; }
+.langs li { font: 700 17px var(--f); padding: 5px 14px; border: 3px solid var(--ink); border-radius: 999px; background: #fff; color: var(--ink); }
 
 /* screenshots */
 .scr { display: grid; grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); gap: 5vw; align-items: start; }
@@ -214,7 +218,7 @@ pre.term { background: var(--ink); color: var(--cream); padding: 16px 18px; bord
   .hero, .scr, .split, .two { grid-template-columns: 1fr; }
   .sl { position: static; }
   .bento { grid-template-columns: 1fr; }
-  .b1, .b2, .b3, .b4, .b5, .b6 { grid-column: 1; }
+  .b1, .b2, .b3, .b4, .b5, .b6, .b7 { grid-column: 1; }
   .b6 { grid-template-columns: 1fr; }
   .b6 .txt { grid-column: 1; }
   .gal figure:nth-child(n) .fr { transform: none; }

@@ -7,6 +7,16 @@ single summary, so release notes aren't kept anywhere else in the repository.
 
 ## Unreleased
 
+- **Multilingual: TripLibre now speaks 11 languages**: English, Chinese (Simplified and Traditional), French, German,
+  Spanish, Portuguese, Russian, Arabic (right to left), Japanese and Korean. Settings › Language picks one or follows
+  the iPhone; dates, units, money and plurals follow it, and the location and motion permission prompts are translated
+  too. Exports and stored codes stay English, so analysis scripts keep working. The experimental diary agent and the
+  Home Screen widgets are English for now (#90)
+- Developers: translations live in `App/Localizable.xcstrings` and `App/InfoPlist.xcstrings`; text built in code
+  goes through `L(…)`. `scripts/check_localizations.py` (in `make lint` and CI) checks every key is translated into
+  every language with matching format specifiers (#90)
+- Website: the homepage announces the new languages, and the docs cover them: Using the app › Languages, Developer
+  API › Localization, Contributing › Translations, and notes in Architecture, Privacy and the Data dictionary (#90)
 - Website: TripLibre now has its own site at triplibre.hhtdiary.org, published from `docs/`: overview at `/`, docs at
   `/docs/`, story at `/story/`. The HHT Diary organization pages (home, Products, Vision, Roadmap, About) moved to
   [hhtdiary/hhtdiary.github.io](https://github.com/hhtdiary/hhtdiary.github.io) and stay at hhtdiary.org, where the

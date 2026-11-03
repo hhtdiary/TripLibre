@@ -63,7 +63,7 @@ struct HistoryView: View {
         .task(id: model.revision) { load() }
     }
 
-    private func shortcut<D: View>(_ symbol: String, _ color: Color, _ title: String, count: Int = 0, tilt: Double,
+    private func shortcut<D: View>(_ symbol: String, _ color: Color, _ title: LocalizedStringKey, count: Int = 0, tilt: Double,
                                    @ViewBuilder destination: @escaping () -> D) -> some View {
         HStack(spacing: 12) {
             ToonChip(symbol: symbol, color: color, size: 36)
@@ -85,7 +85,8 @@ struct HistoryView: View {
 
     private func monthTitle(_ d: Date) -> String {
         let f = DateFormatter()
-        f.dateFormat = "MMMM yyyy"
+        f.locale = Lang.locale
+        f.setLocalizedDateFormatFromTemplate("MMMMyyyy")
         return f.string(from: d)
     }
 
@@ -141,11 +142,12 @@ struct WeekChart: View {
 
     private var title: String {
         switch offset {
-        case 0: return "This week"
-        case -1: return "Last week"
+        case 0: return L("This week")
+        case -1: return L("Last week")
         default:
-            let w = week
-            return "\(w.first!.day.formatted(.dateTime.month(.abbreviated).day())) – \(w.last!.day.formatted(.dateTime.month(.abbreviated).day()))"
+            guard let first = week.first?.day, let last = week.last?.day else { return "" }
+            let style = Date.FormatStyle.dateTime.month(.abbreviated).day().locale(Lang.locale)
+            return "\(first.formatted(style)) – \(last.formatted(style))"
         }
     }
 
@@ -179,7 +181,7 @@ struct WeekChart: View {
         let peak = max(1, w.map { $0.summary?.trips ?? 0 }.max() ?? 1)
         let busiest = w.filter { ($0.summary?.trips ?? 0) > 0 }.max { ($0.summary?.trips ?? 0) < ($1.summary?.trips ?? 0) }
 
-        let totals = Text("\(trips) trip\(trips == 1 ? "" : "s") · \(Fmt.distance(dist))")
+        let totals = Text(L("%lld trips", trips) + " · " + Fmt.distance(dist))
             .font(.toon(13, .heavy)).foregroundStyle(Toon.muted)
 
         VStack(alignment: .leading, spacing: 10) {
@@ -208,17 +210,17 @@ struct WeekChart: View {
                                 .strokeBorder(Toon.ink.opacity(future ? 0.3 : 1),
                                               style: StrokeStyle(lineWidth: Toon.line, dash: future ? [4, 4] : [])))
                             .frame(height: 12 + 64 * CGFloat(n) / CGFloat(peak))
-                        Text(d.day.formatted(.dateTime.weekday(.narrow)))
+                        Text(d.day.formatted(.dateTime.weekday(.narrow).locale(Lang.locale)))
                             .font(.toon(12, .black)).foregroundStyle(today ? Toon.accentDeep : Toon.muted)
                     }
                     .frame(maxWidth: .infinity)
                     .accessibilityElement(children: .ignore)
-                    .accessibilityLabel("\(d.day.formatted(.dateTime.weekday(.wide))): \(n) trips")
+                    .accessibilityLabel(d.day.formatted(.dateTime.weekday(.wide).locale(Lang.locale)) + ": " + L("%lld trips", n))
                 }
             }
             .frame(minHeight: 112, alignment: .bottom)
             if let b = busiest {
-                Text("Busiest day: \(b.day.formatted(.dateTime.weekday(.wide))), \(b.summary!.trips) trips")
+                Text(L("Busiest day: %@, %@", b.day.formatted(.dateTime.weekday(.wide).locale(Lang.locale)), L("%lld trips", b.summary?.trips ?? 0)))
                     .font(.toon(12, .heavy)).foregroundStyle(Toon.muted)
             } else {
                 Text(offset == 0 ? "A fresh week. Where to first?" : "A quiet week, no trips recorded.")
@@ -238,8 +240,8 @@ struct DayRow: View {
     var body: some View {
         ToonRowStack {
             VStack(spacing: 0) {
-                Text(summary.day.formatted(.dateTime.day())).font(.toon(24, .bold)).monospacedDigit()
-                Text(summary.day.formatted(.dateTime.weekday(.abbreviated)).uppercased()).font(.toon(11, .black))
+                Text(summary.day.formatted(.dateTime.day().locale(Lang.locale))).font(.toon(24, .bold)).monospacedDigit()
+                Text(summary.day.formatted(.dateTime.weekday(.abbreviated).locale(Lang.locale)).uppercased()).font(.toon(11, .black))
             }
             .foregroundStyle(Toon.ink)
             .frame(minWidth: 54, minHeight: 58)
@@ -257,7 +259,7 @@ struct DayRow: View {
                     HStack(spacing: 3) {
                         ForEach(summary.modes.prefix(4)) { m in ModeIcon(mode: m, size: 24) }
                     }
-                    Text("\(summary.trips) trips · \(Fmt.distance(summary.distance))")
+                    Text(L("%lld trips", summary.trips) + " · " + Fmt.distance(summary.distance))
                         .font(.toon(12, .bold)).foregroundStyle(Toon.muted).toonLineLimit(1, minScale: 0.8)
                 }
             }
@@ -289,13 +291,14 @@ struct TripSearchView: View {
                 DatePicker("To", selection: $to, displayedComponents: .date)
                 Picker("Mode", selection: $mode) {
                     Text("Any").tag(TravelMode?.none)
-                    ForEach(TravelMode.allCases) { m in Text(m.label).tag(TravelMode?.some(m)) }
+                    ForEach(TravelMode.allCases) { m in Text(m.localizedLabel).tag(TravelMode?.some(m)) }
                 }
                 Picker("Origin or destination", selection: $placeID) {
                     Text("Any").tag(String?.none)
                     ForEach(places) { p in Text(p.displayName).tag(String?.some(p.id)) }
                 }
-                Stepper("Departing after \(afterHour):00", value: $afterHour, in: 0...23)
+                // a literal title (key "Departing after %@"): the a11y check reads it as the Stepper's label
+                Stepper("Departing after \(String(format: "%02d:00", afterHour))", value: $afterHour, in: 0...23)
                 Toggle("Weekends only", isOn: $weekendsOnly)
             } header: { Text("Filters").toonSectionText() }
             Section {
@@ -304,14 +307,14 @@ struct TripSearchView: View {
                         HStack {
                             ModeIcon(mode: t.mode, size: 24)
                             VStack(alignment: .leading) {
-                                Text("\(names[t.id] ?? "")").font(.subheadline).foregroundStyle(.primary)
+                                Text(names[t.id] ?? "").font(.subheadline).foregroundStyle(.primary)
                                 Text("\(Fmt.shortDay(t.departure)) \(Fmt.time(t.departure)) · \(Fmt.distance(t.distance)) · \(Fmt.duration(t.duration))")
                                     .font(.caption).foregroundStyle(Toon.muted)
                             }
                         }
                     }
                 }
-            } header: { Text("\(results.count) trips · \(Fmt.distance(results.reduce(0) { $0 + $1.distance }))").toonSectionText() }
+            } header: { Text(L("%lld trips", results.count) + " · " + Fmt.distance(results.reduce(0) { $0 + $1.distance })).toonSectionText() }
         }
         .toonBackground()
         .navigationTitle("Find trips")

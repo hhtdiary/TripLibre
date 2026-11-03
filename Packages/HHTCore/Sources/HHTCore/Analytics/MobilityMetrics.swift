@@ -20,6 +20,7 @@ public struct DateRange: Equatable, Sendable {
     /// From a life phase's YYYY-MM-DD bounds.
     public static func phase(_ p: LifePhase, now: Date = Date(), calendar: Calendar = .current) -> DateRange? {
         let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
         f.calendar = calendar
         f.timeZone = calendar.timeZone
         f.dateFormat = "yyyy-MM-dd"
@@ -315,6 +316,8 @@ public enum Analytics {
 
     private static func isWeekendKey(_ key: String) -> Bool {
         let f = DateFormatter()
+        f.locale = Locale(identifier: "en_US_POSIX")
+        f.calendar = Calendar(identifier: .gregorian)
         f.dateFormat = "yyyy-MM-dd"
         f.timeZone = TimeZone(identifier: "UTC")
         guard let d = f.date(from: key) else { return false }

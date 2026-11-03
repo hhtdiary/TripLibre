@@ -26,11 +26,14 @@ struct SettingsView: View {
     @State private var confirmErase2 = false
     @State private var confirmAirports = false
     @State private var airportCount = 0
+    /// Applied when Settings closes, so the sheet isn't torn down mid-choice by the UI rebuilding in the new language.
+    @State private var language = Lang.selected
 
     enum ImportKind: String, Identifiable { case trips, flights, gpx; var id: String { rawValue } }
 
     var body: some View {
         Form {
+            languageSection
             collectionSection
             privacySection
             exportSection
@@ -44,7 +47,7 @@ struct SettingsView: View {
             Section {
                 Toggle("Diary agent", isOn: $agentEnabled)
             } header: { Text("Experimental").toonSectionText() } footer: {
-                Text("Adds an Agent tab that recaps your day, asks about stops it can't explain, suggests mode fixes and answers simple questions. It runs on this iPhone with fixed rules: no AI model, nothing is sent anywhere. Off by default.")
+                Text("Adds an Agent tab that recaps your day, asks about stops it can't explain, suggests mode fixes and answers simple questions. It runs on this iPhone with fixed rules: no AI model, nothing is sent anywhere. Off by default. It understands and answers in English only.")
                     .toonSectionText()
             }
             aboutSection
@@ -53,6 +56,7 @@ struct SettingsView: View {
         .navigationTitle("Settings")
         .inlineTitle()
         .toolbar { ToolbarItem(placement: .confirmationAction) { Button("Done") { dismiss() }.confirmTint() } }
+        .onDisappear { if language != Lang.selected { Lang.apply(language) } }
         .task(id: model.revision) {
             counts = model.store.counts()
             airportCount = Importer(store: model.store).airportCount()
@@ -70,17 +74,43 @@ struct SettingsView: View {
 
     // MARK: sections
 
+    private var languageSection: some View {
+        Section {
+            Picker("Language", selection: $language) {
+                ForEach(AppLanguage.allCases) { lang in
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text(verbatim: lang.nativeName)
+                        if let name = lang.localizedName, name != lang.nativeName {
+                            Text(verbatim: name).font(.caption).foregroundStyle(Toon.muted)
+                        }
+                    }
+                    .tag(lang)
+                }
+            }
+            .pickerStyle(.navigationLink)
+            .accessibilityIdentifier("languagePicker")
+        } header: { Text("Language").toonSectionText() } footer: {
+            if language != Lang.selected {
+                Text("TripLibre switches to the new language when you close Settings. Location permission prompts follow after the next launch.")
+                    .toonSectionText()
+            } else if language == .system {
+                Text("System default follows your iPhone's language list. Exports and data codes stay in English so analysis scripts keep working.")
+                    .toonSectionText()
+            }
+        }
+    }
+
     private var collectionSection: some View {
         Section {
             Toggle("Record location", isOn: Binding(
                 get: { collector.mode != .off },
                 set: { $0 ? collector.start() : collector.stop() }))
-            LabeledContent("Permission", value: collector.authorizationLabel)
-            LabeledContent("Collector state", value: collector.mode.rawValue)
+            LabeledContent("Permission", value: L(collector.authorizationLabel))
+            LabeledContent("Collector state", value: L(collector.mode.rawValue))
             if let f = collector.lastFix { LabeledContent("Last fix", value: Fmt.dateTime(f)) }
-            LabeledContent("Motion activity", value: MotionSync.isAvailable ? "available" : "unavailable")
+            LabeledContent("Motion activity", value: MotionSync.isAvailable ? L("available") : L("unavailable"))
             Picker("Accuracy", selection: $profile) {
-                ForEach(LocationCollector.Profile.allCases) { p in Text(p.label).tag(p.rawValue) }
+                ForEach(LocationCollector.Profile.allCases) { p in Text(LocalizedStringKey(p.label)).tag(p.rawValue) }
             }
             .onChange(of: profile) { _, v in collector.profile = LocationCollector.Profile(rawValue: v) ?? .balanced }
             #if os(iOS)
@@ -134,7 +164,7 @@ struct SettingsView: View {
             Button { importKind = .flights } label: { Label("Import flights (CSV)", systemImage: "airplane") }
             Button { importKind = .gpx } label: { Label("Import GPX track", systemImage: "point.topleft.down.to.point.bottomright.curvepath") }
             if airportCount > 0 {
-                LabeledContent("Airport list", value: "\(airportCount) airports")
+                LabeledContent("Airport list", value: L("%lld airports", airportCount))
             } else {
                 Button { confirmAirports = true } label: { Label("Download airport list (OurAirports)", systemImage: "arrow.down.circle") }
             }
@@ -156,7 +186,7 @@ struct SettingsView: View {
                 Task { await model.reprocess(from: .distantPast, to: Date()); message = rebuildMessage }
             }
             Button("Back up database now") {
-                do { let u = try model.backupNow(); message = "Saved \(u.lastPathComponent) in Files › TripLibre › Backups" } catch { message = "\(error)" }
+                do { let u = try model.backupNow(); message = L("Saved %@ in Files › TripLibre › Backups", u.lastPathComponent) } catch { message = "\(error)" }
             }
             #if targetEnvironment(simulator)
             Button("Load demo data (simulator only)") {
@@ -183,22 +213,22 @@ struct SettingsView: View {
             ForEach(["raw_location_points", "motion_activities", "visits", "trips", "trip_segments", "places", "flights", "audit_log"], id: \.self) { k in
                 LabeledContent(k, value: "\(counts[k] ?? 0)")
             }
-            LabeledContent("Schema version", value: "\(model.store.schemaVersion)")
+            LabeledContent("Schema version", value: model.store.schemaVersion.formatted())
             LabeledContent("Last diary update") {
                 if model.isProcessing { Text("Running now…") }
                 else if let d = model.lastInferenceAt { Text(d, format: .relative(presentation: .named)) }
                 else { Text("Never") }
             }
-            LabeledContent("Stay radius / min dwell", value: "\(Int(model.engine.config.stayRadius)) m / \(Int(model.engine.config.minStayDuration / 60)) min")
+            LabeledContent("Stay radius / min dwell", value: Fmt.distance(model.engine.config.stayRadius) + " / " + Fmt.duration(model.engine.config.minStayDuration))
         } header: { Text("Database").toonSectionText() }
     }
 
     // MARK: actions
 
     private var rebuildMessage: String {
-        if model.isProcessing { return "Queued; it runs as soon as the update in progress finishes." }
-        if let f = model.inferenceFailure { return "Rebuild failed: \(f.message)" }
-        return "Rebuilt. Your edits were kept."
+        if model.isProcessing { return L("Queued; it runs as soon as the update in progress finishes.") }
+        if let f = model.inferenceFailure { return L("Rebuild failed: %@", f.message) }
+        return L("Rebuilt. Your edits were kept.")
     }
 
     private func export() {
@@ -212,7 +242,7 @@ struct SettingsView: View {
             exportedFiles = ((try? FileManager.default.contentsOfDirectory(at: folder, includingPropertiesForKeys: nil)) ?? [])
                 .sorted { $0.lastPathComponent < $1.lastPathComponent }
         } catch {
-            model.errorMessage = "Export failed: \(error)"
+            model.errorMessage = L("Export failed: %@", "\(error)")
         }
     }
 
@@ -225,17 +255,17 @@ struct SettingsView: View {
             case .trips, .flights:
                 let text = try String(contentsOf: url, encoding: .utf8)
                 let r = kind == .trips ? try imp.importTrips(csv: text) : try imp.importFlights(csv: text)
-                message = "Imported \(r.imported), skipped \(r.skipped)." + (r.messages.isEmpty ? "" : "\n" + r.messages.prefix(5).joined(separator: "\n"))
+                message = L("Imported %lld, skipped %lld.", r.imported, r.skipped) + (r.messages.isEmpty ? "" : "\n" + r.messages.prefix(5).joined(separator: "\n"))
                 model.touch()
             case .gpx:
                 let r = try imp.importGPX(Data(contentsOf: url))
                 if let s = r.start, let e = r.end {
                     Task { await model.reprocess(from: s, to: e) }
                 }
-                message = "Imported \(r.count) GPS points; visits and trips are being reconstructed."
+                message = L("Imported %lld GPS points; visits and trips are being reconstructed.", r.count)
             }
         } catch {
-            model.errorMessage = "Import failed: \(error)"
+            model.errorMessage = L("Import failed: %@", "\(error)")
         }
     }
 
@@ -245,9 +275,9 @@ struct SettingsView: View {
                 let (data, _) = try await URLSession.shared.data(from: Importer.ourAirportsURL)
                 let n = try Importer(store: model.store).importAirports(csv: String(decoding: data, as: UTF8.self))
                 airportCount = n
-                message = "Loaded \(n) airports."
+                message = L("Loaded %lld airports.", n)
             } catch {
-                model.errorMessage = "Download failed: \(error.localizedDescription)"
+                model.errorMessage = L("Download failed: %@", error.localizedDescription)
             }
         }
     }

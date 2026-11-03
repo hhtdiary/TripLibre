@@ -223,6 +223,7 @@ public final class Exporter {
     @discardableResult
     public func exportBundle(to directory: URL, options: Options = Options()) throws -> URL {
         let stamp = DateFormatter()
+        stamp.locale = Locale(identifier: "en_US_POSIX")
         stamp.dateFormat = "yyyyMMdd-HHmmss"
         let folder = directory.appendingPathComponent("hht-export-\(stamp.string(from: Date()))", isDirectory: true)
         try FileManager.default.createDirectory(at: folder, withIntermediateDirectories: true)

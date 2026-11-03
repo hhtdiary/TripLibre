@@ -11,15 +11,20 @@ struct HHTApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     #endif
     @StateObject private var model = AppModel.shared
+    @StateObject private var language = LanguageController.shared
     @Environment(\.scenePhase) private var scenePhase
 
-    #if os(iOS)
-    init() { Toon.configureAppearance() }
-    #endif
+    init() {
+        Lang.bootstrap()
+        #if os(iOS)
+        Toon.configureAppearance()
+        #endif
+    }
 
     var body: some Scene {
         WindowGroup {
             RootView()
+                .appLanguage(language.code)
                 .environmentObject(model)
                 .onAppear { model.launch() }
         }

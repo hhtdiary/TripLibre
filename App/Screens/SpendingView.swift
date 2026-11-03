@@ -61,18 +61,20 @@ struct SpendingView: View {
 
     private func line(_ s: SpendingSummary) -> String {
         guard !s.isEmpty else {
-            return "No costs logged in \(period == .all ? "your diary" : "the last \(period.label)") yet. Tap + or answer my question on Today after a paid trip."
+            return period == .all
+                ? L("No costs logged in your diary yet. Tap + or answer my question on Today after a paid trip.")
+                : L("No costs logged in the last %@ yet. Tap + or answer my question on Today after a paid trip.", period.label)
         }
-        guard s.hasMainCurrency else { return "Everything here is in other currencies; see the list below." }
-        let lead = "\(money(s.total)) over \(s.days) day\(s.days == 1 ? "" : "s")"
-        if s.travel > 0 && s.travel >= s.atDestinations { return lead + ", mostly getting around." }
-        if s.atDestinations > 0 { return lead + ", mostly once you got there." }
-        return lead + "."
+        guard s.hasMainCurrency else { return L("Everything here is in other currencies; see the list below.") }
+        let days = L("%lld days", s.days)
+        if s.travel > 0 && s.travel >= s.atDestinations { return L("%@ over %@, mostly getting around.", money(s.total), days) }
+        if s.atDestinations > 0 { return L("%@ over %@, mostly once you got there.", money(s.total), days) }
+        return L("%@ over %@.", money(s.total), days)
     }
 
     @ViewBuilder private func periodPills(equalWidth: Bool) -> some View {
         ForEach([Period.week, .month, .year, .all]) { p in
-            Button { period = p } label: { Text(p == .all ? "All" : p.label).frame(maxWidth: equalWidth ? .infinity : nil) }
+            Button { period = p } label: { Text(p == .all ? L("All") : p.label).frame(maxWidth: equalWidth ? .infinity : nil) }
                 .buttonStyle(ToonButtonStyle(fill: period == p ? Toon.ink : Toon.paper, height: 38, fontSize: 13,
                                              shadow: period == p ? 0 : 2, text: period == p ? .white : Toon.ink))
                 .accessibilityAddTraits(period == p ? .isSelected : [])
@@ -106,9 +108,9 @@ struct SpendingView: View {
             // only the text is one element: the contrast audit measures an element's whole frame, and with the bar in
             // it reads the bar's colours as the text's (issue #67). The percentages say what the bar shows.
             ToonRowStack(spacing: 8) {
-                Text("Travel \(Fmt.percent(s.travel / total))")
+                Text(L("Travel %@", Fmt.percent(s.travel / total)))
                 Spacer()
-                Text("At destinations \(Fmt.percent(s.atDestinations / total))")
+                Text(L("At destinations %@", Fmt.percent(s.atDestinations / total)))
             }
             .font(.toon(12, .heavy)).foregroundStyle(Toon.muted)
             .accessibilityElement(children: .combine)
@@ -165,7 +167,7 @@ struct SpendingView: View {
                             .accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 3) {
                             ToonRowStack(spacing: 8) {
-                                Text(r.category.label)
+                                Text(r.category.localizedLabel)
                                 Spacer()
                                 Text(money(r.total)).monospacedDigit()
                             }
@@ -191,13 +193,13 @@ struct SpendingView: View {
                         ModeIcon(mode: r.mode, size: 34).accessibilityHidden(true)
                         VStack(alignment: .leading, spacing: 2) {
                             ToonRowStack(spacing: 8) {
-                                Text(r.mode.label)
+                                Text(r.mode.localizedLabel)
                                 Spacer()
                                 Text(money(r.total)).monospacedDigit()
                             }
                             .font(.toon(13, .black))
-                            Text("\(r.trips) trip\(r.trips == 1 ? "" : "s") · \(money(r.perTrip)) a trip"
-                                 + (r.perKm.map { " · \(money(Fmt.usesMetric ? $0 : $0 * 1.609_344))/\(Fmt.usesMetric ? "km" : "mi")" } ?? ""))
+                            Text(L("%lld trips", r.trips) + " · " + L("%@ a trip", money(r.perTrip))
+                                 + (r.perKm.map { " · " + L(Fmt.usesMetric ? "%@/km" : "%@/mi", money(Fmt.usesMetric ? $0 : $0 * 1.609_344)) } ?? ""))
                                 .font(.toon(12, .bold)).foregroundStyle(Toon.muted).monospacedDigit()
                         }
                         .foregroundStyle(Toon.ink)
@@ -257,9 +259,8 @@ struct SpendingView: View {
                     }
                 }
                 if let s, !s.otherCurrencies.isEmpty {
-                    Text("Totals above are in \(s.currency) only. Also spent "
-                         + s.otherCurrencies.sorted { $0.key < $1.key }.map { Fmt.money($0.value, $0.key) }.joined(separator: ", ")
-                         + ", not converted.")
+                    Text(L("Totals above are in %@ only. Also spent %@, not converted.", s.currency,
+                           Fmt.list(s.otherCurrencies.sorted { $0.key < $1.key }.map { Fmt.money($0.value, $0.key) })))
                         .font(.toon(12, .bold)).foregroundStyle(Toon.muted)
                 }
             }
@@ -271,7 +272,7 @@ struct SpendingView: View {
             Image(systemName: e.category.symbol).frame(width: 24).foregroundStyle(Toon.muted).accessibilityHidden(true)
             VStack(alignment: .leading, spacing: 1) {
                 Text(what(e)).font(.toon(14, .bold)).toonLineLimit(1)
-                Text([Fmt.time(e.timestamp, tz: e.timeZone), e.category.label, e.note].compactMap { $0 }.joined(separator: " · "))
+                Text([Fmt.time(e.timestamp, tz: e.timeZone), e.category.localizedLabel, e.note].compactMap { $0 }.joined(separator: " · "))
                     .font(.toon(12, .bold)).foregroundStyle(Toon.muted).toonLineLimit(1)
             }
             Spacer()
@@ -286,13 +287,13 @@ struct SpendingView: View {
     private func what(_ e: Expense) -> String {
         if let t = e.tripID.flatMap({ trips[$0] }) {
             let dest = t.destinationVisitID.flatMap { visits[$0]?.placeID } ?? t.destinationPlaceID
-            return t.displayModes.map(\.label).joined(separator: " + ")
-                + (dest.flatMap { places[$0] }.flatMap { $0.isNamed ? " to \($0.displayName)" : nil } ?? "")
+            return t.displayModes.map(\.localizedLabel).joined(separator: " + ")
+                + (dest.flatMap { places[$0] }.flatMap { $0.isNamed ? " " + L("to %@", $0.displayName) : nil } ?? "")
         }
         if let v = e.visitID.flatMap({ visits[$0] }) {
-            return v.placeID.flatMap { places[$0] }.flatMap { $0.isNamed ? "At \($0.displayName)" : nil } ?? "At an unnamed place"
+            return v.placeID.flatMap { places[$0] }.flatMap { $0.isNamed ? L("At %@", $0.displayName) : nil } ?? L("At an unnamed place")
         }
-        return e.category.label
+        return e.category.localizedLabel
     }
 
     private func bar(_ fraction: Double, _ color: Color) -> some View {
@@ -336,11 +337,11 @@ struct SpendingStatsCard: View {
                     VStack(alignment: .leading, spacing: 2) {
                         if summary.hasMainCurrency {
                             Text(Fmt.money(summary.total, summary.currency)).font(.toon(22, .bold)).monospacedDigit()
-                            Text("\(Fmt.money(summary.travel, summary.currency)) getting around · "
-                                 + "\(Fmt.money(summary.atDestinations, summary.currency)) at destinations")
+                            Text(L("%@ getting around", Fmt.money(summary.travel, summary.currency)) + " · "
+                                 + L("%@ at destinations", Fmt.money(summary.atDestinations, summary.currency)))
                                 .font(.toon(12, .bold)).foregroundStyle(Toon.muted).toonLineLimit(2)
                         } else {
-                            Text("No costs in \(period.label)").font(.toon(16, .bold))
+                            Text(L("No costs in %@", period.label)).font(.toon(16, .bold))
                             Text("Log fares and other costs from Today or any trip.").font(.toon(12, .bold)).foregroundStyle(Toon.muted)
                         }
                     }

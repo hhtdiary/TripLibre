@@ -29,6 +29,8 @@ jobs:
         run: npm run lint
       - name: Ruff (analysis/)
         run: pipx run ruff==0.15.1 check
+      - name: String catalogs (every key in every language, matching format specifiers)
+        run: python3 scripts/check_localizations.py
       # Static Linux builds, pinned and checksummed; no macOS runner needed. Bump together with the Makefile pins.
       - name: Install SwiftLint 0.65.1 + SwiftFormat 0.63.1
         run: |

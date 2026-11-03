@@ -348,6 +348,8 @@ public final class InferenceEngine {
             return
         }
         let fmt = DateFormatter()
+        fmt.locale = Locale(identifier: "en_US_POSIX")   // a stored key: ASCII digits, Gregorian, whatever the app language
+        fmt.calendar = Calendar(identifier: .gregorian)
         fmt.dateFormat = "yyyy-MM-dd"
         fmt.timeZone = trip.timeZone.flatMap(TimeZone.init(identifier:)) ?? .current
         let oPlace = try a.placeID.flatMap(store.place)

@@ -17,7 +17,7 @@ struct StatsView: View {
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 18) {
-                Text(compare.map { "\(period.label) vs \($0.label)" } ?? period.label)
+                Text(compare.map { L("%@ vs %@", period.label, $0.label) } ?? period.label)
                     .font(.toon(15, .heavy)).foregroundStyle(Toon.muted)
                 periodBar
                 if let m {
@@ -62,7 +62,7 @@ struct StatsView: View {
                     Menu {
                         ForEach(phases) { ph in Button(ph.name) { period = .phase(ph) } }
                     } label: {
-                        menuLabel(isPhase ? period.label : "Life phase", symbol: "calendar.badge.clock", on: isPhase)
+                        menuLabel(isPhase ? period.label : L("Life phase"), symbol: "calendar.badge.clock", on: isPhase)
                     }
                 }
                 Menu {
@@ -70,7 +70,7 @@ struct StatsView: View {
                     ForEach([Period.week, .month, .year, .all]) { p in Button(p.label) { compare = p } }
                     ForEach(phases) { ph in Button(ph.name) { compare = .phase(ph) } }
                 } label: {
-                    menuLabel(compare.map { "vs \($0.label)" } ?? "Compare…", symbol: "arrow.left.arrow.right", on: compare != nil)
+                    menuLabel(compare.map { L("vs %@", $0.label) } ?? L("Compare…"), symbol: "arrow.left.arrow.right", on: compare != nil)
                 }
             }
         }
@@ -80,7 +80,7 @@ struct StatsView: View {
 
     @ViewBuilder private func periodPills(equalWidth: Bool) -> some View {
         ForEach([Period.week, .month, .year, .all]) { p in
-            pill(p == .all ? "All" : p.label, on: period == p, equalWidth: equalWidth) { period = p }
+            pill(p == .all ? L("All") : p.label, on: period == p, equalWidth: equalWidth) { period = p }
         }
     }
 
@@ -101,10 +101,12 @@ struct StatsView: View {
     // MARK: design sections
 
     private func hero(_ m: MobilityMetrics) -> some View {
-        MascotSays(text: m.trips == 0 ? "No trips in this period yet. Let's go somewhere!"
-                   : "You made \(m.trips) trip\(m.trips == 1 ? "" : "s") across \(m.personDays) active day\(m.personDays == 1 ? "" : "s")"
-                     + (c.flatMap { cc in compare.map { cmp in cc.trips < m.trips ? ", \(m.trips - cc.trips) more than \(cmp.label)" : "" } } ?? "")
-                     + ". Busy bee!")
+        let trips = L("%lld trips", m.trips), days = L("%lld active days", m.personDays)
+        var more: (Int, String)?
+        if let cc = c, let cmp = compare, cc.trips < m.trips { more = (m.trips - cc.trips, cmp.label) }
+        return MascotSays(text: m.trips == 0 ? L("No trips in this period yet. Let's go somewhere!")
+                          : more.map { L("You made %@ across %@, %lld more than %@. Busy bee!", trips, days, $0.0, $0.1) }
+                            ?? L("You made %@ across %@. Busy bee!", trips, days))
     }
 
     private func stickers(_ m: MobilityMetrics) -> some View {
@@ -120,7 +122,7 @@ struct StatsView: View {
         }
     }
 
-    private func sticker(_ value: String, _ label: String, _ color: Color, _ tilt: Double, _ sub: String?) -> some View {
+    private func sticker(_ value: String, _ label: LocalizedStringKey, _ color: Color, _ tilt: Double, _ sub: String?) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             Text(value).font(.toon(26, .bold)).monospacedDigit().toonLineLimit(1, minScale: 0.6)
             Text(label).font(.toon(12)).toonLineLimit(1, minScale: 0.8)
@@ -137,8 +139,8 @@ struct StatsView: View {
     private func delta(_ a: Double, _ b: Double?, _ fmt: (Double) -> String) -> String? {
         guard let b, let compare else { return nil }
         let d = a - b
-        if abs(d) < 1e-9 { return "same as \(compare.label)" }
-        return "\(d > 0 ? "▲" : "▼") \(fmt(abs(d))) vs \(compare.label)"
+        if abs(d) < 1e-9 { return L("same as %@", compare.label) }
+        return (d > 0 ? "▲ " : "▼ ") + L("%@ vs %@", fmt(abs(d)), compare.label)
     }
 
     private func modes(_ m: MobilityMetrics) -> some View {
@@ -155,13 +157,13 @@ struct StatsView: View {
                     }
                 } label: {
                     HStack(spacing: 3) {
-                        Text(["by trips", "by distance", "by time"][shareBasis])
+                        Text(Self.basisNames[shareBasis])
                         Image(systemName: "chevron.down").font(.toon(10, .black))
                     }
                     .font(.toon(13, .heavy)).foregroundStyle(Toon.muted)
                     .frame(minHeight: 44).contentShape(Rectangle())
                 }
-                .accessibilityLabel("Share basis: \(["by trips", "by distance", "by time"][shareBasis])")
+                .accessibilityLabel(L("Share basis: %@", Self.basisNames[shareBasis]))
             }
             VStack(alignment: .leading, spacing: 12) {
                 if rows.isEmpty {
@@ -173,7 +175,7 @@ struct StatsView: View {
                         ModeIcon(mode: r.mode, size: 34)
                         VStack(alignment: .leading, spacing: 3) {
                             HStack {
-                                Text(r.mode.label)
+                                Text(r.mode.localizedLabel)
                                 Spacer()
                                 if let cs = compareShare(r.mode) {
                                     Text(Fmt.percent(cs)).foregroundStyle(Toon.muted)
@@ -196,7 +198,7 @@ struct StatsView: View {
                 let groups = ModeGroup.allCases.filter { (m.groupShareByTrips[$0] ?? 0) > 0 || (c?.groupShareByTrips[$0] ?? 0) > 0 }
                 if !groups.isEmpty {
                     FlowChips(items: groups.map { g in
-                        ("\(g.label) \(Fmt.percent(m.groupShareByTrips[g] ?? 0))"
+                        ("\(g.localizedLabel) \(Fmt.percent(m.groupShareByTrips[g] ?? 0))"
                          + (c.map { " / \(Fmt.percent($0.groupShareByTrips[g] ?? 0))" } ?? ""), g.color)
                     })
                     .padding(.top, 2)
@@ -206,6 +208,8 @@ struct StatsView: View {
             .toonCard(radius: 22, shadow: 4)
         }
     }
+
+    private static var basisNames: [String] { [L("by trips"), L("by distance"), L("by time")] }
 
     private func compareShare(_ mode: TravelMode) -> Double? {
         guard let c else { return nil }
@@ -250,7 +254,7 @@ struct StatsView: View {
                 }
                 .font(.toon(11, .black)).foregroundStyle(Toon.muted)
                 if !peaks.isEmpty {
-                    Text("Peak departures: " + peaks.map { String(format: "%02d:00", $0) }.joined(separator: " and "))
+                    Text(L("Peak departures: %@", Fmt.list(peaks.map { String(format: "%02d:00", $0) })))
                         .font(.toon(13, .heavy)).foregroundStyle(Toon.ink).padding(.top, 2)
                 }
             }
@@ -289,15 +293,15 @@ struct StatsView: View {
             card("Modes") {
                 ForEach(ModeGroup.allCases, id: \.self) { g in
                     if (m.groupShareByTrips[g] ?? 0) > 0 || (c?.groupShareByTrips[g] ?? 0) > 0 {
-                        row("\(g.label) share (trips)", Fmt.percent(m.groupShareByTrips[g] ?? 0), c.map { Fmt.percent($0.groupShareByTrips[g] ?? 0) })
+                        row("\(g.localizedLabel) share (trips)", Fmt.percent(m.groupShareByTrips[g] ?? 0), c.map { Fmt.percent($0.groupShareByTrips[g] ?? 0) })
                     }
                 }
-                row("Mode entropy", m.modeEntropy.map { String(format: "%.2f bits", $0) } ?? "–", c?.modeEntropy.map { String(format: "%.2f", $0) })
+                row("Mode entropy", m.modeEntropy.map { L("%.2f bits", $0) } ?? "–", c?.modeEntropy.map { String(format: "%.2f", $0) })
             }
             card("When") {
                 row("Mean first departure", Fmt.minutesOfDay(m.meanFirstDepartureMinutes), c.map { Fmt.minutesOfDay($0.meanFirstDepartureMinutes) })
-                row("SD first departure", m.sdFirstDepartureMinutes.map { String(format: "%.0f min", $0) } ?? "–",
-                    c?.sdFirstDepartureMinutes.map { String(format: "%.0f min", $0) })
+                row("SD first departure", m.sdFirstDepartureMinutes.map { L("%.0f min", $0) } ?? "–",
+                    c?.sdFirstDepartureMinutes.map { L("%.0f min", $0) })
                 row("Mean last arrival", Fmt.minutesOfDay(m.meanLastArrivalMinutes), c.map { Fmt.minutesOfDay($0.meanLastArrivalMinutes) })
                 row("Time away from home / day", m.meanTimeAwayFromHomePerDay.map(Fmt.duration) ?? "–",
                     c?.meanTimeAwayFromHomePerDay.map(Fmt.duration))
@@ -305,7 +309,7 @@ struct StatsView: View {
             card("Places") {
                 row("Unique places", "\(m.uniquePlaces)", c.map { "\($0.uniquePlaces)" })
                 row("New places (first visit)", "\(m.newPlaces)", c.map { "\($0.newPlaces)" })
-                row("Destination entropy", m.destinationEntropy.map { String(format: "%.2f bits", $0) } ?? "–",
+                row("Destination entropy", m.destinationEntropy.map { L("%.2f bits", $0) } ?? "–",
                     c?.destinationEntropy.map { String(format: "%.2f", $0) })
                 row("Repeat OD share", Fmt.percent(m.repeatODShare), c.map { Fmt.percent($0.repeatODShare) })
                 ForEach(m.topPlaces.prefix(6)) { p in
@@ -335,7 +339,7 @@ struct StatsView: View {
                     DisclosureGroup("Time by place category") {
                         ForEach(Array(cats), id: \.key) { k, v in
                             ToonRowStack(spacing: 8) {
-                                Text(PlaceCategory(rawValue: k)?.label ?? "Uncategorized")
+                                Text(PlaceCategory(rawValue: k)?.localizedLabel ?? L("Uncategorized"))
                                 Spacer()
                                 Text(Fmt.hours(v)).monospacedDigit()
                             }
@@ -381,7 +385,7 @@ struct StatsView: View {
         }
     }
 
-    private func card<C: View>(_ title: String, footer: String? = nil, @ViewBuilder _ content: () -> C) -> some View {
+    private func card<C: View>(_ title: LocalizedStringKey, footer: LocalizedStringKey? = nil, @ViewBuilder _ content: () -> C) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             ToonRowStack(spacing: 8) {
                 Text(title).font(.toon(16, .heavy)).foregroundStyle(Toon.ink)
@@ -400,7 +404,7 @@ struct StatsView: View {
     }
 
     /// Label and value(s) on one line, or the values under the label at accessibility text sizes.
-    private func row(_ label: String, _ value: String, _ other: String? = nil) -> some View {
+    private func row(_ label: LocalizedStringKey, _ value: String, _ other: String? = nil) -> some View {
         ToonRowStack(alignment: .firstTextBaseline, spacing: 8) {
             Text(label).font(.toon(14, .bold))
             Spacer()
@@ -481,7 +485,7 @@ struct MetricsHelpView: View {
         .navigationTitle("Definitions")
     }
 
-    private func item(_ t: String, _ d: String) -> some View {
+    private func item(_ t: LocalizedStringKey, _ d: LocalizedStringKey) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text(t).font(.headline).accessibilityAddTraits(.isHeader)
             Text(d).font(.callout).foregroundStyle(Toon.muted)

@@ -2,6 +2,7 @@
 name: HHT
 options:
   bundleIdPrefix: com.zyang91
+  developmentLanguage: en
   deploymentTarget:
     iOS: "17.0"
   createIntermediateGroups: true
@@ -45,6 +46,9 @@ targets:
         CFBundleDisplayName: TripLibre
         CFBundleShortVersionString: "$(MARKETING_VERSION)"
         CFBundleVersion: "$(CURRENT_PROJECT_VERSION)"
+        # Languages with translations in App/Localizable.xcstrings and App/InfoPlist.xcstrings (issue #90). Keep in
+        # line with AppLanguage in App/Support/Localization.swift; scripts/check_localizations.py checks the catalogs.
+        CFBundleLocalizations: [en, zh-Hans, zh-Hant, fr, de, es, pt, ru, ar, ja, ko]
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         # Keep these in line with release/app-privacy-details.md: no absolute "never leaves" claims, since optional

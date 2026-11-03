@@ -18,10 +18,10 @@ enum Period: Hashable, Identifiable {
     }
     var label: String {
         switch self {
-        case .week: return "7 days"
-        case .month: return "30 days"
-        case .year: return "Year"
-        case .all: return "All time"
+        case .week: return L("7 days")
+        case .month: return L("30 days")
+        case .year: return L("Year")
+        case .all: return L("All time")
         case .phase(let p): return p.name
         }
     }
@@ -82,8 +82,8 @@ struct ExploreMapView: View {
     @ViewBuilder private func statPills(_ m: MobilityMetrics) -> some View {
         StatPill(value: Fmt.distance(m.radiusOfGyrationDwell ?? 0), label: "radius of gyration")
         StatPill(value: String(format: "%.1f km²", (m.activitySpaceHullArea ?? 0) / 1e6), label: "hull area")
-        StatPill(value: "\(m.uniquePlaces)", label: "places")
-        StatPill(value: "\(m.trips)", label: "trips")
+        StatPill(value: m.uniquePlaces.formatted(), label: "places")
+        StatPill(value: m.trips.formatted(), label: "trips")
     }
 
     var body: some View {
@@ -115,7 +115,7 @@ struct ExploreMapView: View {
                                 .frame(width: CGFloat(10 + min(24, sqrt(Double(n)) * 3)), height: CGFloat(10 + min(24, sqrt(Double(n)) * 3)))
                                 .overlay(Circle().strokeBorder(Toon.ink, lineWidth: 2))
                                 .frame(minWidth: 44, minHeight: 44).contentShape(Circle())   // tappable size, not drawn
-                                .accessibilityLabel("\(p.isNamed ? p.displayName : "Unnamed place"), \(n) \(n == 1 ? "visit" : "visits")")
+                                .accessibilityLabel((p.isNamed ? p.displayName : L("Unnamed place")) + ", " + L("%lld visits", n))
                         }
                     }
                 }
@@ -244,8 +244,8 @@ private enum RouteStyle: String, CaseIterable, Identifiable {
     var id: String { rawValue }
     var label: String {
         switch self {
-        case .arcs: return "Origin → destination arcs"
-        case .traces: return "GPS traces"
+        case .arcs: return L("Origin → destination arcs")
+        case .traces: return L("GPS traces")
         }
     }
 }

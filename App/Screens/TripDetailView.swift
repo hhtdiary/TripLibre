@@ -42,8 +42,8 @@ struct TripDetailView: View {
                         destination: destination.1?.coordinate ?? destination.0?.coordinate)
                     .frame(height: 220).listRowInsets(EdgeInsets())
                 VStack(alignment: .leading, spacing: 4) {
-                    Label(origin.1?.displayName ?? "Unknown origin", systemImage: "circle")
-                    Label(destination.1?.displayName ?? "Unknown destination", systemImage: "mappin.circle.fill")
+                    Label(origin.1?.displayName ?? L("Unknown origin"), systemImage: "circle")
+                    Label(destination.1?.displayName ?? L("Unknown destination"), systemImage: "mappin.circle.fill")
                     Text("\(Fmt.dateTime(t.departure)) → \(Fmt.time(t.arrival))  ·  \(Fmt.duration(t.duration))  ·  \(Fmt.distance(t.distance))")
                         .font(.caption).foregroundStyle(Toon.muted)
                 }
@@ -52,7 +52,7 @@ struct TripDetailView: View {
             Section {
                 modeGrid(t)
                 if t.modeUser != nil {
-                    Button("Reset to automatic (\(t.modeAuto?.label ?? "unknown"))") {
+                    Button(L("Reset to automatic (%@)", t.modeAuto?.localizedLabel ?? L("unknown"))) {
                         model.perform { try model.edit.setTripMode(t.id, nil) }
                     }
                     .font(.footnote)
@@ -67,7 +67,7 @@ struct TripDetailView: View {
                                 ModeIcon(mode: s.mode, size: 24)
                                 VStack(alignment: .leading) {
                                     HStack(spacing: 6) {
-                                        Text(s.mode.label)
+                                        Text(s.mode.localizedLabel)
                                         Text(s.isUserSet ? "You" : "Auto")
                                             .font(.caption2.weight(.semibold))
                                             .padding(.horizontal, 6).padding(.vertical, 1)
@@ -100,8 +100,8 @@ struct TripDetailView: View {
                 Picker("Purpose", selection: Binding(
                     get: { t.purpose },
                     set: { p in model.perform { try model.edit.setTripPurpose(t.id, p) } })) {
-                    Text(destinationDefaultPurpose.map { "Auto (\($0.label))" } ?? "Not set").tag(TripPurpose?.none)
-                    ForEach(TripPurpose.allCases) { p in Text(p.label).tag(TripPurpose?.some(p)) }
+                    Text(destinationDefaultPurpose.map { L("Auto (%@)", $0.localizedLabel) } ?? L("Not set")).tag(TripPurpose?.none)
+                    ForEach(TripPurpose.allCases) { p in Text(p.localizedLabel).tag(TripPurpose?.some(p)) }
                 }
             } header: { Text("Purpose (activity at destination)").toonSectionText() }
 
@@ -126,13 +126,13 @@ struct TripDetailView: View {
             }
 
             Section {
-                LabeledContent("Automatic mode", value: "\(t.modeAuto?.label ?? "–") (\(Fmt.percent(t.modeConfidence)))")
-                LabeledContent("Status", value: t.userStatus.rawValue)
-                LabeledContent("Source", value: t.source.rawValue)
-                if t.hasGap { LabeledContent("GPS gap", value: "yes – route partly straight-line") }
+                LabeledContent("Automatic mode", value: "\(t.modeAuto?.localizedLabel ?? "–") (\(Fmt.percent(t.modeConfidence)))")
+                LabeledContent("Status", value: L(t.userStatus.rawValue))
+                LabeledContent("Source", value: L(t.source.rawValue))
+                if t.hasGap { LabeledContent("GPS gap", value: L("yes – route partly straight-line")) }
                 LabeledContent("Trip ID", value: String(t.id.prefix(8)))
                 if !history.isEmpty {
-                    DisclosureGroup("Edit history (\(history.count))") {
+                    DisclosureGroup(L("Edit history (%lld)", history.count)) {
                         ForEach(Array(history.enumerated()), id: \.offset) { _, h in
                             VStack(alignment: .leading) {
                                 Text("\(h.action) \(h.field ?? "")").font(.caption.weight(.medium))
@@ -181,7 +181,7 @@ struct TripDetailView: View {
                     Button { model.perform { try model.edit.setTripMode(t.id, m) } } label: {
                         VStack(spacing: 4) {
                             Image(systemName: m.symbol).font(.title3)
-                            Text(m.label).font(.caption2).toonLineLimit(2).multilineTextAlignment(.center)
+                            Text(m.localizedLabel).font(.caption2).toonLineLimit(2).multilineTextAlignment(.center)
                         }
                         .frame(maxWidth: .infinity, minHeight: 54)
                         .background(t.mode == m ? m.color.opacity(0.25) : Color.secondary.opacity(0.08),
@@ -373,7 +373,7 @@ struct ModeChangeSheet: View {
     }
 
     @ViewBuilder private var modeOptions: some View {
-        ForEach(TravelMode.allCases) { m in Label(m.label, systemImage: m.symbol).tag(m) }
+        ForEach(TravelMode.allCases) { m in Label(m.localizedLabel, systemImage: m.symbol).tag(m) }
     }
 }
 
@@ -402,7 +402,7 @@ struct SegmentEditSheet: View {
             Form {
                 Section {
                     Picker("Mode", selection: $mode) {
-                        ForEach(TravelMode.allCases) { m in Label(m.label, systemImage: m.symbol).tag(m) }
+                        ForEach(TravelMode.allCases) { m in Label(m.localizedLabel, systemImage: m.symbol).tag(m) }
                     }
                     LabeledContent("Started", value: Fmt.time(segment.start))
                     if let n = next {
@@ -413,8 +413,8 @@ struct SegmentEditSheet: View {
                     LabeledContent("Distance", value: Fmt.distance(segment.distance))
                 } footer: {
                     Text(segment.isUserSet
-                         ? "Set by you; kept when the day is reprocessed."
-                         : "Detected automatically (\(Fmt.percent(segment.modeConfidence))). Saving marks it as set by you.")
+                         ? L("Set by you; kept when the day is reprocessed.")
+                         : L("Detected automatically (%@). Saving marks it as set by you.", Fmt.percent(segment.modeConfidence)))
                         .toonSectionText()
                 }
                 Section {

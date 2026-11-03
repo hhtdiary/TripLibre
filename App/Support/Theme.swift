@@ -424,7 +424,7 @@ private struct TileLayout: Layout {
 /// Big number sticker.
 struct StatSticker: View {
     let value: String
-    let label: String
+    let label: LocalizedStringKey
     var color: Color
     var tilt: Double = 0
 
@@ -446,7 +446,7 @@ struct StatSticker: View {
 
 /// Small rounded badge ("check", "here now", counts).
 struct ToonBadge: View {
-    let text: String
+    let text: LocalizedStringKey
     var color: Color = Toon.sun
     @Environment(\.dynamicTypeSize) private var typeSize
 
@@ -463,7 +463,7 @@ struct ToonBadge: View {
 }
 
 struct SectionLabel: View {
-    let text: String
+    let text: LocalizedStringKey
     var body: some View {
         Text(text).font(.toon(20, .bold)).foregroundStyle(Toon.ink).textCase(nil)
     }

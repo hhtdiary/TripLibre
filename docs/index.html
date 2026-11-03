@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/site.css?v=4">
+<link rel="stylesheet" href="assets/site.css?v=5">
 <script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <script src="assets/site.js?v=4" defer></script>
 </head>
@@ -23,7 +23,7 @@
     <h1 id="page-title">A travel diary that <span>writes itself.</span></h1>
     <p class="lede">TripLibre records where you go, rebuilds each day into visits, trips and travel modes, and keeps all of it on your iPhone. Think of it as a household travel survey that fills itself in, with a sample size of one.</p>
     <div class="acts"><a class="btn p" href="#install">Install <span class="arr" aria-hidden="true">→</span></a><a class="btn" href="docs/using-the-app.html">Read the user guide</a></div>
-    <ul class="strip"><li>iOS 17+</li><li>Free · Apache 2.0</li><li>No account</li><li>No server</li><li>CSV · JSON · GeoJSON · SQLite</li></ul>
+    <ul class="strip"><li>iOS 17+</li><li>Free · Apache 2.0</li><li>No account</li><li>No server</li><li>CSV · JSON · GeoJSON · SQLite</li><li>11 languages</li></ul>
   </div>
   <div class="fan" role="group" aria-label="Screenshots of TripLibre for iOS">
     <figure class="ph"><img src="assets/screens/map.jpg" width="600" height="1304" alt="The Map screen: the day's trips drawn over Philadelphia with radius of gyration, hull area, places and trip counts"><figcaption>Map</figcaption></figure><figure class="ph"><img src="assets/screens/diary.jpg" width="600" height="1304" alt="The Diary screen: the day's visits and trips in order, with a trip asking 'Did I get that right?'"><figcaption>Diary</figcaption></figure><figure class="ph"><img src="assets/screens/trip.jpg" width="600" height="1304" alt="A trip's detail sheet: the route on a map, start and end, and a grid of travel modes to correct it" loading="lazy"><figcaption>Trip</figcaption></figure>
@@ -41,6 +41,8 @@
         <div class="bt sticker b4"><p class="k">04 · stamp</p><h3>Self-reported stops</h3><p>One tap records a stop too short for GPS to notice, like dropping someone off.</p></div>
         <div class="bt sticker b5"><p class="k">05 · analyse</p><h3>Stats and widgets</h3><p>Mode share, radius of gyration, tours, flights, period comparisons, and Home Screen widgets for today and the last 7 days.</p></div>
         <div class="bt sticker b6"><p class="k">06 · export</p><h3>Survey-shaped export</h3><p class="txt">Trips follow household-travel-survey conventions and export to CSV, JSON, GeoJSON and SQLite, with a Python loader.</p></div>
+        <div class="bt sticker b7" id="languages"><p class="k">07 · new · languages</p><h3>Now in your language</h3><p>TripLibre now speaks 11 languages. Pick one in Settings › Language, or let it follow your iPhone. Dates, units and plurals follow along, Arabic reads right to left, and exports stay in English so analysis scripts keep working.</p>
+          <ul class="langs" aria-label="Supported languages"><li lang="en">English</li><li lang="zh-Hans">简体中文</li><li lang="zh-Hant">繁體中文</li><li lang="fr">Français</li><li lang="de">Deutsch</li><li lang="es">Español</li><li lang="pt">Português</li><li lang="ru">Русский</li><li lang="ar" dir="rtl">العربية</li><li lang="ja">日本語</li><li lang="ko">한국어</li></ul></div>
         </div>
   </div>
 </section>

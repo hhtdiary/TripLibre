@@ -21,10 +21,10 @@ struct FlightsView: View {
                 }
                 .frame(height: 220).listRowInsets(EdgeInsets())
                 HStack {
-                    StatPill(value: "\(s.flights)", label: "flights")
+                    StatPill(value: s.flights.formatted(), label: "flights")
                     StatPill(value: Fmt.distance(s.distance), label: "distance")
-                    StatPill(value: "\(s.airports.count)", label: "airports")
-                    StatPill(value: "\(s.routes.count)", label: "routes")
+                    StatPill(value: s.airports.count.formatted(), label: "airports")
+                    StatPill(value: s.routes.count.formatted(), label: "routes")
                 }
             }
             if !s.airports.isEmpty {
@@ -120,7 +120,7 @@ struct FlightEditor: View {
         f.notes = notes.isEmpty ? nil : notes
         f.updatedAt = Date()
         if f.origin == nil || f.destination == nil, imp.airportCount() == 0 {
-            lookupNote = "Saved without coordinates. Download the airport list in Settings to get distances and map routes."
+            lookupNote = L("Saved without coordinates. Download the airport list in Settings to get distances and map routes.")
         }
         model.perform { try model.store.upsertFlight(f); _ = try imp.airportPlace(o); _ = try imp.airportPlace(d) }
         dismiss()
@@ -139,7 +139,7 @@ struct LifePhasesView: View {
                     Button { editing = p } label: {
                         VStack(alignment: .leading) {
                             Text(p.name).foregroundStyle(.primary)
-                            Text("\(p.startDate) – \(p.endDate ?? "now")" + (p.kind.map { " · \($0)" } ?? ""))
+                            Text("\(p.startDate) – \(p.endDate ?? L("now"))" + (p.kind.map { " · " + Self.kindName($0) } ?? ""))
                                 .font(.caption).foregroundStyle(Toon.muted)
                         }
                     }
@@ -161,6 +161,9 @@ struct LifePhasesView: View {
         .sheet(item: $editing) { p in PhaseEditor(phase: p).environmentObject(model) }
         .task(id: model.revision) { phases = (try? model.store.lifePhases()) ?? [] }
     }
+
+    /// A phase kind as shown; the stored code ("research_trip") stays English.
+    static func kindName(_ code: String) -> String { L(code.replacingOccurrences(of: "_", with: " ")) }
 }
 
 struct PhaseEditor: View {
@@ -178,7 +181,7 @@ struct PhaseEditor: View {
                 LabeledContent("Name") { TextField("Name", text: $phase.name, prompt: Text("e.g. Fall 2026, PhD Year 1")) }
                 Picker("Kind", selection: Binding(get: { phase.kind }, set: { phase.kind = $0 })) {
                     Text("–").tag(String?.none)
-                    ForEach(Self.kinds, id: \.self) { Text($0.replacingOccurrences(of: "_", with: " ")).tag(String?.some($0)) }
+                    ForEach(Self.kinds, id: \.self) { Text(LifePhasesView.kindName($0)).tag(String?.some($0)) }
                 }
                 DatePicker("Start", selection: $start, displayedComponents: .date)
                 Toggle("Ongoing", isOn: $ongoing)
