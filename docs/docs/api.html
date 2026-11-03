@@ -194,6 +194,45 @@ let engine = InferenceEngine(store: store, config: config)</code></pre>
 <code>current</code> stay, <code>timeline</code> blocks) and <code>week</code> (<code>tripsPerDay</code>, totals, <code>modeDistance</code> by
 <code>ModeGroup</code>, <code>topPlace</code>). See <a href="architecture.html#widgets">Architecture › Home Screen widgets</a>.</p>
 
+<h2 id="localization">Localization (app)</h2>
+<p>The app ships in 11 languages: English, Chinese (Simplified and Traditional), French, German, Spanish, Portuguese,
+Russian, Arabic, Japanese and Korean. Translations live in two String Catalogs keyed by the English text:
+<code>App/Localizable.xcstrings</code> (the UI) and <code>App/InfoPlist.xcstrings</code> (the location and motion permission
+prompts). <code>HHTCore</code> is not localized: its enum <code>label</code>s, CSV headers, codes and exports stay English, so
+analysis scripts don't depend on the phone's language.</p>
+<div class="api">
+  <div class="api-head"><span class="kind">enum</span><span class="name">AppLanguage</span><span class="file">App/Support/Localization.swift</span></div>
+  <div class="api-body">
+    <p>The languages offered in Settings › Language. The raw value is the <code>.lproj</code> code (<code>"zh-Hans"</code>, <code>"ar"</code>…); <code>.system</code> (<code>""</code>) follows the iPhone's language list.</p>
+    <div class="sig"><code>var nativeName: String</code><span>The language's own name (简体中文, العربية), so people find theirs in any UI language.</span></div>
+    <div class="sig"><code>var localizedName: String?</code><span>Its name in the current app language, shown under the native name.</span></div>
+  </div>
+</div>
+<div class="api">
+  <div class="api-head"><span class="kind">enum</span><span class="name">Lang</span><span class="file">App/Support/Localization.swift</span></div>
+  <div class="api-body">
+    <div class="sig"><code>static var selected: AppLanguage</code><span>The choice stored under <code>UserDefaults</code> key <code>appLanguage</code>.</span></div>
+    <div class="sig"><code>static var code: String</code><span>The localization in use: the choice, or iOS's best match among the shipped ones.</span></div>
+    <div class="sig"><code>static var locale: Locale</code><span>The app language with the iPhone's region, for dates, numbers and currency (<code>Fmt</code> uses it).</span></div>
+    <div class="sig"><code>static var layoutDirection: LayoutDirection</code><span>Right to left for Arabic.</span></div>
+    <div class="sig"><code>static func bootstrap()</code><span>Called once in <code>HHTApp.init</code>: routes <code>Bundle.main</code> string lookups through the chosen <code>.lproj</code>.</span></div>
+    <div class="sig"><code>@MainActor static func apply(_: AppLanguage)</code><span>Switches language at once and sets <code>AppleLanguages</code>, so iOS-owned text (permission prompts) follows on the next launch.</span></div>
+  </div>
+</div>
+<div class="api">
+  <div class="api-head"><span class="kind">func</span><span class="name">L</span><span class="file">App/Support/Localization.swift</span></div>
+  <div class="api-body">
+    <p>For text built as a <code>String</code>. A literal in a SwiftUI view (<code>Text("Done")</code>, <code>Button("Save")</code>) is looked up automatically and needs no call.</p>
+    <div class="sig"><code>func L(_ key: String) -&gt; String</code><span><code>L("Unnamed place")</code></span></div>
+    <div class="sig"><code>func L(_ key: String, _ args: CVarArg...) -&gt; String</code><span>Format key with <code>%@</code> for text and <code>%lld</code> for whole numbers: <code>L("%lld trips", n)</code>. Counts get plural forms in the catalog (Russian one/few/many, Arabic zero…many).</span></div>
+    <div class="sig"><code>TravelMode.localizedLabel</code>, <code>TripPurpose</code>, <code>PlaceCategory</code>, <code>ExpenseCategory</code>…<span>Display names of the core enums (<code>L(label)</code>), in <code>App/Support/Formatting.swift</code>.</span></div>
+  </div>
+</div>
+<p><code>python3 scripts/check_localizations.py</code> (part of <code>make lint</code> and CI) checks that every key has all 10
+translations and each language's plural forms, that the <code>%@</code> / <code>%lld</code> / <code>%.1f</code> specifiers
+match (numbered ones like <code>%2$@</code> may reorder), and that every <code>L("…")</code> key is in the catalog. See
+<a href="contributing.html#translations">Contributing › Translations</a>.</p>
+
 <h2>Python analysis helpers</h2>
 <p><code>analysis/hht.py</code> loads an export folder or a <code>travel.sqlite</code> file into pandas. Install with
 <code>pip install -r analysis/requirements.txt</code>.</p>
@@ -222,6 +261,7 @@ let engine = InferenceEngine(store: store, config: config)</code></pre>
   <tr><td><code>make phone</code></td><td>Build, sign and install on the connected iPhone</td></tr>
   <tr><td><code>make analysis-env</code></td><td>Create <code>analysis/.venv</code></td></tr>
   <tr><td><code>make export-check</code></td><td>Swift writes a real export; Python loads and validates it</td></tr>
+  <tr><td><code>make lint</code></td><td>Docs, Markdown, Python, Swift lint and the string-catalog check (<code>scripts/check_localizations.py</code>)</td></tr>
   <tr><td><code>make ci</code></td><td>Everything CI runs</td></tr>
 </table></div>
 

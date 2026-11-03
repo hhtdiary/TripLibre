@@ -44,7 +44,9 @@ After each run (and after any edit) the app also refreshes a small summary for t
   AppModel.swift         owns the store and services; views observe it
   Location/              LocationCollector, MotionSync, PlaceGeocoder
   Screens/               Today, Timeline, Map, Stats, Places, Settings, detail screens
-  Support/               theme, formatting, demo data, Info.plist, WidgetBridge
+  Support/               theme, formatting, localization (Localization.swift), demo data, Info.plist, WidgetBridge
+  Localizable.xcstrings  UI strings in 11 languages (keys are the English text)
+  InfoPlist.xcstrings    translated permission prompts
 Widgets/                 WidgetKit extension: read-only Home Screen widgets
 Packages/HHTCore/        Swift package, no third-party dependencies
   Sources/HHTCore/
@@ -70,6 +72,11 @@ Makefile                 test / sim / phone / ci workflows</code></pre>
 geocoding), and the SwiftUI screens. <code>AppModel</code> is a single shared object that owns the
 <code>TravelStore</code>, <code>InferenceEngine</code> and <code>EditService</code>. Views observe its <code>revision</code>
 counter and reload after any change.</p>
+<p>The app is <b>localized</b> (11 languages), the core is not. SwiftUI looks up its literals in
+<code>Localizable.xcstrings</code>; text built in code goes through <code>L(…)</code>. <code>Lang</code> routes
+<code>Bundle.main</code> lookups to the language chosen in Settings and the root view applies its locale and layout
+direction, so a change takes effect without a relaunch. <code>HHTCore</code>'s labels, codes and exports stay English. See
+<a href="api.html#localization">Developer API › Localization</a>.</p>
 
 <h3>HHTCore (pure Swift)</h3>
 <p>No UIKit, no CoreLocation, no dependencies beyond Foundation and the system SQLite. It builds and tests with plain
@@ -143,8 +150,9 @@ app, not a second engine: it never opens the database, collects location or runs
 <h2>Build and CI</h2>
 <p>There is no Docker image: iOS apps can only be built and signed on macOS with Xcode. The reproducible "package" is
 <code>project.yml</code> (XcodeGen) + <code>Makefile</code> + GitHub Actions on macOS runners. CI runs the core tests,
-an end-to-end check that the Python loader reads a real export, simulator and device builds, and a check that
-<code>HHT.xcodeproj</code> matches <code>project.yml</code>. See <a href="contributing.html">Contributing</a>.</p>
+an end-to-end check that the Python loader reads a real export, simulator and device builds, a check that
+<code>HHT.xcodeproj</code> matches <code>project.yml</code>, and a check that every string is translated into every language
+(<code>scripts/check_localizations.py</code>). See <a href="contributing.html">Contributing</a>.</p>
 
 </article></main>
 </body>

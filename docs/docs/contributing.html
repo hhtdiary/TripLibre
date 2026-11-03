@@ -27,7 +27,7 @@ cd TripLibre
 brew install xcodegen swiftlint swiftformat
 make test     # core tests, no simulator needed
 make sim      # run the app with demo data
-make lint     # docs JS/CSS/HTML + accessibility, Markdown, Python, Swift (needs node + ruff)</code></pre>
+make lint     # docs JS/CSS/HTML + accessibility, Markdown, Python, Swift, string catalogs (needs node + ruff)</code></pre>
 <p>Changing Swift? <code>make swift-lint</code> runs the same SwiftLint and SwiftFormat checks as CI. SwiftLint only enforces
 correctness and VoiceOver rules (<code>.swiftlint.yml</code>); violations that already existed are listed in
 <code>.swiftlint-baseline.json</code>, so only new ones fail. If you fix old ones, run <code>make swiftlint-baseline</code> and commit
@@ -48,7 +48,8 @@ dark theme, and runs axe-core's WCAG 2.1 AA rules against the finished page, inc
   <tr><td>Add an export column</td><td><code>Export/Exporter.swift</code>; the Python contract check (<code>make export-check</code>) must still pass</td></tr>
   <tr><td>Change background collection</td><td><code>App/Location/LocationCollector.swift</code>; test on a real device, the simulator can't reproduce it</td></tr>
   <tr><td>Change a Home Screen widget</td><td>Views in <code>Widgets/</code>; data in <code>Widget/WidgetSnapshot.swift</code> (bump <code>currentVersion</code> if its shape changes, and extend <code>WidgetSnapshotTests</code>)</td></tr>
-  <tr><td>Change the UI</td><td><code>App/Screens/</code>, styling in <code>App/Support/Theme.swift</code></td></tr>
+  <tr><td>Change the UI</td><td><code>App/Screens/</code>, styling in <code>App/Support/Theme.swift</code>; new text needs translations (see <a href="#translations">Translations</a>)</td></tr>
+  <tr><td>Fix or add a translation</td><td><code>App/Localizable.xcstrings</code> (UI) or <code>App/InfoPlist.xcstrings</code> (permission prompts); edit in Xcode's String Catalog editor or as JSON</td></tr>
   <tr><td>Edit these docs</td><td><code>docs/docs/*.html</code>; navigation is in <code>docs/assets/docs.js</code>. See <a href="#documentation">Documentation</a> below</td></tr>
 </table></div>
 
@@ -84,6 +85,22 @@ fixture:</p>
 <p>If a real trace is truly needed, share it privately with the maintainer, and only after shifting it far from where it
 happened, rotating it and offsetting the times. Even then, home and work can sometimes be recovered from the pattern.
 Accuracy measurements on real data are summarised in aggregate only; see <a href="validation.html">Validation</a>.</p>
+
+<h2 id="translations">Translations</h2>
+<p>The app is in English, Chinese (Simplified and Traditional), French, German, Spanish, Portuguese, Russian, Arabic,
+Japanese and Korean. Strings live in <code>App/Localizable.xcstrings</code>, keyed by the English text.</p>
+<ul>
+  <li><b>A literal in a SwiftUI view is localized automatically</b>: <code>Text("Done")</code>, <code>Button("Save")</code>,
+    <code>Toggle("Weekends only", …)</code>. Text built as a <code>String</code> goes through <code>L("…")</code>, and counts
+    use a format key with plural forms: <code>L("%lld trips", n)</code>, never <code>"trip\(n == 1 ? "" : "s")"</code>.</li>
+  <li><b>Add every language.</b> A new key needs all 10 translations with the same specifiers (<code>%@</code> for text,
+    <code>%lld</code> for whole numbers); use numbered ones (<code>%1$@</code>, <code>%2$@</code>) when a language needs a
+    different order. Counts need each language's plural forms.</li>
+  <li><b>Keep data English.</b> Exports, CSV headers, stored codes and <code>HHTCore</code> enum labels don't change with the
+    app language, and fixed-format dates use <code>en_US_POSIX</code>.</li>
+  <li><b>Check</b> with <code>python3 scripts/check_localizations.py</code> (also in <code>make lint</code> and CI). Native
+    speakers reviewing a language are very welcome: open an issue or a pull request against the catalog.</li>
+</ul>
 
 <h2 id="documentation">Documentation</h2>
 <ul>

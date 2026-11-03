@@ -131,6 +131,7 @@ the next trip on that route gets that mode automatically.</p></div>
 <h2>Settings</h2>
 <div class="table-wrap"><table>
   <tr><th>Section</th><th>Options</th></tr>
+  <tr><td>Language</td><td>English, 简体中文, 繁體中文, Français, Deutsch, Español, Português, Русский, العربية, 日本語, 한국어, or <i>System default</i> (follows the iPhone). See <a href="#languages">Languages</a>.</td></tr>
   <tr><td>Collection</td><td><i>Record location</i> on/off, accuracy (Balanced / Precise), permission status.</td></tr>
   <tr><td>Privacy</td><td><i>Look up addresses (Apple)</i>, off by default. When on, one place coordinate at a time is sent to Apple's geocoder.</td></tr>
   <tr><td>Display</td><td>Units: metric or imperial.</td></tr>
@@ -139,6 +140,20 @@ the next trip on that route gets that mode automatically.</p></div>
   <tr><td>Airports</td><td>Download the public OurAirports list. Nothing about you is sent.</td></tr>
   <tr><td>Database</td><td>Rebuild the last 7 days or everything from raw data, back up now, erase all data.</td></tr>
 </table></div>
+
+<h2 id="languages">Languages</h2>
+<p>TripLibre is available in 11 languages. Settings › <b>Language</b> lists each one by its own name; <i>System default</i>
+uses the first language in your iPhone's list (Settings › General › Language &amp; Region) that TripLibre has, and English
+otherwise.</p>
+<ul>
+  <li>The app switches when you close Settings. The location and motion permission prompts come from iOS and switch the next
+    time you open TripLibre.</li>
+  <li>Dates, weekdays, money and units follow the chosen language, with your iPhone's region (so currency and the first day
+    of the week stay local). Arabic is laid out right to left.</li>
+  <li><b>Exports stay in English</b>: column names, mode and purpose codes and dates are the same whatever the app language,
+    so analysis scripts keep working. Names you type (places, notes) are kept as you wrote them.</li>
+  <li>Two parts are English for now: the experimental <i>Diary agent</i> and the Home Screen widgets.</li>
+</ul>
 
 <h2>Exporting</h2>
 <p>Settings › <b>Create export</b> writes a timestamped folder such as <code>hht-export-20260927-120000/</code> to
