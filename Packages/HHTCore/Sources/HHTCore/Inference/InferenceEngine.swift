@@ -183,7 +183,7 @@ public final class InferenceEngine {
                 for var lv in lockedVisits where !lv.deleted && lv.departure == nil && lv.arrival < stay.start {
                     guard try !isNear(stay.centroid, lv),
                           try !(store.heldOpenAt(visitID: lv.id).map { $0 > stay.start } ?? false) else { continue }
-                    let lastNear = try clean.filter { $0.timestamp > lv.arrival && $0.timestamp < stay.start }
+                    let lastNear = try clean.strictlyBetween(lv.arrival, stay.start)
                         .last { try isNear($0.coordinate, lv) }
                     try setDeparture(&lv, lastNear?.timestamp ?? stay.start)
                 }
@@ -298,11 +298,16 @@ public final class InferenceEngine {
         return p
     }
 
+    /// `points` must be sorted by timestamp (as `StayDetector.clean` returns them): the fixes strictly
+    /// between departure and arrival are located by binary search rather than a scan of every point.
     func buildTrip(from a: Visit, to b: Visit, points: [RawPoint], motion: MotionTimeline) throws -> Trip {
         let dep = a.departure ?? a.arrival
         let arr = b.arrival
-        var path = points.filter { $0.timestamp > dep && $0.timestamp < arr }
-        path.insert(RawPoint(timestamp: dep, coordinate: a.coordinate, source: "anchor"), at: 0)
+        let inner = points.strictlyBetween(dep, arr)
+        var path: [RawPoint] = []
+        path.reserveCapacity(inner.count + 2)
+        path.append(RawPoint(timestamp: dep, coordinate: a.coordinate, source: "anchor"))
+        path.append(contentsOf: inner)
         path.append(RawPoint(timestamp: arr, coordinate: b.coordinate, source: "anchor"))
 
         let classifier = ModeClassifier(config: config)
