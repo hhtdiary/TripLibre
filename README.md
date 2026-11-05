@@ -20,7 +20,7 @@
 </p>
 
 <p align="center">
-  <a href="https://apps.apple.com/us/app/triplibre-your-trip-diary/id6826907636"><img src="https://img.shields.io/badge/Download_on_the-App_Store-0D96F6?logo=apple&logoColor=white&style=for-the-badge" alt="Download TripLibre on the App Store"></a>
+  <a href="https://apps.apple.com/us/app/triplibre-your-trip-diary/id6826907636"><img src="docs/assets/app-store-badge.png" width="180" alt="Download TripLibre on the App Store"></a>
 </p>
 
 <p align="center">
