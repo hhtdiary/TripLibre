@@ -7,6 +7,8 @@ single summary, so release notes aren't kept anywhere else in the repository.
 
 ## Unreleased
 
+- **TripLibre is on the App Store**: [download it here](https://apps.apple.com/us/app/triplibre-your-trip-diary/id6826907636).
+  The README, website and installation docs now link to it; building from source is still documented
 - **Multilingual: TripLibre now speaks 11 languages**: English, Chinese (Simplified and Traditional), French, German,
   Spanish, Portuguese, Russian, Arabic (right to left), Japanese and Korean. Settings › Language picks one or follows
   the iPhone; dates, units, money and plurals follow it, and the location and motion permission prompts are translated
