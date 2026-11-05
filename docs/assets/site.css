@@ -105,6 +105,10 @@ h1 span { display: inline-block; background: var(--coral); color: var(--cream); 
 .btn:hover { transform: translate(3px, 3px); box-shadow: 2px 2px 0 var(--sh); }
 .btn:active { transform: translate(5px, 5px); box-shadow: 0 0 0 var(--sh); }
 .btn .arr { margin-left: .35em; }
+.store-badge { display: inline-flex; align-items: center; border-radius: 14px; transition: transform .1s; }
+.store-badge img { display: block; height: 58px; width: auto; }
+.store-badge:hover { transform: translateY(-2px); }
+.store-badge:focus-visible { outline: 3px solid var(--ink); outline-offset: 3px; }
 .strip { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; padding: 0; margin: 34px 0 0; }
 .strip li { font: 700 15px var(--f); padding: 5px 14px; border: 3px solid var(--ink); border-radius: 999px; background: var(--mint); color: var(--ink); }
 .strip li:nth-child(2) { background: var(--pink); }
