@@ -10,7 +10,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="assets/site.css?v=5">
+<link rel="stylesheet" href="assets/site.css?v=6">
 <script>try { const t = localStorage.getItem('hht-docs-theme'); if (t) document.documentElement.dataset.theme = t; } catch (e) {}</script>
 <script src="assets/site.js?v=4" defer></script>
 </head>
@@ -22,7 +22,7 @@
     <p class="chip">TripLibre for iOS · by HHT Diary</p>
     <h1 id="page-title">A travel diary that <span>writes itself.</span></h1>
     <p class="lede">TripLibre records where you go, rebuilds each day into visits, trips and travel modes, and keeps all of it on your iPhone. Think of it as a household travel survey that fills itself in, with a sample size of one.</p>
-    <div class="acts"><a class="btn p" href="#install">Install <span class="arr" aria-hidden="true">→</span></a><a class="btn" href="docs/using-the-app.html">Read the user guide</a></div>
+    <div class="acts"><a class="store-badge" href="https://apps.apple.com/us/app/triplibre-your-trip-diary/id6826907636"><img src="assets/app-store-badge.png" width="193" height="65" alt="Download on the App Store"></a><a class="btn" href="#install">Install options</a><a class="btn" href="docs/using-the-app.html">Read the user guide</a></div>
     <ul class="strip"><li>iOS 17+</li><li>Free · Apache 2.0</li><li>No account</li><li>No server</li><li>CSV · JSON · GeoJSON · SQLite</li><li>11 languages</li></ul>
   </div>
   <div class="fan" role="group" aria-label="Screenshots of TripLibre for iOS">
@@ -76,11 +76,11 @@
   <div class="in">
     <p class="chip">Install</p>
     <h2 id="install-title">Get TripLibre on your iPhone.</h2>
-    <p class="lede">TripLibre is not on the App Store yet. Today you build it from source on a Mac and install it on your own phone; the <a class="link" href="docs/installation.html">installation guide</a> walks through every step.</p>
+    <p class="lede">TripLibre is free on the App Store. You can also build it from source on a Mac and install it on your own phone; the <a class="link" href="docs/installation.html">installation guide</a> walks through every step.</p>
     <div class="two">
       <div class="opt sticker a"><p class="k" style="margin:0"><span class="st available">Available</span></p><h3>Build from source</h3><p>Needs a Mac with Xcode, XcodeGen, a free Apple ID and an iPhone on iOS 17 or later. With a free Apple ID the install lasts 7 days and you renew it with one command; your data is kept between installs.</p><pre class="term"><span class="p">$ </span>git clone https://github.com/zyang91/TripLibre.git
 <span class="p">$ </span>cd TripLibre &amp;&amp; make phone</pre></div>
-      <div class="opt sticker b"><p class="k" style="margin:0"><span class="st progress">In progress</span></p><h3>App Store</h3><p>An App Store release of the same personal diary is in progress, so installing will no longer need Xcode. The target is around November 2026, it depends on App Review, and it may move. It adds no research features.</p><p><a href="https://hhtdiary.org/roadmap/">Follow it on the roadmap</a></p></div>
+      <div class="opt sticker b"><p class="k" style="margin:0"><span class="st available">Available</span></p><h3>App Store</h3><p>The same personal diary, free on the App Store for iPhone on iOS 17 or later. No Mac, no Xcode, and no weekly renewal.</p><p><a class="store-badge" href="https://apps.apple.com/us/app/triplibre-your-trip-diary/id6826907636"><img src="assets/app-store-badge.png" width="193" height="65" alt="Download on the App Store"></a></p></div>
       </div>
     <div class="callout sticker"><div class="ic" aria-hidden="true">i</div><p>No phone? <code>make sim</code> builds the app and launches it in the iOS Simulator with three synthetic days of demo data. See <a href="docs/installation.html#try-it-in-the-simulator">Try it in the Simulator</a>.</p></div>
   </div>

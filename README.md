@@ -20,6 +20,10 @@
 </p>
 
 <p align="center">
+  <a href="https://apps.apple.com/us/app/triplibre-your-trip-diary/id6826907636"><img src="docs/assets/app-store-badge.png" width="180" alt="Download TripLibre on the App Store"></a>
+</p>
+
+<p align="center">
   <img src="docs/assets/hht-daily-journey.png" width="820" alt="A miniature Philadelphia unfolds from a phone, with a looping route connecting home, campus, coffee, cycling and the subway.">
 </p>
 
@@ -59,7 +63,7 @@ The original product brief is in [`design/`](design/personal_travel_tracker_clau
 | Self-reported stamps for very short stops | ✅ Available |
 | Stats (mode share, radius of gyration, tours…), flights, life phases, widgets | ✅ Available |
 | Export to CSV, JSON, GeoJSON, SQLite + Python loader | ✅ Available |
-| App Store release (target around November 2026) | 🚧 In progress |
+| [App Store release](https://apps.apple.com/us/app/triplibre-your-trip-diary/id6826907636) | ✅ Available |
 | Selective export (chosen dates, trips, detail level) | 📋 Planned |
 | Prompted recall and study configuration for research | 📋 Planned |
 | Formal accuracy benchmark | 📋 Planned |
@@ -88,9 +92,13 @@ docs/                   website (static HTML, published at triplibre.hhtdiary.or
 project.yml             XcodeGen spec (HHT.xcodeproj is generated from it)
 ```
 
-## Install on your iPhone (personal use, no App Store)
+## Install on your iPhone
 
-TripLibre is not on the App Store yet; you build it from source. Full guide: [Installation](https://triplibre.hhtdiary.org/docs/installation.html).
+**Easiest: [download TripLibre on the App Store](https://apps.apple.com/us/app/triplibre-your-trip-diary/id6826907636).** It is free, needs iOS 17 or later, and is the same app as this repository.
+
+### Build from source
+
+Prefer to build it yourself? Full guide: [Installation](https://triplibre.hhtdiary.org/docs/installation.html).
 
 **Reinstalling / renewing every 7 days → see [INSTALL.md](INSTALL.md)** (`make phone`).
 

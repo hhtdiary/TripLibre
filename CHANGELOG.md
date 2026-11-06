@@ -7,6 +7,8 @@ single summary, so release notes aren't kept anywhere else in the repository.
 
 ## Unreleased
 
+- **TripLibre is on the App Store**: [download it here](https://apps.apple.com/us/app/triplibre-your-trip-diary/id6826907636).
+  The README, website and installation docs now link to it; building from source is still documented
 - Developers: trip construction finds each trip's GPS fixes by binary search over the time-sorted cleaned points instead
   of scanning every point once per trip, so long rebuilds no longer cost O(N × T). Inferred visits and trips are
   unchanged. Developer API › Point order and trip windows documents the sorted-input contract and the internal
