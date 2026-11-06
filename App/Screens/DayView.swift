@@ -668,9 +668,9 @@ struct DayMap: View {
             HStack(spacing: 8) {
                 VStack(alignment: .leading, spacing: 1) {
                     Text(L("Trip %lld: %@", c.order, t.displayModes.map(\.localizedLabel).joined(separator: " + ")))
-                        .font(.toon(12, .heavy)).foregroundStyle(Toon.ink).lineLimit(1)
+                        .font(.toon(12, .heavy)).foregroundStyle(Toon.ink).toonLineLimit(2)
                     Text("\(endpointsText(c)) · \(Fmt.time(t.departure))–\(Fmt.time(t.arrival))")
-                        .font(.toon(11, .semibold)).foregroundStyle(Toon.muted).lineLimit(1).monospacedDigit()
+                        .font(.toon(11, .semibold)).foregroundStyle(Toon.muted).toonLineLimit(2).monospacedDigit()
                 }
                 Spacer(minLength: 0)
                 Button("Details") { onOpenTrip(id) }
