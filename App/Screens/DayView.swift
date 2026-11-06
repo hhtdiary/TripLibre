@@ -34,6 +34,8 @@ struct DayData {
     var items: [DiaryItem] = []
     var visits: [Visit] = []
     var trips: [Trip] = []
+    /// Display-only map geometry per trip id, rebuilt from raw fixes so gaps and GPS jumps show as gaps (issue #100).
+    var tripPieces: [String: [DisplayTrajectory.Piece]] = [:]
     var places: [String: Place] = [:]
     /// Stamps attached to each visit, and the ones no visit on screen accounts for.
     var stampsByVisit: [String: [Stamp]] = [:]
@@ -51,6 +53,10 @@ struct DayData {
         var d = DayData()
         d.visits = (try? store.visits(overlapping: r.start, r.end)) ?? []
         d.trips = (try? store.trips(overlapping: r.start, r.end)) ?? []
+        if let from = d.trips.map(\.departure).min(), let to = d.trips.map(\.arrival).max() {
+            let points = (try? store.points(from: from, to: to)) ?? []
+            for t in d.trips { d.tripPieces[t.id] = DisplayTrajectory.pieces(for: t, points: points) }
+        }
         let ids = Set(d.visits.compactMap(\.placeID) + d.trips.flatMap { [$0.originPlaceID, $0.destinationPlaceID].compactMap { $0 } })
         for id in ids { if let p = try? store.place(id) { d.places[id] = p } }
         let visitIDs = Set(d.visits.map(\.id))
@@ -577,21 +583,17 @@ struct DayMap: View {
     var body: some View {
         Map(position: $position) {
             ForEach(data.trips) { t in
-                if t.segments.count > 1 {
-                    ForEach(t.segments) { s in
-                        if let poly = s.routePolyline {
-                            let coords = Polyline.decode(poly).map(\.cl)
-                            MapPolyline(coordinates: coords)
-                                .stroke(Toon.ink, style: StrokeStyle(lineWidth: 8, lineCap: .round, lineJoin: .round))
-                            MapPolyline(coordinates: coords)
-                                .stroke(s.mode.color, style: ToonMap.style(for: s.mode))
-                        }
+                ForEach(Array((data.tripPieces[t.id] ?? []).enumerated()), id: \.offset) { _, piece in
+                    let coords = piece.coordinates.map(\.cl)
+                    if piece.isConnector {
+                        // not measured: a thin arc in the mode's colour, no ink casing
+                        MapPolyline(coordinates: coords).stroke(piece.mode.color.opacity(0.9), style: ToonMap.connectorStyle)
+                    } else {
+                        MapPolyline(coordinates: coords)
+                            .stroke(Toon.ink, style: StrokeStyle(lineWidth: 8, lineCap: .round, lineJoin: .round))
+                        MapPolyline(coordinates: coords)
+                            .stroke(piece.mode.color, style: ToonMap.style(for: piece.mode))
                     }
-                } else if t.route.count >= 2 {
-                    MapPolyline(coordinates: t.route.map(\.cl))
-                        .stroke(Toon.ink, style: StrokeStyle(lineWidth: 8, lineCap: .round, lineJoin: .round))
-                    MapPolyline(coordinates: t.route.map(\.cl))
-                        .stroke(t.mode.color, style: ToonMap.style(for: t.mode))
                 }
             }
             ForEach(data.unmatchedStamps.filter { $0.coordinate != nil }) { s in
@@ -615,7 +617,7 @@ struct DayMap: View {
     /// Fit everything, but never closer than ~1 km across (a lone visit would otherwise zoom to street level).
     static func camera(for data: DayData) -> MapCameraPosition {
         let coords = data.visits.map { v in (v.placeID.flatMap { data.places[$0] }?.coordinate ?? v.coordinate) }
-            + data.trips.flatMap(\.route) + data.unmatchedStamps.compactMap(\.coordinate)
+            + data.tripPieces.values.flatMap { $0.flatMap(\.coordinates) } + data.unmatchedStamps.compactMap(\.coordinate)
         guard let first = coords.first else { return .automatic }
         var minLat = first.latitude, maxLat = first.latitude, minLon = first.longitude, maxLon = first.longitude
         for c in coords {
@@ -640,6 +642,9 @@ enum ToonMap {
         default: return StrokeStyle(lineWidth: 4.5, lineCap: .round, lineJoin: .round)
         }
     }
+
+    /// The arc across a stretch with no usable GPS: thinner, uncased and dashed, so it never reads as a measured road.
+    static let connectorStyle = StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round, dash: [5, 6])
 }
 
 /// Sticker-style map pin: coloured disc with an icon and an optional name tag underneath.

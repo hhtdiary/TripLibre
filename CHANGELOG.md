@@ -7,6 +7,15 @@ single summary, so release notes aren't kept anywhere else in the repository.
 
 ## Unreleased
 
+- **Cleaner day maps**: the day map no longer draws false straight-line jumps or triangles. Each trip is redrawn from
+  its GPS fixes and the line is broken (leaving a gap) across a silence of more than 10 minutes, a subway or rail
+  tunnel (no fix for 2 minutes while covering more than 300 m), a speed no ground travel reaches, fixes less accurate
+  than 65 m, and single fixes that jump away and back. The thresholds were tuned on six weeks of real days; the usual
+  3–5 minute sampling in cars and buses is not treated as a gap. Each gap is bridged by a thin dashed arc in that
+  stretch's mode colour (for example blue across a subway tunnel), so every trip still visibly joins its origin and
+  destination without pretending a straight route was measured. Flights and trips you entered by hand keep their
+  stored line. This is display only: raw GPS, exports and inferred stops and trips are
+  unchanged (`DisplayTrajectory` in `Geo/DisplayTrajectory.swift`, #100)
 - **TripLibre is on the App Store**: [download it here](https://apps.apple.com/us/app/triplibre-your-trip-diary/id6826907636).
   The README, website and installation docs now link to it; building from source is still documented
 - Developers: trip construction finds each trip's GPS fixes by binary search over the time-sorted cleaned points instead
