@@ -16,6 +16,12 @@ single summary, so release notes aren't kept anywhere else in the repository.
   destination without pretending a straight route was measured. Flights and trips you entered by hand keep their
   stored line. This is display only: raw GPS, exports and inferred stops and trips are
   unchanged (`DisplayTrajectory` in `Geo/DisplayTrajectory.swift`, #100)
+- **Saved places nearby**: when you review a stop, TripLibre lists the places you saved within 150 m (adjustable in
+  Settings › Display), nearest first, so you can tell apart places at nearly the same spot, such as two floors of one
+  building. Pick one, say **None of these**, add a **New place**, or **Skip for now**; nothing is chosen for you, and
+  the search runs on the iPhone only. Places get an optional **Floor / unit** field shown in the list. Exports add
+  `place_status` (`auto`, `confirmed` or `unspecified`) and `place_unit` to `visits.csv` and `unit` to `places.csv`,
+  so the place you confirmed stays separate from the detected stop (schema v7, #95)
 - **TripLibre is on the App Store**: [download it here](https://apps.apple.com/us/app/triplibre-your-trip-diary/id6826907636).
   The README, website and installation docs now link to it; building from source is still documented
 - Developers: trip construction finds each trip's GPS fixes by binary search over the time-sorted cleaned points instead

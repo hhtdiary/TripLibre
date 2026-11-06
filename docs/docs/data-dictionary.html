@@ -133,9 +133,12 @@ If you're sharing a limited export, delete <code>travel.sqlite</code> first. Sel
 
 <h2>Other CSV files</h2>
 <h3>visits.csv</h3>
-<p><code>visit_id, place_id, place_name, place_category, place_category_custom, arrival_ts, arrival_utc, departure_ts,
-departure_utc, tz, duration_min, lat, lon, purpose, auto_confidence, source, user_status, point_count, notes</code>.
-<code>lat</code>/<code>lon</code> is the observed centroid of the stay; <code>point_count</code> the number of fixes in it.</p>
+<p><code>visit_id, place_id, place_name, place_category, place_category_custom, place_unit, place_status, arrival_ts, arrival_utc,
+departure_ts, departure_utc, tz, duration_min, lat, lon, purpose, auto_confidence, source, user_status, point_count, notes</code>.
+<code>lat</code>/<code>lon</code> is the observed centroid of the stay; <code>point_count</code> the number of fixes in it.
+<code>place_status</code> says how the place was decided, separately from the detected stop: <code>auto</code> (matched by
+location alone), <code>confirmed</code> (chosen or confirmed by the user) or <code>unspecified</code> (the user said it is
+none of their saved places). <code>place_unit</code> is the place's floor / unit, if the user gave one.</p>
 
 <h3>trip_segments.csv</h3>
 <p><code>segment_id, trip_id, seq, start_ts, start_utc, end_ts, end_utc, mode, mode_auto, mode_confidence, mode_user,
@@ -143,10 +146,10 @@ distance_m, route_polyline</code>. <code>seq</code> starts at 0. Segments of a t
 A segment with <code>mode_user</code> set and no <code>mode_auto</code> was drawn by hand.</p>
 
 <h3>places.csv</h3>
-<p><code>place_id, name, category, category_custom, code, lat, lon, radius_m, address, city, region, country, favorite,
+<p><code>place_id, name, category, category_custom, code, unit, lat, lon, radius_m, address, city, region, country, favorite,
 source, merged_into, notes, created_ts, created_utc, visit_count, first_visit_ts, first_visit_utc, last_visit_ts,
 last_visit_utc</code>. Address fields are filled only if the user turned on address lookup. <code>code</code> is an
-IATA or station code.</p>
+IATA or station code; <code>unit</code> the floor, unit or suite the user typed.</p>
 
 <h3>stamps.csv</h3>
 <p><code>stamp_id, ts, time_utc, tz, lat, lon, uncertainty_m, fix_accuracy_m, fix_age_s, visit_id, note</code>.
@@ -242,7 +245,7 @@ run that the CSV and SQLite versions of one export agree. More helpers are on th
     and written to <code>data.json</code> and <code>README.txt</code> in every export.</li>
   <li>Migrations only ever add (<code>Schema.swift</code>). Columns and codes are not renamed or removed, so code written
     for an older export keeps working.</li>
-  <li>History: v1 initial schema · v2 places can be deleted · v3 stamps · v4 more place categories · v5 custom place types · v6 costs.</li>
+  <li>History: v1 initial schema · v2 places can be deleted · v3 stamps · v4 more place categories · v5 custom place types · v6 costs · v7 visit place status and place floor / unit (saved places nearby).</li>
   <li>A formal, machine-readable schema file for exports is <span class="status planned">Planned</span>.</li>
 </ul>
 

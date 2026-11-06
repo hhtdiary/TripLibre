@@ -319,6 +319,14 @@ public enum UserStatus: String, Codable, Sendable {
     public var isLocked: Bool { self != .auto }
 }
 
+/// How a visit's place was decided (issue #95). The detected stop (centroid, times) is kept either way: this only
+/// says whether the place identity attached to it came from proximity or from the user.
+public enum PlaceStatus: String, Codable, Sendable {
+    case auto          // matched (or created) by inference from location alone
+    case confirmed     // the user chose, created or confirmed the place
+    case unspecified   // the user said it is none of their saved places, or left it unspecified
+}
+
 /// What money was spent on (issue #17). Raw values are the canonical codes written to the database and exports;
 /// never rename a shipped one, only append new cases.
 public enum ExpenseCategory: String, CaseIterable, Codable, Identifiable, Sendable {

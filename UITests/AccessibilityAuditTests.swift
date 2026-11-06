@@ -32,6 +32,21 @@ final class AccessibilityAuditTests: HHTUITestCase {
         try audit("Visit detail")
     }
 
+    /// Visit detail with "Is this one of your places?" listing the two demo places in one building (issue #95).
+    func testVisitDetailSavedPlacesNearby() throws {
+        showYesterday()
+        let row = visitRows.matching(NSPredicate(format: "label CONTAINS 'Dr. Lee' OR label CONTAINS 'Co-working'")).firstMatch
+        reveal(row)
+        row.tap()
+        waitForNavigationTitle("Visit")
+        let none = app.buttons["None of these"]
+        XCTAssertTrue(none.waitForExistence(timeout: 5), "saved places nearby list")
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS 'Suite 400'")).firstMatch.exists)
+        XCTAssertTrue(app.buttons.matching(NSPredicate(format: "label CONTAINS 'Floor 5'")).firstMatch.exists)
+        reveal(none)
+        try audit("Visit detail")
+    }
+
     func testSpending() throws {
         // Skipped for now: on CI (iOS 26.5) the Spending audit reports two contrast failures on SwiftUI-made nodes
         // it can't name, plus Dynamic Type findings on the section labels, which we couldn't place (#67). The rest
@@ -193,8 +208,9 @@ enum KnownIssue: String {
     /// and aren't exposed as elements. They're informational; the same places are named in the rows below the map.
     case mapKitMarkers
     /// Reported as clipped, but rendered in full (checked by screenshot on iPhone 17, iOS 27): the Stamp pill on Today,
-    /// the origin/destination labels under the Trip detail map and Visit detail's "Name this place". Matched by exact
-    /// text so other clipping still fails.
+    /// the origin/destination labels under the Trip detail map and Visit detail's "Name this place" / "Edit “…” (all
+    /// visits)" (the same row once the place is named; checked at the largest accessibility size too). Matched by text
+    /// so other clipping still fails.
     case textClippedFalsePositive
 
     /// The system "Done" button in a sheet's navigation bar (Liquid Glass): it stops growing at the system's bar-button
@@ -262,7 +278,7 @@ enum KnownIssue: String {
         }
         if issue.auditType == .textClipped,
            label == "Stamp this moment" || (screen == "Trip detail" && label.hasPrefix("Place "))
-            || (screen == "Visit detail" && label == "Name this place") {
+            || (screen == "Visit detail" && (label == "Name this place" || (label.hasPrefix("Edit “") && label.hasSuffix("” (all visits)")))) {
             return .textClippedFalsePositive
         }
         if let e = issue.element, e.elementType == .button, e.frame.maxY < 140,
