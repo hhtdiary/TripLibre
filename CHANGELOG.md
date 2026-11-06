@@ -11,6 +11,15 @@ single summary, so release notes aren't kept anywhere else in the repository.
   symbols, hills and a winding road. The white border of the original artwork is removed; see `docs/branding.md`. Earlier
   logos are kept on a new Logo & brand page in the docs.
 
+- **Schematic day map**: the Today map no longer draws GPS trails. Each trip is a smooth curve from where it started to
+  where it ended, styled by mode: walking dotted, cycling short dashes, car solid, bus long dashes, rail solid, ferry
+  dash-dot, flights a long-dashed wide arc and unknown modes grey dashes, in the same mode colours as the diary. A trip
+  back the other way bows to the other side, repeat trips fan out, round trips are small loops and multimodal trips change
+  colour part-way. Numbered markers give the order of the day; tap one to see that trip's mode, places and times, and
+  **Details** for the trip itself, whose recorded route is still shown there. A note on the map says the lines join
+  stops and are not the routes taken. Everything is drawn on the iPhone from the trips and places already inferred, with
+  no routing service or downloads; raw GPS, distances, inference and exports are unchanged (`SchematicTrips` in
+  `Geo/SchematicTrips.swift`, #109)
 - **Cleaner day maps**: the day map no longer draws false straight-line jumps or triangles. Each trip is redrawn from
   its GPS fixes and the line is broken (leaving a gap) across a silence of more than 10 minutes, a subway or rail
   tunnel (no fix for 2 minutes while covering more than 300 m), a speed no ground travel reaches, fixes less accurate

@@ -34,9 +34,11 @@ struct DayData {
     var items: [DiaryItem] = []
     var visits: [Visit] = []
     var trips: [Trip] = []
-    /// Display-only map geometry per trip id, rebuilt from raw fixes so gaps and GPS jumps show as gaps (issue #100).
-    var tripPieces: [String: [DisplayTrajectory.Piece]] = [:]
+    /// The day map's trip lines: schematic origin→destination curves, never raw GPS (issue #109).
+    var connections: [SchematicTrips.Connection] = []
     var places: [String: Place] = [:]
+    /// The day's visits plus trip ends that fall on another day, by id (for trip endpoints).
+    var visitsByID: [String: Visit] = [:]
     /// Stamps attached to each visit, and the ones no visit on screen accounts for.
     var stampsByVisit: [String: [Stamp]] = [:]
     var unmatchedStamps: [Stamp] = []
@@ -53,12 +55,15 @@ struct DayData {
         var d = DayData()
         d.visits = (try? store.visits(overlapping: r.start, r.end)) ?? []
         d.trips = (try? store.trips(overlapping: r.start, r.end)) ?? []
-        if let from = d.trips.map(\.departure).min(), let to = d.trips.map(\.arrival).max() {
-            let points = (try? store.points(from: from, to: to)) ?? []
-            for t in d.trips { d.tripPieces[t.id] = DisplayTrajectory.pieces(for: t, points: points) }
+        for v in d.visits { d.visitsByID[v.id] = v }
+        // a trip across midnight starts or ends at a stop on the neighbouring day
+        for id in Set(d.trips.flatMap { [$0.originVisitID, $0.destinationVisitID].compactMap { $0 } }) where d.visitsByID[id] == nil {
+            if let v = try? store.visit(id) { d.visitsByID[id] = v }
         }
-        let ids = Set(d.visits.compactMap(\.placeID) + d.trips.flatMap { [$0.originPlaceID, $0.destinationPlaceID].compactMap { $0 } })
+        let ids = Set(d.visitsByID.values.compactMap(\.placeID) + d.trips.flatMap { [$0.originPlaceID, $0.destinationPlaceID].compactMap { $0 } })
         for id in ids { if let p = try? store.place(id) { d.places[id] = p } }
+        d.connections = SchematicTrips.layout(d.trips.sorted { $0.departure < $1.departure }
+            .map { SchematicTrips.leg(for: $0, visits: d.visitsByID, places: d.places) })
         let visitIDs = Set(d.visits.map(\.id))
         for s in (try? store.stamps(from: r.start, to: r.end)) ?? [] {
             if let id = s.visitID, visitIDs.contains(id) { d.stampsByVisit[id, default: []].append(s) } else { d.unmatchedStamps.append(s) }
@@ -126,7 +131,7 @@ struct DayView: View {
                         .background(NavigationLink { ReviewView() } label: { EmptyView() }.opacity(0))
                         .toonRow()
                 }
-                DayMap(data: data)
+                DayMap(data: data) { selectedTrip = IDBox(id: $0) }
                     .frame(height: 230)
                     .clipShape(RoundedRectangle(cornerRadius: 22, style: .continuous))
                     .toonCard(radius: 22, shadow: 5)
@@ -580,22 +585,33 @@ struct StampRow: View {
 
 struct DayMap: View {
     let data: DayData
+    /// Opens a trip's details (where its recorded route is shown).
+    var onOpenTrip: (String) -> Void = { _ in }
     @State private var position: MapCameraPosition = .automatic
+    @State private var selected: String?
+
+    /// Above this many trips the markers drop their mode glyph; above `markerLimit` only the selected one is shown.
+    private static let glyphLimit = 8
+    private static let markerLimit = 20
 
     var body: some View {
         Map(position: $position) {
-            ForEach(data.trips) { t in
-                ForEach(Array((data.tripPieces[t.id] ?? []).enumerated()), id: \.offset) { _, piece in
-                    let coords = piece.coordinates.map(\.cl)
-                    if piece.isConnector {
-                        // not measured: a thin arc in the mode's colour, no ink casing
-                        MapPolyline(coordinates: coords).stroke(piece.mode.color.opacity(0.9), style: ToonMap.connectorStyle)
-                    } else {
-                        MapPolyline(coordinates: coords)
-                            .stroke(Toon.ink, style: StrokeStyle(lineWidth: 8, lineCap: .round, lineJoin: .round))
-                        MapPolyline(coordinates: coords)
-                            .stroke(piece.mode.color, style: ToonMap.style(for: piece.mode))
-                    }
+            ForEach(data.connections) { c in
+                let dim = selected != nil && selected != c.id
+                ForEach(Array(c.spans.enumerated()), id: \.offset) { _, span in
+                    let style = SchematicStyle.of(span.kind)
+                    let coords = span.coordinates.map(\.cl)
+                    let width: CGFloat = selected == c.id ? 5.5 : 4
+                    // an ink casing with the same dash pattern keeps light colours legible on the muted map
+                    MapPolyline(coordinates: coords)
+                        .stroke(Toon.ink.opacity(dim ? 0.15 : 0.85), style: style.stroke(width: width + 3))
+                    MapPolyline(coordinates: coords)
+                        .stroke(style.color.opacity(dim ? 0.3 : 1), style: style.stroke(width: width))
+                }
+            }
+            ForEach(data.connections.filter { data.connections.count <= Self.markerLimit || $0.id == selected }) { c in
+                Annotation("", coordinate: c.marker.cl, anchor: .center) {
+                    marker(c)
                 }
             }
             ForEach(data.unmatchedStamps.filter { $0.coordinate != nil }) { s in
@@ -612,14 +628,80 @@ struct DayMap: View {
             }
         }
         .mapStyle(.standard(emphasis: .muted, pointsOfInterest: .excludingAll))
+        .overlay(alignment: .top) { caption.padding(8) } // the bottom edge holds the Maps logo and Legal link
         .onAppear { position = Self.camera(for: data) }
-        .onChange(of: data.items.map(\.id)) { _, _ in position = Self.camera(for: data) }
+        .onChange(of: data.items.map(\.id)) { _, _ in
+            position = Self.camera(for: data)
+            if let s = selected, !data.connections.contains(where: { $0.id == s }) { selected = nil }
+        }
+    }
+
+    private func marker(_ c: SchematicTrips.Connection) -> some View {
+        let isSelected = selected == c.id
+        let style = SchematicStyle.of(SchematicTrips.kind(of: c.mainMode))
+        return Button {
+            withAnimation(.snappy) { selected = isSelected ? nil : c.id }
+        } label: {
+            HStack(spacing: 2) {
+                if data.connections.count <= Self.glyphLimit || isSelected {
+                    Image(systemName: c.mainMode.symbol).accessibilityHidden(true) // the button's label names the mode
+                        .font(.system(size: 9, weight: .bold)) // a11y-check:disable fixed-font-size (sized to the map marker)
+                }
+                Text(c.order.formatted()).font(.system(size: 10, weight: .heavy)).monospacedDigit() // a11y-check:disable fixed-font-size (sized to the map marker)
+            }
+            .foregroundStyle(Toon.ink)
+            .padding(.horizontal, 5).frame(minWidth: 20, minHeight: 20)
+            .background(Capsule().fill(isSelected ? Toon.paper : style.color))
+            .overlay(Capsule().strokeBorder(Toon.ink, lineWidth: isSelected ? 2.5 : 1.5))
+            .scaleEffect(isSelected ? 1.25 : 1)
+            .opacity(selected == nil || isSelected ? 1 : 0.55)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(L("Trip %lld: %@", c.order, c.mainMode.localizedLabel))
+        .accessibilityValue(endpointsText(c))
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    @ViewBuilder private var caption: some View {
+        if let id = selected, let c = data.connections.first(where: { $0.id == id }),
+           let t = data.trips.first(where: { $0.id == id }) {
+            HStack(spacing: 8) {
+                VStack(alignment: .leading, spacing: 1) {
+                    Text(L("Trip %lld: %@", c.order, t.displayModes.map(\.localizedLabel).joined(separator: " + ")))
+                        .font(.toon(12, .heavy)).foregroundStyle(Toon.ink).lineLimit(1)
+                    Text("\(endpointsText(c)) · \(Fmt.time(t.departure))–\(Fmt.time(t.arrival))")
+                        .font(.toon(11, .semibold)).foregroundStyle(Toon.muted).lineLimit(1).monospacedDigit()
+                }
+                Spacer(minLength: 0)
+                Button("Details") { onOpenTrip(id) }
+                    .buttonStyle(ToonButtonStyle(fill: Toon.accent, height: 28, fontSize: 11, shadow: 2))
+            }
+            .padding(.horizontal, 10).padding(.vertical, 6)
+            .background(RoundedRectangle(cornerRadius: 14, style: .continuous).fill(Toon.paper))
+            .overlay(RoundedRectangle(cornerRadius: 14, style: .continuous).strokeBorder(Toon.ink, lineWidth: 2))
+        } else if !data.connections.isEmpty {
+            Text("Lines join stops; they are not the routes taken")
+                .font(.toon(10, .bold)).foregroundStyle(Toon.muted)
+                .padding(.horizontal, 8).padding(.vertical, 3)
+                .background(Capsule().fill(Toon.paper.opacity(0.9)))
+                .frame(maxWidth: .infinity, alignment: .leading)
+                .allowsHitTesting(false)
+        }
+    }
+
+    private func endpointsText(_ c: SchematicTrips.Connection) -> String {
+        guard let t = data.trips.first(where: { $0.id == c.id }) else { return "" }
+        func name(_ visitID: String?, _ placeID: String?) -> String {
+            let p = (visitID.flatMap { data.visitsByID[$0] }?.placeID ?? placeID).flatMap { data.places[$0] }
+            return p.flatMap { $0.isNamed ? $0.displayName : nil } ?? p?.address ?? L("Unnamed place")
+        }
+        return L("%@ → %@", name(t.originVisitID, t.originPlaceID), name(t.destinationVisitID, t.destinationPlaceID))
     }
 
     /// Fit everything, but never closer than ~1 km across (a lone visit would otherwise zoom to street level).
     static func camera(for data: DayData) -> MapCameraPosition {
         let coords = data.visits.map { v in (v.placeID.flatMap { data.places[$0] }?.coordinate ?? v.coordinate) }
-            + data.tripPieces.values.flatMap { $0.flatMap(\.coordinates) } + data.unmatchedStamps.compactMap(\.coordinate)
+            + data.connections.flatMap(\.path) + data.unmatchedStamps.compactMap(\.coordinate)
         guard let first = coords.first else { return .automatic }
         var minLat = first.latitude, maxLat = first.latitude, minLon = first.longitude, maxLon = first.longitude
         for c in coords {
@@ -635,18 +717,30 @@ struct DayMap: View {
 
 // MARK: - Cartoon map pieces
 
-enum ToonMap {
-    /// Walking is drawn dotted, rail/transit dashed, everything else solid — on top of an ink casing.
-    static func style(for mode: TravelMode) -> StrokeStyle {
-        switch mode.group {
-        case .active: return StrokeStyle(lineWidth: 4.5, lineCap: .round, lineJoin: .round, dash: [1, 7])
-        case .transit, .longDistance: return StrokeStyle(lineWidth: 4.5, lineCap: .round, lineJoin: .round, dash: [9, 5])
-        default: return StrokeStyle(lineWidth: 4.5, lineCap: .round, lineJoin: .round)
-        }
+/// How each kind of schematic trip connection looks (issue #109): one place to tune it. Colours follow the diary's mode
+/// colours so a trip looks the same on the map and in the list; the dash pattern tells modes apart at a glance.
+struct SchematicStyle {
+    let color: Color
+    let dash: [CGFloat]
+
+    /// The dash pattern is fixed, not scaled by `width`, so the wider ink casing stays in step with the colour on top.
+    func stroke(width: CGFloat) -> StrokeStyle {
+        StrokeStyle(lineWidth: width, lineCap: dash.isEmpty || dash[0] < 1 ? .round : .butt, // a dash under 1 pt with round caps is a dot
+                     lineJoin: .round, dash: dash)
     }
 
-    /// The arc across a stretch with no usable GPS: thinner, uncased and dashed, so it never reads as a measured road.
-    static let connectorStyle = StrokeStyle(lineWidth: 3, lineCap: .round, lineJoin: .round, dash: [5, 6])
+    static func of(_ kind: SchematicTrips.Kind) -> SchematicStyle {
+        switch kind {
+        case .walking: return SchematicStyle(color: TravelMode.walk.color, dash: [0.1, 9])      // dotted
+        case .cycling: return SchematicStyle(color: TravelMode.bicycle.color, dash: [7, 5])    // short dashes
+        case .driving: return SchematicStyle(color: TravelMode.car.color, dash: [])            // solid
+        case .bus: return SchematicStyle(color: TravelMode.bus.color, dash: [16, 6])           // long dashes
+        case .rail: return SchematicStyle(color: TravelMode.subway.color, dash: [])            // solid
+        case .ferry: return SchematicStyle(color: TravelMode.ferry.color, dash: [12, 5, 3, 5]) // dash-dot
+        case .flight: return SchematicStyle(color: TravelMode.airplane.color, dash: [20, 8])   // long-dashed arc
+        case .other: return SchematicStyle(color: TravelMode.unknown.color, dash: [8, 6])      // neutral dashes
+        }
+    }
 }
 
 /// Sticker-style map pin: coloured disc with an icon and an optional name tag underneath.
