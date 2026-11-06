@@ -51,7 +51,8 @@ struct TimeWindowTests {
     }
 
     @Test func sparseData() {
-        let pts = [0.0, 3600, 7200 * 3].map { pt($0) }
+        let sparse: [Double] = [0, 3600, 7200 * 3]
+        let pts = sparse.map { pt($0) }
         #expect(Array(pts.strictlyBetween(at(1), at(7200 * 3))) == [pt(3600)])
         #expect(Array(pts.strictlyBetween(at(3600), at(7200 * 3 + 1))) == [pt(7200 * 3)])
     }
@@ -141,7 +142,7 @@ struct TimeWindowTests {
         path.insert(RawPoint(timestamp: dep, coordinate: a.coordinate, source: "anchor"), at: 0)
         path.append(RawPoint(timestamp: arr, coordinate: b.coordinate, source: "anchor"))
         // buildTrip only depends on the path, so rebuilding from exactly these points must give the same trip
-        let only = path.dropFirst().dropLast().map { $0 }
+        let only = Array(path.dropFirst().dropLast())
         #expect(only == Array(points.strictlyBetween(dep, arr)))
         return try engine.buildTrip(from: a, to: b, points: only, motion: motion)
     }
