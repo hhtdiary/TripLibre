@@ -9,7 +9,7 @@ const DOI = 'https://doi.org/10.5281/zenodo.23307589';
 
 const BRAND = {
   name: 'TripLibre',
-  logo: 'assets/triplibre-logo.png',
+  logo: 'assets/triplibre-logo.png?v=3',
   home: '',
   byline: true,
   blurb: 'A free, open-source, local-first travel diary for iPhone. A product of HHT Diary.',

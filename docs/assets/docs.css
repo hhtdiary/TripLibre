@@ -709,3 +709,11 @@ td code { white-space: nowrap; }
 }
 /* stickers keep ink text in both themes (.dx-content li sets the page ink colour) */
 .dx-content .metro li, .dx-content .conveyor li, .dx-content .route li { color: var(--t-ink); }
+
+/* Logo & brand page */
+.logo-current { margin: 8px 0 20px; }
+.logo-current img { display: block; width: 200px; height: auto; border-radius: 44px; }
+.logo-current figcaption, .logo-archive figcaption { margin-top: 10px; font-size: 12.5px; color: var(--ink-faint); line-height: 1.5; }
+.logo-archive { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 20px; margin: 18px 0 16px; }
+.logo-archive figure { margin: 0; }
+.logo-archive img { display: block; width: 140px; height: auto; border-radius: 31px; }

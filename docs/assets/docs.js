@@ -31,6 +31,7 @@ const NAV = [
   ] },
   { group: 'About', items: [
     { href: D + 'developer.html', title: 'Meet the developer' },
+    { href: D + 'brand.html', title: 'Logo & brand' },
   ] },
   { group: 'TripLibre', items: [
     { href: '', title: 'Product overview', ext: true },
@@ -72,7 +73,7 @@ function buildHeader() {
   h.className = 'dx-header';
   h.innerHTML = `
     <button class="icon-btn menu-btn" aria-label="Open navigation">${ICONS.menu}</button>
-    <a class="dx-brand" href="${url(D)}"><img src="${url('assets/triplibre-logo.png')}" alt="">TripLibre <span class="tag">docs</span></a>
+    <a class="dx-brand" href="${url(D)}"><img src="${url('assets/triplibre-logo.png?v=3')}" alt="">TripLibre <span class="tag">docs</span></a>
     <span class="dx-by hide-sm">by <a href="${ORG}">HHT Diary</a></span>
     <nav>
       <a class="hide-sm" href="${url('')}">Overview</a>
