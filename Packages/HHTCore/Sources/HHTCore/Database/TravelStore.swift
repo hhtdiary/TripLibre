@@ -110,14 +110,14 @@ public final class TravelStore: @unchecked Sendable {
     public func upsertPlace(_ p: Place) throws {
         try db.run("""
             INSERT INTO places(id, name, lat, lon, radius_m, address, city, region, country, category, category_custom, code,
-                favorite, notes, source, merged_into, deleted, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+                unit, favorite, notes, source, merged_into, deleted, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
             ON CONFLICT(id) DO UPDATE SET name=excluded.name, lat=excluded.lat, lon=excluded.lon,
                 radius_m=excluded.radius_m, address=excluded.address, city=excluded.city, region=excluded.region,
-                country=excluded.country, category=excluded.category, category_custom=excluded.category_custom, code=excluded.code, favorite=excluded.favorite,
+                country=excluded.country, category=excluded.category, category_custom=excluded.category_custom, code=excluded.code, unit=excluded.unit, favorite=excluded.favorite,
                 notes=excluded.notes, source=excluded.source, merged_into=excluded.merged_into,
                 deleted=excluded.deleted, updated_at=excluded.updated_at
             """, p.id, p.name, p.coordinate.latitude, p.coordinate.longitude, p.radius, p.address, p.city, p.region,
-            p.country, p.category?.rawValue, p.category == .other ? Place.cleanCustom(p.customCategory) : nil, p.code, p.favorite, p.notes, p.source.rawValue, p.mergedInto,
+            p.country, p.category?.rawValue, p.category == .other ? Place.cleanCustom(p.customCategory) : nil, p.code, Place.cleanCustom(p.unit), p.favorite, p.notes, p.source.rawValue, p.mergedInto,
             p.deleted, p.createdAt, p.updatedAt)
     }
 
@@ -169,11 +169,28 @@ public final class TravelStore: @unchecked Sendable {
             .sorted { Geo.distance($0.coordinate, c) < Geo.distance($1.coordinate, c) }
     }
 
+    /// Saved places the user may recognise for a stop at `c` (issue #95): only places they marked themselves, within
+    /// `radius` m, nearest first. Read from the local database only; nothing is assigned.
+    public func recallCandidates(near c: Coordinate, radius: Double = PlaceRecall.defaultRadius,
+                                 limit: Int = PlaceRecall.defaultLimit) throws -> [PlaceRecall.Candidate] {
+        let r = max(0, radius)
+        let dLat = r / 111_320 + 0.001, dLon = dLat / max(0.1, cos(c.latitude * .pi / 180))
+        let nearby = try db.query("""
+            SELECT * FROM places WHERE merged_into IS NULL AND deleted = 0 AND lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?
+            """, c.latitude - dLat, c.latitude + dLat, c.longitude - dLon, c.longitude + dLon).map(Self.place)
+        guard !nearby.isEmpty else { return [] }
+        let confirmed = Set(try db.query("""
+            SELECT DISTINCT place_id FROM visits WHERE deleted = 0 AND place_status = 'confirmed' AND place_id IS NOT NULL
+            """).compactMap { $0.string("place_id") })
+        return PlaceRecall.candidates(near: c, places: nearby, stats: try placeStats(), confirmedPlaceIDs: confirmed,
+                                      radius: r, limit: limit)
+    }
+
     /// Remove inferred, unnamed, uncategorised places that no longer have any visit.
     public func pruneOrphanPlaces() throws {
         try db.run("""
             DELETE FROM places WHERE source = 'inferred' AND name IS NULL AND category IS NULL AND merged_into IS NULL
-              AND notes IS NULL AND favorite = 0
+              AND notes IS NULL AND unit IS NULL AND favorite = 0
               AND id NOT IN (SELECT place_id FROM visits WHERE place_id IS NOT NULL)
               AND id NOT IN (SELECT merged_into FROM places WHERE merged_into IS NOT NULL)
             """)
@@ -184,7 +201,7 @@ public final class TravelStore: @unchecked Sendable {
               coordinate: Coordinate(r.double("lat") ?? 0, r.double("lon") ?? 0), radius: r.double("radius_m") ?? 100,
               address: r.string("address"), city: r.string("city"), region: r.string("region"), country: r.string("country"),
               category: r.string("category").flatMap(PlaceCategory.init(rawValue:)), customCategory: r.string("category_custom"),
-              code: r.string("code"),
+              code: r.string("code"), unit: r.string("unit"),
               favorite: r.bool("favorite"), notes: r.string("notes"),
               source: RecordSource(rawValue: r.string("source") ?? "") ?? .inferred, mergedInto: r.string("merged_into"),
               deleted: r.bool("deleted"), createdAt: r.date("created_at") ?? Date(), updatedAt: r.date("updated_at") ?? Date())
@@ -217,14 +234,14 @@ public final class TravelStore: @unchecked Sendable {
 
     public func upsertVisit(_ v: Visit) throws {
         try db.run("""
-            INSERT INTO visits(id, place_id, arrival_ts, departure_ts, lat, lon, purpose, auto_confidence, source,
-                user_status, deleted, tz, point_count, notes, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
-            ON CONFLICT(id) DO UPDATE SET place_id=excluded.place_id, arrival_ts=excluded.arrival_ts,
+            INSERT INTO visits(id, place_id, place_status, arrival_ts, departure_ts, lat, lon, purpose, auto_confidence, source,
+                user_status, deleted, tz, point_count, notes, created_at, updated_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)
+            ON CONFLICT(id) DO UPDATE SET place_id=excluded.place_id, place_status=excluded.place_status, arrival_ts=excluded.arrival_ts,
                 departure_ts=excluded.departure_ts, lat=excluded.lat, lon=excluded.lon, purpose=excluded.purpose,
                 auto_confidence=excluded.auto_confidence, source=excluded.source, user_status=excluded.user_status,
                 deleted=excluded.deleted, tz=excluded.tz, point_count=excluded.point_count, notes=excluded.notes,
                 updated_at=excluded.updated_at
-            """, v.id, v.placeID, v.arrival, v.departure, v.coordinate.latitude, v.coordinate.longitude,
+            """, v.id, v.placeID, v.placeStatus.rawValue, v.arrival, v.departure, v.coordinate.latitude, v.coordinate.longitude,
             v.purpose?.rawValue, v.autoConfidence, v.source.rawValue, v.userStatus.rawValue, v.deleted, v.timeZone,
             v.pointCount, v.notes, v.createdAt, v.updatedAt)
     }
@@ -255,7 +272,8 @@ public final class TravelStore: @unchecked Sendable {
     }
 
     static func visit(_ r: Row) -> Visit {
-        Visit(id: r.string("id") ?? "", placeID: r.string("place_id"), arrival: r.date("arrival_ts") ?? Date(),
+        Visit(id: r.string("id") ?? "", placeID: r.string("place_id"),
+              placeStatus: PlaceStatus(rawValue: r.string("place_status") ?? "") ?? .auto, arrival: r.date("arrival_ts") ?? Date(),
               departure: r.date("departure_ts"), coordinate: Coordinate(r.double("lat") ?? 0, r.double("lon") ?? 0),
               purpose: r.string("purpose").flatMap(TripPurpose.init(rawValue:)), autoConfidence: r.double("auto_confidence"),
               source: RecordSource(rawValue: r.string("source") ?? "") ?? .inferred,

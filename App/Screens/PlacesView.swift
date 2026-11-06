@@ -164,7 +164,7 @@ struct PlaceTile: View {
             Text(L("%lld visits", stats?.visitCount ?? 0) + " · " + Fmt.hours(stats?.totalDwell ?? 0)
                  + (stats?.lastVisit.map { "\n" + L("last %@", Fmt.shortDay($0)) } ?? ""))
                 .font(.toon(12, .bold)).foregroundStyle(Toon.muted)
-                .lineLimit(2).fixedSize(horizontal: false, vertical: true)
+                .toonLineLimit(2).fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
         }
         .frame(maxWidth: .infinity, minHeight: 130, alignment: .topLeading)
@@ -244,6 +244,10 @@ struct PlaceDetailView: View {
                         TextField("Code", text: Binding(get: { draft?.code ?? "" }, set: { draft?.code = $0.isEmpty ? nil : $0.uppercased() }),
                                   prompt: Text("IATA, station…"))
                             .capsKeyboard()
+                    }
+                    LabeledContent("Floor / unit") {
+                        TextField("Floor / unit", text: Binding(get: { draft?.unit ?? "" }, set: { draft?.unit = $0.isEmpty ? nil : $0 }),
+                                  prompt: Text("e.g. Floor 2, Suite 400"))
                     }
                     HStack {
                         Text("Radius")

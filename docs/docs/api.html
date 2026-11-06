@@ -60,6 +60,7 @@ let folder  = try Exporter(store: store).exportBundle(to: outputDirectory)</code
     <div class="sig"><code>func insertPoints(_ ps: [RawPoint]) throws</code><span>Append raw GPS fixes. Also <code>insertPoint</code>, <code>points(from:to:)</code>, <code>lastPoint()</code>.</span></div>
     <div class="sig"><code>func insertMotion(_ samples: [MotionSample]) throws</code><span>Append CoreMotion episodes; read back with <code>motion(from:to:)</code>.</span></div>
     <div class="sig"><code>func places() throws -&gt; [Place]</code><span>Also <code>place(_:)</code>, <code>upsertPlace</code>, <code>matchPlace(_:slack:)</code>, <code>placesNear(_:within:)</code>, <code>placeStats()</code>.</span></div>
+    <div class="sig"><code>func recallCandidates(near: Coordinate, radius: Double = 150, limit: Int = 8) throws -&gt; [PlaceRecall.Candidate]</code><span>The user's own saved places near a stop, nearest first (near-ties: more visited, then more recent). Only places the user marked (<code>PlaceRecall.isUserMarked</code>); reads the local database only and assigns nothing.</span></div>
     <div class="sig"><code>func visits(overlapping: Date, _: Date, includeDeleted: Bool = false) throws -&gt; [Visit]</code><span>Also <code>visit(_:)</code>, <code>visits(atPlace:)</code>, <code>allVisits()</code>, <code>latestVisit()</code>.</span></div>
     <div class="sig"><code>func trips(overlapping: Date, _: Date, includeDeleted: Bool = false, withSegments: Bool = true) throws -&gt; [Trip]</code><span>Also <code>trip(_:)</code>, <code>segments(tripID:)</code>, <code>allTrips()</code>.</span></div>
     <div class="sig"><code>func flights() / lifePhases() throws</code><span>With matching <code>upsert…</code> and <code>delete…</code>.</span></div>
@@ -138,9 +139,10 @@ do not check it.</p>
     <code>edited</code> / <code>confirmed</code> / <code>manual</code> so inference won't overwrite it. Throws <code>EditError</code> on invalid input.</p>
     <div class="sig"><code>setTripMode(_ tripID:, _ mode: TravelMode?)</code><span><code>nil</code> resets to automatic. Also <code>setSegmentMode</code>.</span></div>
     <div class="sig"><code>setTripPurpose / setVisitPurpose(_ id:, _ purpose: TripPurpose?)</code></div>
-    <div class="sig"><code>confirm(tripID:) / confirm(visitID:)</code><span>"Looks right."</span></div>
+    <div class="sig"><code>confirm(tripID:) / confirm(visitID:)</code><span>"Looks right." Also marks the visit's place <code>confirmed</code>.</span></div>
     <div class="sig"><code>setNotes(tripID:, _:) / setNotes(visitID:, _:)</code></div>
-    <div class="sig"><code>setVisitPlace(_ visitID:, placeID:)</code><span>Reassign a stop to another place.</span></div>
+    <div class="sig"><code>setVisitPlace(_ visitID:, placeID:)</code><span>Reassign a stop to another place; sets <code>placeStatus = .confirmed</code>. The stop's coordinate and times are unchanged.</span></div>
+    <div class="sig"><code>setVisitPlaceUnspecified(_ visitID:)</code><span>"None of these": <code>placeStatus = .unspecified</code>; a stop linked to a saved place moves to a new unnamed place at its own coordinate.</span></div>
     <div class="sig"><code>createPlace(forVisit:, name:, category:, coordinate:, radius:) -&gt; Place</code></div>
     <div class="sig"><code>updatePlace(_:) / mergePlaces(_ sourceID:, into targetID:)</code></div>
     <div class="sig"><code>setVisitTimes(_ visitID:, arrival:, departure:)</code></div>

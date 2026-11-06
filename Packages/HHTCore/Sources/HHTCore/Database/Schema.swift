@@ -313,6 +313,15 @@ enum Schema {
         CREATE INDEX idx_expenses_trip ON expenses(trip_id);
         CREATE INDEX idx_expenses_visit ON expenses(visit_id);
         """,
+        // v7 — saved-place recall (issue #95): how a visit's place was decided, kept apart from the detected stop, and a
+        // floor / unit to tell apart places at nearly the same coordinates. Visits whose place the user already set
+        // (manual stops, or a set_place edit in the audit log) start out confirmed.
+        """
+        ALTER TABLE visits ADD COLUMN place_status TEXT NOT NULL DEFAULT 'auto';
+        ALTER TABLE places ADD COLUMN unit TEXT;
+        UPDATE visits SET place_status = 'confirmed' WHERE place_id IS NOT NULL AND (source = 'manual'
+            OR id IN (SELECT entity_id FROM audit_log WHERE entity_type = 'visit' AND action IN ('set_place', 'confirm')));
+        """,
     ]
 
     static func migrate(_ db: SQLiteConnection) throws {

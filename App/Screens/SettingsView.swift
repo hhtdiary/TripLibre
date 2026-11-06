@@ -13,6 +13,7 @@ struct SettingsView: View {
     @AppStorage("collectorProfile") private var profile = LocationCollector.Profile.balanced.rawValue
     @AppStorage("units") private var units = ""
     @AppStorage("agentEnabled") private var agentEnabled = false
+    @AppStorage("placeRecallRadius") private var recallRadius = PlaceRecall.defaultRadius
 
     @State private var counts: [String: Int] = [:]
     @State private var exportRange = 0          // 0 all, 1 last 30 days
@@ -43,7 +44,13 @@ struct SettingsView: View {
                 Picker("Units", selection: $units) {
                     Text("System").tag(""); Text("Metric").tag("metric"); Text("Imperial").tag("imperial")
                 }
-            } header: { Text("Display").toonSectionText() }
+                Picker("Saved places nearby", selection: $recallRadius) {
+                    ForEach(PlaceRecall.radiusChoices, id: \.self) { r in Text(Fmt.distance(r)).tag(r) }
+                }
+            } header: { Text("Display").toonSectionText() } footer: {
+                Text("How far from a stop to look for places you saved when you review it. Searched on this iPhone only.")
+                    .toonSectionText()
+            }
             Section {
                 Toggle("Diary agent", isOn: $agentEnabled)
             } header: { Text("Experimental").toonSectionText() } footer: {

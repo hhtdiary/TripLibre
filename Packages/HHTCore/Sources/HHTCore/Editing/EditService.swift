@@ -277,6 +277,8 @@ public final class EditService {
         var v = try visitOrThrow(visitID)
         guard v.userStatus == .auto else { return }
         v.userStatus = .confirmed
+        // "Looks right" confirms the place shown with the stop as well
+        if v.placeID != nil, v.placeStatus == .auto { v.placeStatus = .confirmed }
         v.updatedAt = Date()
         try store.upsertVisit(v)
         try store.audit("visit", visitID, "confirm")
@@ -288,11 +290,41 @@ public final class EditService {
         try db.transaction {
             var v = try visitOrThrow(visitID)
             guard let p = try store.place(placeID), !p.deleted else { throw EditError.notFound("place \(placeID)") }
-            let old = v.placeID
+            let old = v.placeID, oldStatus = v.placeStatus
             v.placeID = placeID
+            v.placeStatus = .confirmed
             touch(&v)
             try store.upsertVisit(v)
             try store.audit("visit", visitID, "set_place", field: "place_id", old: old, new: placeID)
+            if oldStatus != .confirmed {
+                try store.audit("visit", visitID, "set_place", field: "place_status", old: oldStatus.rawValue,
+                                new: PlaceStatus.confirmed.rawValue)
+            }
+            try store.pruneOrphanPlaces()
+        }
+    }
+
+    /// "None of these" / "leave unspecified" (issue #95): the stop is not one of the user's saved places, or they do
+    /// not want to say which. The detected stop is kept as it is. If it was matched to a place the user marked, it
+    /// moves to a new unnamed place at the stop's own coordinate, so it no longer counts as a visit there.
+    public func setVisitPlaceUnspecified(_ visitID: String) throws {
+        try db.transaction {
+            var v = try visitOrThrow(visitID)
+            let old = v.placeID, oldStatus = v.placeStatus
+            if let current = try old.flatMap(store.place),
+               PlaceRecall.isUserMarked(current, confirmedPlaceIDs: []) || oldStatus == .confirmed {
+                let p = Place(coordinate: v.coordinate, radius: 80, source: .inferred)
+                try store.upsertPlace(p)
+                v.placeID = p.id
+            }
+            v.placeStatus = .unspecified
+            touch(&v)
+            try store.upsertVisit(v)
+            if v.placeID != old {
+                try store.audit("visit", visitID, "set_place", field: "place_id", old: old, new: v.placeID)
+            }
+            try store.audit("visit", visitID, "set_place", field: "place_status", old: oldStatus.rawValue,
+                            new: PlaceStatus.unspecified.rawValue)
             try store.pruneOrphanPlaces()
         }
     }
@@ -319,14 +351,16 @@ public final class EditService {
             var p = updated
             p.updatedAt = Date()
             p.customCategory = p.category == .other ? Place.cleanCustom(p.customCategory) : nil
-            if p.source == .inferred && (p.name != old.name || p.category != old.category || p.customCategory != old.customCategory) {
+            p.unit = Place.cleanCustom(p.unit)
+            if p.source == .inferred && (p.name != old.name || p.category != old.category
+                                         || p.customCategory != old.customCategory || p.unit != old.unit) {
                 p.source = .manual
             }
             try store.upsertPlace(p)
             let pairs: [(String, String?, String?)] = [
                 ("name", old.name, p.name), ("category", old.category?.rawValue, p.category?.rawValue),
                 ("category_custom", old.customCategory, p.customCategory),
-                ("radius_m", String(old.radius), String(p.radius)), ("code", old.code, p.code),
+                ("radius_m", String(old.radius), String(p.radius)), ("code", old.code, p.code), ("unit", old.unit, p.unit),
                 ("address", old.address, p.address), ("city", old.city, p.city), ("region", old.region, p.region),
                 ("country", old.country, p.country), ("notes", old.notes, p.notes),
                 ("favorite", String(old.favorite), String(p.favorite)),
@@ -498,17 +532,16 @@ public final class EditService {
             let coord = place?.coordinate ?? coordinate ?? Geo.centroid(atStop) ?? nearest?.coordinate
                 ?? t.route.dropFirst(t.route.count / 2).first ?? Coordinate(0, 0)
 
-            var resolvedPlace = place
-            if resolvedPlace == nil {
-                resolvedPlace = try store.matchPlace(coord, slack: 40)
-            }
-            if resolvedPlace == nil {
-                let p = Place(coordinate: coord, radius: 80, source: .manual)
-                try store.upsertPlace(p)
+            let resolvedPlace: Place
+            if let p = try place ?? store.matchPlace(coord, slack: 40) {
                 resolvedPlace = p
+            } else {
+                resolvedPlace = Place(coordinate: coord, radius: 80, source: .manual)
+                try store.upsertPlace(resolvedPlace)
             }
-            let stop = Visit(placeID: resolvedPlace!.id, arrival: stopStart, departure: stopEnd, coordinate: coord,
-                             source: .manual, userStatus: .manual, timeZone: t.timeZone)
+            // a place the user picked is confirmed; one found from the coordinate is only a match
+            let stop = Visit(placeID: resolvedPlace.id, placeStatus: place != nil ? .confirmed : .auto, arrival: stopStart,
+                             departure: stopEnd, coordinate: coord, source: .manual, userStatus: .manual, timeZone: t.timeZone)
             try store.upsertVisit(stop)
 
             let origin = try t.originVisitID.flatMap(store.visit)?.coordinate
@@ -564,7 +597,7 @@ public final class EditService {
                 throw EditError.invalid("The stop must lie between leaving and returning.")
             }
             let out = try outgoingTrip(visitID)
-            let second = Visit(placeID: v.placeID, arrival: back, departure: v.departure, coordinate: v.coordinate,
+            let second = Visit(placeID: v.placeID, placeStatus: v.placeStatus, arrival: back, departure: v.departure, coordinate: v.coordinate,
                                purpose: v.purpose, source: .manual, userStatus: .manual, timeZone: v.timeZone)
             try store.upsertVisit(second)
             v.departure = leave
@@ -584,7 +617,7 @@ public final class EditService {
             }
             if let s = stop {
                 guard let p = try store.place(s.placeID) else { throw EditError.notFound("place \(s.placeID)") }
-                let mid = Visit(placeID: p.id, arrival: s.arrival, departure: s.departure, coordinate: p.coordinate,
+                let mid = Visit(placeID: p.id, placeStatus: .confirmed, arrival: s.arrival, departure: s.departure, coordinate: p.coordinate,
                                 purpose: p.category?.defaultPurpose, source: .manual, userStatus: .manual, timeZone: v.timeZone)
                 try store.upsertVisit(mid)
                 try manualTrip(v, mid)
@@ -629,7 +662,8 @@ public final class EditService {
     public func addManualVisit(placeID: String, arrival: Date, departure: Date?, purpose: TripPurpose? = nil) throws -> Visit {
         guard let p = try store.place(placeID) else { throw EditError.notFound("place \(placeID)") }
         if let d = departure, d <= arrival { throw EditError.invalid("Departure must be after arrival.") }
-        let v = Visit(placeID: p.id, arrival: arrival, departure: departure, coordinate: p.coordinate, purpose: purpose,
+        let v = Visit(placeID: p.id, placeStatus: .confirmed, arrival: arrival, departure: departure, coordinate: p.coordinate,
+                      purpose: purpose,
                       source: .manual, userStatus: .manual)
         try store.upsertVisit(v)
         try store.audit("visit", v.id, "create")

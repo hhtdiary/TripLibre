@@ -21,6 +21,12 @@ struct VisitDetailView: View {
     @State private var showSplit = false
     @State private var confirmDelete = false
     @State private var editPlace: IDBox?
+    @State private var recall: [PlaceRecall.Candidate] = []
+    @State private var showRecall = false
+    @State private var recallLoaded = false
+    /// icon column in the saved-places rows; grows with the symbol so it never overlaps the text
+    @ScaledMetric(relativeTo: .body) private var iconWidth: CGFloat = 24
+    @AppStorage("placeRecallRadius") private var recallRadius = PlaceRecall.defaultRadius
 
     var body: some View {
         NavigationStack {
@@ -53,7 +59,9 @@ struct VisitDetailView: View {
                     Image(systemName: place?.category?.symbol ?? "mappin").accessibilityHidden(true)
                     VStack(alignment: .leading) {
                         Text(place.flatMap { $0.isNamed ? $0.displayName : nil } ?? L("Unnamed place")).font(.headline).accessibilityAddTraits(.isHeader)
+                        if let d = place?.recallDetail { Text(d).font(.caption).foregroundStyle(Toon.muted) }
                         if let a = place?.address { Text(a).font(.caption).foregroundStyle(Toon.muted) }
+                        if v.placeStatus == .unspecified { Text("Not one of your saved places").font(.caption).foregroundStyle(Toon.muted) }
                     }
                 }
                 Button { showPlacePicker = true } label: { Label("Wrong place? Choose or create…", systemImage: "arrow.triangle.swap") }
@@ -63,6 +71,8 @@ struct VisitDetailView: View {
                     }
                 }
             } header: { Text("Place").toonSectionText() }
+
+            if !recall.isEmpty { recallSection(v) }
 
             Section {
                 Picker("Activity", selection: Binding(
@@ -162,6 +172,47 @@ struct VisitDetailView: View {
         .sheet(isPresented: $showSplit) { SplitVisitSheet(visit: v).environmentObject(model) }
     }
 
+    /// Issue #95: the user's own saved places near the detected stop, to recognise rather than have one guessed.
+    /// Listed open while the place is still the automatic match; otherwise behind one button.
+    @ViewBuilder private func recallSection(_ v: Visit) -> some View {
+        Section {
+            if showRecall {
+                ForEach(recall) { c in
+                    let current = c.id == v.placeID && v.placeStatus != .unspecified
+                    Button {
+                        model.perform { try model.edit.setVisitPlace(v.id, placeID: c.id) }
+                        showRecall = false
+                    } label: {
+                        HStack {
+                            Image(systemName: c.place.category?.symbol ?? "mappin").frame(width: iconWidth).accessibilityHidden(true)
+                            VStack(alignment: .leading) {
+                                Text(c.place.displayName).foregroundStyle(.primary)
+                                Text([c.place.recallDetail, L("%@ away", Fmt.distance(c.distance))].compactMap { $0 }.joined(separator: " · "))
+                                    .font(.caption).foregroundStyle(Toon.muted)
+                            }
+                            Spacer()
+                            if current { Image(systemName: "checkmark").foregroundStyle(Toon.accent).accessibilityHidden(true) }
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .accessibilityAddTraits(current ? .isSelected : [])
+                }
+                Button { model.perform { try model.edit.setVisitPlaceUnspecified(v.id) }; showRecall = false } label: {
+                    Label("None of these", systemImage: "xmark.circle")
+                }
+                Button { showPlacePicker = true } label: { Label("New place…", systemImage: "plus.circle") }
+                Button { showRecall = false } label: { Label("Skip for now", systemImage: "forward") }
+            } else {
+                Button { showRecall = true } label: { Label("Show saved places nearby", systemImage: "list.bullet") }
+            }
+        } header: {
+            Text("Is this one of your places?").toonSectionText()
+        } footer: {
+            Text("Only places you saved, found on this iPhone. Nothing is picked for you; the detected stop stays as recorded.")
+                .toonSectionText()
+        }
+    }
+
     private func timesChanged(_ v: Visit) -> Bool {
         abs(arrival.timeIntervalSince(v.arrival)) > 30 || ongoing != (v.departure == nil)
             || (!ongoing && abs(departure.timeIntervalSince(v.departure ?? departure)) > 30)
@@ -183,6 +234,9 @@ struct VisitDetailView: View {
         history = (try? model.store.auditLog(entityID: v.id)) ?? []
         stamps = (try? model.store.stamps(visitID: v.id)) ?? []
         costs = (try? model.store.expenses(visitID: v.id)) ?? []
+        recall = (try? model.store.recallCandidates(near: v.coordinate, radius: recallRadius)) ?? []
+        // open by default only while the place is the automatic match, and only on first load (not after each edit)
+        if !recallLoaded { showRecall = v.placeStatus == .auto; recallLoaded = true }
     }
 }
 
@@ -199,6 +253,7 @@ struct PlacePickerView: View {
     @State private var newName = ""
     @State private var newCategory: PlaceCategory? = nil
     @State private var newCustom: String? = nil
+    @ScaledMetric(relativeTo: .body) private var iconWidth: CGFloat = 24
 
     var body: some View {
         NavigationStack {
@@ -219,10 +274,12 @@ struct PlacePickerView: View {
                             dismiss()
                         } label: {
                             HStack {
-                                Image(systemName: p.category?.symbol ?? "mappin").frame(width: 24)
+                                Image(systemName: p.category?.symbol ?? "mappin").frame(width: iconWidth).accessibilityHidden(true)
                                 VStack(alignment: .leading) {
                                     Text(p.displayName).foregroundStyle(.primary)
-                                    Text(L("%@ away", Fmt.distance(Geo.distance(p.coordinate, near)))).font(.caption).foregroundStyle(Toon.muted)
+                                    Text([p.recallDetail, L("%@ away", Fmt.distance(Geo.distance(p.coordinate, near)))].compactMap { $0 }
+                                        .joined(separator: " · "))
+                                        .font(.caption).foregroundStyle(Toon.muted)
                                 }
                             }
                         }
@@ -320,5 +377,14 @@ struct SplitVisitSheet: View {
                 places = ((try? model.store.places()) ?? []).filter(\.isNamed)
             }
         }
+    }
+}
+
+extension Place {
+    /// What tells this place apart from others at nearly the same spot: the floor / unit and the type, when set.
+    var recallDetail: String? {
+        let type = category == .other ? (Place.cleanCustom(customCategory) ?? category?.localizedLabel) : category?.localizedLabel
+        let parts = [Place.cleanCustom(unit), type].compactMap { $0 }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 }
