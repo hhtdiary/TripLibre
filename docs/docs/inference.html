@@ -69,7 +69,9 @@ places win over unnamed ones. Otherwise a new unnamed place is created with radi
 This is why naming a place once is enough: every later visit is matched to it.</p>
 
 <h2>4. Trips and modes</h2>
-<p>A trip connects consecutive visits. Its path is every cleaned fix in between plus both visit centroids.</p>
+<p>A trip connects consecutive visits. Its path is every cleaned fix strictly between the departure and the arrival
+(a fix exactly on either bound is left out), plus both visit centroids. Cleaned fixes are kept in time order, so each
+trip's fixes are found by binary search instead of scanning the whole history once per trip.</p>
 
 <h3>Per-interval classification</h3>
 <p>Between each pair of fixes, speed and the CoreMotion activity at the midpoint give a class:</p>

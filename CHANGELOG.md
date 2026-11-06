@@ -7,6 +7,10 @@ single summary, so release notes aren't kept anywhere else in the repository.
 
 ## Unreleased
 
+- Developers: trip construction finds each trip's GPS fixes by binary search over the time-sorted cleaned points instead
+  of scanning every point once per trip, so long rebuilds no longer cost O(N × T). Inferred visits and trips are
+  unchanged. Developer API › Point order and trip windows documents the sorted-input contract and the internal
+  `strictlyBetween` helper in `Inference/TimeWindow.swift` (#101, #102)
 - **Multilingual: TripLibre now speaks 11 languages**: English, Chinese (Simplified and Traditional), French, German,
   Spanish, Portuguese, Russian, Arabic (right to left), Japanese and Korean. Settings › Language picks one or follows
   the iPhone; dates, units, money and plurals follow it, and the location and motion permission prompts are translated

@@ -54,7 +54,9 @@ Naming or categorising a place therefore makes all future visits to it recognise
 
 ## 4. Trips and modes
 
-A trip connects consecutive visits; its path is every cleaned fix between departure and arrival plus both visit centroids.
+A trip connects consecutive visits; its path is every cleaned fix strictly between departure and arrival (fixes exactly
+on either bound are excluded) plus both visit centroids. Cleaned fixes are sorted by timestamp, so each trip's fixes are
+found by binary search rather than a scan of every point (`Inference/TimeWindow.swift`, #101).
 Distance = path length (straight line across gaps). `has_gap` = any > 15 min hole.
 
 **Per-interval class** between consecutive fixes (speed = distance / time; CoreMotion activity at the midpoint):

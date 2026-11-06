@@ -117,6 +117,19 @@ let engine = InferenceEngine(store: store, config: config)</code></pre>
   <tr><td><code>MotionTimeline</code></td><td><code>activity(at:)</code>, <code>movingSeconds(from:to:)</code>, <code>hasCoverage(from:to:)</code></td></tr>
 </table></div>
 
+<h3 id="point-order">Point order and trip windows</h3>
+<p><code>StayDetector.clean(_:)</code> returns fixes sorted by timestamp, ties broken by point id. The engine relies on that
+order: a trip's path is the cleaned fixes <em>strictly</em> between the origin's departure and the destination's arrival
+(a fix exactly on either bound is left out), plus both visit centroids as anchors. Those fixes are found by binary search
+instead of scanning every point for every trip, so a long rebuild costs O(T log N) lookups rather than O(N × T)
+(#101). If you assemble paths for <code>ModeClassifier.segment(path:motion:)</code> yourself, pass the output of
+<code>clean(_:)</code> (or keep your own points in the same order).</p>
+<p>The lookup lives in <code>Inference/TimeWindow.swift</code> as an <code>internal</code> extension on collections of
+<code>RawPoint</code>. <code>strictlyBetween(_:_:)</code> returns the slice inside <code>(from, to)</code>, and
+<code>partitionIndex(after:inclusive:)</code> is the binary search under it. Tests reach both through
+<code>@testable import HHTCore</code> (see <code>TimeWindowTests.swift</code>). Both expect ascending timestamps and
+do not check it.</p>
+
 <h2>Editing</h2>
 <div class="api">
   <div class="api-head"><span class="kind">class</span><span class="name">EditService</span><span class="file">Editing/EditService.swift</span></div>
