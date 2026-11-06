@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="docs/assets/triplibre-logo.png" width="112" height="112" alt="TripLibre logo: a colorful infinity route forming a T, with home, city and travel symbols">
+  <img src="docs/assets/triplibre-logo.png" width="112" height="112" alt="TripLibre logo: a white T on a sky-blue background, with plane, bus, train, walking, cycling and car symbols">
 </p>
 
 <h1 align="center">TripLibre — personal travel diary</h1>

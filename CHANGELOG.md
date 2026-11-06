@@ -7,6 +7,10 @@ single summary, so release notes aren't kept anywhere else in the repository.
 
 ## Unreleased
 
+- **New logo**: the app icon, README, website and docs use the new TripLibre logo, a white T over travel-mode
+  symbols, hills and a winding road. The white border of the original artwork is removed; see `docs/branding.md`. Earlier
+  logos are kept on a new Logo & brand page in the docs.
+
 - **Cleaner day maps**: the day map no longer draws false straight-line jumps or triangles. Each trip is redrawn from
   its GPS fixes and the line is broken (leaving a gap) across a silence of more than 10 minutes, a subway or rail
   tunnel (no fix for 2 minutes while covering more than 300 m), a speed no ground travel reaches, fixes less accurate
