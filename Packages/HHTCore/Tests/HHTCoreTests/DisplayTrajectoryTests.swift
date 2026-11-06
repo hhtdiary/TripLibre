@@ -109,8 +109,10 @@ struct DisplayTrajectoryTests {
                         modeAuto: .walk, modeConfidence: 0.8,
                         routePolyline: Polyline.encode([origin] + (leg1 + leg2).map(\.coordinate) + [dest]),
                         hasGap: true)
-        let outside = [fix(-60, -500, -500), fix(arr.timeIntervalSince(t0) + 60, 3000, 3000)]
-        let pieces = DisplayTrajectory.pieces(for: trip, points: outside[0..<1] + leg1 + leg2 + outside[1...])
+        // fixes just before and after the trip must be ignored
+        let before = fix(-60, -500, -500), after = fix(arr.timeIntervalSince(t0) + 60, 3000, 3000)
+        let points: [RawPoint] = [before] + leg1 + leg2 + [after]
+        let pieces = DisplayTrajectory.pieces(for: trip, points: points)
         // measured, then an arc across the gap, then measured
         #expect(pieces.map(\.isConnector) == [false, true, false])
         #expect(pieces.allSatisfy { $0.mode == .walk })
