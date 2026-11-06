@@ -9,6 +9,10 @@ single summary, so release notes aren't kept anywhere else in the repository.
 
 - **TripLibre is on the App Store**: [download it here](https://apps.apple.com/us/app/triplibre-your-trip-diary/id6826907636).
   The README, website and installation docs now link to it; building from source is still documented
+- Developers: trip construction finds each trip's GPS fixes by binary search over the time-sorted cleaned points instead
+  of scanning every point once per trip, so long rebuilds no longer cost O(N × T). Inferred visits and trips are
+  unchanged. Developer API › Point order and trip windows documents the sorted-input contract and the internal
+  `strictlyBetween` helper in `Inference/TimeWindow.swift` (#101, #102)
 - **Multilingual: TripLibre now speaks 11 languages**: English, Chinese (Simplified and Traditional), French, German,
   Spanish, Portuguese, Russian, Arabic (right to left), Japanese and Korean. Settings › Language picks one or follows
   the iPhone; dates, units, money and plurals follow it, and the location and motion permission prompts are translated
