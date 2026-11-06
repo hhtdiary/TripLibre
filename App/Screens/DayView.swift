@@ -268,6 +268,7 @@ struct DayView: View {
         ToonRowStack {
             // the icons stay as they are (fixed, not hidden): when they change, Apple's audit reports the banner text as
             // only partly scaling
+            // swiftlint:disable:next accessibility_label_for_image
             Image(systemName: "checklist") // a11y-check:disable image-missing-label
                 .font(.system(size: 18, weight: .bold)).foregroundStyle(Toon.ink) // a11y-check:disable fixed-font-size
                 .frame(width: 38, height: 38)
@@ -276,6 +277,7 @@ struct DayView: View {
                 .font(.toon(14, .heavy)).foregroundStyle(.white) // a11y-check:disable hardcoded-color (on Toon.ink in both modes)
                 .fixedSize(horizontal: false, vertical: true)
             Spacer(minLength: 0)
+            // swiftlint:disable:next accessibility_label_for_image
             Image(systemName: "arrow.right").font(.system(size: 16, weight: .heavy)).foregroundStyle(.white) // a11y-check:disable hardcoded-color, fixed-font-size, image-missing-label
         }
         .padding(14)

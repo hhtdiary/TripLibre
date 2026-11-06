@@ -18,7 +18,7 @@ never starts location collection, so runs are reproducible and never touch your 
 | Suite | What it covers |
 | --- | --- |
 | `CoreFlowTests` | Every tab opens and is announced as selected; trip and visit details open from the diary and close; the day navigation buttons have labels; Map › layers menu; Settings › Create export finishes and offers Share. |
-| `AccessibilityAuditTests` | `performAccessibilityAudit(for: .all)` on Today, a day with trips, Trip detail, Visit detail, Timeline, Map, Stats, Places and Settings. |
+| `AccessibilityAuditTests` | `performAccessibilityAudit(for: .all)` on Today, a day with trips, Trip detail, Visit detail (also with its "Is this one of your places?" list, from two demo places in one building), Timeline, Map, Stats, Places and Settings. |
 
 `testSpending` (Add a cost and Spending) is skipped for now: on CI (iOS 26.5) the Spending audit reports two contrast
 failures on SwiftUI-made nodes it can't name, and Dynamic Type findings on the section labels, which haven't been
@@ -39,7 +39,7 @@ Accepted findings live in `KnownIssue` in `UITests/AccessibilityAuditTests.swift
 | --- | --- | --- |
 | `mapKitAttribution` | Map, Today, Trip/Visit detail | Apple Maps' logo and "Legal" link are drawn by MapKit; their size and contrast aren't ours to change. |
 | `mapKitMarkers` | Trip detail, Visit detail | MapKit's `Marker` pins are under 44 pt and not exposed as elements; they're informational and the same places are named right below the map. |
-| `textClippedFalsePositive` | Today, Trip/Visit detail | "Stamp this moment", the origin/destination labels under the trip map and "Name this place" are reported as clipped but render in full (screenshot-checked on iPhone 17). Matched by exact text. |
+| `textClippedFalsePositive` | Today, Trip/Visit detail | "Stamp this moment", the origin/destination labels under the trip map and "Name this place" (or "Edit “…” (all visits)" once the place is named) are reported as clipped but render in full (screenshot-checked on iPhone 17, also at the largest accessibility size for the visit row). Matched by text. |
 | `systemBarButton` | Settings, Trip/Visit detail | The system "Done" button in a sheet's navigation bar (Liquid Glass) stops growing at the system's bar-button size (long-press shows the large content viewer) and the contrast check measures the glass behind it. Its title is ink. Matched by being a button inside the navigation bar. |
 | `underNavigationBar` | Spending | Contrast findings on elements whose top edge is still under the navigation bar (the period pills right under Spending's inline title): iOS 26 blurs and fades content there (scroll edge effect) and the audit samples that strip. The pills are ink on white or white on ink; the same pills under Stats' large title pass. |
 | `systemDrawnText` | Map, Today, Trip/Visit detail; sheets | Text the system draws outside our view hierarchy, reported with no element: MapKit's street and place labels, and the dimmed screen behind a sheet. |
@@ -87,6 +87,9 @@ Xcode › Open Developer Tool › Accessibility Inspector).
 - [ ] Trip detail: mode picker, segment rows ("Set by you" / "Detected automatically"), Confirm, Split, Delete and
       Done are all reachable and named; delete asks for confirmation.
 - [ ] Visit detail: Wrong place?, purpose, times, Save times, Confirm, Split and Remove are reachable and named.
+- [ ] Visit detail, "Is this one of your places?": each saved place reads its name, floor / unit, type and distance
+      as one button; the current place reads "Selected"; None of these, New place…, Skip for now and Show saved
+      places nearby are named buttons.
 - [ ] Map: Period and Map layers are named; each place marker reads its name and visit count. The same information
       is available without the map in Places (list with visit counts) and Stats.
 - [ ] Settings: permission state is read as text; "Open iOS Settings to allow “Always”" is a button; Create export

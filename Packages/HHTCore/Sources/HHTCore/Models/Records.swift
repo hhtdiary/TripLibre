@@ -62,6 +62,8 @@ public struct Place: Identifiable, Equatable, Hashable, Sendable {
     /// User-defined type name; only meaningful with `category == .other` (issue #56).
     public var customCategory: String?
     public var code: String?           // IATA / station code etc.
+    /// Floor, unit, suite or entrance the user gave, to tell apart places at nearly the same coordinates (issue #95).
+    public var unit: String?
     public var favorite: Bool
     public var notes: String?
     public var source: RecordSource
@@ -72,12 +74,12 @@ public struct Place: Identifiable, Equatable, Hashable, Sendable {
 
     public init(id: String = newID(), name: String? = nil, coordinate: Coordinate, radius: Double = 100,
                 address: String? = nil, city: String? = nil, region: String? = nil, country: String? = nil,
-                category: PlaceCategory? = nil, customCategory: String? = nil, code: String? = nil, favorite: Bool = false,
-                notes: String? = nil, source: RecordSource = .inferred, mergedInto: String? = nil, deleted: Bool = false,
+                category: PlaceCategory? = nil, customCategory: String? = nil, code: String? = nil, unit: String? = nil,
+                favorite: Bool = false, notes: String? = nil, source: RecordSource = .inferred, mergedInto: String? = nil, deleted: Bool = false,
                 createdAt: Date = Date(), updatedAt: Date = Date()) {
         self.id = id; self.name = name; self.coordinate = coordinate; self.radius = radius
         self.address = address; self.city = city; self.region = region; self.country = country
-        self.category = category; self.customCategory = customCategory; self.code = code; self.favorite = favorite; self.notes = notes
+        self.category = category; self.customCategory = customCategory; self.code = code; self.unit = unit; self.favorite = favorite; self.notes = notes
         self.source = source; self.mergedInto = mergedInto; self.deleted = deleted; self.createdAt = createdAt; self.updatedAt = updatedAt
     }
 
@@ -104,6 +106,8 @@ public struct Place: Identifiable, Equatable, Hashable, Sendable {
 public struct Visit: Identifiable, Equatable, Sendable {
     public var id: String
     public var placeID: String?
+    /// How `placeID` was decided, apart from the detected stop (`coordinate`, times) itself (issue #95).
+    public var placeStatus: PlaceStatus
     public var arrival: Date
     public var departure: Date?        // nil = ongoing
     public var coordinate: Coordinate  // observed centroid
@@ -118,11 +122,11 @@ public struct Visit: Identifiable, Equatable, Sendable {
     public var createdAt: Date
     public var updatedAt: Date
 
-    public init(id: String = newID(), placeID: String? = nil, arrival: Date, departure: Date?, coordinate: Coordinate,
-                purpose: TripPurpose? = nil, autoConfidence: Double? = nil, source: RecordSource = .inferred,
+    public init(id: String = newID(), placeID: String? = nil, placeStatus: PlaceStatus = .auto, arrival: Date,
+                departure: Date?, coordinate: Coordinate, purpose: TripPurpose? = nil, autoConfidence: Double? = nil, source: RecordSource = .inferred,
                 userStatus: UserStatus = .auto, deleted: Bool = false, timeZone: String? = TimeZone.current.identifier,
                 pointCount: Int? = nil, notes: String? = nil, createdAt: Date = Date(), updatedAt: Date = Date()) {
-        self.id = id; self.placeID = placeID; self.arrival = arrival; self.departure = departure
+        self.id = id; self.placeID = placeID; self.placeStatus = placeStatus; self.arrival = arrival; self.departure = departure
         self.coordinate = coordinate; self.purpose = purpose; self.autoConfidence = autoConfidence
         self.source = source; self.userStatus = userStatus; self.deleted = deleted; self.timeZone = timeZone
         self.pointCount = pointCount; self.notes = notes; self.createdAt = createdAt; self.updatedAt = updatedAt

@@ -69,6 +69,12 @@ enum DemoData {
             let midnight = cal.date(byAdding: .day, value: 1, to: cal.startOfDay(for: t))!
             stay(max(30, midnight.timeIntervalSince(t) / 60))
         }
+        // Two saved places in one building at the short afternoon stop, so reviewing it shows "Is this one of your
+        // places?" with two choices GPS can't tell apart (issue #95). Categories that don't prompt for a cost.
+        try store.upsertPlace(Place(id: "demo-dentist", name: "Dr. Lee", coordinate: grocery, radius: 60,
+                                    category: .medical, unit: "Suite 400", source: .manual))
+        try store.upsertPlace(Place(id: "demo-coworking", name: "Co-working", coordinate: Geo.unproject((6, 0), origin: grocery),
+                                    radius: 60, category: .workSchool, unit: "Floor 5", source: .manual))
         try store.insertPoints(points.filter { $0.timestamp < Date() })
         try store.insertMotion(motion.filter { $0.timestamp < Date() })
     }
