@@ -101,6 +101,27 @@ import Testing
         #expect(after.placeStatus == .unspecified)
     }
 
+    /// An unnamed place that counts as saved only because another visit confirmed it is offered by recall, so
+    /// rejecting it on an automatically matched visit must detach that visit too (review on #106).
+    @Test func noneOfTheseDetachesFromAPlaceConfirmedElsewhere() throws {
+        let (store, v) = try seededStore()
+        let edit = EditService(store: store)
+        let other = Visit(placeID: "auto", arrival: Trajectory.date("2026-10-02 09:00"),
+                          departure: Trajectory.date("2026-10-02 10:00"), coordinate: Philly.penn)
+        try store.upsertVisit(other)
+        try edit.confirm(visitID: other.id)                         // "Looks right": "auto" is now a saved place
+        var w = v
+        w.placeID = "auto"
+        try store.upsertVisit(w)                                    // this visit was matched to it automatically
+        #expect(try store.recallCandidates(near: v.coordinate).contains { $0.id == "auto" })
+
+        try edit.setVisitPlaceUnspecified(v.id)
+        let after = try #require(try store.visit(v.id))
+        #expect(after.placeStatus == .unspecified)
+        #expect(after.placeID != "auto")
+        #expect(try store.visits(atPlace: "auto").map(\.id) == [other.id])
+    }
+
     @Test func emptyWhenNothingIsSavedNearby() throws {
         let store = try TravelStore.inMemory()
         #expect(try store.recallCandidates(near: Philly.penn).isEmpty)

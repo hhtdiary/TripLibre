@@ -311,8 +311,10 @@ public final class EditService {
         try db.transaction {
             var v = try visitOrThrow(visitID)
             let old = v.placeID, oldStatus = v.placeStatus
+            // same test as recall uses, so any place that could have been offered (including one that is "saved" only
+            // because another visit confirmed it) is left when the user rejects it
             if let current = try old.flatMap(store.place),
-               PlaceRecall.isUserMarked(current, confirmedPlaceIDs: []) || oldStatus == .confirmed {
+               PlaceRecall.isUserMarked(current, confirmedPlaceIDs: try store.confirmedPlaceIDs()) || oldStatus == .confirmed {
                 let p = Place(coordinate: v.coordinate, radius: 80, source: .inferred)
                 try store.upsertPlace(p)
                 v.placeID = p.id

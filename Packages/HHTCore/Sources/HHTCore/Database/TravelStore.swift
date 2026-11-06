@@ -179,11 +179,15 @@ public final class TravelStore: @unchecked Sendable {
             SELECT * FROM places WHERE merged_into IS NULL AND deleted = 0 AND lat BETWEEN ? AND ? AND lon BETWEEN ? AND ?
             """, c.latitude - dLat, c.latitude + dLat, c.longitude - dLon, c.longitude + dLon).map(Self.place)
         guard !nearby.isEmpty else { return [] }
-        let confirmed = Set(try db.query("""
+        return PlaceRecall.candidates(near: c, places: nearby, stats: try placeStats(), confirmedPlaceIDs: try confirmedPlaceIDs(),
+                                      radius: r, limit: limit)
+    }
+
+    /// Places the user chose or confirmed for at least one (non-deleted) visit: they count as saved places for recall.
+    public func confirmedPlaceIDs() throws -> Set<String> {
+        Set(try db.query("""
             SELECT DISTINCT place_id FROM visits WHERE deleted = 0 AND place_status = 'confirmed' AND place_id IS NOT NULL
             """).compactMap { $0.string("place_id") })
-        return PlaceRecall.candidates(near: c, places: nearby, stats: try placeStats(), confirmedPlaceIDs: confirmed,
-                                      radius: r, limit: limit)
     }
 
     /// Remove inferred, unnamed, uncategorised places that no longer have any visit.
