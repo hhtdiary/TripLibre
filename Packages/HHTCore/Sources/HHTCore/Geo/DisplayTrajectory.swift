@@ -64,15 +64,17 @@ public enum DisplayTrajectory {
     /// Continuous pieces of a timestamped path travelled by `mode`. Points need not be sorted; empty when nothing
     /// should be drawn.
     public static func pieces(_ points: [RawPoint], mode: TravelMode = .unknown, options o: Options = Options()) -> [[Coordinate]] {
-        runs(points, mode: mode, options: o).map { Geo.simplify($0.map(\.coordinate), tolerance: o.simplifyTolerance) }
+        runs(points, mode: mode, options: o).filter { $0.count >= 2 }
+            .map { Geo.simplify($0.map(\.coordinate), tolerance: o.simplifyTolerance) }
     }
 
-    /// The continuous runs of fixes (at least two each) that survive filtering, in time order.
+    /// The continuous runs of fixes that survive filtering, in time order. A run may be a single isolated fix: it
+    /// draws no line of its own but is still a known position for connector arcs to pass through.
     static func runs(_ points: [RawPoint], mode: TravelMode, options o: Options) -> [[RawPoint]] {
         let sorted = points.sorted { $0.timestamp < $1.timestamp }
         let accurate = sorted.filter { isAnchor($0) || isAccurate($0, limit: o.maxAccuracy) }
         let kept = despike(accurate, options: o)
-        return split(kept, signalLoss: o.signalLossModes.contains(mode), options: o).filter { $0.count >= 2 }
+        return split(kept, signalLoss: o.signalLossModes.contains(mode), options: o)
     }
 
     /// Drawable pieces for a trip, one mode per piece, from the raw points around it: any superset, sorted by
@@ -97,6 +99,16 @@ public enum DisplayTrajectory {
 
         let segments = trip.segments.sorted { $0.sequence < $1.sequence }
         var measured: [Run] = []
+        func add(_ found: [[RawPoint]], mode: TravelMode) {
+            for r in found {
+                // a line needs two points and at least one real fix: a pair of stop anchors is not a measurement
+                if r.count >= 2 && r.contains(where: { !isAnchor($0) }) {
+                    measured.append(Run(r, mode: mode, options: o))
+                } else {
+                    measured += r.map { Run(waypoint: $0.coordinate, at: $0.timestamp, mode: mode) }
+                }
+            }
+        }
         if segments.count > 1 {
             for s in segments {
                 if s.mode == .airplane {
@@ -109,11 +121,11 @@ public enum DisplayTrajectory {
                 // the pieces meet, without reaching back past it (that would redraw the previous segment's connector)
                 let lo = path.lastIndex { $0.timestamp <= s.start } ?? 0
                 let within = path[lo...].prefix { $0.timestamp <= s.end }
-                measured += runs(Array(within), mode: s.mode, options: o).map { Run($0, mode: s.mode, options: o) }
+                add(runs(Array(within), mode: s.mode, options: o), mode: s.mode)
             }
         } else {
             if trip.mode == .airplane { return stored(trip) }
-            measured = runs(path, mode: trip.mode, options: o).map { Run($0, mode: trip.mode, options: o) }
+            add(runs(path, mode: trip.mode, options: o), mode: trip.mode)
         }
 
         func modeAt(_ t: Date) -> TravelMode {
@@ -128,21 +140,26 @@ public enum DisplayTrajectory {
         }
         for r in measured {
             bridge(to: r.coordinates[0], at: r.start)
-            out.append(Piece(mode: r.mode, coordinates: r.coordinates))
+            if !r.isWaypoint { out.append(Piece(mode: r.mode, coordinates: r.coordinates)) }
             loose = (r.coordinates[r.coordinates.count - 1], r.end)
         }
         if let last = path.last, path.count >= 2 { bridge(to: last.coordinate, at: last.timestamp) }
         return out
     }
 
-    /// A measured stretch with its time span, before connectors are added.
+    /// A measured stretch with its time span, or a lone known position (`isWaypoint`), before connectors are added.
     struct Run {
         var mode: TravelMode
         var coordinates: [Coordinate]
         var start: Date
         var end: Date
+        var isWaypoint = false
         init(mode: TravelMode, coordinates: [Coordinate], start: Date, end: Date) {
             self.mode = mode; self.coordinates = coordinates; self.start = start; self.end = end
+        }
+        init(waypoint c: Coordinate, at t: Date, mode: TravelMode) {
+            self.init(mode: mode, coordinates: [c], start: t, end: t)
+            isWaypoint = true
         }
         init(_ pts: [RawPoint], mode: TravelMode, options o: Options) {
             self.init(mode: mode, coordinates: Geo.simplify(pts.map(\.coordinate), tolerance: o.simplifyTolerance),

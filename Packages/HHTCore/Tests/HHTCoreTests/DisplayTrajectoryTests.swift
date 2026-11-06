@@ -219,6 +219,39 @@ struct DisplayTrajectoryTests {
         #expect(pieces[0].coordinates.first == trip.route.first && pieces[0].coordinates.last == trip.route.last)
     }
 
+    @Test func shortTripWithoutFixesIsAnArcNotAMeasuredLine() {
+        // review on #107: a 5-min, 1 km trip's two stop anchors are within every gap threshold, but they are not a
+        // measurement, so the trip is a connector arc rather than a solid line
+        let trip = Trip(originVisitID: "a", destinationVisitID: "b", departure: t0, arrival: t0.addingTimeInterval(300),
+                        distance: 1000, modeAuto: .car, modeConfidence: 0.4,
+                        routePolyline: Polyline.encode([at(0, 0), at(1000, 0)]))
+        let pieces = DisplayTrajectory.pieces(for: trip, points: [])
+        #expect(pieces.count == 1 && pieces[0].isConnector && pieces[0].mode == .car)
+    }
+
+    @Test func tripWhoseFixesAreAllRejectedIsAnArc() {
+        let trip = Trip(originVisitID: "a", destinationVisitID: "b", departure: t0, arrival: t0.addingTimeInterval(300),
+                        distance: 1000, modeAuto: .walk, modeConfidence: 0.4,
+                        routePolyline: Polyline.encode([at(0, 0), at(1000, 0)]))
+        let poor = [fix(100, 300, 50, acc: 400), fix(200, 700, -40, acc: 250)]
+        let pieces = DisplayTrajectory.pieces(for: trip, points: poor)
+        #expect(pieces.count == 1 && pieces[0].isConnector)
+    }
+
+    @Test func isolatedFixesAreKeptAsArcWaypoints() {
+        // review on #107: a subway trip sampled every 3 min, each fix its own run; the arcs must pass through the
+        // observed station instead of collapsing to one origin-to-destination arc
+        let station = at(1500, 800)
+        let trip = Trip(originVisitID: "a", destinationVisitID: "b", departure: t0, arrival: t0.addingTimeInterval(360),
+                        distance: 3000, modeAuto: .subway, modeConfidence: 0.7,
+                        routePolyline: Polyline.encode([at(0, 0), at(3000, 0)]))
+        let pieces = DisplayTrajectory.pieces(for: trip, points: [fix(180, 1500, 800)])
+        #expect(pieces.count == 2)
+        #expect(pieces.allSatisfy { $0.isConnector && $0.mode == .subway })
+        #expect(pieces[0].coordinates.last == station && pieces[1].coordinates.first == station)
+        #expect(pieces[0].coordinates.first == trip.route.first && pieces[1].coordinates.last == trip.route.last)
+    }
+
     @Test func rawPointsAreNotMutated() {
         var pts = walk(metres: 700)
         pts[20] = fix(200, 300, 900, acc: 400)
