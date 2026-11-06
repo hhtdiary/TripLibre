@@ -590,9 +590,10 @@ struct DayMap: View {
     @State private var position: MapCameraPosition = .automatic
     @State private var selected: String?
 
-    /// Above this many trips the markers drop their mode glyph; above `markerLimit` only the selected one is shown.
+    /// Above this many trips the markers drop their mode glyph; above `compactLimit` they shrink to a dot (the selected
+    /// one keeps its number). Every trip keeps a marker: it is the only way to select a trip on the map.
     private static let glyphLimit = 8
-    private static let markerLimit = 20
+    private static let compactLimit = 20
 
     var body: some View {
         Map(position: $position) {
@@ -609,7 +610,7 @@ struct DayMap: View {
                         .stroke(style.color.opacity(dim ? 0.3 : 1), style: style.stroke(width: width))
                 }
             }
-            ForEach(data.connections.filter { data.connections.count <= Self.markerLimit || $0.id == selected }) { c in
+            ForEach(data.connections) { c in
                 Annotation("", coordinate: c.marker.cl, anchor: .center) {
                     marker(c)
                 }
@@ -639,27 +640,40 @@ struct DayMap: View {
     private func marker(_ c: SchematicTrips.Connection) -> some View {
         let isSelected = selected == c.id
         let style = SchematicStyle.of(SchematicTrips.kind(of: c.mainMode))
+        let compact = data.connections.count > Self.compactLimit && !isSelected
         return Button {
             withAnimation(.snappy) { selected = isSelected ? nil : c.id }
         } label: {
-            HStack(spacing: 2) {
-                if data.connections.count <= Self.glyphLimit || isSelected {
-                    Image(systemName: c.mainMode.symbol).accessibilityHidden(true) // the button's label names the mode
-                        .font(.system(size: 9, weight: .bold)) // a11y-check:disable fixed-font-size (sized to the map marker)
+            Group {
+                if compact {
+                    Circle().fill(style.color).overlay(Circle().strokeBorder(Toon.ink, lineWidth: 1.5))
+                        .frame(width: 11, height: 11)
+                        .frame(width: 24, height: 24).contentShape(Rectangle()) // a dot to see, a finger-sized target
+                } else {
+                    numbered(c, style: style, isSelected: isSelected)
                 }
-                Text(c.order.formatted()).font(.system(size: 10, weight: .heavy)).monospacedDigit() // a11y-check:disable fixed-font-size (sized to the map marker)
             }
-            .foregroundStyle(Toon.ink)
-            .padding(.horizontal, 5).frame(minWidth: 20, minHeight: 20)
-            .background(Capsule().fill(isSelected ? Toon.paper : style.color))
-            .overlay(Capsule().strokeBorder(Toon.ink, lineWidth: isSelected ? 2.5 : 1.5))
-            .scaleEffect(isSelected ? 1.25 : 1)
             .opacity(selected == nil || isSelected ? 1 : 0.55)
         }
         .buttonStyle(.plain)
         .accessibilityLabel(L("Trip %lld: %@", c.order, c.mainMode.localizedLabel))
         .accessibilityValue(endpointsText(c))
         .accessibilityAddTraits(isSelected ? .isSelected : [])
+    }
+
+    private func numbered(_ c: SchematicTrips.Connection, style: SchematicStyle, isSelected: Bool) -> some View {
+        HStack(spacing: 2) {
+            if data.connections.count <= Self.glyphLimit || isSelected {
+                Image(systemName: c.mainMode.symbol).accessibilityHidden(true) // the button's label names the mode
+                    .font(.system(size: 9, weight: .bold)) // a11y-check:disable fixed-font-size (sized to the map marker)
+            }
+            Text(c.order.formatted()).font(.system(size: 10, weight: .heavy)).monospacedDigit() // a11y-check:disable fixed-font-size (sized to the map marker)
+        }
+        .foregroundStyle(Toon.ink)
+        .padding(.horizontal, 5).frame(minWidth: 20, minHeight: 20)
+        .background(Capsule().fill(isSelected ? Toon.paper : style.color))
+        .overlay(Capsule().strokeBorder(Toon.ink, lineWidth: isSelected ? 2.5 : 1.5))
+        .scaleEffect(isSelected ? 1.25 : 1)
     }
 
     @ViewBuilder private var caption: some View {

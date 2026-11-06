@@ -103,7 +103,9 @@ public enum SchematicTrips {
             let modes = leg.modes.isEmpty ? [Leg.Mode(.unknown)] : leg.modes
             let main = modes.max { $0.weight < $1.weight }?.mode ?? .unknown
             let chord = Geo.distance(a.coordinate, b.coordinate)
-            let isLoop = a.key == b.key || chord < o.loopDistance
+            // a shared key means the same place only for real places: grid-snapped fallback keys (`~lat,lon`) can match
+            // for points ~100 m apart, so those count as a round trip only by distance
+            let isLoop = (a.key == b.key && !a.key.hasPrefix("~")) || chord < o.loopDistance
             let path: [Coordinate]
             let marker: Coordinate
             if isLoop {

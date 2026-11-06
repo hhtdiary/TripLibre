@@ -64,6 +64,16 @@ struct SchematicTripsTests {
         #expect(Geo.distance(c[1].marker, c[2].marker) > 20)
     }
 
+    @Test func snappedKeysAloneDoNotMakeARoundTrip() {
+        // ~89 m apart, yet both snap to the same ~100 m grid key
+        let a = ODFlows.Endpoint(coordinate: Coordinate(40.9996, -75)), b = ODFlows.Endpoint(coordinate: Coordinate(41.0004, -75))
+        #expect(a.key == b.key)
+        let c = SchematicTrips.layout([leg("t", a, b, .walk)])[0]
+        #expect(!c.isLoop && c.path.last == b.coordinate)
+        // the same saved place at both ends is still a round trip
+        #expect(SchematicTrips.layout([leg("r", home, home, .walk)])[0].isLoop)
+    }
+
     @Test func missingEndpointsAreLeftOutButKeepOrder() {
         let c = SchematicTrips.layout([leg("a", nil, penn, .walk), leg("b", penn, nil, .walk), leg("c", penn, shop, .walk)])
         #expect(c.map(\.id) == ["c"] && c[0].order == 3)
