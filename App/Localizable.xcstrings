@@ -651,6 +651,47 @@
         }
       }
     },
+    "%@" : {},
+    "%@ %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@"
+          }
+        }
+      }
+    },
+    "%@ %@ · %@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@ · %3$@ · %4$@"
+          }
+        }
+      }
+    },
+    "%@ %@: %@ → %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ %2$@: %3$@ → %4$@"
+          }
+        }
+      }
+    },
+    "%@ / %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ / %2$@"
+          }
+        }
+      }
+    },
     "%@ a trip" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1106,6 +1147,7 @@
         }
       }
     },
+    "%@ more after this one." : {},
     "%@ over %@, mostly getting around." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1691,6 +1733,26 @@
         }
       }
     },
+    "%@ → %@  ·  %@  ·  %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ → %2$@  ·  %3$@  ·  %4$@"
+          }
+        }
+      }
+    },
+    "%@ → %@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@ → %2$@ · %3$@"
+          }
+        }
+      }
+    },
     "%@/km" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -1817,6 +1879,36 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "%@/英里"
+          }
+        }
+      }
+    },
+    "%@× · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@× · %2$@"
+          }
+        }
+      }
+    },
+    "%@–%@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@–%2$@ · %3$@"
+          }
+        }
+      }
+    },
+    "%@–%@ · %@ · %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "%1$@–%2$@ · %3$@ · %4$@"
           }
         }
       }
@@ -4060,6 +4152,16 @@
         }
       }
     },
+    "**%@** of your trips in the last %@ days were %@" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "**%1$@** of your trips in the last %2$@ days were %3$@"
+          }
+        }
+      }
+    },
     "24 h minus time at Home places, averaged over observed days that include a Home visit." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4515,6 +4617,7 @@
         }
       }
     },
+    "Accept and lock" : {},
     "Accuracy" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7115,6 +7218,7 @@
         }
       }
     },
+    "Ask me about your diary, for example:" : {},
     "At %@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -8480,6 +8584,7 @@
         }
       }
     },
+    "CHANGE" : {},
     "CSV (trips, segments, visits, places, flights…), full JSON, GeoJSON and a SQLite snapshot. Stable IDs join across tables. See analysis/ in the repo for Python helpers." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13282,201 +13387,6 @@
         }
       }
     },
-    "Lines join stops; they are not the routes taken" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الخطوط تصل بين المحطات، وليست المسارات الفعلية"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Linien verbinden Stopps; sie zeigen nicht den gefahrenen Weg"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Las líneas unen paradas; no son las rutas recorridas"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Les lignes relient les arrêts ; ce ne sont pas les itinéraires suivis"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "線は立ち寄り先を結ぶだけで、実際の経路ではありません"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "선은 머문 곳을 잇기만 하며 실제 경로가 아닙니다"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "As linhas ligam paradas; não são os percursos feitos"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Линии соединяют остановки, а не показывают реальный путь"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "线条只连接停留点，并非实际路线"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "線條只連接停留點，並非實際路線"
-          }
-        }
-      }
-    },
-    "Trip %lld: %@" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الرحلة %lld: %@"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Fahrt %lld: %@"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Viaje %lld: %@"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Trajet %lld : %@"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "移動 %lld：%@"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "이동 %lld: %@"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Viagem %lld: %@"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Поездка %lld: %@"
-          }
-        },
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "行程 %lld：%@"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "行程 %lld：%@"
-          }
-        }
-      }
-    },
-    "e.g. Floor 2, Suite 400" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "例如 2 楼、400 室"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "例如 2 樓、400 室"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ex. 2e étage, bureau 400"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "z. B. 2. OG, Suite 400"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "p. ej., piso 2, oficina 400"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "ex.: 2º andar, sala 400"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "напр. 2 этаж, офис 400"
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "مثل الطابق 2، جناح 400"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "例：2階、400号室"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "예: 2층, 400호"
-          }
-        }
-      }
-    },
     "Edit cost" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17637,6 +17547,7 @@
         }
       }
     },
+    "I can only answer questions about how you get around, how far you travel, how many trips you make and where you spend your time. Try one of these:" : {},
     "I changed mode on the way" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17702,6 +17613,8 @@
         }
       }
     },
+    "I couldn't tell how you made the %@ trip." : {},
+    "I don't have anything from the last %@ days yet." : {},
     "I left and came back / add a missing stop" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -17763,6 +17676,27 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "我離開後又回來了／新增遺漏的停留"
+          }
+        }
+      }
+    },
+    "I rebuilt %@: **%@ %@** between **%@ %@**. " : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "I rebuilt %1$@: **%2$@ %3$@** between **%4$@ %5$@**. "
+          }
+        }
+      }
+    },
+    "I recorded this as **%@**, but I'm not sure:" : {},
+    "I recorded this as **%@**, but it looks like **%@**:" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "I recorded this as **%1$@**, but it looks like **%2$@**:"
           }
         }
       }
@@ -19969,6 +19903,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "輕軌／路面電車"
+          }
+        }
+      }
+    },
+    "Lines join stops; they are not the routes taken" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخطوط تصل بين المحطات، وليست المسارات الفعلية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Linien verbinden Stopps; sie zeigen nicht den gefahrenen Weg"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Las líneas unen paradas; no son las rutas recorridas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les lignes relient les arrêts ; ce ne sont pas les itinéraires suivis"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "線は立ち寄り先を結ぶだけで、実際の経路ではありません"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "선은 머문 곳을 잇기만 하며 실제 경로가 아닙니다"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "As linhas ligam paradas; não são os percursos feitos"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Линии соединяют остановки, а не показывают реальный путь"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "线条只连接停留点，并非实际路线"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "線條只連接停留點，並非實際路線"
           }
         }
       }
@@ -23739,6 +23738,16 @@
         }
       }
     },
+    "No trips %@, just %@. " : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "No trips %1$@, just %2$@. "
+          }
+        }
+      }
+    },
     "No trips in this period yet. Let's go somewhere!" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -24714,6 +24723,7 @@
         }
       }
     },
+    "Nothing is recorded yet. I'll recap your day once you've been somewhere. You can still ask about earlier days below." : {},
     "Nothing logged" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -24909,6 +24919,7 @@
         }
       }
     },
+    "Now" : {},
     "OK" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -24974,6 +24985,7 @@
         }
       }
     },
+    "On-device · nothing leaves your phone" : {},
     "Ongoing" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -27184,6 +27196,7 @@
         }
       }
     },
+    "Proposed" : {},
     "Purpose" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -29914,71 +29927,6 @@
         }
       }
     },
-    "Saved places nearby" : {
-      "extractionState" : "manual",
-      "localizations" : {
-        "zh-Hans" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "附近已保存的地点"
-          }
-        },
-        "zh-Hant" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "附近已儲存的地點"
-          }
-        },
-        "fr" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lieux enregistrés à proximité"
-          }
-        },
-        "de" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Gespeicherte Orte in der Nähe"
-          }
-        },
-        "es" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lugares guardados cercanos"
-          }
-        },
-        "pt" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Lugares salvos próximos"
-          }
-        },
-        "ru" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "Сохранённые места рядом"
-          }
-        },
-        "ar" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "الأماكن المحفوظة القريبة"
-          }
-        },
-        "ja" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "近くの保存した場所"
-          }
-        },
-        "ko" : {
-          "stringUnit" : {
-            "state" : "translated",
-            "value" : "근처 저장한 장소"
-          }
-        }
-      }
-    },
     "SD first departure" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -30369,6 +30317,71 @@
         }
       }
     },
+    "Saved places nearby" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "附近已保存的地点"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "附近已儲存的地點"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lieux enregistrés à proximité"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Gespeicherte Orte in der Nähe"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lugares guardados cercanos"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Lugares salvos próximos"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Сохранённые места рядом"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الأماكن المحفوظة القريبة"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "近くの保存した場所"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "근처 저장한 장소"
+          }
+        }
+      }
+    },
     "Saved without coordinates. Download the airport list in Settings to get distances and map routes." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -30430,6 +30443,16 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "已儲存，但沒有座標。在設定中下載機場列表即可取得距離和地圖航線。"
+          }
+        }
+      }
+    },
+    "Saved: the %@ stop was %@. It's locked against rebuilds." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "Saved: the %1$@ stop was %2$@. It's locked against rebuilds."
           }
         }
       }
@@ -34200,6 +34223,16 @@
         }
       }
     },
+    "The %@ trip looks like **%@**, not %@." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "The %1$@ trip looks like **%2$@**, not %3$@."
+          }
+        }
+      }
+    },
     "The sequence of trips from leaving a Home place to the next arrival at a Home place. Stops per tour = intermediate destinations." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -36276,6 +36309,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "行程"
+          }
+        }
+      }
+    },
+    "Trip %lld: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الرحلة %lld: %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Fahrt %lld: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viaje %lld: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Trajet %lld : %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移動 %lld：%@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이동 %lld: %@"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Viagem %lld: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Поездка %lld: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行程 %lld：%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "行程 %lld：%@"
           }
         }
       }
@@ -39660,6 +39758,26 @@
         }
       }
     },
+    "You made **%@ trips** in the last %@ days, %@ per recorded day" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You made **%1$@ trips** in the last %2$@ days, %3$@ per recorded day"
+          }
+        }
+      }
+    },
+    "You spent the most time at **%@**: %@ over %@ visits." : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You spent the most time at **%1$@**: %2$@ over %3$@ visits."
+          }
+        }
+      }
+    },
     "You stamped a stop" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -39851,6 +39969,26 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "你在這裡打過卡"
+          }
+        }
+      }
+    },
+    "You stopped **%@**%@ at %@. What was it?" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You stopped **%1$@**%2$@ at %3$@. What was it?"
+          }
+        }
+      }
+    },
+    "You travelled **%@** in the last %@ days, about %@ per recorded day" : {
+      "localizations" : {
+        "en" : {
+          "stringUnit" : {
+            "state" : "new",
+            "value" : "You travelled **%1$@** in the last %2$@ days, about %3$@ per recorded day"
           }
         }
       }
@@ -41220,6 +41358,71 @@
         }
       }
     },
+    "e.g. Floor 2, Suite 400" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "例如 2 楼、400 室"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "例如 2 樓、400 室"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ex. 2e étage, bureau 400"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "z. B. 2. OG, Suite 400"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "p. ej., piso 2, oficina 400"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ex.: 2º andar, sala 400"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "напр. 2 этаж, офис 400"
+          }
+        },
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "مثل الطابق 2، جناح 400"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "例：2階、400号室"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "예: 2층, 400호"
+          }
+        }
+      }
+    },
     "e.g. Home, Penn, 30th St Station" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -42195,6 +42398,7 @@
         }
       }
     },
+    "no trips" : {},
     "now" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -44079,7 +44283,9 @@
           }
         }
       }
-    }
+    },
+    "±%@" : {},
+    "–" : {}
   },
   "version" : "1.0"
 }
