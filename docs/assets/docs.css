@@ -405,11 +405,10 @@ td code { white-space: nowrap; }
 .widget-shot { margin: 8px 0 24px; }
 .widget-shot img { display: block; width: 100%; max-width: 640px; height: auto; border-radius: 18px; border: 1px solid var(--line); }
 .store-badge img { display: block; height: 48px; width: auto; }
-.release-shots { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; align-items: start; margin: 18px 0 8px; }
+.release-shots { display: flex; flex-direction: column; gap: 24px; max-width: 440px; margin: 18px 0 8px; }
 .release-shots figure { margin: 0; }
 .release-shots img { display: block; width: 100%; height: auto; border-radius: 14px; border: 1px solid var(--line); }
 .release-shots figcaption { margin-top: 8px; font-size: 12.5px; color: var(--ink-faint); }
-@media (max-width: 640px) { .release-shots { grid-template-columns: 1fr; } }
 .widget-shot figcaption { margin-top: 8px; font-size: 12.5px; color: var(--ink-faint); }
 .gallery { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 18px 14px; margin: 0 0 48px; }
 .gallery .phone { border-radius: 22px; padding: 5px; transition: transform .15s; }
