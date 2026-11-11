@@ -7,6 +7,13 @@ single summary, so release notes aren't kept anywhere else in the repository.
 
 ## Unreleased
 
+- **Confirm places on Today**: a stop whose place is still a guess among your saved places nearby (two floors of one
+  building, a saved place next door, or a saved place passed over for an unsaved one) gets a card on Today, like the cost
+  prompts. One tap on a nearby saved place confirms it; **None of these** leaves the stop unspecified; **Choose or
+  create…** opens the full picker. A lone saved place nearby, and a home or work place recognised again and again, are
+  never asked about. One card shows at a time, with **More to check** for the rest of the day. Closing a card does not
+  confirm the guess; the Visit screen keeps full editing (#116).
+
 - **New logo**: the app icon, README, website and docs use the new TripLibre logo, a white T over travel-mode
   symbols, hills and a winding road. The white border of the original artwork is removed; see `docs/branding.md`. Earlier
   logos are kept on a new Logo & brand page in the docs.

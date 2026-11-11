@@ -61,4 +61,26 @@ public enum PlaceRecall {
         }
         return Array(sorted.prefix(max(0, limit)))
     }
+
+    // MARK: - Today's place review (issue #116)
+
+    /// Another saved place within this many meters of the matched one's distance makes the match a guess.
+    public static let ambiguityMargin: Double = 40
+    /// A home or work place matched at least this often is recognised, not guessed, even with a neighbour close by.
+    public static let habitualVisits = 3
+
+    /// Whether Today should ask the user which place a visit was. `candidates` are the visit's recall candidates.
+    ///
+    /// Asks only while the place is still the automatic match, and only when the user's saved places leave real doubt:
+    /// a saved place is near but the stop was matched to some other (unsaved) place, or a second saved place is about
+    /// as close as the matched one. A lone nearby saved place, and a home or work place recognised again and again, are
+    /// high-confidence matches and never asked about. A finished stop only: an ongoing one may still move.
+    public static func needsReview(_ v: Visit, candidates: [Candidate]) -> Bool {
+        guard !v.deleted, v.placeStatus == .auto, v.departure != nil, !candidates.isEmpty else { return false }
+        guard let current = candidates.first(where: { $0.id == v.placeID }) else { return true }
+        if current.place.category == .home || current.place.category == .workSchool, current.visitCount >= habitualVisits {
+            return false
+        }
+        return candidates.contains { $0.id != current.id && $0.distance <= current.distance + ambiguityMargin }
+    }
 }

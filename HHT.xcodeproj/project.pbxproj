@@ -42,6 +42,7 @@
 		B47A24F2783191BBF089F3EC /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 4DF2686F19AD7155DB77ED08 /* PrivacyInfo.xcprivacy */; };
 		B52499FB561C4152A8896C8E /* AgentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2505117CDE49BA7C2886CAA /* AgentView.swift */; };
 		B784B030DD84BF95953E593A /* StickerWidgets.swift in Sources */ = {isa = PBXBuildFile; fileRef = 547562DE9D36DA87638056CF /* StickerWidgets.swift */; };
+		BDEF48F68DE671AFD359D3D8 /* PlaceReviewViews.swift in Sources */ = {isa = PBXBuildFile; fileRef = 319F57AB561E9FCCF3454193 /* PlaceReviewViews.swift */; };
 		C9FAB60FD36BB8AED3D23251 /* SpendingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4F12A1CD63317F38D0A600D /* SpendingView.swift */; };
 		CC0119CC1B3CB500FF98CB79 /* HHTApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A1A92382C3C1A2201092CE29 /* HHTApp.swift */; };
 		CD9D346A13D380C7AC187B94 /* HistoryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A893397672D1738BEBB64118 /* HistoryView.swift */; };
@@ -90,6 +91,7 @@
 		112A11944067E24BC2270F2F /* AlternateWidgets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlternateWidgets.swift; sourceTree = "<group>"; };
 		2C7C175AD8BE3FB6B2F54954 /* FlightsAndPhases.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FlightsAndPhases.swift; sourceTree = "<group>"; };
 		2F723BF25119810CD3AE5ADD /* CoreFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CoreFlowTests.swift; sourceTree = "<group>"; };
+		319F57AB561E9FCCF3454193 /* PlaceReviewViews.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlaceReviewViews.swift; sourceTree = "<group>"; };
 		3321C1138F7322C1A90BE6AC /* InfoPlist.xcstrings */ = {isa = PBXFileReference; lastKnownFileType = text.json.xcstrings; path = InfoPlist.xcstrings; sourceTree = "<group>"; };
 		33E62737741B71F5D7EEB9A0 /* HHTUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = HHTUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		347CADD18533359EC7F11C5D /* HHTWidgets.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = HHTWidgets.entitlements; sourceTree = "<group>"; };
@@ -227,6 +229,7 @@
 				ABE1BD8E9C215B70B363144E /* ExploreMapView.swift */,
 				2C7C175AD8BE3FB6B2F54954 /* FlightsAndPhases.swift */,
 				A893397672D1738BEBB64118 /* HistoryView.swift */,
+				319F57AB561E9FCCF3454193 /* PlaceReviewViews.swift */,
 				71589A2C32BC9B00D1D61EF9 /* PlacesView.swift */,
 				495655A63CE92A5F9CAE8DE3 /* RootView.swift */,
 				8E3214E2F8FEC4777BA5B89F /* SettingsView.swift */,
@@ -456,6 +459,7 @@
 				85C3BED772CCA27C5872F1C2 /* LocationCollector.swift in Sources */,
 				8E1100B1172683C530C3A02F /* MotionSync.swift in Sources */,
 				06B9F74A77B1602EE5434A86 /* PlaceGeocoder.swift in Sources */,
+				BDEF48F68DE671AFD359D3D8 /* PlaceReviewViews.swift in Sources */,
 				608839344CE1FBFF228B6C6C /* PlacesView.swift in Sources */,
 				5DC16A0B78C0EB02DD5F9D02 /* RootView.swift in Sources */,
 				1D60E853138492F2AC27A245 /* SettingsView.swift in Sources */,
