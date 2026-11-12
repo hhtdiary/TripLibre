@@ -238,7 +238,8 @@ struct DayView: View {
             }
             .presentationDetents([.medium])
         }
-        .task(id: "\(model.revision)-\(day.timeIntervalSince1970)") { reload() }
+        // the recall radius too: Settings changes it without an edit, and the place reviews depend on it
+        .task(id: "\(model.revision)-\(day.timeIntervalSince1970)-\(recallRadius)") { reload() }
         .task(id: isToday) {
             // new fixes arrive without a revision bump; keep the pending tail current while today is on screen
             while isToday && !Task.isCancelled {
