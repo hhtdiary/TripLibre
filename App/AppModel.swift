@@ -241,6 +241,16 @@ final class AppModel: ObservableObject {
         revision += 1
     }
 
+    /// Visits whose place the user said not to ask about on Today (newest last, capped, issue #116). Skipping leaves
+    /// the place as it was matched, not confirmed: it can still be corrected from the visit.
+    private(set) var skippedPlaceReviews: [String] = UserDefaults.standard.stringArray(forKey: "placeReviewSkipped") ?? []
+
+    func skipPlaceReview(_ id: String) {
+        skippedPlaceReviews = Array((skippedPlaceReviews + [id]).suffix(300))
+        UserDefaults.standard.set(skippedPlaceReviews, forKey: "placeReviewSkipped")
+        revision += 1
+    }
+
     /// Run an edit; report errors; refresh views.
     func perform(_ body: () throws -> Void) {
         do {

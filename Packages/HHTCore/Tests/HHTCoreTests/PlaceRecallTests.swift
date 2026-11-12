@@ -176,4 +176,52 @@ import Testing
         #expect(try store.visit("m")?.placeStatus == .confirmed)
         #expect(try store.place("p")?.unit == nil)
     }
+
+    // MARK: - Today's place review (issue #116)
+
+    @Test func reviewAsksWhenSavedPlacesLeaveDoubt() throws {
+        let (store, v) = try seededStore()
+        let c = try store.recallCandidates(near: v.coordinate)
+        #expect(PlaceRecall.needsReview(v, candidates: c))                          // two floors of one building
+        var unsaved = v
+        unsaved.placeID = "auto"
+        #expect(PlaceRecall.needsReview(unsaved, candidates: c))                    // matched past saved places nearby
+    }
+
+    @Test func reviewSkipsHighConfidenceAndSettledVisits() throws {
+        let (store, v) = try seededStore()
+        let c = try store.recallCandidates(near: v.coordinate)
+        #expect(!PlaceRecall.needsReview(v, candidates: c.filter { $0.id == "f2" }))  // the only saved place near
+        #expect(!PlaceRecall.needsReview(v, candidates: []))
+        var ongoing = v
+        ongoing.departure = nil
+        #expect(!PlaceRecall.needsReview(ongoing, candidates: c))
+        var unspecified = v
+        unspecified.placeStatus = .unspecified
+        #expect(!PlaceRecall.needsReview(unspecified, candidates: c))
+    }
+
+    @Test func reviewSkipsHomeOrWorkRecognisedAgainAndAgain() {
+        let home = Place(id: "home", name: "Home", coordinate: Philly.home, radius: 80, category: .home, source: .manual)
+        let gym = Place(id: "gym", name: "Gym", coordinate: Philly.home, radius: 60, category: .gym, source: .manual)
+        let v = Visit(placeID: "home", arrival: Trajectory.date("2026-10-01 18:00"),
+                      departure: Trajectory.date("2026-10-01 23:00"), coordinate: Philly.home)
+        let gymNear = PlaceRecall.Candidate(place: gym, distance: 4, visitCount: 1)
+        #expect(!PlaceRecall.needsReview(v, candidates: [PlaceRecall.Candidate(place: home, distance: 4, visitCount: 3), gymNear]))
+        #expect(PlaceRecall.needsReview(v, candidates: [PlaceRecall.Candidate(place: home, distance: 4, visitCount: 2), gymNear]))
+    }
+
+    @Test func confirmingFromReviewUpdatesThatVisitAndEndsItsPrompt() throws {
+        let (store, v) = try seededStore()
+        let other = Visit(placeID: "f2", arrival: Trajectory.date("2026-10-02 09:00"),
+                          departure: Trajectory.date("2026-10-02 10:00"), coordinate: v.coordinate)
+        try store.upsertVisit(other)
+        try EditService(store: store).setVisitPlace(v.id, placeID: "f5")
+        let after = try #require(try store.visit(v.id))
+        #expect(after.placeID == "f5" && after.placeStatus == .confirmed)
+        #expect(!PlaceRecall.needsReview(after, candidates: try store.recallCandidates(near: after.coordinate)))
+        let untouched = try #require(try store.visit(other.id))
+        #expect(untouched.placeID == "f2" && untouched.placeStatus == .auto)
+        #expect(PlaceRecall.needsReview(untouched, candidates: try store.recallCandidates(near: untouched.coordinate)))
+    }
 }

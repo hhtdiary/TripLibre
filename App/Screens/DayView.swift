@@ -104,6 +104,9 @@ struct DayView: View {
     @State private var reviewCount = 0
     @State private var costTarget: CostSheet?
     @State private var showSpending = false
+    @State private var placeReviews: [PlaceReview] = []
+    @State private var showPlaceReviews = false
+    @AppStorage("placeRecallRadius") private var recallRadius = PlaceRecall.defaultRadius
 
     private var isToday: Bool { Calendar.current.isDateInToday(day) }
 
@@ -122,6 +125,11 @@ struct DayView: View {
             Section {
                 MascotSays(text: mascotLine).toonRow(top: 8, bottom: 8)
                 if isToday && !fixedDay { StampButton().toonRow(top: 4, bottom: 6) }
+                // one place to confirm at a time; the rest behind "More to check" (issue #116)
+                if let r = placeReviews.first {
+                    PlaceReviewCard(review: r, more: placeReviews.count - 1) { showPlaceReviews = true }
+                        .toonRow(top: 4, bottom: 6)
+                }
                 ForEach(costPrompts) { p in
                     CostPromptCard(prompt: p) { costTarget = CostSheet(target: p.target, day: day) }
                         .toonRow(top: 4, bottom: 6)
@@ -201,6 +209,7 @@ struct DayView: View {
         .sheet(item: $selectedVisit) { box in VisitDetailView(visitID: box.id).environmentObject(model) }
         .sheet(item: $costTarget) { c in CostEntrySheet(target: c.target, existing: c.existing, day: c.day).environmentObject(model) }
         .navigationDestination(isPresented: $showSpending) { SpendingView(period: .week) }
+        .sheet(isPresented: $showPlaceReviews) { PlaceReviewList(reviews: placeReviews).environmentObject(model) }
         .onReceive(model.$route) { r in
             guard let r, r == .settings || r == .stamp, !fixedDay else { return }
             model.route = nil
@@ -213,6 +222,7 @@ struct DayView: View {
             selectedVisit = nil
             costTarget = nil
             showSpending = false
+            showPlaceReviews = false
             model.stampNow()
         }
         // SettingsView sets its own title
@@ -228,7 +238,8 @@ struct DayView: View {
             }
             .presentationDetents([.medium])
         }
-        .task(id: "\(model.revision)-\(day.timeIntervalSince1970)") { reload() }
+        // the recall radius too: Settings changes it without an edit, and the place reviews depend on it
+        .task(id: "\(model.revision)-\(day.timeIntervalSince1970)-\(recallRadius)") { reload() }
         .task(id: isToday) {
             // new fixes arrive without a revision bump; keep the pending tail current while today is on screen
             while isToday && !Task.isCancelled {
@@ -346,6 +357,10 @@ struct DayView: View {
             if !acc.contains(m) { acc.append(m) }
         }.prefix(4))
         reviewCount = (try? model.store.reviewCount(since: Date().addingTimeInterval(-7 * 86_400))) ?? 0
+        // like the cost prompts: Today and the last 7 days only, while the stop is still remembered
+        placeReviews = fixedDay || Date().timeIntervalSince(day) >= 7 * 86_400 ? []
+            : PlaceReview.load(model.store, visits: data.visits, places: data.places, radius: recallRadius,
+                               skipped: Set(model.skippedPlaceReviews))
     }
 }
 
