@@ -9,7 +9,9 @@ class HHTUITestCase: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
         app = XCUIApplication()
-        app.launchArguments += ["-hhtUITest", "YES", "-onboarded", "YES", "-hhtTab", "0",
+        // `-appLanguage en`: the in-app language choice (Settings, or the welcome screen's menu) is saved on the
+        // simulator and would otherwise outlive the test that made it
+        app.launchArguments += ["-hhtUITest", "YES", "-onboarded", "YES", "-hhtTab", "0", "-appLanguage", "en",
                                 "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
         app.launch()
     }

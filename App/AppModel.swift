@@ -45,6 +45,8 @@ final class AppModel: ObservableObject {
     }
 
     private static func freshUITestDatabase() -> URL {
+        // like the database, one-time hints start over, so each test sees what a new user sees
+        UserDefaults.standard.removeObject(forKey: "diaryTipDismissed")
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("hht-uitest.sqlite")
         for suffix in ["", "-wal", "-shm"] { try? FileManager.default.removeItem(atPath: url.path + suffix) }
         return url
@@ -70,6 +72,19 @@ final class AppModel: ObservableObject {
             Task { @MainActor in await self?.runInference() }
         }
         widgets = WidgetBridge(model: self)
+    }
+
+    /// A model over a throwaway database, so the tutorial can open the real Visit, Place and Trip screens on its
+    /// sample day (issue #114). Edits made there go to `sampleStore` and nowhere else: this model has no widget
+    /// bridge, never launches, never runs inference, and borrows the app's collector and motion sync only because the
+    /// screens' type requires them (a second `CLLocationManager` would get the real one's region events).
+    init(sampleStore: TravelStore) {
+        store = sampleStore
+        engine = InferenceEngine(store: sampleStore)
+        edit = EditService(store: sampleStore)
+        collector = Self.shared.collector
+        motion = Self.shared.motion
+        geocoder = PlaceGeocoder(store: sampleStore)
     }
 
     private var launched = false

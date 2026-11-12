@@ -7,6 +7,22 @@ single summary, so release notes aren't kept anywhere else in the repository.
 
 ## Unreleased
 
+- **Sample-day tutorial**: the welcome screen now starts with a language menu (the same eleven choices as Settings ›
+  Language, applied at once) and offers **Try a demo**, a one-minute tutorial on a made-up day
+  ("You visited Mingming's Home"), and **Skip for now**. On the app's real diary rows and day map you select a stop,
+  name it, give it a place category and a trip purpose, correct a travel mode that was guessed as Car to Walk, and remove
+  a stop that never happened (a wait at a crossing), which joins the two walks around it back into one trip. Tapping the highlighted row opens the app's real Visit, Place
+  or Trip screen on the sample day (a throwaway in-memory database), and what you change there carries on in the
+  tutorial; each
+  step says which question the label answers (what you call it, what kind of place, why you went this time, how you got
+  there) and where the same edit is in your diary. Two closing steps explain how tracking works and what it can miss
+  (the "Always" permission, gaps when iOS stops the app, GPS drift, guessed modes) and recap the four labels. Every step
+  has Back, Next and Skip, and Next fills in the example answer. The sample day lives in memory only (`SampleDay`): it
+  is never written to the database, so it cannot reach the diary, stats, widgets, backups or exports. **Settings › Help**
+  has **Replay tutorial** and **How tracking works**; a one-time tip above the diary rows opens the tutorial for people
+  who skipped it or installed earlier; the Visit and Trip screens say in a line what the place name, category, purpose
+  and mode each mean (#114).
+
 - **Confirm places on Today**: a stop whose place is still a guess among your saved places nearby (two floors of one
   building, a saved place next door, or a saved place passed over for an unsaved one) gets a card on Today, like the cost
   prompts. One tap on a nearby saved place confirms it; **None of these** leaves the stop unspecified; **Choose or

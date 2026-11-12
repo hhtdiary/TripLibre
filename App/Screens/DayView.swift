@@ -107,6 +107,9 @@ struct DayView: View {
     @State private var placeReviews: [PlaceReview] = []
     @State private var showPlaceReviews = false
     @AppStorage("placeRecallRadius") private var recallRadius = PlaceRecall.defaultRadius
+    /// The one-line "tap a stop, tap a trip" tip above the rows, until it's waved off or the tutorial is opened from it.
+    @AppStorage("diaryTipDismissed") private var tipDismissed = false
+    @State private var showTutorial = false
 
     private var isToday: Bool { Calendar.current.isDateInToday(day) }
 
@@ -153,6 +156,10 @@ struct DayView: View {
                 if data.items.isEmpty && pendingTail == nil {
                     emptyState.toonRow()
                 } else {
+                    if !fixedDay && !tipDismissed && !data.items.isEmpty {
+                        DiaryTipCard(onShow: { showTutorial = true }, onDismiss: { tipDismissed = true })
+                            .toonRow(top: 5, bottom: 5)
+                    }
                     ForEach(data.items) { item in
                         switch item {
                         case .visit(let v, let p):
@@ -210,6 +217,12 @@ struct DayView: View {
         .sheet(item: $costTarget) { c in CostEntrySheet(target: c.target, existing: c.existing, day: c.day).environmentObject(model) }
         .navigationDestination(isPresented: $showSpending) { SpendingView(period: .week) }
         .sheet(isPresented: $showPlaceReviews) { PlaceReviewList(reviews: placeReviews).environmentObject(model) }
+        .fullScreenCover(isPresented: $showTutorial) {
+            TutorialView {
+                showTutorial = false
+                tipDismissed = true
+            }
+        }
         .onReceive(model.$route) { r in
             guard let r, r == .settings || r == .stamp, !fixedDay else { return }
             model.route = nil
@@ -223,6 +236,7 @@ struct DayView: View {
             costTarget = nil
             showSpending = false
             showPlaceReviews = false
+            showTutorial = false
             model.stampNow()
         }
         // SettingsView sets its own title

@@ -172,36 +172,22 @@ struct IDBox: Identifiable, Hashable { let id: String }
 struct OnboardingView: View {
     @EnvironmentObject var model: AppModel
     var done: () -> Void
+    /// The welcome offers the sample-day tutorial first (issue #114); trying it or skipping it both lead to the
+    /// permission page, so nothing here stands between a new user and their own diary.
+    @State private var page = Page.welcome
+    @State private var showTutorial = false
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+
+    private enum Page { case welcome, start }
 
     var body: some View {
         NavigationStack {
             ScrollView {
-                VStack(spacing: 18) {
-                    VStack(spacing: 12) {
-                        Mascot(size: 110)
-                        Text("Your private\ntravel diary")
-                            .font(.toon(34, .bold)).multilineTextAlignment(.center)
-                        Text("TripLibre records where you go, reconstructs your day into visits and trips (like a household travel survey for one), and lets you correct it in a couple of taps.")
-                            .font(.toon(15, .bold)).foregroundStyle(Toon.muted).multilineTextAlignment(.center)
+                Group {
+                    switch page {
+                    case .welcome: welcome
+                    case .start: start
                     }
-                    .padding(.top, 8)
-                    feature("lock.shield", Toon.sun, "Everything stays on this iPhone in a local SQLite database. No account, no server.", -1.5)
-                    feature("location", Toon.sky, "Location “Always” lets it log trips in the background. It uses GPS only while you're moving.", 1)
-                    feature("figure.walk.motion", Toon.lime, "Motion & Fitness activity helps tell walking, cycling and vehicles apart.", -1)
-                    feature("square.and.arrow.up", Toon.bubblegum, "Export CSV / JSON / GeoJSON / SQLite any time from Settings — for R, Python, QGIS.", 1.5)
-                    Text("After allowing “While Using”, iOS will later ask to upgrade to “Always”. Choose “Change to Always Allow”.")
-                        .font(.toon(12, .bold)).foregroundStyle(Toon.muted).multilineTextAlignment(.center)
-                    Button {
-                        model.collector.start()
-                        model.motion.requestPermission { model.collector.startMotionUpdatesIfAuthorized() }
-                        done()
-                    } label: {
-                        Text("Allow location & start").frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(ToonButtonStyle(fill: Toon.accent, height: 56, fontSize: 19, shadow: 5))
-                    Button("Not now") { done() }
-                        .font(.toon(15)).foregroundStyle(Toon.ink).underline()
-                        .frame(maxWidth: .infinity, minHeight: 44)
                 }
                 .foregroundStyle(Toon.ink)
                 .padding(20)
@@ -209,6 +195,114 @@ struct OnboardingView: View {
             .background(ToonBackground())
             .navigationTitle("Welcome")
             .toolbar(.hidden, for: .navigationBar)
+        }
+        .fullScreenCover(isPresented: $showTutorial) {
+            TutorialView(finishLabel: "Continue") {
+                showTutorial = false
+                page = .start
+            }
+        }
+    }
+
+    /// The first thing on the first screen (issue #114): the tutorial is only useful in a language you read, and
+    /// Settings is a long way off for someone who can't read the welcome. Applied at once; the choice is the one
+    /// Settings › Language shows afterwards.
+    private var languageMenu: some View {
+        Menu {
+            Picker("Language", selection: Binding(get: { Lang.selected }, set: { Lang.apply($0) })) {
+                ForEach(AppLanguage.allCases) { lang in Text(verbatim: lang.nativeName).tag(lang) }
+            }
+        } label: {
+            HStack(spacing: 6) {
+                Image(systemName: "globe").accessibilityHidden(true)
+                Text(verbatim: (AppLanguage(rawValue: Lang.code) ?? .english).nativeName)
+                Image(systemName: "chevron.down").font(.toon(11, .black)).accessibilityHidden(true)
+            }
+            .font(.toon(14, .heavy))
+            .foregroundStyle(Toon.ink)
+            .padding(.horizontal, 14)
+            .frame(minHeight: 44)
+            .toonCard(radius: 22, shadow: 3)
+        }
+        .accessibilityLabel("Language")
+        .accessibilityValue(Text(verbatim: (AppLanguage(rawValue: Lang.code) ?? .english).nativeName))
+        .accessibilityIdentifier("onboardingLanguage")
+        .frame(maxWidth: .infinity, alignment: .trailing)
+    }
+
+    private var welcome: some View {
+        VStack(spacing: 18) {
+            languageMenu
+            VStack(spacing: 12) {
+                Mascot(size: 110)
+                Text("Your private\ntravel diary")
+                    .font(.toon(34, .bold)).multilineTextAlignment(.center)
+                Text("TripLibre records where you go, reconstructs your day into visits and trips (like a household travel survey for one), and lets you correct it in a couple of taps.")
+                    .font(.toon(15, .bold)).foregroundStyle(Toon.muted).multilineTextAlignment(.center)
+            }
+            VStack(alignment: .leading, spacing: 12) {
+                HStack(spacing: 12) {
+                    ToonChip(symbol: "sparkles", color: Toon.sun, size: 44)
+                    VStack(alignment: .leading, spacing: 2) {
+                        Text("See it on a sample day").font(.toon(18, .heavy)).accessibilityAddTraits(.isHeader)
+                        Text("About a minute. Nothing is saved.").font(.toon(13, .bold)).foregroundStyle(Toon.muted)
+                    }
+                    .fixedSize(horizontal: false, vertical: true)
+                    Spacer(minLength: 0)
+                }
+                ToonFlow(spacing: 6) {
+                    ForEach(TutorialConcept.allCases, id: \.self) { c in
+                        Label(c.title, systemImage: c.symbol)
+                            .font(.toon(12, .heavy))
+                            .padding(.horizontal, 9).padding(.vertical, 4)
+                            .background(Capsule().fill(c.color))
+                            .overlay(Capsule().strokeBorder(Toon.ink, lineWidth: 2))
+                    }
+                }
+                Text("Name a stop, give it a category and a purpose, and fix a travel mode I guessed wrong.")
+                    .font(.toon(14, .bold)).fixedSize(horizontal: false, vertical: true)
+            }
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .toonCard(radius: 22, shadow: 5)
+            .tilt(-1)
+            Button { showTutorial = true } label: {
+                Label("Try a demo", systemImage: "play.fill").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(ToonButtonStyle(fill: Toon.accent, height: 56, fontSize: 19, shadow: 5))
+            .accessibilityIdentifier("onboardingDemo")
+            Button("Skip for now") { withAnimation(reduceMotion ? nil : .default) { page = .start } }
+                .font(.toon(15)).foregroundStyle(Toon.ink).underline()
+                .frame(maxWidth: .infinity, minHeight: 44)
+                .accessibilityIdentifier("onboardingSkipDemo")
+        }
+    }
+
+    private var start: some View {
+        VStack(spacing: 18) {
+            VStack(spacing: 10) {
+                Mascot(size: 72)
+                Text("Now, your own days")
+                    .font(.toon(28, .bold)).multilineTextAlignment(.center).accessibilityAddTraits(.isHeader)
+            }
+            .padding(.top, 8)
+            feature("lock.shield", Toon.sun, "Everything stays on this iPhone in a local SQLite database. No account, no server.", -1.5)
+            feature("location", Toon.sky, "Location “Always” lets it log trips in the background. It uses GPS only while you're moving.", 1)
+            feature("figure.walk.motion", Toon.lime, "Motion & Fitness activity helps tell walking, cycling and vehicles apart.", -1)
+            feature("square.and.arrow.up", Toon.bubblegum, "Export CSV / JSON / GeoJSON / SQLite any time from Settings — for R, Python, QGIS.", 1.5)
+            Text("After allowing “While Using”, iOS will later ask to upgrade to “Always”. Choose “Change to Always Allow”.")
+                .font(.toon(12, .bold)).foregroundStyle(Toon.muted).multilineTextAlignment(.center)
+            Button {
+                model.collector.start()
+                model.motion.requestPermission { model.collector.startMotionUpdatesIfAuthorized() }
+                done()
+            } label: {
+                Text("Allow location & start").frame(maxWidth: .infinity)
+            }
+            .buttonStyle(ToonButtonStyle(fill: Toon.accent, height: 56, fontSize: 19, shadow: 5))
+            Button("Not now") { done() }
+                .font(.toon(15)).foregroundStyle(Toon.ink).underline()
+                .frame(maxWidth: .infinity, minHeight: 44)
         }
     }
 

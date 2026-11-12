@@ -57,7 +57,9 @@ struct TripDetailView: View {
                     }
                     .font(.footnote)
                 }
-            } header: { Text("Mode").toonSectionText() }
+            } header: { Text("Mode").toonSectionText() } footer: {
+                Text("How you travelled. The automatic guess can be wrong: tap the mode you really used.").toonSectionText()
+            }
 
             Section {
                 if t.segments.count > 1 {

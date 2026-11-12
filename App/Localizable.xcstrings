@@ -4255,6 +4255,71 @@
         }
       }
     },
+    "A category belongs to the place: every visit here gets its icon and colour." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الفئة تخصّ المكان: كل زيارة إلى هنا تأخذ أيقونتها ولونها."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Kategorie gehört zum Ort: Jeder Aufenthalt hier bekommt ihr Symbol und ihre Farbe."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La categoría pertenece al lugar: cada visita aquí lleva su icono y su color."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "La catégorie appartient au lieu : chaque visite ici reprend son icône et sa couleur."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "カテゴリは場所に付きます。ここでの滞在はすべて、そのアイコンと色になります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "카테고리는 장소에 붙어요. 이곳의 모든 방문에 그 아이콘과 색이 적용돼요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "A categoria pertence ao lugar: cada visita aqui recebe seu ícone e sua cor."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Категория относится к месту: каждый визит сюда получает её значок и цвет."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "类别属于地点：以后每次在这里停留，都会带上它的图标和颜色。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "類別屬於地點：以後每次在這裡停留，都會帶上它的圖示和顏色。"
+          }
+        }
+      }
+    },
     "A fresh week. Where to first?" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4385,6 +4450,71 @@
         }
       }
     },
+    "A purpose belongs to one visit. The category suggests one, but the same place can mean a visit today and a pick-up tomorrow." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الغرض يخصّ زيارة واحدة. الفئة تقترح غرضًا، لكن المكان نفسه قد يكون زيارة اليوم وتوصيلة غدًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Zweck gehört zu einem einzelnen Aufenthalt. Die Kategorie schlägt einen vor, aber derselbe Ort kann heute ein Besuch sein und morgen nur ein Abholen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El motivo pertenece a una sola visita. La categoría sugiere uno, pero el mismo lugar puede ser una visita hoy y una recogida mañana."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le motif appartient à une seule visite. La catégorie en suggère un, mais le même lieu peut être une visite aujourd’hui et un simple passage pour chercher quelqu’un demain."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目的は1回の滞在に付きます。カテゴリから候補が出ますが、同じ場所でも今日は訪問、明日は送迎ということがあります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "목적은 한 번의 방문에 붙어요. 카테고리가 하나를 제안하지만, 같은 장소라도 오늘은 방문이고 내일은 픽업일 수 있어요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O motivo pertence a uma única visita. A categoria sugere um, mas o mesmo lugar pode ser uma visita hoje e uma carona amanhã."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цель относится к одному визиту. Категория подсказывает её, но одно и то же место сегодня может быть визитом в гости, а завтра — заездом, чтобы кого-то забрать."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目的属于某一次停留。类别会给出建议，但同一个地点今天可能是串门，明天可能是接人。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "目的屬於某一次停留。類別會給出建議，但同一個地點今天可能是拜訪，明天可能是接人。"
+          }
+        }
+      }
+    },
     "A quiet day. Nothing recorded here." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -4511,6 +4641,201 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "平靜的一週，沒有記錄到行程。"
+          }
+        }
+      }
+    },
+    "A slow car, a bus and a bike can look alike to a phone. Trips I'm unsure about ask you to check." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "السيارة البطيئة والحافلة والدراجة قد تبدو متشابهة للهاتف. الرحلات التي لست متأكدًا منها تطلب منك التحقق."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Für ein Handy sehen ein langsames Auto, ein Bus und ein Fahrrad ähnlich aus. Bei Fahrten, bei denen ich unsicher bin, bitte ich dich nachzusehen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para un teléfono, un coche lento, un autobús y una bici se parecen. Los viajes de los que no estoy seguro te piden que los revises."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pour un téléphone, une voiture lente, un bus et un vélo se ressemblent. Les trajets dont je doute vous demandent de vérifier."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スマートフォンには、ゆっくり走る車とバスと自転車の区別がつきにくいです。自信のない移動は確認をお願いします。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "휴대폰에게는 느린 차와 버스, 자전거가 비슷해 보여요. 제가 확신이 없는 이동은 확인을 부탁드려요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Para um celular, um carro lento, um ônibus e uma bicicleta se parecem. As viagens sobre as quais não tenho certeza pedem que você confira."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Для телефона медленная машина, автобус и велосипед выглядят похоже. Поездки, в которых я не уверен, попросят вас проверить."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "对手机来说，慢速行驶的汽车、公交车和自行车看起来很像。我不确定的行程会请你检查。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "對手機來說，慢速行駛的汽車、公車和自行車看起來很像。我不確定的行程會請你檢查。"
+          }
+        }
+      }
+    },
+    "A stop that never was" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "توقف لم يحدث قط"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ein Halt, den es nie gab"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Una parada que nunca existió"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un arrêt qui n’a jamais eu lieu"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "実際にはなかった立ち寄り"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실제로는 없었던 정류 지점"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Uma parada que nunca existiu"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Остановка, которой не было"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一个并不存在的停留点"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一個並不存在的停留點"
+          }
+        }
+      }
+    },
+    "About a minute. Nothing is saved." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "نحو دقيقة. لا يُحفظ شيء."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Etwa eine Minute. Nichts wird gespeichert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Un minuto, más o menos. No se guarda nada."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Environ une minute. Rien n’est enregistré."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "約1分。何も保存されません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "약 1분이에요. 아무것도 저장되지 않아요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cerca de um minuto. Nada é salvo."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Около минуты. Ничего не сохраняется."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大约一分钟。不会保存任何内容。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "大約一分鐘。不會儲存任何內容。"
           }
         }
       }
@@ -6595,6 +6920,71 @@
         }
       }
     },
+    "Allow “Always”" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اسمح بـ«دائمًا»"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "„Immer“ erlauben"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permite «Siempre»"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Autorisez « Toujours »"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「常に」を許可"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "‘항상’ 허용하기"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Permita “Sempre”"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Разрешите «Всегда»"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "选择“始终”允许"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "選擇「永遠」允許"
+          }
+        }
+      }
+    },
     "Already stamped at %@, so I kept just one." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7635,6 +8025,71 @@
         }
       }
     },
+    "Back" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "رجوع"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zurück"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Atrás"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Retour"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "戻る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이전"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voltar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Назад"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上一步"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "上一步"
+          }
+        }
+      }
+    },
     "Back up database now" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -7696,6 +8151,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "立即備份資料庫"
+          }
+        }
+      }
+    },
+    "Background recording needs it. With “While Using” only, trips made while the app is closed can be missed." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التسجيل في الخلفية يحتاج إليه. مع «أثناء الاستخدام» فقط، قد تفوت الرحلات التي تتم والتطبيق مغلق."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Die Aufzeichnung im Hintergrund braucht das. Mit nur „Beim Verwenden“ können Fahrten fehlen, die du bei geschlossener App machst."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El registro en segundo plano lo necesita. Con solo «Al usar la app», pueden perderse los viajes hechos con la app cerrada."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "L’enregistrement en arrière-plan en a besoin. Avec « Lorsque l’app est active » seulement, les trajets faits pendant que l’app est fermée peuvent être manqués."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "バックグラウンドでの記録に必要です。「使用中のみ」だけだと、アプリを閉じている間の移動を記録できないことがあります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "백그라운드 기록에 필요해요. ‘앱을 사용하는 동안’만 허용하면 앱이 닫혀 있을 때의 이동을 놓칠 수 있어요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O registro em segundo plano precisa disso. Só com “Durante o Uso”, viagens feitas com o app fechado podem não ser registradas."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Это нужно для записи в фоне. Если выбрать только «При использовании», поездки при закрытом приложении могут не записаться."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "后台记录需要它。如果只选“使用 App 期间”，App 关闭时的行程可能会漏记。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "背景記錄需要它。如果只選「使用 App 期間」，App 關閉時的行程可能會漏記。"
           }
         }
       }
@@ -8606,6 +9126,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "將此地點確認為這次停留的地點"
+          }
+        }
+      }
+    },
+    "Continue" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "متابعة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weiter"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuer"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "続ける"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "계속"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Continuar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Продолжить"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "继续"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "繼續"
           }
         }
       }
@@ -11275,6 +11860,71 @@
         }
       }
     },
+    "Days can have gaps" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "قد تكون في الأيام فجوات"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tage können Lücken haben"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los días pueden tener huecos"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Une journée peut avoir des trous"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "1日に抜けが出ることがあります"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "하루에 빈틈이 생길 수 있어요"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os dias podem ter lacunas"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В дне могут быть пропуски"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一天的记录可能有空缺"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "一天的記錄可能有空缺"
+          }
+        }
+      }
+    },
     "Definitions" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13412,6 +14062,266 @@
         }
       }
     },
+    "Four labels, four different questions. This was a sample: nothing was saved to your diary or your exports." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أربع تسميات، أربعة أسئلة مختلفة. كان هذا مثالًا: لم يُحفظ شيء في يومياتك ولا في ملفات التصدير."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vier Angaben, vier verschiedene Fragen. Das war ein Beispiel: Nichts davon wurde in deinem Tagebuch oder deinen Exporten gespeichert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cuatro etiquetas, cuatro preguntas distintas. Esto era un ejemplo: no se guardó nada en tu diario ni en tus exportaciones."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quatre étiquettes, quatre questions différentes. C’était un exemple : rien n’a été enregistré dans votre journal ni dans vos exports."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "4つのラベルは、4つの別々の問いに答えます。これはサンプルです。日記にも書き出しにも何も保存されていません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "네 가지 라벨, 네 가지 서로 다른 질문이에요. 이건 샘플이었어요. 다이어리나 내보내기에는 아무것도 저장되지 않았어요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Quatro rótulos, quatro perguntas diferentes. Isto foi um exemplo: nada foi salvo no seu diário nem nas suas exportações."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Четыре метки — четыре разных вопроса. Это был пример: ничего не сохранено ни в вашем дневнике, ни в экспорте."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "四个标签，回答四个不同的问题。这只是示例：没有任何内容保存到你的日记或导出文件中。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "四個標籤，回答四個不同的問題。這只是範例：沒有任何內容儲存到你的日記或匯出檔案中。"
+          }
+        }
+      }
+    },
+    "Gone. The two walks are one trip again, in the list and on the map." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تم الحذف. عاد المشيان رحلة واحدة، في القائمة وعلى الخريطة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weg. Die beiden Fußwege sind wieder eine Fahrt, in der Liste und auf der Karte."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Listo. Las dos caminatas vuelven a ser un solo viaje, en la lista y en el mapa."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supprimé. Les deux marches ne font à nouveau qu’un seul trajet, dans la liste comme sur la carte."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "削除しました。2つの徒歩移動は、リストでも地図でも1つの移動に戻りました。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "지웠어요. 두 번의 도보 이동이 목록과 지도에서 다시 하나의 이동이 됐어요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pronto. As duas caminhadas voltaram a ser uma só viagem, na lista e no mapa."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Готово. Две прогулки снова стали одной поездкой — и в списке, и на карте."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已删除。两段步行重新合并成一段行程，列表和地图上都是如此。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "已刪除。兩段步行重新合併成一段行程，列表和地圖上都是如此。"
+          }
+        }
+      }
+    },
+    "Got it" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فهمت"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verstanden"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entendido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Compris"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "わかった"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "알겠어요"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Entendi"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Понятно"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "知道了"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "知道了"
+          }
+        }
+      }
+    },
+    "GPS drifts" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الـGPS ينحرف"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS ist ungenau"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El GPS se desvía"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le GPS dérive"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS はずれることがあります"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS는 흔들려요"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O GPS oscila"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS «плавает»"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS 会漂移"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "GPS 會漂移"
+          }
+        }
+      }
+    },
     "Guessed: %@" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13473,6 +14383,526 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "推測：%@"
+          }
+        }
+      }
+    },
+    "Help" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "المساعدة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Hilfe"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ayuda"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Aide"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ヘルプ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "도움말"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ajuda"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Справка"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "帮助"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "說明"
+          }
+        }
+      }
+    },
+    "How tracking works" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كيف يعمل التتبّع"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "So funktioniert die Aufzeichnung"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cómo funciona el registro"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment fonctionne le suivi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記録のしくみ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "기록은 이렇게 작동해요"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como o registro funciona"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Как работает запись"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "记录是如何工作的"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "記錄是如何運作的"
+          }
+        }
+      }
+    },
+    "How you got there" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كيف وصلت إلى هناك"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie du hingekommen bist"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cómo llegaste"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment vous y êtes allé"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "どうやって行ったか"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "어떻게 갔는지"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como você chegou lá"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Как вы туда добрались"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你是怎么去的"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你是怎麼去的"
+          }
+        }
+      }
+    },
+    "How you travelled. The automatic guess can be wrong: tap the mode you really used." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كيف تنقّلت. قد يخطئ التخمين التلقائي: اضغط على الوسيلة التي استخدمتها فعلًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie du unterwegs warst. Die automatische Schätzung kann falsch sein: Tippe das Verkehrsmittel an, das du wirklich benutzt hast."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cómo viajaste. La estimación automática puede fallar: toca el modo que usaste de verdad."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Comment vous vous êtes déplacé. L’estimation automatique peut se tromper : touchez le mode réellement utilisé."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "どうやって移動したかです。自動の推測はまちがうことがあります。実際に使った交通手段をタップしてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "어떻게 이동했는지예요. 자동 추측은 틀릴 수 있어요. 실제로 이용한 수단을 탭하세요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como você viajou. A estimativa automática pode errar: toque no modo que você realmente usou."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Как вы добирались. Автоматическая догадка может быть неверной: нажмите способ, которым вы действительно пользовались."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你是怎么出行的。自动推测可能有误：请轻点你实际使用的方式。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你是怎麼移動的。自動推測可能有誤：請點一下你實際使用的方式。"
+          }
+        }
+      }
+    },
+    "I guessed %@, but %@ in %@ is walking pace. A dashed card means I'm unsure: pick how you really travelled." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "خمّنتُ «%@»، لكن %@ في %@ هي سرعة المشي. البطاقة المتقطعة تعني أنني غير متأكد: اختر كيف تنقّلت فعلًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ich habe „%@“ geraten, aber %@ in %@ ist Gehtempo. Eine gestrichelte Karte heißt, dass ich unsicher bin: Wähle, wie du wirklich unterwegs warst."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Supuse «%@», pero %@ en %@ es ritmo de caminata. Una tarjeta con borde discontinuo significa que no estoy seguro: elige cómo viajaste de verdad."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "J’ai deviné « %@ », mais %@ en %@, c’est une allure de marche. Une carte en pointillés signifie que j’hésite : choisissez comment vous vous êtes vraiment déplacé."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "「%@」と推測しましたが、%@を%@というのは歩く速さです。点線のカードは自信がないという意味です。実際の交通手段を選んでください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "‘%@’(이)라고 추측했지만 %@를 %@에 간 건 걷는 속도예요. 점선 카드는 제가 확신이 없다는 뜻이에요. 실제로 어떻게 이동했는지 골라 주세요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Eu chutei “%@”, mas %@ em %@ é ritmo de caminhada. Um cartão tracejado significa que não tenho certeza: escolha como você realmente viajou."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Я предположил «%@», но %@ за %@ — это скорость пешехода. Пунктирная карточка означает, что я не уверен: выберите, как вы добирались на самом деле."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我猜的是%@，但 %@ 用了 %@，这是步行的速度。虚线卡片表示我不确定：请选择你实际的出行方式。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "我猜的是%@，但 %@ 用了 %@，這是步行的速度。虛線卡片表示我不確定：請選擇你實際的交通方式。"
+          }
+        }
+      }
+    },
+    "If the iPhone is off, has no signal, or iOS stops the app in the background, part of a day can go missing. You can correct the diary afterwards." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إذا كان iPhone مطفأً أو بلا إشارة، أو أوقف iOS التطبيق في الخلفية، فقد يغيب جزء من اليوم. يمكنك تصحيح اليوميات لاحقًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wenn das iPhone aus ist, kein Signal hat oder iOS die App im Hintergrund beendet, kann ein Teil des Tages fehlen. Du kannst das Tagebuch nachträglich korrigieren."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si el iPhone está apagado, sin señal, o iOS detiene la app en segundo plano, puede faltar parte del día. Puedes corregir el diario después."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Si l’iPhone est éteint, sans réseau, ou si iOS arrête l’app en arrière-plan, une partie de la journée peut manquer. Vous pouvez corriger le journal après coup."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone の電源が切れている、電波がない、iOS がバックグラウンドでアプリを止めた、といった場合は1日の一部が抜けることがあります。日記はあとから直せます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "iPhone이 꺼져 있거나 신호가 없거나 iOS가 백그라운드에서 앱을 멈추면 하루의 일부가 빠질 수 있어요. 다이어리는 나중에 고칠 수 있어요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Se o iPhone estiver desligado, sem sinal, ou se o iOS encerrar o app em segundo plano, parte do dia pode faltar. Você pode corrigir o diário depois."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Если iPhone выключен, нет сигнала или iOS остановила приложение в фоне, часть дня может пропасть. Дневник можно исправить позже."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如果 iPhone 关机、没有信号，或者 iOS 在后台停止了 App，一天中的一部分可能会缺失。你可以事后修正日记。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "如果 iPhone 關機、沒有訊號，或者 iOS 在背景停止了 App，一天中的一部分可能會缺失。你可以事後修正日記。"
+          }
+        }
+      }
+    },
+    "In your diary: %@" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في يومياتك: %@"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In deinem Tagebuch: %@"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En tu diario: %@"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dans votre journal : %@"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あなたの日記では：%@"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내 다이어리에서: %@"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "No seu diário: %@"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В вашем дневнике: %@"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在你的日记里：%@"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在你的日記裡：%@"
+          }
+        }
+      }
+    },
+    "Indoors and between tall buildings a stop can land a street away, or a short trip can appear that never happened. Move it or remove it." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في الأماكن المغلقة وبين المباني العالية قد يقع التوقف على بُعد شارع، أو تظهر رحلة قصيرة لم تحدث. انقله أو احذفه."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "In Gebäuden und zwischen hohen Häusern kann ein Halt eine Straße weiter landen oder eine kurze Fahrt auftauchen, die es nie gab. Verschiebe oder entferne sie."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En interiores y entre edificios altos, una parada puede caer a una calle de distancia, o puede aparecer un viaje corto que nunca ocurrió. Muévelo o elimínalo."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En intérieur et entre de grands immeubles, un arrêt peut se retrouver une rue plus loin, ou un court trajet qui n’a jamais eu lieu peut apparaître. Déplacez-le ou supprimez-le."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "屋内や高いビルの間では、立ち寄りが1本隣の通りにずれたり、実際にはなかった短い移動が現れたりします。移動するか削除してください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실내나 높은 건물 사이에서는 정류 지점이 한 블록 옆에 찍히거나, 실제로 없었던 짧은 이동이 생길 수 있어요. 옮기거나 지우면 돼요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Em ambientes fechados e entre prédios altos, uma parada pode cair a uma rua de distância, ou pode aparecer uma viagem curta que nunca aconteceu. Mova ou remova."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В помещении и между высокими зданиями остановка может оказаться на соседней улице, или появится короткая поездка, которой не было. Переместите или удалите её."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在室内或高楼之间，停留点可能偏到隔壁街，也可能出现一段并不存在的短行程。你可以移动或删除它。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "在室內或高樓之間，停留點可能偏到隔壁街，也可能出現一段並不存在的短行程。你可以移動或刪除它。"
           }
         }
       }
@@ -13542,6 +14972,136 @@
         }
       }
     },
+    "Mingming's Home" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "بيت مينغ مينغ"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Bei Mingming"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Casa de Mingming"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Chez Mingming"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ミンミンの家"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "밍밍네 집"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Casa da Mingming"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Дом Минмин"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "明明家"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "明明家"
+          }
+        }
+      }
+    },
+    "Modes are guesses" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وسائل التنقل تخمينات"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verkehrsmittel sind geschätzt"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Los modos son estimaciones"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Les modes sont des estimations"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "交通手段は推測です"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이동 수단은 추측이에요"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Os modos são estimativas"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Способ передвижения — это догадка"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出行方式是推测出来的"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "交通方式是推測出來的"
+          }
+        }
+      }
+    },
     "More to check (%lld)" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13607,6 +15167,396 @@
         }
       }
     },
+    "Name a stop, give it a category and a purpose, and fix a travel mode I guessed wrong." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "سمِّ توقفًا، وحدّد له فئة وغرضًا، وصحّح وسيلة تنقل خمّنتها خطأ."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Benenne einen Halt, gib ihm eine Kategorie und einen Zweck, und korrigiere ein Verkehrsmittel, das ich falsch geraten habe."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ponle nombre a una parada, dale una categoría y un motivo, y corrige un modo de transporte que adiviné mal."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nommez un arrêt, donnez-lui une catégorie et un motif, et corrigez un mode de transport que j’ai mal deviné."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "立ち寄りに名前を付け、カテゴリと目的を設定し、私がまちがえて推測した交通手段を直してみましょう。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "정류 지점에 이름을 짓고, 카테고리와 목적을 정하고, 제가 잘못 추측한 이동 수단을 고쳐 보세요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dê nome a uma parada, defina uma categoria e um motivo, e corrija um modo de transporte que eu errei."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Назовите остановку, задайте ей категорию и цель и исправьте способ передвижения, который я угадал неверно."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "给一个停留点命名，设置类别和目的，再修正一个我猜错的出行方式。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "為一個停留點命名，設定類別和目的，再修正一個我猜錯的交通方式。"
+          }
+        }
+      }
+    },
+    "Next" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "التالي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Weiter"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Siguiente"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Suivant"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次へ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다음"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Avançar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Далее"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一步"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "下一步"
+          }
+        }
+      }
+    },
+    "Now, your own days" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "والآن، أيامك أنت"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Jetzt deine eigenen Tage"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ahora, tus propios días"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "À présent, vos propres journées"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "次は、あなた自身の毎日を"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이제 나의 하루를 기록해요"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Agora, os seus próprios dias"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "А теперь — ваши собственные дни"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "现在，记录你自己的日子"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "現在，記錄你自己的日子"
+          }
+        }
+      }
+    },
+    "On the walk home you waited at a crossing, and I took it for a stop. I get this wrong sometimes: tell me it wasn't one." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "في طريق العودة مشيًا انتظرتَ عند تقاطع، فحسبته توقفًا. أخطئ هكذا أحيانًا: أخبرني أنه لم يكن توقفًا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Auf dem Heimweg zu Fuß hast du an einer Kreuzung gewartet, und ich habe das für einen Halt gehalten. Das passiert mir manchmal: Sag mir, dass es keiner war."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Al volver a casa a pie esperaste en un cruce y lo tomé por una parada. A veces me equivoco así: dime que no lo fue."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "En rentrant à pied, vous avez attendu à un carrefour et j’ai pris cela pour un arrêt. Il m’arrive de me tromper ainsi : dites-moi que ce n’en était pas un."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "歩いて帰る途中、交差点で待っていたのを立ち寄りだと判断してしまいました。こういうまちがいは時々あります。立ち寄りではなかったと教えてください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "걸어서 집에 가는 길에 건널목에서 기다린 것을 제가 정류 지점으로 착각했어요. 가끔 이렇게 틀려요. 정류 지점이 아니었다고 알려 주세요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voltando a pé para casa, você esperou em um cruzamento e eu achei que era uma parada. Às vezes eu erro assim: diga que não foi."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "По дороге домой пешком вы ждали на перекрёстке, а я принял это за остановку. Иногда я так ошибаюсь: скажите мне, что это была не остановка."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "走路回家时你在路口等了一会儿，我把它当成了一次停留。我有时会这样判断错：告诉我这不是停留。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "走路回家時你在路口等了一會兒，我把它當成了一次停留。我有時會這樣判斷錯：告訴我這不是停留。"
+          }
+        }
+      }
+    },
+    "Place category" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "فئة المكان"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ortskategorie"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Categoría del lugar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Catégorie du lieu"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "場所のカテゴリ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "장소 카테고리"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Categoria do lugar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Категория места"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "地点类别"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "地點類別"
+          }
+        }
+      }
+    },
+    "Place name" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اسم المكان"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ortsname"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nombre del lugar"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nom du lieu"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "場所の名前"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "장소 이름"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Nome do lugar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Название места"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "地点名称"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "地點名稱"
+          }
+        }
+      }
+    },
     "Places to check" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -13668,6 +15618,721 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "待確認的地點"
+          }
+        }
+      }
+    },
+    "Replay tutorial" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "إعادة الدليل التعليمي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tutorial erneut ansehen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Repetir el tutorial"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Revoir le tutoriel"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チュートリアルをもう一度"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "튜토리얼 다시 보기"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Rever o tutorial"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пройти обучение ещё раз"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重看教程"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "重看教學"
+          }
+        }
+      }
+    },
+    "Sample day" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يوم تجريبي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Beispieltag"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Día de ejemplo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Journée d’exemple"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サンプルの1日"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "샘플 하루"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dia de exemplo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пример дня"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "示例日"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "範例日"
+          }
+        }
+      }
+    },
+    "See it on a sample day" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جرّبه على يوم تجريبي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Probier es an einem Beispieltag aus"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pruébalo con un día de ejemplo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Découvrez-le sur une journée d’exemple"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "サンプルの1日で試す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "샘플 하루로 체험해 보기"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Veja com um dia de exemplo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Посмотрите на примере дня"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用示例日体验一下"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "用範例日體驗一下"
+          }
+        }
+      }
+    },
+    "See the real page" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "عرض الصفحة الحقيقية"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Echte Seite ansehen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver la página real"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Voir la vraie page"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "実際のページを見る"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "실제 페이지 보기"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ver a página real"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Открыть настоящую страницу"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查看真实页面"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "查看真實頁面"
+          }
+        }
+      }
+    },
+    "Show me" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "أرِني"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Zeig’s mir"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Enséñame"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Montrez-moi"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "やってみる"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "보여 주세요"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mostrar"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Показать"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "演示给我看"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "示範給我看"
+          }
+        }
+      }
+    },
+    "Skip" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "تخطَّ"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Überspringen"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Omitir"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passer"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "スキップ"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "건너뛰기"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pular"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Пропустить"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "跳过"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "略過"
+          }
+        }
+      }
+    },
+    "Step %lld of %lld" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الخطوة %lld من %lld"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Schritt %lld von %lld"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Paso %lld de %lld"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Étape %lld sur %lld"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ステップ %lld / %lld"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "%lld단계 / 총 %lld단계"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Passo %lld de %lld"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Шаг %lld из %lld"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第 %lld 步，共 %lld 步"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "第 %lld 步，共 %lld 步"
+          }
+        }
+      }
+    },
+    "Tap a stop to name it. Tap a trip to fix how you travelled." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "اضغط على توقف لتسميته. اضغط على رحلة لتصحيح وسيلة التنقل."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tippe einen Halt an, um ihn zu benennen. Tippe eine Fahrt an, um das Verkehrsmittel zu korrigieren."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toca una parada para ponerle nombre. Toca un viaje para corregir cómo viajaste."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Touchez un arrêt pour le nommer. Touchez un trajet pour corriger le mode de transport."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "立ち寄りをタップして名前を付けられます。移動をタップして交通手段を直せます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "정류 지점을 탭하면 이름을 지을 수 있어요. 이동을 탭하면 이동 수단을 고칠 수 있어요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Toque em uma parada para dar um nome. Toque em uma viagem para corrigir como você viajou."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Нажмите на остановку, чтобы назвать её. Нажмите на поездку, чтобы исправить способ передвижения."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "轻点停留点可为它命名。轻点行程可修正出行方式。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "點一下停留點可為它命名。點一下行程可修正交通方式。"
+          }
+        }
+      }
+    },
+    "The name is what you call this place; its category is the kind of place. Both apply to every visit here." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "الاسم هو ما تسمّي به هذا المكان، والفئة هي نوع المكان. كلاهما ينطبق على كل زيارة إلى هنا."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Der Name ist, wie du diesen Ort nennst; die Kategorie ist die Art des Ortes. Beides gilt für jeden Aufenthalt hier."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El nombre es como llamas a este lugar; la categoría es el tipo de lugar. Ambos se aplican a todas las visitas aquí."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le nom est celui que vous donnez à ce lieu ; la catégorie est le type de lieu. Les deux s’appliquent à toutes les visites ici."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名前はこの場所のあなたの呼び名、カテゴリは場所の種類です。どちらも、ここでのすべての滞在に適用されます。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이름은 내가 이 장소를 부르는 말이고, 카테고리는 장소의 종류예요. 둘 다 이곳의 모든 방문에 적용돼요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O nome é como você chama este lugar; a categoria é o tipo de lugar. Os dois valem para todas as visitas aqui."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Название — это то, как вы называете это место; категория — это тип места. И то и другое относится ко всем визитам сюда."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名称是你对这个地点的叫法；类别是它属于哪一类地点。两者适用于在这里的每一次停留。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "名稱是你對這個地點的叫法；類別是它屬於哪一類地點。兩者適用於在這裡的每一次停留。"
+          }
+        }
+      }
+    },
+    "The tutorial uses a sample day. Nothing in it is saved, counted or exported." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يستخدم الدليل التعليمي يومًا تجريبيًا. لا يُحفظ منه شيء ولا يُحتسب ولا يُصدَّر."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Das Tutorial verwendet einen Beispieltag. Nichts daraus wird gespeichert, gezählt oder exportiert."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "El tutorial usa un día de ejemplo. Nada de él se guarda, se cuenta ni se exporta."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le tutoriel utilise une journée d’exemple. Rien de ce qu’il contient n’est enregistré, compté ni exporté."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "チュートリアルではサンプルの1日を使います。その内容は保存も集計も書き出しもされません。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "튜토리얼은 샘플 하루를 사용해요. 그 안의 어떤 것도 저장되거나 집계되거나 내보내지지 않아요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O tutorial usa um dia de exemplo. Nada dele é salvo, contado ou exportado."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "В обучении используется пример дня. Ничего из него не сохраняется, не учитывается и не экспортируется."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "教程使用的是示例日。其中的内容不会被保存、统计或导出。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "教學使用的是範例日。其中的內容不會被儲存、統計或匯出。"
+          }
+        }
+      }
+    },
+    "Travel mode" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "وسيلة التنقل"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Verkehrsmittel"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modo de transporte"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Mode de transport"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "交通手段"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이동 수단"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Modo de transporte"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Способ передвижения"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出行方式"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "交通方式"
           }
         }
       }
@@ -36735,6 +39400,136 @@
         }
       }
     },
+    "Trip purpose" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "غرض الرحلة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wegezweck"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motivo del viaje"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motif du déplacement"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "移動の目的"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이동 목적"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Motivo da viagem"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Цель поездки"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出行目的"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "出行目的"
+          }
+        }
+      }
+    },
+    "TripLibre records by itself in the background. Four things to keep in mind:" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يسجّل TripLibre تلقائيًا في الخلفية. أربعة أمور يجدر تذكّرها:"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre zeichnet von selbst im Hintergrund auf. Vier Dinge solltest du wissen:"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre registra solo en segundo plano. Cuatro cosas a tener en cuenta:"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre enregistre tout seul en arrière-plan. Quatre choses à garder en tête :"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre はバックグラウンドで自動的に記録します。覚えておきたいことが4つあります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre는 백그라운드에서 알아서 기록해요. 기억해 둘 네 가지가 있어요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O TripLibre registra sozinho em segundo plano. Quatro coisas para lembrar:"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre записывает сам в фоне. Стоит помнить о четырёх вещах:"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre 会在后台自动记录。有四件事要记住："
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre 會在背景自動記錄。有四件事要記住："
+          }
+        }
+      }
+    },
     "TripLibre records where you go, reconstructs your day into visits and trips (like a household travel survey for one), and lets you correct it in a couple of taps." : {
       "extractionState" : "manual",
       "localizations" : {
@@ -36861,6 +39656,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "關閉設定後，TripLibre 會切換到新語言。位置權限提示會在下次啟動後生效。"
+          }
+        }
+      }
+    },
+    "TripLibre turns where your iPhone goes into stops and the trips between them. The highlighted stop has no name yet. Tap it to see its real page, then tap Done to come back." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يحوّل TripLibre الأماكن التي يمرّ بها iPhone إلى توقفات ورحلات بينها. التوقف المميَّز بلا اسم بعد. اضغط عليه لترى صفحته الحقيقية، ثم اضغط «تم» للعودة."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre macht aus den Wegen deines iPhones Halte und die Fahrten dazwischen. Der hervorgehobene Halt hat noch keinen Namen. Tippe ihn an, um seine echte Seite zu sehen, und dann auf „Fertig“, um zurückzukommen."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre convierte los lugares por donde pasa tu iPhone en paradas y en los viajes entre ellas. La parada resaltada aún no tiene nombre. Tócala para ver su página real y luego toca OK para volver."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre transforme les déplacements de votre iPhone en arrêts et en trajets entre eux. L’arrêt mis en évidence n’a pas encore de nom. Touchez-le pour voir sa vraie page, puis touchez OK pour revenir."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre は iPhone の移動を、立ち寄りとその間の移動に整理します。強調表示されている立ち寄りには、まだ名前がありません。タップして実際の詳細ページを見てから、「完了」をタップして戻ってください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre는 iPhone이 지나간 곳을 정류 지점과 그 사이의 이동으로 정리해요. 강조된 정류 지점에는 아직 이름이 없어요. 탭해서 실제 상세 페이지를 본 다음, ‘완료’를 탭해 돌아오세요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "O TripLibre transforma os lugares por onde seu iPhone passa em paradas e nas viagens entre elas. A parada destacada ainda não tem nome. Toque nela para ver sua página real e depois toque em OK para voltar."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre превращает перемещения вашего iPhone в остановки и поездки между ними. У выделенной остановки ещё нет названия. Нажмите на неё, чтобы увидеть её настоящую страницу, а затем «Готово», чтобы вернуться."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre 会把 iPhone 去过的地方整理成停留点和它们之间的行程。高亮的停留点还没有名字。轻点它，看看它真实的详情页，然后点“完成”回到这里。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "TripLibre 會把 iPhone 去過的地方整理成停留點和它們之間的行程。醒目標示的停留點還沒有名字。點一下它，看看它真實的詳細頁面，然後點「完成」回到這裡。"
           }
         }
       }
@@ -37186,6 +40046,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "行程 CSV：date,start_time,end_time,origin,destination,mode,distance_km,purpose,notes。航班 CSV：date,origin,destination,airline,flight_number,… 格式說明請見 docs/import-formats.md。"
+          }
+        }
+      }
+    },
+    "Try a demo" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "جرّب العرض التوضيحي"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Demo ausprobieren"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Probar la demo"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Essayer la démo"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "デモを試す"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "데모 체험하기"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Experimentar a demo"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Попробовать демо"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "试用演示"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "試用示範"
           }
         }
       }
@@ -39205,6 +42130,136 @@
         }
       }
     },
+    "What kind of place it is" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما نوع هذا المكان"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Was für ein Ort es ist"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Qué tipo de lugar es"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le type de lieu"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "どんな種類の場所か"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "어떤 종류의 장소인지"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Que tipo de lugar é"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Что это за место"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "它是哪一类地点"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "它是哪一類地點"
+          }
+        }
+      }
+    },
+    "What you call it" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "ما تسمّيه به"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Wie du ihn nennst"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Cómo lo llamas"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Le nom que vous lui donnez"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あなたの呼び名"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "내가 부르는 이름"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Como você o chama"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Как вы его называете"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你怎么称呼它"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你怎麼稱呼它"
+          }
+        }
+      }
+    },
     "When" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -39591,6 +42646,136 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "使用期間（背景受限）"
+          }
+        }
+      }
+    },
+    "Why you went, this time" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لماذا ذهبت هذه المرة"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warum du diesmal dort warst"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por qué fuiste, esta vez"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pourquoi vous y êtes allé, cette fois"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今回、なぜ行ったか"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이번에 왜 갔는지"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por que você foi, desta vez"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зачем вы были там в этот раз"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这一次为什么去"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這一次為什麼去"
+          }
+        }
+      }
+    },
+    "Why you were here this time. It can differ from one visit to the next." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لماذا كنت هنا هذه المرة. قد يختلف من زيارة إلى أخرى."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Warum du diesmal hier warst. Das kann von Aufenthalt zu Aufenthalt verschieden sein."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por qué estuviste aquí esta vez. Puede cambiar de una visita a otra."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Pourquoi vous étiez ici cette fois. Il peut changer d’une visite à l’autre."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "今回ここにいた理由です。滞在ごとに変わることがあります。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이번에 여기 있었던 이유예요. 방문마다 다를 수 있어요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Por que você esteve aqui desta vez. Pode mudar de uma visita para outra."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Зачем вы были здесь в этот раз. От визита к визиту цель может меняться."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "这一次你为什么来这里。每次停留的目的可以不同。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "這一次你為什麼來這裡。每次停留的目的可以不同。"
           }
         }
       }
@@ -40245,6 +43430,136 @@
         }
       }
     },
+    "You were at your friend Mingming's. Type what you call this place, or use my suggestion." : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "كنت عند صديقتك مينغ مينغ. اكتب الاسم الذي تطلقه على هذا المكان، أو استخدم اقتراحي."
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du warst bei deiner Freundin Mingming. Gib ein, wie du diesen Ort nennst, oder nimm meinen Vorschlag."
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Estabas en casa de tu amiga Mingming. Escribe cómo llamas a este lugar o usa mi sugerencia."
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous étiez chez votre amie Mingming. Saisissez le nom que vous donnez à ce lieu, ou utilisez ma suggestion."
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "友だちのミンミンさんの家にいました。この場所の呼び名を入力するか、提案を使ってください。"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "친구 밍밍의 집에 있었어요. 이 장소를 뭐라고 부르는지 입력하거나 제 제안을 쓰세요."
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você estava na casa da sua amiga Mingming. Digite como você chama este lugar ou use minha sugestão."
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы были у своей подруги Минмин. Введите, как вы называете это место, или возьмите мой вариант."
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你当时在朋友明明家。输入你对这个地点的叫法，或者用我的建议。"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你當時在朋友明明家。輸入你對這個地點的叫法，或者用我的建議。"
+          }
+        }
+      }
+    },
+    "You've got it!" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "لقد أتقنتها!"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Du hast es raus!"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "¡Ya lo tienes!"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Vous avez compris !"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "これでばっちり！"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "이제 다 알았어요!"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Você pegou o jeito!"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Вы разобрались!"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你学会了！"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "你學會了！"
+          }
+        }
+      }
+    },
     "Your categories" : {
       "extractionState" : "manual",
       "localizations" : {
@@ -40306,6 +43621,71 @@
           "stringUnit" : {
             "state" : "translated",
             "value" : "你的類別"
+          }
+        }
+      }
+    },
+    "Your day, rebuilt" : {
+      "extractionState" : "manual",
+      "localizations" : {
+        "ar" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "يومك، مُعاد بناؤه"
+          }
+        },
+        "de" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Dein Tag, rekonstruiert"
+          }
+        },
+        "es" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Tu día, reconstruido"
+          }
+        },
+        "fr" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Votre journée, reconstituée"
+          }
+        },
+        "ja" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "あなたの1日を再現"
+          }
+        },
+        "ko" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "다시 그려 낸 나의 하루"
+          }
+        },
+        "pt" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Seu dia, reconstruído"
+          }
+        },
+        "ru" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "Ваш день, восстановленный"
+          }
+        },
+        "zh-Hans" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "还原你的一天"
+          }
+        },
+        "zh-Hant" : {
+          "stringUnit" : {
+            "state" : "translated",
+            "value" : "還原你的一天"
           }
         }
       }

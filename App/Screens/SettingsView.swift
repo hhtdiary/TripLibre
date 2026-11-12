@@ -29,12 +29,15 @@ struct SettingsView: View {
     @State private var airportCount = 0
     /// Applied when Settings closes, so the sheet isn't torn down mid-choice by the UI rebuilding in the new language.
     @State private var language = Lang.selected
+    @State private var showTutorial = false
+    @State private var showTrackingHelp = false
 
     enum ImportKind: String, Identifiable { case trips, flights, gpx; var id: String { rawValue } }
 
     var body: some View {
         Form {
             languageSection
+            helpSection
             collectionSection
             privacySection
             exportSection
@@ -77,9 +80,22 @@ struct SettingsView: View {
         .alert("Done", isPresented: Binding(get: { message != nil }, set: { if !$0 { message = nil } })) { // a11y-check:disable sheet-focus-return (iOS puts VoiceOver focus back on the trigger when it closes)
             Button("OK", role: .cancel) {}
         } message: { Text(message ?? "") }
+        .fullScreenCover(isPresented: $showTutorial) { TutorialView { showTutorial = false } }
+        .sheet(isPresented: $showTrackingHelp) { TrackingHelpView() }
     }
 
     // MARK: sections
+
+    /// The sample-day tutorial again, and tracking's limits in the app rather than only in the docs (issue #114).
+    private var helpSection: some View {
+        Section {
+            Button { showTutorial = true } label: { Label("Replay tutorial", systemImage: "play.circle") }
+                .accessibilityIdentifier("replayTutorial")
+            Button { showTrackingHelp = true } label: { Label("How tracking works", systemImage: "questionmark.circle") }
+        } header: { Text("Help").toonSectionText() } footer: {
+            Text("The tutorial uses a sample day. Nothing in it is saved, counted or exported.").toonSectionText()
+        }
+    }
 
     private var languageSection: some View {
         Section {
