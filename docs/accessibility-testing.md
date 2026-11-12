@@ -90,6 +90,9 @@ Xcode › Open Developer Tool › Accessibility Inspector).
 - [ ] Visit detail, "Is this one of your places?": each saved place reads its name, floor / unit, type and distance
       as one button; the current place reads "Selected"; None of these, New place…, Skip for now and Show saved
       places nearby are named buttons.
+- [ ] Today, "Which place was this?": each saved place reads its name as a button with its distance as the value and
+      "Confirms this place for the stop" as the hint; None of these, Choose or create…, "Don't ask about this visit" (✕)
+      and More to check are named buttons; Places to check lists the same cards and closes with Done.
 - [ ] Map: Period and Map layers are named; each place marker reads its name and visit count. The same information
       is available without the map in Places (list with visit counts) and Stats.
 - [ ] Settings: permission state is read as text; "Open iOS Settings to allow “Always”" is a button; Create export

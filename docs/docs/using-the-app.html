@@ -25,7 +25,8 @@ and builds your diary whenever it gets a chance. Opening it once a day to confir
 <div class="table-wrap"><table>
   <tr><th>Tab</th><th>What it shows</th></tr>
   <tr><td><b>Today</b></td><td>The reconstructed day on a map plus a chronological diary of visits and trips. Swipe between days.
-    Trips that need review show quick mode buttons. <b>Stamp this moment</b> marks a short stop in one tap, and
+    Trips that need review show quick mode buttons, and a stop whose place is a guess asks <i>Which place was this?</i>.
+    <b>Stamp this moment</b> marks a short stop in one tap, and
     <b>Spent today</b> adds up what the day cost.
     The gear icon opens <b>Settings</b>.</td></tr>
   <tr><td><b>Timeline</b></td><td>Days grouped by month, trip search and filters (mode, place, weekends only), flights, and life phases.</td></tr>
@@ -44,6 +45,8 @@ and builds your diary whenever it gets a chance. Opening it once a day to confir
     Tap <b>Stamp this moment</b> on Today while you're there: no form, nothing to fill in.</li>
   <li><b>Review uncertain trips</b>"Did I get that right?" cards appear for trips with an unknown or low-confidence mode.
     Tap the right mode, or <b>Looks right</b>.</li>
+  <li><b>Confirm uncertain places</b>When a stop could be one of several of your saved places, a
+    <i>Which place was this?</i> card asks which. Tap the right one, <b>None of these</b>, or ✕ to leave it.</li>
   <li><b>Note what things cost</b>A card asks about each fare-type trip and each stop at a restaurant, shop, hotel or other
     paid place. Tap the usual amount, <b>Free</b> / <b>Nothing</b>, or enter one. Optional.</li>
   <li><b>Name new places once</b>The first time you stop somewhere, it's an unnamed place. Name it (e.g. "Home", "Lab") and pick a category;
@@ -132,6 +135,24 @@ database on your iPhone; no place service is asked. The stop's own GPS position 
 recorded whichever place you pick, and exports show which visits you confirmed (<code>place_status</code> in
 <code>visits.csv</code>). If there's no saved place nearby, the list doesn't appear and <i>Wrong place? Choose or
 create…</i> works as before. Change how far it looks in Settings › Display.</p>
+
+<h3 id="confirm-places-on-today">Confirming places on Today</h3>
+<p>You don't have to open each visit to answer this. When TripLibre's match for a finished stop is a guess, Today shows a
+<i>Which place was this?</i> card with the stop's times and the guess, like the cards that ask what things cost. It
+appears for Today and the last 7 days.</p>
+<ul>
+  <li><b>Tap a saved place</b> (up to three, with how far each is) to confirm it. The card goes away.</li>
+  <li><b>None of these</b> works as on the visit screen.</li>
+  <li><b>Choose or create…</b> opens the full list of places, where you can also name a new one.</li>
+  <li><b>✕</b> stops asking about that stop. It doesn't confirm the guess, so the visit still counts as matched
+    automatically and you can correct it later from the visit itself.</li>
+</ul>
+<p>Only one card shows at a time. When more stops that day need an answer, <b>More to check</b> opens them all in one
+list.</p>
+<p>A card only appears when your saved places leave real doubt: two of them are about as close to the stop (within
+40 m of each other), or a saved place is nearby but the stop was matched to a place you never saved. A stop with only
+one of your saved places nearby isn't asked about, and neither is a Home or Work place TripLibre has recognised at
+least three times. A stop you're still at waits until you leave. The visit screen keeps everything above for any stop.</p>
 
 <div class="callout tip"><div class="ic">✓</div>
 <p>TripLibre learns from corrections. If you've corrected trips between the same two places and most of those corrections agree,

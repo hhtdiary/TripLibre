@@ -77,7 +77,7 @@ let folder  = try Exporter(store: store).exportBundle(to: outputDirectory)</code
   <tr><td><code>RawPoint</code></td><td><code>timestamp, coordinate, horizontalAccuracy, speed, source, collectorMode, timeZone</code></td></tr>
   <tr><td><code>MotionSample</code></td><td><code>timestamp, activity</code> (<code>.walking</code>, <code>.automotive</code>…), <code>confidence</code></td></tr>
   <tr><td><code>Place</code></td><td><code>name, coordinate, radius, category, code, favorite, mergedInto</code></td></tr>
-  <tr><td><code>Visit</code></td><td><code>placeID, arrival, departure?, purpose, userStatus, deleted</code>; <code>duration(now:)</code></td></tr>
+  <tr><td><code>Visit</code></td><td><code>placeID, placeStatus, arrival, departure?, purpose, userStatus, deleted</code>; <code>duration(now:)</code></td></tr>
   <tr><td><code>Trip</code></td><td><code>originVisitID, destinationVisitID, departure, arrival, distance, modeAuto, modeUser, segments</code>; <code>mode</code> = final mode</td></tr>
   <tr><td><code>TripSegment</code></td><td><code>tripID, sequence, start, end, modeAuto, modeUser</code>; <code>mode</code></td></tr>
   <tr><td><code>Flight</code>, <code>LifePhase</code>, <code>AuditEntry</code></td><td>Mirror their tables</td></tr>
@@ -192,6 +192,18 @@ do not check it.</p>
 <p><code>Geo</code> (<code>Geo/Geo.swift</code>): <code>distance</code> (haversine), <code>pathLength</code>, <code>centroid</code>,
 <code>sphericalCentroid</code>, <code>radiusOfGyration</code>, <code>convexHull</code>, <code>simplify</code> (Douglas–Peucker),
 <code>project</code> / <code>unproject</code>. <code>Polyline.encode</code> / <code>decode</code> for Google polylines.</p>
+
+<div class="api">
+  <div class="api-head"><span class="kind">enum</span><span class="name">PlaceRecall</span><span class="file">Geo/PlaceRecall.swift</span></div>
+  <div class="api-body">
+    <p>Ranks the user's own saved places near a detected stop (issue #95) and decides when Today asks which one it was
+    (issue #116). Pure functions over the places passed in: no network, and nothing is assigned.</p>
+    <div class="sig"><code>static func candidates(near: Coordinate, places: [Place], stats: [String: TravelStore.PlaceStats] = [:], confirmedPlaceIDs: Set&lt;String&gt; = [], radius: Double = 150, limit: Int = 8) -&gt; [Candidate]</code><span>User-marked places within <code>radius</code> m, nearest first; within <code>tieTolerance</code> (20 m) the more visited, then more recently visited place wins. <code>TravelStore.recallCandidates(near:radius:limit:)</code> calls this with the database's places.</span></div>
+    <div class="sig"><code>static func isUserMarked(_ p: Place, confirmedPlaceIDs: Set&lt;String&gt;) -&gt; Bool</code><span>Named, typed, given a floor / unit or notes, a favorite, created by hand, or confirmed for some visit; never deleted or merged.</span></div>
+    <div class="sig"><code>static func needsReview(_ v: Visit, candidates: [Candidate]) -&gt; Bool</code><span>Whether Today should show <i>Which place was this?</i> for <code>v</code>. True only for a finished, non-deleted visit with <code>placeStatus == .auto</code> and at least one candidate, when either the matched place is not among the candidates, or another candidate is within <code>ambiguityMargin</code> (40 m) of the matched one's distance. False for a home or work place with at least <code>habitualVisits</code> (3) visits.</span></div>
+    <div class="sig"><code>struct Candidate</code><span><code>place</code>, <code>distance</code> (m), <code>visitCount</code>, <code>lastVisit</code>; <code>id</code> is the place's.</span></div>
+  </div>
+</div>
 
 <h2 id="widget-snapshot">Widget snapshot</h2>
 <div class="api">
