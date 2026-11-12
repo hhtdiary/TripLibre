@@ -21,7 +21,7 @@ single summary, so release notes aren't kept anywhere else in the repository.
   is never written to the database, so it cannot reach the diary, stats, widgets, backups or exports. **Settings › Help**
   has **Replay tutorial** and **How tracking works**; a one-time tip above the diary rows opens the tutorial for people
   who skipped it or installed earlier; the Visit and Trip screens say in a line what the place name, category, purpose
-  and mode each mean (#114).
+  and mode each mean. Documented in Using the app, the UI guide, Architecture and Privacy (#114).
 
 - **Confirm places on Today**: a stop whose place is still a guess among your saved places nearby (two floors of one
   building, a saved place next door, or a saved place passed over for an unsaved one) gets a card on Today, like the cost

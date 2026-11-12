@@ -43,8 +43,8 @@ After each run (and after any edit) the app also refreshes a small summary for t
   HHTApp.swift           entry point, AppDelegate, background refresh task
   AppModel.swift         owns the store and services; views observe it
   Location/              LocationCollector, MotionSync, PlaceGeocoder
-  Screens/               Today, Timeline, Map, Stats, Places, Settings, detail screens
-  Support/               theme, formatting, localization (Localization.swift), demo data, Info.plist, WidgetBridge
+  Screens/               Today, Timeline, Map, Stats, Places, Settings, detail screens, tutorial (TutorialView)
+  Support/               theme, formatting, localization (Localization.swift), demo data, sample day, Info.plist, WidgetBridge
   Localizable.xcstrings  UI strings in 11 languages (keys are the English text)
   InfoPlist.xcstrings    translated permission prompts
 Widgets/                 WidgetKit extension: read-only Home Screen widgets
@@ -72,6 +72,12 @@ Makefile                 test / sim / phone / ci workflows</code></pre>
 geocoding), and the SwiftUI screens. <code>AppModel</code> is a single shared object that owns the
 <code>TravelStore</code>, <code>InferenceEngine</code> and <code>EditService</code>. Views observe its <code>revision</code>
 counter and reload after any change.</p>
+<p>The <b>sample-day tutorial</b> (<code>TutorialView</code>) keeps its day as plain values (<code>SampleDay</code>) and
+draws it with the diary's own rows and map. When it opens a real Visit, Place or Trip screen, it writes the sample day
+into <code>TravelStore.inMemory()</code> and hands the screen a second <code>AppModel(sampleStore:)</code> over that store:
+no widget bridge, no launch, no inference, and the shared location collector only borrowed because the screens' type
+needs one. Edits land in that throwaway store and are read back into the tutorial when the screen closes. The real
+database is never opened for the tutorial.</p>
 <p>The app is <b>localized</b> (11 languages), the core is not. SwiftUI looks up its literals in
 <code>Localizable.xcstrings</code>; text built in code goes through <code>L(…)</code>. <code>Lang</code> routes
 <code>Bundle.main</code> lookups to the language chosen in Settings and the root view applies its locale and layout
