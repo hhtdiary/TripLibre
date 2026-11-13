@@ -172,7 +172,7 @@ extension PlaceCategory {
         case .recreation, .entertainment, .stadium, .eventVenue, .museum, .gym: return Toon.lime
         case .airport, .railStation, .transitStation, .hotel, .parking: return Toon.grape
         case .friendFamily, .religious: return Toon.mint
-        case .medical, .pharmacy, .bank, .civic: return Toon.aqua
+        case .medical, .pharmacy, .bank, .postal, .civic: return Toon.aqua
         case .other: return Toon.paper
         }
     }
