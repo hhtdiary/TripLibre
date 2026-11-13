@@ -18,7 +18,8 @@ never starts location collection, so runs are reproducible and never touch your 
 | Suite | What it covers |
 | --- | --- |
 | `CoreFlowTests` | Every tab opens and is announced as selected; trip and visit details open from the diary and close; the day navigation buttons have labels; Map › layers menu; Settings › Create export finishes and offers Share. |
-| `AccessibilityAuditTests` | `performAccessibilityAudit(for: .all)` on Today, a day with trips, Trip detail, Visit detail (also with its "Is this one of your places?" list, from two demo places in one building), Timeline, Map, Stats, Places and Settings. |
+| `AccessibilityAuditTests` | `performAccessibilityAudit(for: .all)` on Today, a day with trips, Trip detail, Visit detail (also with its "Is this one of your places?" list, from two demo places in one building), Timeline, Map, Stats, Places, Settings and three steps of the sample-day tutorial. |
+| `TutorialFlowTests` | The sample-day tutorial (#114): first launch offers Try a demo and Skip for now; Settings › Replay tutorial walks all eight steps (select, name, category, purpose, mode, remove a phantom stop, limits, recap); Next fills in untouched steps; Skip leaves; the Today tip opens it once; nothing from the sample day is in the diary afterwards. |
 
 `testSpending` (Add a cost and Spending) is skipped for now: on CI (iOS 26.5) the Spending audit reports two contrast
 failures on SwiftUI-made nodes it can't name, and Dynamic Type findings on the section labels, which haven't been
@@ -97,7 +98,12 @@ Xcode › Open Developer Tool › Accessibility Inspector).
       is available without the map in Places (list with visit counts) and Stats.
 - [ ] Settings: permission state is read as text; "Open iOS Settings to allow “Always”" is a button; Create export
       reports progress and then "Share N files…".
-- [ ] Onboarding: the feature list reads in order; "Allow location & start" and "Not now" are buttons.
+- [ ] Onboarding: the language menu reads "Language" with the current language as its value; "Try a demo" and
+      "Skip for now" are buttons; on the next page the feature list reads in order and
+      "Allow location & start" and "Not now" are buttons.
+- [ ] Tutorial (Settings › Help › Replay tutorial): the progress bar reads "Step N of 8"; each step's title is a
+      heading and takes VoiceOver focus when the step changes; the sample stop reads as a button and opens the real Visit screen; choices read as
+      selected once chosen; Back, Next and Skip are named buttons on every step.
 
 ### Display and motion
 

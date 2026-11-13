@@ -9,7 +9,9 @@ class HHTUITestCase: XCTestCase {
     override func setUpWithError() throws {
         continueAfterFailure = false
         app = XCUIApplication()
-        app.launchArguments += ["-hhtUITest", "YES", "-onboarded", "YES", "-hhtTab", "0",
+        // `-appLanguage en`: the in-app language choice (Settings, or the welcome screen's menu) is saved on the
+        // simulator and would otherwise outlive the test that made it
+        app.launchArguments += ["-hhtUITest", "YES", "-onboarded", "YES", "-hhtTab", "0", "-appLanguage", "en",
                                 "-AppleLanguages", "(en)", "-AppleLocale", "en_US"]
         app.launch()
     }
@@ -111,6 +113,15 @@ class HHTUITestCase: XCTestCase {
         // until the sheet has gone, the screen under it (and its tab bar) isn't in the accessibility tree, and reveal()
         // would measure against the window's bottom and leave rows under the tab bar
         XCTAssertTrue(done.waitForNonExistence(timeout: 5), "sheet closes")
+    }
+
+    /// Closes a sheet shown over another sheet (the tutorial's real pages open over Settings, whose Done stays in
+    /// the tree under them), so it waits for this sheet's own bar to go.
+    func dismissSheet(titled title: String, button: String = "Done") {
+        let bar = app.navigationBars[title]
+        XCTAssertTrue(bar.waitForExistence(timeout: 5), "screen \(title)")
+        bar.buttons[button].tap()
+        XCTAssertTrue(bar.waitForNonExistence(timeout: 5), "\(title) closes")
     }
 
     /// For sheets that close themselves (e.g. Add a cost on Save); see dismissSheet for why it matters.

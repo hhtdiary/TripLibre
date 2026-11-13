@@ -47,6 +47,26 @@ final class AccessibilityAuditTests: HHTUITestCase {
         try audit("Visit detail")
     }
 
+    /// The sample-day tutorial (issue #114): the day with its unnamed stop, then the step with a text field and choices.
+    func testTutorial() throws {
+        waitForNavigationTitle("Today")
+        app.buttons["Settings"].tap()
+        waitForNavigationTitle("Settings")
+        app.buttons["replayTutorial"].tap()
+        let stop = app.descendants(matching: .any).matching(identifier: "tutorialStop").firstMatch
+        XCTAssertTrue(stop.waitForExistence(timeout: 10), "tutorial opens")
+        try audit("Tutorial")
+        stop.tap()
+        dismissSheet(titled: "Visit")
+        XCTAssertTrue(app.textFields["tutorialName"].waitForExistence(timeout: 5))
+        app.buttons["tutorialNext"].tap()
+        XCTAssertTrue(app.buttons["Friend / Family"].waitForExistence(timeout: 5))
+        try audit("Tutorial")
+        for _ in 0..<5 { app.buttons["tutorialNext"].tap() }
+        XCTAssertTrue(text(containing: "You've got it!").waitForExistence(timeout: 5))
+        try audit("Tutorial")
+    }
+
     func testSpending() throws {
         // Skipped for now: on CI (iOS 26.5) the Spending audit reports two contrast failures on SwiftUI-made nodes
         // it can't name, plus Dynamic Type findings on the section labels, which we couldn't place (#67). The rest

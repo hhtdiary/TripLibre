@@ -70,7 +70,10 @@ struct VisitDetailView: View {
                         Label(p.isNamed ? L("Edit “%@” (all visits)", p.displayName) : L("Name this place"), systemImage: "pencil")
                     }
                 }
-            } header: { Text("Place").toonSectionText() }
+            } header: { Text("Place").toonSectionText() } footer: {
+                Text("The name is what you call this place; its category is the kind of place. Both apply to every visit here.")
+                    .toonSectionText()
+            }
 
             if !recall.isEmpty { recallSection(v) }
 
@@ -81,7 +84,9 @@ struct VisitDetailView: View {
                     Text(place?.category?.defaultPurpose.map { L("Auto (%@)", $0.localizedLabel) } ?? L("Not set")).tag(TripPurpose?.none)
                     ForEach(TripPurpose.allCases) { p in Text(p.localizedLabel).tag(TripPurpose?.some(p)) }
                 }
-            } header: { Text("Purpose").toonSectionText() }
+            } header: { Text("Purpose").toonSectionText() } footer: {
+                Text("Why you were here this time. It can differ from one visit to the next.").toonSectionText()
+            }
 
             Section {
                 DatePicker("Arrived", selection: $arrival)

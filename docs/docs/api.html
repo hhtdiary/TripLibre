@@ -56,7 +56,7 @@ let folder  = try Exporter(store: store).exportBundle(to: outputDirectory)</code
   <div class="api-body">
     <p>Typed access to the SQLite database. Opening it runs any pending migrations. Every other service takes a store.</p>
     <div class="sig"><code>init(path: String) throws</code><span>Open or create the database at a path.</span></div>
-    <div class="sig"><code>static func inMemory() throws -&gt; TravelStore</code><span>For tests and scripts.</span></div>
+    <div class="sig"><code>static func inMemory() throws -&gt; TravelStore</code><span>For tests, scripts and the app's sample-day tutorial, which opens the real detail screens on one so nothing reaches the diary.</span></div>
     <div class="sig"><code>func insertPoints(_ ps: [RawPoint]) throws</code><span>Append raw GPS fixes. Also <code>insertPoint</code>, <code>points(from:to:)</code>, <code>lastPoint()</code>.</span></div>
     <div class="sig"><code>func insertMotion(_ samples: [MotionSample]) throws</code><span>Append CoreMotion episodes; read back with <code>motion(from:to:)</code>.</span></div>
     <div class="sig"><code>func places() throws -&gt; [Place]</code><span>Also <code>place(_:)</code>, <code>upsertPlace</code>, <code>matchPlace(_:slack:)</code>, <code>placesNear(_:within:)</code>, <code>placeStats()</code>.</span></div>
