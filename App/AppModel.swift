@@ -44,9 +44,14 @@ final class AppModel: ObservableObject {
         #endif
     }
 
+    private static var isFirstRunUITest: Bool { isUITest && UserDefaults.standard.bool(forKey: "hhtFirstRun") }
+
     private static func freshUITestDatabase() -> URL {
         // like the database, one-time hints start over, so each test sees what a new user sees
         UserDefaults.standard.removeObject(forKey: "diaryTipDismissed")
+        // `-hhtFirstRun YES` shows the welcome as on a new install. (Passing `-onboarded NO` instead would pin the
+        // value in the arguments domain, so finishing the welcome could never close it.)
+        if isFirstRunUITest { UserDefaults.standard.removeObject(forKey: "onboarded") }
         let url = FileManager.default.temporaryDirectory.appendingPathComponent("hht-uitest.sqlite")
         for suffix in ["", "-wal", "-shm"] { try? FileManager.default.removeItem(atPath: url.path + suffix) }
         return url
@@ -97,7 +102,7 @@ final class AppModel: ObservableObject {
         #if targetEnvironment(simulator)
         // launch argument `-hhtDemo YES` seeds demo data (simulator builds only)
         if UserDefaults.standard.bool(forKey: "hhtDemo") || Self.isUITest, store.pointCount() == 0 {
-            UserDefaults.standard.set(true, forKey: "onboarded")
+            if !Self.isFirstRunUITest { UserDefaults.standard.set(true, forKey: "onboarded") }
             try? DemoData.generate(into: store)
         }
         #endif

@@ -276,6 +276,8 @@ struct OnboardingView: View {
                 .frame(maxWidth: .infinity, minHeight: 44)
                 .accessibilityIdentifier("onboardingSkipDemo")
         }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Welcome")
     }
 
     private var start: some View {

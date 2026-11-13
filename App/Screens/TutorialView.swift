@@ -229,7 +229,11 @@ struct TutorialView: View {
         switch step {
         case .name:
             VStack(alignment: .leading, spacing: 8) {
+                // A visible label, so the field keeps its name once the placeholder is gone.
+                Text("Place name").font(.toon(13, .heavy)).foregroundStyle(Toon.muted)
+                    .accessibilityHidden(true) // spoken as the field's label below
                 TextField("Name", text: $sample.placeName)
+                    .accessibilityLabel("Place name")
                     .focused($nameFocused)
                     .submitLabel(.done)
                     .onSubmit { nameFocused = false }

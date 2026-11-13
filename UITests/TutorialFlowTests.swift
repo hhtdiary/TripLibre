@@ -11,7 +11,7 @@ final class TutorialFlowTests: HHTUITestCase {
         sampleStop.tap()
         waitForNavigationTitle("Visit")   // the app's real Visit screen, on the sample day
         XCTAssertTrue(app.buttons["Name this place"].exists, "the real page offers to name the place")
-        dismissSheet()
+        dismissSheet(titled: "Visit")
 
         // 2. name it
         let name = app.textFields["tutorialName"]
@@ -131,7 +131,9 @@ final class TutorialFlowTests: HHTUITestCase {
 
     private func relaunchAsFirstRun() {
         app.terminate()
-        if let i = app.launchArguments.firstIndex(of: "-onboarded") { app.launchArguments[i + 1] = "NO" }
+        // not `-onboarded NO`: an argument pins the value, so "Not now" could never close the welcome
+        if let i = app.launchArguments.firstIndex(of: "-onboarded") { app.launchArguments.removeSubrange(i...i + 1) }
+        if !app.launchArguments.contains("-hhtFirstRun") { app.launchArguments += ["-hhtFirstRun", "YES"] }
         app.launch()
     }
 }

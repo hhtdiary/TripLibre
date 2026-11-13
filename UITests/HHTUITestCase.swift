@@ -115,6 +115,15 @@ class HHTUITestCase: XCTestCase {
         XCTAssertTrue(done.waitForNonExistence(timeout: 5), "sheet closes")
     }
 
+    /// Closes a sheet shown over another sheet (the tutorial's real pages open over Settings, whose Done stays in
+    /// the tree under them), so it waits for this sheet's own bar to go.
+    func dismissSheet(titled title: String, button: String = "Done") {
+        let bar = app.navigationBars[title]
+        XCTAssertTrue(bar.waitForExistence(timeout: 5), "screen \(title)")
+        bar.buttons[button].tap()
+        XCTAssertTrue(bar.waitForNonExistence(timeout: 5), "\(title) closes")
+    }
+
     /// For sheets that close themselves (e.g. Add a cost on Save); see dismissSheet for why it matters.
     func waitForSheetToClose(_ title: String, file: StaticString = #filePath, line: UInt = #line) {
         XCTAssertTrue(app.navigationBars[title].waitForNonExistence(timeout: 5), "\(title) closes", file: file, line: line)
