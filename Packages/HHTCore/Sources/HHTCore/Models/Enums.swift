@@ -147,6 +147,7 @@ public enum PlaceCategory: String, CaseIterable, Codable, Identifiable, Sendable
     case civic                                  // government / civic facility
     case religious                              // place of worship
     case parking
+    case postal                                 // post office / mailing & shipping service
 
     public var id: String { rawValue }
     public var label: String {
@@ -179,6 +180,7 @@ public enum PlaceCategory: String, CaseIterable, Codable, Identifiable, Sendable
         case .civic: return "Government / Civic"
         case .religious: return "Place of worship"
         case .parking: return "Parking"
+        case .postal: return "Post / Mailing service"
         }
     }
     public var symbol: String {
@@ -211,6 +213,7 @@ public enum PlaceCategory: String, CaseIterable, Codable, Identifiable, Sendable
         case .civic: return "building.2.fill"
         case .religious: return "hands.and.sparkles.fill"
         case .parking: return "parkingsign.circle.fill"
+        case .postal: return "envelope.fill"
         }
     }
     /// Section the category is listed under in the picker.
@@ -220,7 +223,7 @@ public enum PlaceCategory: String, CaseIterable, Codable, Identifiable, Sendable
         case .restaurant, .cafe, .bar: return .foodDrink
         case .grocery, .convenienceStore, .shopping, .gasStation: return .shopping
         case .recreation, .gym, .stadium, .eventVenue, .museum, .library, .entertainment: return .leisure
-        case .medical, .pharmacy, .bank, .civic, .religious: return .services
+        case .medical, .pharmacy, .bank, .postal, .civic, .religious: return .services
         case .airport, .railStation, .transitStation, .parking: return .transport
         case .other: return .other
         }
@@ -253,9 +256,11 @@ public enum PlaceCategory: String, CaseIterable, Codable, Identifiable, Sendable
         case .gym: return ["fitness", "workout", "yoga", "pool"]
         case .pharmacy: return ["drugstore", "chemist"]
         case .bank: return ["atm", "finance"]
-        case .civic: return ["government", "city hall", "post office", "dmv", "court"]
+        case .civic: return ["government", "city hall", "dmv", "court"]
         case .religious: return ["church", "mosque", "temple", "synagogue", "worship"]
         case .parking: return ["garage", "lot", "park and ride"]
+        case .postal: return ["post office", "mail", "postal", "usps", "ups", "fedex", "dhl", "package", "parcel",
+                               "shipping", "courier"]
         }
     }
     /// True if `query` matches the label or a keyword (case- and diacritic-insensitive).
@@ -278,7 +283,7 @@ public enum PlaceCategory: String, CaseIterable, Codable, Identifiable, Sendable
         case .transitStation, .parking: return .transfer
         case .friendFamily, .bar, .religious: return .social
         case .medical, .pharmacy: return .medical
-        case .bank, .civic: return .personalBusiness
+        case .bank, .postal, .civic: return .personalBusiness
         case .other: return nil
         }
     }

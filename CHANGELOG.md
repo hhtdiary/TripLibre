@@ -5,6 +5,14 @@ All released versions of TripLibre (called HHT before the rename in #77). Each G
 Full notes for each release are on [GitHub Releases](https://github.com/zyang91/TripLibre/releases); this file is the
 single summary, so release notes aren't kept anywhere else in the repository.
 
+## Unreleased
+
+- **Post / Mailing service place category**: a new place category (code `postal`) for post offices and mailing or
+  shipping services, listed under Health & services with an envelope icon and translated in every app language. Search
+  finds it by post office, mail, USPS, UPS, FedEx, DHL, parcel or courier ("post office" no longer matches Government /
+  Civic). Its default trip purpose is Personal business; schema v8 updates `v_trips.purpose_final` to match. Documented
+  in the data model.
+
 ## 2.2.0 — 2026-11-12
 
 - **Sample-day tutorial**: the welcome screen now starts with a language menu (the same eleven choices as Settings ›

@@ -38,6 +38,8 @@ struct PlaceCategoryTests {
         #expect(hits("concert").contains(.eventVenue))
         #expect(hits("Gallery").contains(.museum))
         #expect(hits("petrol").contains(.gasStation))
+        #expect(hits("fedex").contains(.postal))
+        #expect(hits("post office") == [.postal])
         #expect(hits("supermarket").contains(.grocery))
         #expect(hits("cafe").contains(.cafe))
         #expect(hits("café").contains(.cafe))
