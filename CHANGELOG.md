@@ -5,7 +5,7 @@ All released versions of TripLibre (called HHT before the rename in #77). Each G
 Full notes for each release are on [GitHub Releases](https://github.com/zyang91/TripLibre/releases); this file is the
 single summary, so release notes aren't kept anywhere else in the repository.
 
-## Unreleased
+## 2.2.0 — 2026-11-12
 
 - **Sample-day tutorial**: the welcome screen now starts with a language menu (the same eleven choices as Settings ›
   Language, applied at once) and offers **Try a demo**, a one-minute tutorial on a made-up day
