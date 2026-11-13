@@ -13,6 +13,12 @@ Implemented in `App/Location/LocationCollector.swift`.
   last fix is written again as `stationary_marker`, so inference can distinguish "quiet because stationary" from lost signal.
 - The decision lives in `StationaryDetector` (HHTCore, unit-tested). Silence alone is not proof of a stop: when iOS
   suspends the app mid-drive and resumes it minutes later, the check is postponed ~5 s so queued fixes arrive first.
+- **Safety-net geofence in moving mode.** iOS can suspend the app in moving mode before the dwell completes, typically
+  right after a background wake while the phone is still: the distance filter delivers no more fixes and the 60 s timer
+  stops with the app. Without a fence, a departure then went unnoticed until the next significant change (30–40 min
+  late in the 2026-11-12 snapshot, #46). So whenever the detector's anchor is held by a fix at walking speed or slower
+  (or without speed), the same 150 m geofence is armed around it; it moves with the anchor and is withdrawn while the
+  last fix is faster than 2 m/s (`StationaryDetector.safetyNet`). An exit wakes the app and restarts moving mode.
 - A `CLBackgroundActivitySession` is held while collection is enabled (recreated on background relaunch) so iOS keeps
   delivering moving-mode updates in the background.
 - While collecting, live CoreMotion activity (if already authorized) feeds the stationary decision. The ~7-day history is

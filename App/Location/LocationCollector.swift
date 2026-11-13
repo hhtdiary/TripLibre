@@ -12,6 +12,8 @@ import CoreMotion
 ///   (`StationaryDetector`), standard updates stop. A geofence around the stop,
 ///   CLVisit monitoring and significant-location-change monitoring wake the app (even after termination)
 ///   when the user leaves, and the collector switches back to moving.
+/// * While moving slowly or still, the same geofence follows the detector's anchor as a safety net, so a departure
+///   still wakes the app if iOS suspends it before the dwell completes.
 ///
 /// Every fix is written to `raw_location_points` immediately; nothing is ever edited or discarded there.
 @MainActor
@@ -46,6 +48,8 @@ final class LocationCollector: NSObject, ObservableObject {
     private var motionUpdatesRunning = false
     #endif
     private let regionID = "hht.stationary.region"
+    /// Centre of the moving-mode safety-net geofence, when one is armed (`StationaryDetector.safetyNet`).
+    private var safetyNetCenter: StationaryDetector.Fix?
 
     static let departureDistance: CLLocationDistance = 150
 
@@ -164,7 +168,7 @@ final class LocationCollector: NSObject, ObservableObject {
     }
 
     private func enterMoving(reason: String) {
-        if let r = manager.monitoredRegions.first(where: { $0.identifier == regionID }) { manager.stopMonitoring(for: r) }
+        disarmGeofence()
         applyMoving()
         manager.startUpdatingLocation()
         mode = .moving
@@ -179,11 +183,34 @@ final class LocationCollector: NSObject, ObservableObject {
         // mark the transition with the last fix so inference knows the following silence is deliberate
         record(a, source: "stationary_marker", at: Date())
         manager.stopUpdatingLocation()
-        let region = CLCircularRegion(center: a.coordinate, radius: Self.departureDistance, identifier: regionID)
+        armGeofence(at: a.coordinate)
+        safetyNetCenter = nil
+        onStationary?()
+    }
+
+    /// One departure geofence at a time (same identifier, so starting it replaces any previous one).
+    private func armGeofence(at center: CLLocationCoordinate2D) {
+        let region = CLCircularRegion(center: center, radius: Self.departureDistance, identifier: regionID)
         region.notifyOnExit = true
         region.notifyOnEntry = false
         manager.startMonitoring(for: region)
-        onStationary?()
+    }
+
+    private func disarmGeofence() {
+        for r in manager.monitoredRegions where r.identifier == regionID { manager.stopMonitoring(for: r) }
+        safetyNetCenter = nil
+    }
+
+    /// Keep the moving-mode safety net on the detector's current anchor (see `StationaryDetector.safetyNet`).
+    private func syncSafetyNet() {
+        let want = detector.safetyNet
+        guard want != safetyNetCenter else { return }
+        if let w = want {
+            armGeofence(at: CLLocationCoordinate2D(latitude: w.coordinate.latitude, longitude: w.coordinate.longitude))
+            safetyNetCenter = w
+        } else {
+            disarmGeofence()
+        }
     }
 
     private func checkStationary() {
@@ -238,7 +265,7 @@ final class LocationCollector: NSObject, ObservableObject {
                                              speed: loc.speed >= 0 ? loc.speed : nil)
             let still = detector.observe(fix)
             if detector.anchor == fix { anchor = loc }
-            if still { enterStationary() }
+            if still { enterStationary() } else { syncSafetyNet() }
         case .off:
             break
         }

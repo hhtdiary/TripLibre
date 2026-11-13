@@ -136,4 +136,49 @@ struct StationaryDetectorTests {
         #expect(d.anchor == nil)
         #expect(evaluate(&d, 900) == .stay)
     }
+
+    // MARK: - Moving-mode safety net (#46, snapshot 2026-11-12)
+
+    /// Snapshot pattern: a significant-change wake switches to moving, iOS hands over the cached fix (no speed) and
+    /// suspends the app. The fence must already be armed at that fix, before any dwell or timer.
+    @Test func wakeFixWithoutSpeedArmsTheSafetyNet() {
+        var d = StationaryDetector(now: t0)
+        #expect(d.safetyNet == nil)
+        _ = d.observe(fix(0, speed: nil, acc: 20))
+        #expect(d.safetyNet == d.anchor)
+        #expect(d.safetyNet != nil)
+    }
+
+    @Test func safetyNetFollowsASlowAnchor() {
+        var d = StationaryDetector(now: t0)
+        _ = d.observe(fix(0, speed: 1.3))
+        _ = d.observe(fix(30, north(40), speed: 1.3))         // inside the radius: same anchor
+        #expect(d.safetyNet?.coordinate == here)
+        _ = d.observe(fix(80, north(100), speed: 1.3))        // walked out of it: new anchor, fence follows
+        #expect(d.safetyNet?.coordinate == north(100))
+    }
+
+    @Test func noSafetyNetWhileTravellingFast() {
+        var d = StationaryDetector(now: t0)
+        _ = d.observe(fix(0, speed: 12))
+        #expect(d.safetyNet == nil)
+        _ = d.observe(fix(30, north(300), speed: 0))          // red light
+        #expect(d.safetyNet?.coordinate == north(300))
+        _ = d.observe(fix(45, north(420), speed: 11))         // drives off: fence withdrawn before it can fire
+        #expect(d.safetyNet == nil)
+    }
+
+    @Test func inaccurateFixesDoNotMoveTheSafetyNet() {
+        var d = StationaryDetector(now: t0)
+        _ = d.observe(fix(0))
+        _ = d.observe(fix(20, north(400), speed: nil, acc: 300))
+        #expect(d.safetyNet?.coordinate == here)
+    }
+
+    @Test func resetClearsTheSafetyNet() {
+        var d = StationaryDetector(now: t0)
+        _ = d.observe(fix(0))
+        d.reset(at: t0.addingTimeInterval(60))
+        #expect(d.safetyNet == nil)
+    }
 }
