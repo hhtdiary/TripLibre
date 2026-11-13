@@ -91,6 +91,20 @@ public struct StationaryDetector: Sendable {
         return false
     }
 
+    /// Where the collector should keep a departure geofence while still in **moving** mode, or nil for none.
+    ///
+    /// iOS can suspend the app in moving mode before the dwell completes — typically right after a background wake
+    /// (significant change, visit) when the phone is still and the distance filter delivers no more fixes. The 60 s
+    /// timer then stops too, so the collector never switches to stationary and never arms its geofence; leaving was
+    /// only noticed at the next significant change, up to ~40 min late (#46, snapshot 2026-11-12). A geofence around
+    /// the anchor wakes the app on departure whatever happens to it. It is withheld while the last fix is faster than
+    /// `maxSpeed`: the app is plainly awake then, and a fence left at every red light would only fire mid-drive.
+    public var safetyNet: Fix? {
+        guard let a = anchor else { return nil }
+        if let s = lastFix?.speed, s > config.maxSpeed { return nil }
+        return a
+    }
+
     /// Periodic check while no fixes arrive (a still phone produces none because of the distance filter).
     public mutating func evaluate(now: Date) -> Decision {
         defer { lastEvaluation = now }
