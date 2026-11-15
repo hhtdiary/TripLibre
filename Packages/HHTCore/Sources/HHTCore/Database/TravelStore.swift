@@ -5,6 +5,12 @@ import Foundation
 public final class TravelStore: @unchecked Sendable {
     public let db: SQLiteConnection
 
+    private let deferredLock = NSLock()
+    private var deferredPoints: [RawPoint] = []
+    private let deferredQueue = DispatchQueue(label: "hht.store.deferred-points", qos: .utility)
+    /// A point queued by `insertPointWithoutWaiting` could not be written (it stays queued for the next attempt).
+    public var onDeferredPointFailure: ((Error) -> Void)?
+
     public init(path: String) throws {
         db = try SQLiteConnection(path: path)
         try Schema.migrate(db)
@@ -50,6 +56,54 @@ public final class TravelStore: @unchecked Sendable {
             """, p.timestamp, p.coordinate.latitude, p.coordinate.longitude, p.horizontalAccuracy, p.altitude,
             p.verticalAccuracy, p.speed, p.speedAccuracy, p.course, p.source, p.collectorMode, p.timeZone, Date())
         return db.lastInsertRowID
+    }
+
+    /// Store a fix without ever waiting for the write handle: written right away when it is free (the usual case),
+    /// otherwise queued and written as soon as the transaction holding it (an inference run) ends.
+    /// Returns false when the point was queued. Failures of a queued write go to `onDeferredPointFailure`.
+    @discardableResult
+    public func insertPointWithoutWaiting(_ p: RawPoint) throws -> Bool {
+        deferredLock.lock()
+        let queueEmpty = deferredPoints.isEmpty
+        deferredLock.unlock()
+        // keep arrival order: never overtake points that are still queued
+        if queueEmpty, try db.ifIdle({ try insertPoint(p) }) != nil { return true }
+        deferredLock.lock()
+        deferredPoints.append(p)
+        deferredLock.unlock()
+        deferredQueue.async { [self] in flushDeferredPoints() }
+        return false
+    }
+
+    /// Block until every queued point has been written (tests, and before work that must see all fixes).
+    public func waitForDeferredPoints() { deferredQueue.sync { flushDeferredPoints() } }
+
+    private func flushDeferredPoints() {
+        do {
+            try db.transaction {
+                // taken only once the write handle is ours, so nothing queued meanwhile is left behind
+                deferredLock.lock()
+                let batch = deferredPoints
+                deferredPoints = []
+                deferredLock.unlock()
+                do {
+                    for p in batch { try insertPoint(p) }
+                } catch {
+                    deferredLock.lock()
+                    deferredPoints.insert(contentsOf: batch, at: 0)
+                    deferredLock.unlock()
+                    throw error
+                }
+            }
+        } catch {
+            onDeferredPointFailure?(error)
+        }
+    }
+
+    /// Highest row id in `raw_location_points` (0 when empty): a watermark for "has anything arrived since".
+    public func maxPointID() -> Int64 {
+        guard let rows = try? db.query("SELECT MAX(id) AS m FROM raw_location_points") else { return 0 }
+        return Int64(rows.first?.int("m") ?? 0)
     }
 
     public func insertPoints(_ ps: [RawPoint]) throws {

@@ -12,6 +12,10 @@ single summary, so release notes aren't kept anywhere else in the repository.
   finds it by post office, mail, USPS, UPS, FedEx, DHL, parcel or courier ("post office" no longer matches Government /
   Civic). Its default trip purpose is Personal business; schema v8 updates `v_trips.purpose_final` to match. Documented
   in the data model.
+- **No more wait when opening the app**: the diary is now brought up to date in the background (on arrival, every
+  10 minutes while moving, and when iOS reports a visit) instead of when the app comes to the foreground, which only
+  runs inference if something is still unresolved. Screens read from a separate query-only SQLite handle, so the diary
+  stays usable while an update is running, and location fixes recorded during an update are queued instead of blocking.
 
 ## 2.2.0 — 2026-11-12
 

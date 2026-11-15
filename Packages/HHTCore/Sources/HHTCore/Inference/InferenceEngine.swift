@@ -92,7 +92,18 @@ public final class InferenceEngine {
         } else {
             return Report(windowStart: now, windowEnd: now)
         }
-        return try process(from: start, to: now, now: now)
+        // read before the run: a fix that lands while it is running may or may not be seen, so it counts as new
+        let seen = store.maxPointID()
+        let report = try process(from: start, to: now, now: now)
+        try store.setMeta(Self.seenPointKey, String(seen))
+        return report
+    }
+
+    private static let seenPointKey = "last_inference_point_id"
+
+    /// Raw points have been recorded that no incremental run has looked at yet.
+    public var hasUnseenPoints: Bool {
+        store.maxPointID() > (store.meta(Self.seenPointKey).flatMap { Int64($0) } ?? 0)
     }
 
     /// Reprocess a time range. The window is widened to whole visits at both ends.

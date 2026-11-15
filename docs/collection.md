@@ -26,6 +26,12 @@ Implemented in `App/Location/LocationCollector.swift`.
 - Tapping *Stamp this moment* (docs/inference.md §8) wakes the collector from stationary into moving mode, so the short
   stop and the walk away from it get fixes; the usual 3-minute rule puts it back to sleep if nothing moves.
 - A background refresh task (`com.zyang91.hht.refresh`, ~every 2 h when iOS allows) runs inference and the daily backup.
+- Inference is kept caught up in the background, so opening the app has little or nothing left to resolve: it runs on
+  arrival (`stationary_marker`), every 10 min while moving (`LocationCollector.catchUpInterval`), when iOS reports a
+  visit, on background relaunch and in the refresh task. Apart from arrival, these run only if raw points have arrived
+  that no run has seen, or a tail is still unresolved; coming to the foreground uses the same check.
+- A fix is never held up by a running inference transaction: if the database is busy it is queued in memory and written
+  as soon as the transaction ends (`TravelStore.insertPointWithoutWaiting`).
 
 Permissions: Location **Always** (required for background), Motion & Fitness (optional but improves modes).
 The blue background-location indicator is disabled; iOS still shows the location arrow in the status bar.

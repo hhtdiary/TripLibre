@@ -31,7 +31,7 @@ struct HHTApp: App {
         .onChange(of: scenePhase) { _, phase in
             if phase == .active {
                 model.collector.startMotionUpdatesIfAuthorized()   // e.g. Motion & Fitness enabled in Settings
-                Task { await model.runInference() }
+                Task { await model.runInferenceIfNeeded() }   // usually nothing: background wakes keep it caught up
             } else if phase == .background {
                 model.widgets.publish()
             }
@@ -49,7 +49,7 @@ final class AppDelegate: NSObject, UIApplicationDelegate {
                      didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil) -> Bool {
         BGTaskScheduler.shared.register(forTaskWithIdentifier: Self.refreshTaskID, using: nil) { task in
             Task { @MainActor in
-                await AppModel.shared.runInference()
+                await AppModel.shared.runInferenceIfNeeded()
                 AppModel.shared.autoBackupIfDue()
                 task.setTaskCompleted(success: true)
                 AppDelegate.scheduleRefresh()

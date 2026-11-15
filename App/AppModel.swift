@@ -76,6 +76,11 @@ final class AppModel: ObservableObject {
         collector.onStationary = { [weak self] in
             Task { @MainActor in await self?.runInference() }
         }
+        // keep the diary caught up while the app is awake in the background, so opening it has nothing left to do
+        collector.onCatchUp = { [weak self] in
+            Task { @MainActor in await self?.runInferenceIfNeeded() }
+        }
+        store.onDeferredPointFailure = { NSLog("HHT: failed to store queued point: \($0)") }
         widgets = WidgetBridge(model: self)
     }
 
@@ -108,7 +113,7 @@ final class AppModel: ObservableObject {
         #endif
         refreshInferenceStatus()
         widgets.schedule()
-        Task { await runInference() }
+        Task { await runInferenceIfNeeded() }
         autoBackupIfDue()
     }
 
@@ -154,6 +159,24 @@ final class AppModel: ObservableObject {
         }
     }
 
+    /// The automatic triggers (launch, coming to the foreground, background wakes) come here: run only when there is
+    /// something to resolve, and never queue a second pass behind a run that is already going.
+    func runInferenceIfNeeded() async {
+        guard !isProcessing, inferenceNeeded else { return }
+        await runInference()
+    }
+
+    /// A tail that the last run could not resolve may still resolve with time alone (a stop becomes long enough),
+    /// so it is retried, but not more than once a minute.
+    static let unresolvedRetryInterval: TimeInterval = 60
+
+    private var inferenceNeeded: Bool {
+        guard inferenceFailure == nil, let last = engine.lastRunAt else { return true }
+        if engine.hasUnseenPoints { return true }
+        guard (try? engine.unresolvedTail()) != nil else { return false }
+        return Date().timeIntervalSince(last) >= Self.unresolvedRetryInterval
+    }
+
     /// Reprocess a range from raw data (user edits are kept). Queued behind a run already in progress.
     func reprocess(from: Date, to: Date) async {
         queuedRange = queuedRange.map { (min($0.from, from), max($0.to, to)) } ?? (from, to)
@@ -171,6 +194,11 @@ final class AppModel: ObservableObject {
     private func withRun(_ body: () async -> Void) async {
         isProcessing = true
         runStartedAt = Date()
+        #if os(iOS)
+        // most runs now start while the app is in the background; ask for the time to commit before suspension
+        let background = BackgroundTime(name: "hht.inference")
+        defer { background.end() }
+        #endif
         defer {
             isProcessing = false
             runStartedAt = nil
@@ -315,3 +343,23 @@ final class AppModel: ObservableObject {
         return url
     }
 }
+
+#if os(iOS)
+/// A UIKit background-task assertion that ends itself on expiry.
+@MainActor
+private final class BackgroundTime {
+    private var id = UIBackgroundTaskIdentifier.invalid
+
+    init(name: String) {
+        id = UIApplication.shared.beginBackgroundTask(withName: name) { [weak self] in
+            MainActor.assumeIsolated { self?.end() }
+        }
+    }
+
+    func end() {
+        guard id != .invalid else { return }
+        UIApplication.shared.endBackgroundTask(id)
+        id = .invalid
+    }
+}
+#endif
