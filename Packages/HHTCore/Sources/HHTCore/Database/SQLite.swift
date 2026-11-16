@@ -82,9 +82,19 @@ public struct Row {
 private let SQLITE_TRANSIENT = unsafeBitCast(-1, to: sqlite3_destructor_type.self)
 
 /// Minimal thread-safe wrapper around the system SQLite library. No third-party dependencies.
+///
+/// A file database gets two handles: the read-write one, serialized by `lock`, and a read-only one for queries made
+/// outside a transaction. In WAL mode a reader is never blocked by a writer, so the diary stays readable (from its
+/// last committed state) while inference holds a long write transaction on another thread. Queries made inside
+/// `transaction` stay on the write handle, so they see that transaction's own uncommitted changes.
 public final class SQLiteConnection: @unchecked Sendable {
     private var handle: OpaquePointer?
     private let lock = NSRecursiveLock()
+    /// Query-only handle; nil for in-memory databases (a second connection would be a different database).
+    private var reader: OpaquePointer?
+    private let readLock = NSLock()
+    /// Per-thread nesting depth of `transaction` on this connection.
+    private let depthKey = "hht.sqlite.tx.\(UUID().uuidString)"
     public let path: String
 
     public init(path: String) throws {
@@ -101,9 +111,35 @@ public final class SQLiteConnection: @unchecked Sendable {
             try execute("PRAGMA journal_mode = WAL")
         }
         try execute("PRAGMA synchronous = NORMAL")
+        if path != ":memory:", !path.isEmpty { openReader() }
     }
 
-    deinit { sqlite3_close_v2(handle) }
+    deinit {
+        sqlite3_close_v2(reader)
+        sqlite3_close_v2(handle)
+    }
+
+    /// Best effort: without a reader every query simply goes through the write handle, as it always did.
+    private func openReader() {
+        var r: OpaquePointer?
+        // Opened read-write, then restricted with `query_only`: a strictly read-only handle cannot create the WAL
+        // index (-shm) when it is the first to touch the file, and fails with "unable to open database file".
+        guard sqlite3_open_v2(path, &r, SQLITE_OPEN_READWRITE | SQLITE_OPEN_FULLMUTEX, nil) == SQLITE_OK else {
+            sqlite3_close(r)
+            return
+        }
+        sqlite3_busy_timeout(r, 2000)
+        sqlite3_exec(r, "PRAGMA query_only = ON", nil, nil, nil)
+        reader = r
+    }
+
+    /// Whether queries outside a transaction use a separate read-only handle (false for in-memory databases).
+    public var hasSeparateReader: Bool { reader != nil }
+
+    private var transactionDepth: Int {
+        get { Thread.current.threadDictionary[depthKey] as? Int ?? 0 }
+        set { Thread.current.threadDictionary[depthKey] = newValue == 0 ? nil : newValue }
+    }
 
     private func error(_ rc: Int32, _ sql: String?) -> SQLiteError {
         SQLiteError(code: rc, message: String(cString: sqlite3_errmsg(handle)), sql: sql)
@@ -121,9 +157,13 @@ public final class SQLiteConnection: @unchecked Sendable {
         }
     }
 
-    private func prepare(_ sql: String, _ args: [SQLBindable]) throws -> OpaquePointer? {
+    private func prepare(_ sql: String, _ args: [SQLBindable], on db: OpaquePointer? = nil) throws -> OpaquePointer? {
+        let db = db ?? handle
+        func error(_ rc: Int32, _ sql: String?) -> SQLiteError {
+            SQLiteError(code: rc, message: String(cString: sqlite3_errmsg(db)), sql: sql)
+        }
         var stmt: OpaquePointer?
-        let rc = sqlite3_prepare_v2(handle, sql, -1, &stmt, nil)
+        let rc = sqlite3_prepare_v2(db, sql, -1, &stmt, nil)
         guard rc == SQLITE_OK else { throw error(rc, sql) }
         for (i, arg) in args.enumerated() {
             let idx = Int32(i + 1)
@@ -161,16 +201,31 @@ public final class SQLiteConnection: @unchecked Sendable {
     }
 
     public func query(_ sql: String, _ args: [SQLBindable]) throws -> [Row] {
+        // outside a transaction, read from the last committed state without waiting for whoever is writing
+        if let reader, transactionDepth == 0 {
+            readLock.lock(); defer { readLock.unlock() }
+            if let stmt = try? prepare(sql, args, on: reader) {
+                defer { sqlite3_finalize(stmt) }
+                if sqlite3_stmt_readonly(stmt) != 0 { return try rows(of: stmt, on: reader, sql) }
+            }
+            // not a pure read (or the reader could not prepare it): fall through to the write handle
+        }
         lock.lock(); defer { lock.unlock() }
         let stmt = try prepare(sql, args)
         defer { sqlite3_finalize(stmt) }
+        return try rows(of: stmt, on: handle, sql)
+    }
+
+    private func rows(of stmt: OpaquePointer?, on db: OpaquePointer?, _ sql: String) throws -> [Row] {
         var rows: [Row] = []
         let n = sqlite3_column_count(stmt)
         let names = (0..<n).map { String(cString: sqlite3_column_name(stmt, $0)) }
         while true {
             let rc = sqlite3_step(stmt)
             if rc == SQLITE_DONE { break }
-            guard rc == SQLITE_ROW else { throw error(rc, sql) }
+            guard rc == SQLITE_ROW else {
+                throw SQLiteError(code: rc, message: String(cString: sqlite3_errmsg(db)), sql: sql)
+            }
             var cols: [String: SQLValue] = [:]
             for i in 0..<n {
                 switch sqlite3_column_type(stmt, i) {
@@ -202,6 +257,8 @@ public final class SQLiteConnection: @unchecked Sendable {
     /// Run `body` inside a transaction; rolls back if it throws. Nested calls use savepoints.
     public func transaction<T>(_ body: () throws -> T) throws -> T {
         lock.lock(); defer { lock.unlock() }
+        transactionDepth += 1
+        defer { transactionDepth -= 1 }
         let name = "sp_\(UUID().uuidString.replacingOccurrences(of: "-", with: ""))"
         try execute("SAVEPOINT \(name)")
         do {
@@ -213,6 +270,14 @@ public final class SQLiteConnection: @unchecked Sendable {
             try? execute("RELEASE \(name)")
             throw error
         }
+    }
+
+    /// Run `body` only if no other thread is using the write handle right now; nil when it is busy.
+    /// For writers that must not wait behind a long transaction (the location collector on the main thread).
+    public func ifIdle<T>(_ body: () throws -> T) rethrows -> T? {
+        guard lock.try() else { return nil }
+        defer { lock.unlock() }
+        return try body()
     }
 
     public var lastInsertRowID: Int64 {

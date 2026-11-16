@@ -33,6 +33,12 @@ final class LocationCollector: NSObject, ObservableObject {
     var profile: Profile = .balanced { didSet { if mode == .moving { applyMoving() } } }
     /// Called when the collector believes the user has arrived somewhere (good moment to run inference).
     var onStationary: (() -> Void)?
+    /// Called while the app is awake anyway and new fixes may be waiting: every `catchUpInterval` while moving, and
+    /// when iOS reports a visit. Lets the diary be brought up to date before the user opens the app.
+    var onCatchUp: (() -> Void)?
+    /// How often a trip in progress is folded into the diary. Each catch-up costs CPU in the background.
+    static let catchUpInterval: TimeInterval = 600
+    private var lastCatchUp = Date()
 
     private let manager = CLLocationManager()
     private let store: TravelStore
@@ -89,8 +95,17 @@ final class LocationCollector: NSObject, ObservableObject {
         startMotionUpdatesIfAuthorized()
         timer?.invalidate()
         timer = Timer.scheduledTimer(withTimeInterval: 60, repeats: true) { [weak self] _ in
-            Task { @MainActor in self?.checkStationary() }
+            Task { @MainActor in
+                self?.checkStationary()
+                self?.catchUpIfDue()
+            }
         }
+    }
+
+    private func catchUpIfDue() {
+        guard mode == .moving, Date().timeIntervalSince(lastCatchUp) >= Self.catchUpInterval else { return }
+        lastCatchUp = Date()
+        onCatchUp?()
     }
 
     /// Live activity feeds the stationary decision. Only when already authorized (MotionSync asks for permission),
@@ -174,6 +189,7 @@ final class LocationCollector: NSObject, ObservableObject {
         mode = .moving
         anchor = nil
         detector.reset(at: Date())
+        lastCatchUp = Date()
     }
 
     private func enterStationary() {
@@ -185,6 +201,7 @@ final class LocationCollector: NSObject, ObservableObject {
         manager.stopUpdatingLocation()
         armGeofence(at: a.coordinate)
         safetyNetCenter = nil
+        lastCatchUp = Date()
         onStationary?()
     }
 
@@ -242,7 +259,8 @@ final class LocationCollector: NSObject, ObservableObject {
                          source: source, collectorMode: mode == .stationary ? "stationary" : "moving",
                          timeZone: TimeZone.current.identifier)
         do {
-            try store.insertPoint(p)
+            // never wait behind an inference run: this is the main thread
+            try store.insertPointWithoutWaiting(p)
             lastFix = p.timestamp
             pointsToday += 1
         } catch {
@@ -300,16 +318,17 @@ extension LocationCollector: CLLocationManagerDelegate {
         Task { @MainActor in
             let c = Coordinate(visit.coordinate.latitude, visit.coordinate.longitude)
             if visit.arrivalDate != .distantPast {
-                _ = try? self.store.insertPoint(RawPoint(timestamp: visit.arrivalDate, coordinate: c,
+                _ = try? self.store.insertPointWithoutWaiting(RawPoint(timestamp: visit.arrivalDate, coordinate: c,
                                                      horizontalAccuracy: visit.horizontalAccuracy, source: "visit_arrival",
                                                      collectorMode: "stationary"))
             }
             if visit.departureDate != .distantFuture {
-                _ = try? self.store.insertPoint(RawPoint(timestamp: visit.departureDate, coordinate: c,
+                _ = try? self.store.insertPointWithoutWaiting(RawPoint(timestamp: visit.departureDate, coordinate: c,
                                                      horizontalAccuracy: visit.horizontalAccuracy, source: "visit_departure",
                                                      collectorMode: "stationary"))
                 if self.mode == .stationary { self.enterMoving(reason: "visit departure") }
             }
+            self.onCatchUp?()
         }
     }
     #endif
