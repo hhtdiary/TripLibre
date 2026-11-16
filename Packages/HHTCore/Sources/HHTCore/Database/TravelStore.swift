@@ -668,6 +668,11 @@ public final class TravelStore: @unchecked Sendable {
                       "raw_location_points", "motion_activities", "stamps", "expenses", "life_phases", "audit_log", "app_meta"] {
                 try db.run("DELETE FROM \(t)")
             }
+            // fixes queued behind a transaction were taken before the erase: they must not be written back after it.
+            // The flush takes its batch only while holding the write handle, so it cannot interleave with this.
+            deferredLock.lock()
+            deferredPoints = []
+            deferredLock.unlock()
         }
     }
 }

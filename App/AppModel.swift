@@ -167,13 +167,14 @@ final class AppModel: ObservableObject {
     }
 
     /// A tail that the last run could not resolve may still resolve with time alone (a stop becomes long enough),
-    /// so it is retried, but not more than once a minute.
+    /// so it is retried, but not more than once a minute. Even one or two fixes count: arriving after a drive with GPS
+    /// asleep can leave just one fix and the stationary marker, which only become a visit once the stop is 5 min old.
     static let unresolvedRetryInterval: TimeInterval = 60
 
     private var inferenceNeeded: Bool {
         guard inferenceFailure == nil, let last = engine.lastRunAt else { return true }
         if engine.hasUnseenPoints { return true }
-        guard (try? engine.unresolvedTail()) != nil else { return false }
+        guard (try? engine.unresolvedTail(minPoints: 1)) != nil else { return false }
         return Date().timeIntervalSince(last) >= Self.unresolvedRetryInterval
     }
 

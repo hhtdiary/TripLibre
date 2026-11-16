@@ -98,4 +98,52 @@ struct ConcurrentReadTests {
         try engine.process(from: tr.t.addingTimeInterval(-600), to: tr.t.addingTimeInterval(-300), now: tr.t)
         #expect(engine.hasUnseenPoints)
     }
+
+    @Test func eraseDropsPointsStillQueued() throws {
+        let (store, dir) = try fileStore()
+        defer { try? FileManager.default.removeItem(at: dir) }
+        try store.insertPoint(point(1))
+        let queued = DispatchSemaphore(value: 0), done = DispatchSemaphore(value: 0), holding = DispatchSemaphore(value: 0)
+        // the erase runs while the write handle is still held, so it is certain to come before the flush
+        let writer = Thread {
+            try? store.db.transaction {
+                holding.signal()
+                queued.wait()
+                try store.eraseAll()
+            }
+            done.signal()
+        }
+        writer.start()
+        holding.wait()
+        #expect(try !store.insertPointWithoutWaiting(point(3)))          // queued behind the transaction
+        queued.signal()
+        done.wait()
+        store.waitForDeferredPoints()
+        #expect(store.pointCount() == 0)
+        #expect(try store.insertPointWithoutWaiting(point(5)))          // later fixes are kept
+        #expect(store.pointCount() == 1)
+    }
+
+    /// Arriving after a drive with GPS asleep: one fix at the destination, then the stationary marker 3 min later.
+    /// The run at that moment sees too short a stop; later checks must still find work to do (Codex review on #124).
+    @Test func aSparseArrivalStaysPendingUntilItResolves() throws {
+        var tr = Trajectory(start: Trajectory.date("2026-03-02 08:00"), at: Philly.home)
+        tr.stay(minutes: 60)
+        tr.move(to: Philly.penn, speed: 8, noGPS: true)
+        tr.emit(Philly.penn, speed: 0, mode: "moving")
+        tr.gap(minutes: 3)
+        tr.emit(Philly.penn, speed: 0, mode: "stationary", source: "stationary_marker")
+        let store = try makeStore(tr)
+        let engine = InferenceEngine(store: store)
+        try engine.processNew(now: tr.t)
+        #expect(!engine.hasUnseenPoints)
+        #expect(try engine.unresolvedTail(now: tr.t) == nil)                    // too little to show
+        #expect(try engine.unresolvedTail(now: tr.t, minPoints: 1) != nil)      // but not settled
+
+        let later = tr.t.addingTimeInterval(10 * 60)
+        try engine.processNew(now: later)
+        let arrived = try store.visits(overlapping: later, later).contains { Geo.distance($0.coordinate, Philly.penn) < 150 }
+        #expect(arrived)
+        #expect(try engine.unresolvedTail(now: later, minPoints: 1) == nil)
+    }
 }

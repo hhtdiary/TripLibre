@@ -59,7 +59,9 @@ public final class InferenceEngine {
 
     /// Raw data past the latest visit: points after it closed, or, while it is still open,
     /// from the first fix that left it. Nil when nothing (or only a couple of fixes) is outstanding.
-    public func unresolvedTail(now: Date = Date()) throws -> UnresolvedTail? {
+    /// `minPoints` (default 3) hides a fix or two from the status display; pass 1 to ask whether a run could still
+    /// change anything, e.g. a sparse arrival that becomes a stay once enough time has passed.
+    public func unresolvedTail(now: Date = Date(), minPoints: Int = 3) throws -> UnresolvedTail? {
         let detector = StayDetector(config: config)
         let tail: [RawPoint]
         if let v = try store.latestVisit() {
@@ -77,7 +79,7 @@ public final class InferenceEngine {
         } else {
             return nil
         }
-        guard tail.count >= 3, let a = tail.first, let b = tail.last else { return nil }
+        guard tail.count >= max(minPoints, 1), let a = tail.first, let b = tail.last else { return nil }
         return UnresolvedTail(since: a.timestamp, lastPoint: b.timestamp, pointCount: tail.count)
     }
 
